@@ -1,0 +1,1 @@
+from .beer_lambert import solve_beer_lambert

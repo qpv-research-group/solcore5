@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The mobility module &mdash; Solcore 4.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '4.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Solcore 4.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Poisson - Drift-Diffusion solver (PDD)" href="DDsolver.html" />
+    <link rel="prev" title="Light source" href="Illumination.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Illumination.html" title="Light source"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 4.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="DDsolver.html" accesskey="U">Poisson - Drift-Diffusion solver (PDD)</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-mobility-module">
+<h1>The mobility module<a class="headerlink" href="#the-mobility-module" title="Permalink to this headline">¶</a></h1>
+<p>This module allows to calculate the carrier mobilities based on the material composition, temperature (T&gt;100K) and impurity concentration. It is an implementation of the mobility model by:</p>
+<ol class="upperalpha simple" start="13">
+<li>Sotoodeh, A. H. Khalid, and A. A. Rezazadeh, “Empirical low-field mobility model for III–V compounds applicable in device simulation codes,” <em>J. Appl. Phys.</em>, <strong>87</strong>, 2890, (2000).</li>
+</ol>
+<div class="section" id="supported-materials">
+<h2>Supported materials<a class="headerlink" href="#supported-materials" title="Permalink to this headline">¶</a></h2>
+<p>The material parameters used in the model are included in the file <em>mobility_parameters.json</em>. At the moment, the supported materials are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>Binaries</strong>: AlAs, GaAs, InAs, InP, GaP</li>
+<li><strong>Ternaries</strong>: InAlAs, AlGaAs, InGaAs, GaInP, (GaAsP), (InAsP)</li>
+<li><strong>Quaternaries</strong>: InGaAsP</li>
+</ul>
+</div></blockquote>
+<p>The last two ternaries are simply calculated as a linear interpolation of the parameters of the corresponding binaries, so the transition from direct to indirect bandgap and other dependencies might not be very accurate. <em>InGaAsP</em>, in turn, is calculated only based on the <em>InGaAs</em> and <em>GaInP</em> data and it is mostly valid for compositions lattice matched to <em>InP</em>.</p>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descname">def calculate_mobility(material, holes, N, [x=0.0, y=0.0, T=300])</code></dt>
+<dd><p>Calculates the mobility using the model by Sotoodeh <em>et al.</em> (<a class="footnote-reference" href="#ref6" id="id1">[1]</a>). If the material is not in the database, then the function returns the mobility for <em>GaAs</em> at that temperature, <em>T</em>, and impurity concentration, <em>N</em>. <em>holes</em> = 0 calculates the mobility for electrons and <em>holes</em> = 1 calculate the mobility for holes.  <em>x</em> is the fractional composition in the case of ternaries and <em>y</em> in the case of quaternaries.</p>
+<p><strong>Output</strong>: Mobility</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-solcore.poisson_drift_diffusion.mobility">
+<span id="all-functions-description"></span><h2>All functions description<a class="headerlink" href="#module-solcore.poisson_drift_diffusion.mobility" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="solcore.poisson_drift_diffusion.mobility.calculate_InGaAs">
+<code class="descclassname">solcore.poisson_drift_diffusion.mobility.</code><code class="descname">calculate_InGaAs</code><span class="sig-paren">(</span><em>x</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/poisson_drift_diffusion/mobility.html#calculate_InGaAs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.poisson_drift_diffusion.mobility.calculate_InGaAs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an InGaAs alloy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; Indium fraction</li>
+<li><strong>i</strong> &#8211; If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.poisson_drift_diffusion.mobility.calculate_InGaP">
+<code class="descclassname">solcore.poisson_drift_diffusion.mobility.</code><code class="descname">calculate_InGaP</code><span class="sig-paren">(</span><em>x</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/poisson_drift_diffusion/mobility.html#calculate_InGaP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.poisson_drift_diffusion.mobility.calculate_InGaP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an InGaP alloy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; Indium fraction</li>
+<li><strong>i</strong> &#8211; If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.poisson_drift_diffusion.mobility.calculate_AlGaAs">
+<code class="descclassname">solcore.poisson_drift_diffusion.mobility.</code><code class="descname">calculate_AlGaAs</code><span class="sig-paren">(</span><em>x</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/poisson_drift_diffusion/mobility.html#calculate_AlGaAs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.poisson_drift_diffusion.mobility.calculate_AlGaAs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an AlGaAs alloy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; Al fraction</li>
+<li><strong>i</strong> &#8211; If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.poisson_drift_diffusion.mobility.calculate_InAlAs">
+<code class="descclassname">solcore.poisson_drift_diffusion.mobility.</code><code class="descname">calculate_InAlAs</code><span class="sig-paren">(</span><em>x</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/poisson_drift_diffusion/mobility.html#calculate_InAlAs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.poisson_drift_diffusion.mobility.calculate_InAlAs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an InAlAs alloy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; Al fraction</li>
+<li><strong>i</strong> &#8211; If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.poisson_drift_diffusion.mobility.calculate_InGaAsP">
+<code class="descclassname">solcore.poisson_drift_diffusion.mobility.</code><code class="descname">calculate_InGaAsP</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/poisson_drift_diffusion/mobility.html#calculate_InGaAsP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.poisson_drift_diffusion.mobility.calculate_InGaAsP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an InGaAsP alloy. The calculation is based on a interpolation scheme between
+InGaP and InGaAs using data of compositions lattice matched to InP. Results for compositions away from this might
+not be very accurate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; Indium fraction</li>
+<li><strong>y</strong> &#8211; Phosphorus fraction</li>
+<li><strong>i</strong> &#8211; If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.poisson_drift_diffusion.mobility.calculate_General">
+<code class="descclassname">solcore.poisson_drift_diffusion.mobility.</code><code class="descname">calculate_General</code><span class="sig-paren">(</span><em>material</em>, <em>x</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/poisson_drift_diffusion/mobility.html#calculate_General"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.poisson_drift_diffusion.mobility.calculate_General" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for a general alloy of the materials in the database assuming a simple linear
+interpolation. Only ternaries are supported this way.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>material</strong> &#8211; Material to calculate, which must be in the database</li>
+<li><strong>x</strong> &#8211; Main fraction</li>
+<li><strong>i</strong> &#8211; If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.poisson_drift_diffusion.mobility.Rd">
+<code class="descclassname">solcore.poisson_drift_diffusion.mobility.</code><code class="descname">Rd</code><span class="sig-paren">(</span><em>EgG</em>, <em>EgX</em>, <em>EgL</em>, <em>mnG</em>, <em>mnX</em>, <em>mnL</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/poisson_drift_diffusion/mobility.html#Rd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.poisson_drift_diffusion.mobility.Rd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the fraction of electrons in the direct valley.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>EgG</strong> &#8211; Gamma-valley bandgap</li>
+<li><strong>EgX</strong> &#8211; X-valley bandgap</li>
+<li><strong>EgL</strong> &#8211; L-valley bandgap</li>
+<li><strong>mnG</strong> &#8211; Gamma-valley effective mass</li>
+<li><strong>mnX</strong> &#8211; X-valley effective mass</li>
+<li><strong>mnL</strong> &#8211; L-valley effective mass</li>
+<li><strong>T</strong> &#8211; The temperature</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The fraction.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils footnote" frame="void" id="ref6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td><ol class="first last upperalpha simple" start="13">
+<li>Sotoodeh, A. H. Khalid, and A. A. Rezazadeh, “Empirical low-field mobility model for III–V compounds applicable in device simulation codes,” <em>J. Appl. Phys.</em>, <strong>87</strong>, 2890, (2000).</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The mobility module</a><ul>
+<li><a class="reference internal" href="#supported-materials">Supported materials</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#module-solcore.poisson_drift_diffusion.mobility">All functions description</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Illumination.html"
+                        title="previous chapter">Light source</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/PDD/Mobility.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Illumination.html" title="Light source"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 4.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="DDsolver.html" >Poisson - Drift-Diffusion solver (PDD)</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

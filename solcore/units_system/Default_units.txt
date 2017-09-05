@@ -1,0 +1,61 @@
+[length]
+Ang: 1e-10
+angstrom: 1e-10
+Angstrom: 1e-10
+lightyear: 9.4605284e15
+parsec: 3.08568025e16
+META_GenerateConversions: m centi deci
+
+[mass]
+META_GenerateConversions: g 0.001 altbase
+emu: constants.electron_mass
+amu: 1.66053878283e-27
+
+[time]
+META_GenerateConversions: s
+min: 60
+h: 3600
+days:86400
+day:86400
+
+[angle]
+radians: 1
+degrees: constants.pi/180.
+°: constants.pi/180.
+
+[pressure] 
+hPa: 100.
+bar: 1/1e-5
+at: 1/1.0197e-5
+atm: 1/9.8692e-6
+Torr: 1/7.5006e-3
+psi: 1/145.04e-6
+META_GenerateConversions: Pa
+
+[voltage]
+META_GenerateConversions: V
+
+[current]
+META_GenerateConversions: A
+
+[resistance]
+META_GenerateConversions: Ohm
+
+[power]
+META_GenerateConversions: W
+
+[energy]
+META_GenerateConversions: J
+META_GenerateConversions2: eV constants.q altbase
+
+[luminous intensity]
+META_GenerateConversions: cd
+
+[temperature]
+META_GenerateConversions: K
+
+[force]
+META_GenerateConversions: N
+
+[charge]
+META_GenerateConversions: C

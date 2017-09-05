@@ -1,0 +1,38 @@
+[Configuration]
+version: 5.0.0.dev.1
+welcome_message: 1
+verbose_loading: 1
+
+[Units]
+default: SOLCORE_ROOT/units_system/Default_units.txt
+
+[Parameters]
+calculables: SOLCORE_ROOT/parameter_system/calculable_parameters.txt
+adachi_binaries: SOLCORE_ROOT/material_data/Adachi/binaries.txt
+adachi_compounds: SOLCORE_ROOT/material_data/Adachi/ternaries.txt
+vurgaftman_binaries: SOLCORE_ROOT/material_data/Vurgaftman/binaries.txt
+vurgaftman_compounds: SOLCORE_ROOT/material_data/Vurgaftman/ternaries.txt
+hamaker_binaries: SOLCORE_ROOT/material_data/Hamaker/binaries.txt
+hamaker_compounds: SOLCORE_ROOT/material_data/Hamaker/ternaries.txt
+Germanium: SOLCORE_ROOT/material_data/Ge/Ge.txt
+InGaAs_alternative: SOLCORE_ROOT/material_data/InGaAs_alternative/InGaAs.txt
+
+[Materials]
+GaAs: SOLCORE_ROOT/material_data/GaAs-Material
+InSb: SOLCORE_ROOT/material_data/InSb-Material
+GaSb: SOLCORE_ROOT/material_data/GaSb-Material
+AlGaAs: SOLCORE_ROOT/material_data/AlGaAs-Material
+InGaAs: SOLCORE_ROOT/material_data/InGaAs-Material
+GaInSb: SOLCORE_ROOT/material_data/InGaSb-Materials
+Ge: SOLCORE_ROOT/material_data/Ge-Material
+
+[Others]
+sopra: SOLCORE_ROOT/material_data/SOPRA_DB
+
+[External programs]
+spice:
+smarts:
+fortran:
+
+
+

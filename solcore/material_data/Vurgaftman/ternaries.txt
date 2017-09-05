@@ -1,0 +1,186 @@
+[AlInAs]
+parent0=InAs
+parent1=AlAs
+x=Al
+Eg_Gamma=0.70 eV
+Eg_X=0 eV
+spin_orbit_splitting=0.15 eV
+eff_mass_electron_Gamma=0.049
+interband_matrix_element=-4.81 eV
+F=-4.44
+valence_band_offset=-0.64 eV
+a_c=-1.4 eV
+
+[AlGaAs]
+parent0=GaAs
+parent1=AlAs
+x=Al
+Eg_Gamma=-0.127+1.310*Al eV
+Eg_X=0.55 eV
+Eg_L=0 eV
+spin_orbit_splitting=0 eV
+
+[GaPSb]
+parent0=GaSb
+parent1=GaP
+x=P
+Eg_Gamma=2.7 eV
+Eg_X=1.7 eV
+Eg_L=1.7 eV
+
+[GaInAs]
+parent0=GaAs
+parent1=InAs
+x=In
+Eg_Gamma=0.477 eV
+Eg_X=1.4 eV
+Eg_L=0.33 eV
+spin_orbit_splitting=0.15 eV
+eff_mass_electron_Gamma=0.0091
+eff_mass_hh_001=-0.145
+eff_mass_lh_001=0.202
+gamma3_minus_gamma1=0.481
+interband_matrix_element=-1.48 eV
+F=1.77
+valence_band_offset=-0.38 eV
+a_c=2.61 eV
+
+[GaInSb]
+parent0=GaSb
+parent1=InSb
+x=In
+Eg_Gamma=0.415 eV
+Eg_X=0.33 eV
+Eg_L=0.4 eV
+spin_orbit_splitting=0.1 eV
+eff_mass_electron_Gamma=0.0092
+eff_mass_lh_001=0.011
+F=-6.84
+
+[GaInP]
+parent0=GaP
+parent1=InP
+x=In
+Eg_Gamma=0.65 eV
+Eg_X=0.2 eV
+Eg_L=1.03 eV
+spin_orbit_splitting=0 eV
+eff_mass_electron_Gamma=0.051
+F=0.78
+d=0 eV
+
+[GaAsN_zinc_blende]
+parent0=GaAs
+parent1=GaN
+x=N
+Eg_Gamma=120.4-100.*x eV
+spin_orbit_splitting=0 eV
+
+[AlGaP]
+parent0=AlP
+parent1=GaP
+x=Ga
+Eg_Gamma=-0.48 eV
+Eg_X=0.13 eV
+
+[AlPSb]
+parent0=AlP
+parent1=AlSb
+x=Sb
+Eg_Gamma=2.7 eV
+Eg_X=2.7 eV
+Eg_L=2.7 eV
+
+[AlGaSb]
+parent0=GaSb
+parent1=AlSb
+x=Al
+Eg_Gamma=-0.044+1.22*Al eV
+Eg_X=0 eV
+Eg_L=0 eV
+spin_orbit_splitting=0.3 eV
+
+[AlAsP]
+parent0=AlP
+parent1=AlAs
+x=As
+Eg_Gamma=0.22 eV
+Eg_X=0.22 eV
+Eg_L=0.22 eV
+
+[AlInP]
+parent0=InP
+parent1=AlP
+x=Al
+Eg_Gamma=-0.48 eV
+Eg_X=0.38 eV
+spin_orbit_splitting=-0.19 eV
+eff_mass_electron_Gamma=0.22
+
+[InAsP]
+parent0=InP
+parent1=InAs
+x=As
+Eg_Gamma=0.1 eV
+Eg_X=0.27 eV
+Eg_L=0.27 eV
+spin_orbit_splitting=0.16 eV
+
+[AlGaN]
+parent0=AlN
+parent1=GaN
+x=Ga
+Eg_X=0.61 eV
+Eg_L=0.8 eV
+Eg_Gamma=0 eV
+
+[GaAsSb]
+parent0=GaAs
+parent1=GaSb
+x=Sb
+Eg_Gamma=1.43 eV
+Eg_X=1.2 eV
+Eg_L=1.2 eV
+spin_orbit_splitting=0.6 eV
+valence_band_offset=-1.06 eV
+
+[GaInN]
+parent0=GaN
+parent1=InN
+x=In
+Eg_X=0.38 eV
+Eg_Gamma=3.0 eV
+
+[GaAsP]
+parent0=GaAs
+parent1=GaP
+x=P
+Eg_Gamma=0.19 eV
+Eg_X=0.24 eV
+Eg_L=0.16 eV
+
+[AlInSb]
+parent0=AlSb
+parent1=InSb
+x=In
+Eg_Gamma=0.43 eV
+spin_orbit_splitting=0.25 eV
+
+[InAsSb]
+parent0=InAs
+parent1=InSb
+x=Sb
+Eg_Gamma=0.67 eV
+Eg_X=0.6 eV
+Eg_L=0.6 eV
+spin_orbit_splitting=1.2 eV
+eff_mass_electron_Gamma=0.035
+
+[InPSb]
+parent0=InP
+parent1=InSb
+x=Sb
+Eg_Gamma=1.9 eV
+Eg_X=1.9 eV
+Eg_L=1.9 eV
+spin_orbit_splitting=0.75 eV

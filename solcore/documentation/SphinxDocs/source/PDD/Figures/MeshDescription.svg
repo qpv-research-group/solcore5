@@ -1,0 +1,1833 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.5 r10040"
+   sodipodi:docname="MeshDescription.svg">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Mend"
+       style="overflow:visible;">
+      <path
+         id="path3921"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;"
+         transform="scale(0.4) rotate(180) translate(10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;">
+      <path
+         id="path3915"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path3912"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt"
+         transform="scale(0.8) translate(12.5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Mstart"
+       style="overflow:visible">
+      <path
+         id="path3918"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt"
+         transform="scale(0.4) translate(10,0)" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.70000001"
+     inkscape:cx="230.17123"
+     inkscape:cy="461.59355"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1843"
+     inkscape:window-height="1221"
+     inkscape:window-x="163"
+     inkscape:window-y="238"
+     inkscape:window-maximized="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2985"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g6118"
+       transform="translate(220,2.6171874e-6)"
+       style="stroke:#c5c5c5;stroke-opacity:1;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72">
+      <path
+         inkscape:connector-curvature="0"
+         id="path6106"
+         d="m 230,676.36218 60,0 0,50 50,0 0,-50 60,0"
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         sodipodi:nodetypes="cccccc" />
+      <path
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 230,922.36218 60,0 0,-70 50,0 0,70 60,0"
+         id="path6108"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccccc" />
+      <path
+         sodipodi:nodetypes="cccccc"
+         inkscape:connector-curvature="0"
+         id="path6110"
+         d="m 230,912.36218 60,0 0,-40 50,0 0,40 60,0"
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:6, 3;stroke-dashoffset:0"
+         d="m 270,862.36218 90,0"
+         id="path6112"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cc" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path6114"
+         d="m 270,892.36218 90,0"
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:6, 3;stroke-dashoffset:0"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:6, 3;stroke-dashoffset:0"
+         d="m 270,702.36218 90,0"
+         id="path6116"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cc" />
+    </g>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:2,2;stroke-dashoffset:0"
+       d="m 510,212.36218 0,30 150,50"
+       id="path3883"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:2,2;stroke-dashoffset:0"
+       d="m 480,212.36218 0,30 -210,50"
+       id="path3885"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:2,2;stroke-dashoffset:0"
+       d="m 320,132.36218 0,30 -250,50"
+       id="path3877"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:2,2;stroke-dashoffset:0"
+       d="m 370,132.36218 0,30 140,50 0,0 0,0"
+       id="path3879"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path3841"
+       d="m 38.512388,212.36218 520.000002,0"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m -20,132.36218 780,0"
+       id="path3815"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#ff0000;fill-opacity:1;stroke:#ff0000;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path2990"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.3030303,0,0,0.3030303,-3.333333,99.222128)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.3030303,0,0,0.3030303,341.21214,98.767397)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3782"
+       style="fill:#ff0000;fill-opacity:1;stroke:#ff0000;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <image
+       y="122.58936"
+       x="720"
+       id="image3792"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAA3NCSVQICAjb4U/gAAABGUlEQVQ4 jZ2UPY7CMBSExwFBARUlFIQgEC0CDkFnJK7Br0TPbUAxkiUaLkFBQc0R6B0izRZZtE6WXSUeTeHi fXq29eYJkrBlDJSC1rjd8HwCQKOB4RCzGeZzVKupYtpSiu02AQIUInvwfZ5Odvkbfr24XH4X/e/1 mnGchheLVJO/nBSsVhZ8OOQibT4MSYLG/Lwzv4OAUQQej4XJxEqV9uUy7nc4qFIBez3HzoMBWKs5 wvW653Lhtzw0mxDCBW21PIxGyIx3To3HHqR0IQFICRrDbrfwb/X7jCKQpNbFxlMIns9WMLbbAsHY 7dKpiuO8kdxsfkUyURjS91NN7EOnk1kG4sMa0hqXC65XPB4AEASYTDCdQsrMGvoC7tSSg72503IA AAAASUVORK5CYII= "
+       height="20"
+       width="20"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3795"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,300.45456,115.79197)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,243.03029,115.79197)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3797"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3799"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,185.60608,115.79197)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,70.757572,115.79197)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3801"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3803"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,128.18181,115.79197)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,657.66668,115.56479)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3805"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3807"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,602.00004,115.56479)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,546.33331,115.56479)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3809"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,490.66669,115.56479)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3813"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#ff0000;fill-opacity:1;stroke:#ff0000;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3817"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.3030303,0,0,0.3030303,486.08815,178.31304)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,46.391178,195.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3819"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3821"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,87.878788,195.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,419.77961,195.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3823"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3825"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,378.292,195.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,336.80439,195.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3827"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3829"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,295.31678,195.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,253.8292,195.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3831"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3833"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,212.34159,195.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,170.854,195.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3835"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,461.26725,195.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3837"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3839"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,129.36639,195.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 219.50408,292.36218 489.00828,0"
+       id="path3843"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,246.39115,275.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3849"
+       style="fill:#01c214;fill-opacity:1;stroke:#00630a;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3851"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,622.86926,275.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,591.49603,275.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3853"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3855"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,560.12286,275.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,497.37652,275.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3857"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3859"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,434.63019,275.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,371.88385,275.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3861"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3863"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,340.51067,275.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,277.76432,275.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3867"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,403.25701,275.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3869"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3871"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,466.00334,275.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.15151515,0,0,0.15151515,309.13751,275.33761)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3873"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#ebd720;fill-opacity:1;stroke:#030703;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3875"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,528.74967,275.33761)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       transform="matrix(0.3030303,0,0,0.3030303,637.57576,258.31304)"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       sodipodi:ry="30"
+       sodipodi:rx="30"
+       sodipodi:cy="112.36218"
+       sodipodi:cx="110"
+       id="path3881"
+       style="fill:#ff0000;fill-opacity:1;stroke:#ff0000;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       sodipodi:type="arc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
+       d="m 150,112.36218 50,0"
+       id="path3906"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path5102"
+       d="m 148,228.36218 40,0"
+       style="fill:none;stroke:#000000;stroke-width:1.78885436;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.54919326;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
+       d="m 390,308.36218 30,0"
+       id="path5104"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="140"
+       y="98.362183"
+       id="text5106"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         sodipodi:role="line"
+         id="tspan5108"
+         x="140"
+         y="98.362183"
+         style="font-size:20px">Coarse</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text5110"
+       y="258.36218"
+       x="150"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         style="font-size:20px"
+         y="258.36218"
+         x="150"
+         id="tspan5112"
+         sodipodi:role="line">Fine</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="362"
+       y="338.36218"
+       id="text5114"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         sodipodi:role="line"
+         id="tspan5116"
+         x="362"
+         y="338.36218"
+         style="font-size:20px">Ultrafine</tspan></text>
+    <image
+       width="20"
+       height="20"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAA3NCSVQICAjb4U/gAAABGUlEQVQ4 jZ2UPY7CMBSExwFBARUlFIQgEC0CDkFnJK7Br0TPbUAxkiUaLkFBQc0R6B0izRZZtE6WXSUeTeHi fXq29eYJkrBlDJSC1rjd8HwCQKOB4RCzGeZzVKupYtpSiu02AQIUInvwfZ5Odvkbfr24XH4X/e/1 mnGchheLVJO/nBSsVhZ8OOQibT4MSYLG/Lwzv4OAUQQej4XJxEqV9uUy7nc4qFIBez3HzoMBWKs5 wvW653Lhtzw0mxDCBW21PIxGyIx3To3HHqR0IQFICRrDbrfwb/X7jCKQpNbFxlMIns9WMLbbAsHY 7dKpiuO8kdxsfkUyURjS91NN7EOnk1kG4sMa0hqXC65XPB4AEASYTDCdQsrMGvoC7tSSg72503IA AAAASUVORK5CYII= "
+       id="image5118"
+       x="386"
+       y="122.36218"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#0024ff;fill-opacity:1;stroke:#0024ff;stroke-width:6;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path5120"
+       sodipodi:cx="110"
+       sodipodi:cy="112.36218"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       d="m 140,112.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
+       transform="matrix(0.15151515,0,0,0.15151515,434.99998,115.56479)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text5122"
+       y="72.362183"
+       x="430"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         style="font-size:20px"
+         y="72.362183"
+         x="430"
+         id="tspan5124"
+         sodipodi:role="line">Masternodes</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow1Mend)"
+       d="m 430,72.362183 c -30,0 -50,49.999997 -50,49.999997"
+       id="path5126"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path5128"
+       d="m 430,72.362183 c -18,0 -30,49.999997 -30,49.999997"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/Figures/mesh.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3,3;stroke-dashoffset:0"
+       d="m 450,582.36218 170,0"
+       id="path6092"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:nodetypes="cccccc"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 450,676.36218 60,0 0,26 50,0 0,-26 60,0"
+       id="path6094"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       sodipodi:nodetypes="cccccc"
+       inkscape:connector-curvature="0"
+       id="path6096"
+       d="m 450,912.36218 60,0 0,-50 50,0 0,50 60,0"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
+       d="m 470,678.36218 0,234"
+       id="path6132"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
+       d="m 470,674.36218 0,-92"
+       id="path6134"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
+       d="m 530,582.36218 0,120"
+       id="path6138"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
+       d="m 530,862.36218 0,-160"
+       id="path6140"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72" />
+    <g
+       id="g3471"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72">
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path6072"
+         d="m 10,582.36218 170,0"
+         style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:3,3;stroke-dashoffset:0" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         inkscape:connector-curvature="0"
+         id="path6074"
+         d="m 10,682.36218 60,0 0,80 50,0 0,-80 60,0"
+         style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         d="m 10,912.36218 60,0 0,-80 50,0 0,80 60,0"
+         id="path6076"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         inkscape:connector-curvature="0"
+         id="path6126"
+         d="m 50,682.36218 0,-100"
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         inkscape:connector-curvature="0"
+         id="path6130"
+         d="m 50,682.36218 0,230"
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:nodetypes="cc"
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
+         d="m 90,762.36218 0,-180"
+         id="path8398"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path8400"
+         d="m 90,832.36218 0,-70"
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)" />
+      <g
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         transform="translate(-80,42.5)"
+         id="g8439">
+        <text
+           xml:space="preserve"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           x="175.26147"
+           y="756.89258"
+           id="text8427"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan8429"
+             x="175.26147"
+             y="756.89258"
+             style="font-size:20px">E</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           x="190"
+           y="762.36218"
+           id="text8431"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan8433"
+             x="190"
+             y="762.36218"
+             style="font-size:12px">g</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           x="190"
+           y="747.36218"
+           id="text8435"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan8437"
+             x="190"
+             y="747.36218"
+             style="font-size:12px">well</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         transform="translate(-185,42.5)"
+         id="g8447">
+        <text
+           sodipodi:linespacing="125%"
+           id="text8449"
+           y="756.89258"
+           x="175.26147"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           xml:space="preserve"><tspan
+             style="font-size:20px"
+             y="756.89258"
+             x="175.26147"
+             id="tspan8451"
+             sodipodi:role="line">E</tspan></text>
+        <text
+           sodipodi:linespacing="125%"
+           id="text8453"
+           y="762.36218"
+           x="190"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           xml:space="preserve"><tspan
+             style="font-size:12px"
+             y="762.36218"
+             x="190"
+             id="tspan8455"
+             sodipodi:role="line">g</tspan></text>
+        <text
+           sodipodi:linespacing="125%"
+           id="text8457"
+           y="747.36218"
+           x="190"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           xml:space="preserve"><tspan
+             style="font-size:12px"
+             y="747.36218"
+             x="190"
+             id="tspan8459"
+             sodipodi:role="line">barrier</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         id="g8461"
+         transform="translate(-80,-120)">
+        <text
+           sodipodi:linespacing="125%"
+           id="text8463"
+           y="756.89258"
+           x="175.26147"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           xml:space="preserve"><tspan
+             style="font-size:20px"
+             y="756.89258"
+             x="175.26147"
+             id="tspan8465"
+             sodipodi:role="line">X</tspan></text>
+        <text
+           sodipodi:linespacing="125%"
+           id="text8467"
+           y="762.36218"
+           x="190"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           xml:space="preserve"><tspan
+             style="font-size:12px"
+             y="762.36218"
+             x="190"
+             id="tspan8469"
+             sodipodi:role="line">i</tspan></text>
+        <text
+           sodipodi:linespacing="125%"
+           id="text8471"
+           y="747.36218"
+           x="190"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           xml:space="preserve"><tspan
+             style="font-size:12px"
+             y="747.36218"
+             x="190"
+             id="tspan8473"
+             sodipodi:role="line">well</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         transform="translate(-185,-120)"
+         id="g8475">
+        <text
+           xml:space="preserve"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           x="175.26147"
+           y="756.89258"
+           id="text8477"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan8479"
+             x="175.26147"
+             y="756.89258"
+             style="font-size:20px">X</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           x="190"
+           y="762.36218"
+           id="text8481"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan8483"
+             x="190"
+             y="762.36218"
+             style="font-size:12px">i</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+           x="190"
+           y="747.36218"
+           id="text8485"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan8487"
+             x="190"
+             y="747.36218"
+             style="font-size:12px">barrier</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g8489"
+       transform="translate(365,-125)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72">
+      <text
+         sodipodi:linespacing="125%"
+         id="text8491"
+         y="756.89258"
+         x="175.26147"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:20px"
+           y="756.89258"
+           x="175.26147"
+           id="tspan8493"
+           sodipodi:role="line">X</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text8495"
+         y="762.36218"
+         x="190"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px"
+           y="762.36218"
+           x="190"
+           id="tspan8497"
+           sodipodi:role="line">i, eff</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text8499"
+         y="747.36218"
+         x="190"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px"
+           y="747.36218"
+           x="190"
+           id="tspan8501"
+           sodipodi:role="line">well</tspan></text>
+    </g>
+    <g
+       transform="translate(235,-125)"
+       id="g8503"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72">
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="175.26147"
+         y="756.89258"
+         id="text8505"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan8507"
+           x="175.26147"
+           y="756.89258"
+           style="font-size:20px">X</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="190"
+         y="762.36218"
+         id="text8509"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan8511"
+           x="190"
+           y="762.36218"
+           style="font-size:12px">i, eff</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="190"
+         y="747.36218"
+         id="text8513"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan8515"
+           x="190"
+           y="747.36218"
+           style="font-size:12px">barrier</tspan></text>
+    </g>
+    <g
+       transform="translate(360,45)"
+       id="g8517"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72">
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="175.26147"
+         y="756.89258"
+         id="text8519"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan8521"
+           x="175.26147"
+           y="756.89258"
+           style="font-size:20px">E</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="190"
+         y="762.36218"
+         id="text8523"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan8525"
+           x="190"
+           y="762.36218"
+           style="font-size:12px">g, eff</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="190"
+         y="747.36218"
+         id="text8527"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan8529"
+           x="190"
+           y="747.36218"
+           style="font-size:12px">well</tspan></text>
+    </g>
+    <g
+       id="g8531"
+       transform="translate(230,45)"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72">
+      <text
+         sodipodi:linespacing="125%"
+         id="text8533"
+         y="756.89258"
+         x="175.26147"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:20px"
+           y="756.89258"
+           x="175.26147"
+           id="tspan8535"
+           sodipodi:role="line">E</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text8537"
+         y="762.36218"
+         x="190"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px"
+           y="762.36218"
+           x="190"
+           id="tspan8539"
+           sodipodi:role="line">g, eff</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text8541"
+         y="747.36218"
+         x="190"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px"
+           y="747.36218"
+           x="190"
+           id="tspan8543"
+           sodipodi:role="line">barrier</tspan></text>
+    </g>
+    <g
+       id="g3456"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72">
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3,3;stroke-dashoffset:0"
+         d="m 230,582.36218 170,0"
+         id="path6078"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cc" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:nodetypes="cccccc"
+         style="fill:none;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 230,676.36218 60,0 0,50 50,0 0,-50 60,0"
+         id="path6080"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:nodetypes="cccccc"
+         inkscape:connector-curvature="0"
+         id="path6082"
+         d="m 230,922.36218 60,0 0,-70 50,0 0,70 60,0"
+         style="fill:none;stroke:#ff0000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         style="fill:none;stroke:#009200;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 230,912.36218 60,0 0,-40 50,0 0,40 60,0"
+         id="path6084"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccccc" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path6086"
+         d="m 270,862.36218 90,0"
+         style="fill:none;stroke:#ff0000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:6, 3;stroke-dashoffset:0" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:nodetypes="cc"
+         style="fill:none;stroke:#00a400;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:6, 3;stroke-dashoffset:0"
+         d="m 270,892.36218 90,0"
+         id="path6088"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path6090"
+         d="m 270,702.36218 90,0"
+         style="fill:none;stroke:#0000ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:6, 3;stroke-dashoffset:0" />
+      <text
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:linespacing="125%"
+         id="text8545"
+         y="705.36218"
+         x="255"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px;fill:#0000ff;fill-opacity:1"
+           y="705.36218"
+           x="255"
+           id="tspan8547"
+           sodipodi:role="line">e</tspan></text>
+      <text
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="250"
+         y="867.36218"
+         id="text8549"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan8551"
+           x="250"
+           y="867.36218"
+           style="font-size:12px;fill:#ff0000;fill-opacity:1">hh</tspan></text>
+      <text
+         inkscape:export-ydpi="72"
+         inkscape:export-xdpi="72"
+         inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+         sodipodi:linespacing="125%"
+         id="text8553"
+         y="897.36218"
+         x="250"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px;fill:#009a00;fill-opacity:1"
+           y="897.36218"
+           x="250"
+           id="tspan8555"
+           sodipodi:role="line">lh</tspan></text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="20"
+       y="552.36218"
+       id="text3418"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         sodipodi:role="line"
+         id="tspan3420"
+         x="20"
+         y="552.36218"
+         style="font-size:30px">Structure</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3422"
+       y="552.36218"
+       x="258.86719"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         style="font-size:30px"
+         y="552.36218"
+         x="258.86719"
+         id="tspan3424"
+         sodipodi:role="line">QWunit</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="505"
+       y="552.36218"
+       id="text3426"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         sodipodi:role="line"
+         id="tspan3428"
+         x="505"
+         y="552.36218"
+         style="font-size:30px">PDD</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3430"
+       y="587.36218"
+       x="-139.80469"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         style="font-size:20px"
+         y="587.36218"
+         x="-139.80469"
+         id="tspan3432"
+         sodipodi:role="line">Vacuum level</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="-174.41406"
+       y="687.36218"
+       id="text3434"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         sodipodi:role="line"
+         id="tspan3436"
+         x="-174.41406"
+         y="687.36218"
+         style="font-size:20px">Conduction band</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3438"
+       y="917.36218"
+       x="-140"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         style="font-size:20px"
+         y="917.36218"
+         x="-140"
+         id="tspan3440"
+         sodipodi:role="line">Valence band</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="50"
+       y="984.81335"
+       id="text3442"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         sodipodi:role="line"
+         id="tspan3444"
+         x="50"
+         y="984.81335"
+         style="font-size:20px">Bulk DOS</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3446"
+       y="984.63757"
+       x="274.77051"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         style="font-size:20px"
+         y="984.63757"
+         x="274.77051"
+         id="tspan3448"
+         sodipodi:role="line">2D DOS</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="536.48438"
+       y="972.36218"
+       id="text3450"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:export-xdpi="72"
+       inkscape:export-ydpi="72"><tspan
+         sodipodi:role="line"
+         id="tspan3452"
+         x="540"
+         y="972.36218"
+         style="font-size:20px;text-align:center;text-anchor:middle">Effective </tspan><tspan
+         sodipodi:role="line"
+         x="536.48438"
+         y="997.36218"
+         style="font-size:20px;text-align:center;text-anchor:middle"
+         id="tspan3454">bulk + 2D DOS</tspan></text>
+    <g
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       style="stroke:#c5c5c5;stroke-opacity:1;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none"
+       transform="translate(220,2.6171874e-6)"
+       id="g3508">
+      <path
+         sodipodi:nodetypes="cccccc"
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 230,676.36218 60,0 0,50 50,0 0,-50 60,0"
+         id="path3510"
+         inkscape:connector-curvature="0" />
+      <path
+         sodipodi:nodetypes="cccccc"
+         inkscape:connector-curvature="0"
+         id="path3512"
+         d="m 230,922.36218 60,0 0,-70 50,0 0,70 60,0"
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 230,912.36218 60,0 0,-40 50,0 0,40 60,0"
+         id="path3514"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccccc" />
+      <path
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path3516"
+         d="m 270,862.36218 90,0"
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:6, 3;stroke-dashoffset:0" />
+      <path
+         sodipodi:nodetypes="cc"
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:6, 3;stroke-dashoffset:0"
+         d="m 270,892.36218 90,0"
+         id="path3518"
+         inkscape:connector-curvature="0" />
+      <path
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path3520"
+         d="m 270,702.36218 90,0"
+         style="fill:none;stroke:#c5c5c5;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:6, 3;stroke-dashoffset:0" />
+    </g>
+    <path
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path3522"
+       d="m 450,582.36218 170,0"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3,3;stroke-dashoffset:0" />
+    <path
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:connector-curvature="0"
+       id="path3524"
+       d="m 450,676.36218 60,0 0,26 50,0 0,-26 60,0"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       sodipodi:nodetypes="cccccc" />
+    <path
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 450,912.36218 60,0 0,-50 50,0 0,50 60,0"
+       id="path3526"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccc" />
+    <path
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path3528"
+       d="m 470,678.36218 0,234"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)" />
+    <path
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path3530"
+       d="m 470,674.36218 0,-92"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)" />
+    <path
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:connector-curvature="0"
+       id="path3532"
+       d="m 530,582.36218 0,120"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)" />
+    <path
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       inkscape:connector-curvature="0"
+       id="path3534"
+       d="m 530,862.36218 0,-160"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)" />
+    <g
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       transform="translate(365,-125)"
+       id="g3536">
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="175.26147"
+         y="756.89258"
+         id="text3538"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan3540"
+           x="175.26147"
+           y="756.89258"
+           style="font-size:20px">X</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="190"
+         y="762.36218"
+         id="text3542"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan3544"
+           x="190"
+           y="762.36218"
+           style="font-size:12px">i, eff</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="190"
+         y="747.36218"
+         id="text3546"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan3548"
+           x="190"
+           y="747.36218"
+           style="font-size:12px">well</tspan></text>
+    </g>
+    <g
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       id="g3550"
+       transform="translate(235,-125)">
+      <text
+         sodipodi:linespacing="125%"
+         id="text3552"
+         y="756.89258"
+         x="175.26147"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:20px"
+           y="756.89258"
+           x="175.26147"
+           id="tspan3554"
+           sodipodi:role="line">X</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text3556"
+         y="762.36218"
+         x="190"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px"
+           y="762.36218"
+           x="190"
+           id="tspan3558"
+           sodipodi:role="line">i, eff</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text3560"
+         y="747.36218"
+         x="190"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px"
+           y="747.36218"
+           x="190"
+           id="tspan3562"
+           sodipodi:role="line">barrier</tspan></text>
+    </g>
+    <g
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       id="g3564"
+       transform="translate(360,45)">
+      <text
+         sodipodi:linespacing="125%"
+         id="text3566"
+         y="756.89258"
+         x="175.26147"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:20px"
+           y="756.89258"
+           x="175.26147"
+           id="tspan3568"
+           sodipodi:role="line">E</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text3570"
+         y="762.36218"
+         x="190"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px"
+           y="762.36218"
+           x="190"
+           id="tspan3572"
+           sodipodi:role="line">g, eff</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text3574"
+         y="747.36218"
+         x="190"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           style="font-size:12px"
+           y="747.36218"
+           x="190"
+           id="tspan3576"
+           sodipodi:role="line">well</tspan></text>
+    </g>
+    <g
+       inkscape:export-ydpi="72"
+       inkscape:export-xdpi="72"
+       inkscape:export-filename="/Users/dalonsoa/GoogleDrive/WorkIC/Developement/solcore3/Documentation/SphinxDocs/source/PDD/Figures/QWunit.png"
+       transform="translate(230,45)"
+       id="g3578">
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="175.26147"
+         y="756.89258"
+         id="text3580"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan3582"
+           x="175.26147"
+           y="756.89258"
+           style="font-size:20px">E</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="190"
+         y="762.36218"
+         id="text3584"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan3586"
+           x="190"
+           y="762.36218"
+           style="font-size:12px">g, eff</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         x="190"
+         y="747.36218"
+         id="text3588"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan3590"
+           x="190"
+           y="747.36218"
+           style="font-size:12px">barrier</tspan></text>
+    </g>
+  </g>
+</svg>

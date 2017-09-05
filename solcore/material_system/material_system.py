@@ -1,0 +1,242 @@
+import math  # hyperbolic functions etc in parameterisation
+import os
+import sys
+from copy import copy
+from functools import lru_cache  # cache function calls to stop things taking forever / recalculating smae things
+
+import numpy as np
+import configparser
+
+import solcore
+from solcore.material_system import critical_point_interpolate
+from solcore.parameter_system import ParameterSystem
+from solcore.constants import h, c, q
+from solcore.singleton import Singleton
+from solcore.source_managed_class import SourceManagedClass
+
+
+class MaterialSystem(SourceManagedClass, metaclass=Singleton):
+    """ The core class that manage the materials in solcore.
+    """
+    def __init__(self, sources=None):
+        SourceManagedClass.__init__(self)
+        self.known_materials = {}
+
+        for name, path in sources.items():
+            self.sources[name] = os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT))
+
+    def material(self, name):
+        """ This function checks if the requested material exists and creates a class that contains its properties,
+        assuming that the material does not exists in the database, yet.
+
+        Such class will serve as the base class for all the derived materials based on that SpecificMaterial.
+        For example, N-type GaAs and P-type GaAs use the same SpecificMaterial, just with a different doping, and the
+        happens with GaAs at 300K or 200K.
+
+        The derived materials based on a SpecificMaterial are instances of the SpecificMaterial class.
+
+        >>> GaAs = solcore.material('GaAs')      # The SpecificMaterial class
+        >>> n_GaAs = GaAs(Nd=1e23)               # Instance of the class
+        >>> p_GaAs = GaAs(Na=1e22)               # Another instance of GaAs with different doping
+
+        >>> AlGaAs = solcore.material('AlGaAs')  # The SpecificMaterial class
+        >>> AlGaAs_1 = AlGaAs(Al=0.3)            # Instance of the class. For compounds, the variable element MUST be present
+        >>> AlGaAs_2 = AlGaAs(Al=0.7, T=290)     # Different composition and T (the default is T=300K)
+
+        The material is created from the parameters in the parameter_system and the n and k data if available. If the
+        n and k data does not exists - at all or for that composition - then n=1 and k=0 at all wavelengths. Keep in
+        mind that the available n and k data is valid only at room temperature.
+
+        :param name: Name of the material
+        :return: A class of that material
+        """
+
+        # First we check if the material exists. If not, some help is provided
+        try:
+            ParameterSystem().database.options(name)
+        except configparser.NoSectionError:
+            valid_materials = sorted(ParameterSystem().database.sections())
+            valid_materials.remove('Immediate Calculables')
+            valid_materials.remove('Final Calculables')
+            print('\nMaterial ERROR: "{}" is not in the database. Valid materials are: '.format(name))
+            for v in valid_materials:
+                if "x" in ParameterSystem().database.options(v):
+                    x = ParameterSystem().database.get(v, 'x')
+                    print('\t {}  \tx = {}'.format(v, x))
+                else:
+                    print('\t {}'.format(v))
+            print('\nIn compounds, check that the order of the elements is the correct one (eg. GaInSb is OK but InGaSb'
+                  ' is not).')
+            sys.exit(1)
+
+        # Then we check if the material has already been created. If not, we create it.
+        if name in self.known_materials:
+            return self.known_materials[name]
+        else:
+            return self.parameterised_material(name)
+
+    def parameterised_material(self, name):
+        """ The function that actually creates the material class. """
+
+        if "x" in ParameterSystem().database.options(name):
+            self.composition = [ParameterSystem().database.get(name, "x")]
+        else:
+            self.composition = []
+
+        class SpecificMaterial(BaseMaterial):
+            material_string = name
+            composition = self.composition
+
+            def __init__(self, T=300, **kwargs):
+                BaseMaterial.__init__(self, T=T, **kwargs)
+
+        if name.lower() in self.sources.keys():
+            SpecificMaterial.material_directory = self.sources[name.lower()]
+            extension = ''
+            if len(SpecificMaterial.composition) == 0:
+                extension = '.txt'
+
+            SpecificMaterial.n_path = os.path.join(SpecificMaterial.material_directory, 'n' + extension)
+            SpecificMaterial.k_path = os.path.join(SpecificMaterial.material_directory, 'k' + extension)
+
+        SpecificMaterial.__name__ = name
+
+        self.known_materials[name] = SpecificMaterial
+        return SpecificMaterial
+
+
+class BaseMaterial:
+    """ The solcore base material class
+    """
+    material_string = "Unnamed"
+    composition = []
+    material_directory = None
+    k_path = None
+    n_path = None
+    strained = False
+
+    def __init__(self, T, **kwargs):
+        self.Na = kwargs["Na"] if "Na" in kwargs else 1
+        self.Nd = kwargs["Nd"] if "Nd" in kwargs else 1
+        self.__dict__.update(kwargs)
+        self.T = T
+
+        for element in self.composition:
+            setattr(self, element, kwargs[element])
+
+        if len(self.composition) != 0:
+            self.main_fraction = kwargs[self.composition[0]]
+
+        self.key_parameters = sorted(list(kwargs.keys()))
+
+    def __getattr__(self, attrname):  # only used for unknown attributes
+        if attrname == "n":
+            return self.n_interpolated
+        if attrname == "k":
+            return self.k_interpolated
+        if attrname == "electron_affinity":
+            # return 8.81197053e-19+3.8131799748e-19-self.valence_band_offset-self.band_gap
+            return (0.17 + 4.59) * q - self.valence_band_offset - self.band_gap
+            # from http://en.wikipedia.org/wiki/Anderson's_rule and GaAs values
+
+        kwargs = {element: getattr(self, element) for element in self.composition}
+        kwargs["T"] = self.T
+        return ParameterSystem().get_parameter(self.material_string, attrname, **kwargs)
+
+    @lru_cache(maxsize=1)
+    def load_n_data(self):
+        if len(self.composition) == 0:
+            self.n_data = np.loadtxt(self.n_path, unpack=True)
+        else:
+            self.n_data, self.n_critical_points = critical_point_interpolate.load_data_from_directory(self.n_path)
+
+    @lru_cache(maxsize=1)
+    def load_k_data(self):
+        if len(self.composition) == 0:
+            self.k_data = np.loadtxt(self.k_path, unpack=True)
+        else:
+            self.k_data, self.k_critical_points = critical_point_interpolate.load_data_from_directory(self.k_path)
+
+    def n_interpolated(self, x):
+        assert len(self.composition) <= 1, "Can't interpolate 2d spectra yet"
+
+        try:
+            self.load_n_data()
+        except:
+            print('Material "{}" has not n-data defined. Returning "ones"'.format(self.material_string))
+            return np.ones_like(x)
+
+        if len(self.composition) == 0:
+            y = np.interp(x, self.n_data[0], self.n_data[1])
+        else:
+            x, y, self.critical_points_n = critical_point_interpolate.critical_point_interpolate(
+                self.n_data,
+                self.n_critical_points,
+                self.main_fraction,
+                x
+            )
+
+        return y
+
+    def k_interpolated(self, x):
+        assert len(self.composition) <= 1, "Can't interpolate 2d spectra yet"
+
+        try:
+            self.load_k_data()
+        except:
+            print('Material "{}" has not k-data defined. Returning "zeros"'.format(self.material_string))
+            return np.zeros_like(x)
+
+        if len(self.composition) == 0:
+            y = np.interp(x, self.k_data[0], self.k_data[1])
+        else:
+            x, y, self.critical_points_k = critical_point_interpolate.critical_point_interpolate(
+                self.k_data,
+                self.k_critical_points,
+                self.main_fraction,
+                x
+            )
+        return y
+
+    def get(self, parameter):
+        return getattr(self, parameter)
+
+    def alpha(self, wavelength):
+        return 4 * math.pi * self.k(wavelength) / wavelength
+
+    def alphaE(self, energy):
+        return self.alpha(h * c / energy)
+
+    def latex_string(self):
+        s = self.material_string
+        for element in self.composition:
+            if self.__dict__[element] != 0:
+                s = s.replace(element, "{}_{{{:.3f}}}").format(element, self.__dict__[element])
+            else:
+                s = s.replace(element, "")
+        return "$\mathrm{{{}}}$".format(s)
+
+    def plain_string(self):
+        s = self.material_string
+        for element in self.composition:
+            if self.__dict__[element] != 0:
+                s = s.replace(element, "{}{:.3f}").format(element, self.__dict__[element])
+            else:
+                s = s.replace(element, "")
+        return "{}".format(s)
+
+    def html_string(self):
+        s = self.material_string
+        for element in self.composition:
+            if self.__dict__[element] != 0:
+                s = s.replace(element, "{}<sub>{:.3f}</sub>").format(element, self.__dict__[element])
+            else:
+                s = s.replace(element, "")
+        return "{}".format(s)
+
+    def __repr__(self):
+        parameters = ["{}={}".format(key, getattr(self, key)) for key in self.key_parameters]
+        parameters_string = " ".join(parameters)
+        return "<'{}' material{}>".format(
+            self.material_string,
+            "" if len(self.key_parameters) == 0 else " " + parameters_string)

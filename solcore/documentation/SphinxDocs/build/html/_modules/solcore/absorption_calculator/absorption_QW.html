@@ -1,0 +1,536 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>solcore.absorption_calculator.absorption_QW &mdash; Solcore 4.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '4.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Solcore 4.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 4.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.absorption_calculator.absorption_QW</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">solcore.science_tracker</span> <span class="kn">import</span> <span class="n">science_reference</span>
+
+<span class="n">H</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>  <span class="c1">### blindly changed this !!</span>
+<span class="n">D</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">width</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">width</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>  <span class="c1"># Delta function</span>
+<span class="n">L</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">centre</span><span class="p">,</span> <span class="n">hwhm</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">hwhm</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+    <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">centre</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">hwhm</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Lorenzian (area normalised to 1)</span>
+<span class="n">Gauss</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">centre</span><span class="p">,</span> <span class="n">hwhm</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">hwhm</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+    <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">centre</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">hwhm</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Gaussian (area normalised to 1)</span>
+
+
+<div class="viewcode-block" id="exciton_rydberg_energy_2d"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.exciton_rydberg_energy_2d">[docs]</a><span class="k">def</span> <span class="nf">exciton_rydberg_energy_2d</span><span class="p">(</span><span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">eps_r</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param me: electron effective mass (units: kg)</span>
+<span class="sd">    :param mh: hole effective mass (units: kg)</span>
+<span class="sd">    :param eps_r: dielectic constant (units: SI)</span>
+<span class="sd">    :return: The exciton Rydberg energy</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">science_reference</span><span class="p">(</span><span class="s2">&quot;Definition of the exciton Rydberg Energy for a quantum well.&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;S. L. Chuang, Physics of Optoelectonic Devices, Second Edition, p.554, Table 13.1&quot;</span><span class="p">)</span>
+
+    <span class="n">mr</span> <span class="o">=</span> <span class="n">me</span> <span class="o">*</span> <span class="n">mh</span> <span class="o">/</span> <span class="p">(</span><span class="n">me</span> <span class="o">+</span> <span class="n">mh</span><span class="p">)</span>  <span class="c1"># reduced effective mass</span>
+    <span class="k">if</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mr</span> <span class="o">*</span> <span class="n">q</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">eps_r</span> <span class="o">*</span> <span class="n">vacuum_permittivity</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Ry</span> <span class="o">=</span> <span class="mf">13.6</span> <span class="o">*</span> <span class="mf">1.6e-19</span>
+    <span class="n">m0</span> <span class="o">=</span> <span class="n">electron_mass</span>
+    <span class="n">Ry_eff</span> <span class="o">=</span> <span class="p">(</span><span class="n">mr</span> <span class="o">/</span> <span class="n">m0</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ry</span> <span class="o">/</span> <span class="n">eps_r</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># Effective Rydberg</span>
+    <span class="k">return</span> <span class="n">Ry_eff</span></div>
+
+
+<div class="viewcode-block" id="exciton_bohr_radius"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.exciton_bohr_radius">[docs]</a><span class="k">def</span> <span class="nf">exciton_bohr_radius</span><span class="p">(</span><span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param me: electron effective mass (units: kg)</span>
+<span class="sd">    :param mh: hole effective mass (units: kg)</span>
+<span class="sd">    :param eps: dielectic constant (units: SI)</span>
+<span class="sd">    :return: Exciton Borh radius</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">science_reference</span><span class="p">(</span><span class="s2">&quot;Definition of the exciton bohr radius for a quantum well.&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;S. L. Chuang, Physics of Optoelectonic Devices, Second Edition, p.554, Table 13.1&quot;</span><span class="p">)</span>
+    <span class="n">mr</span> <span class="o">=</span> <span class="n">me</span> <span class="o">*</span> <span class="n">mh</span> <span class="o">/</span> <span class="p">(</span><span class="n">me</span> <span class="o">+</span> <span class="n">mh</span><span class="p">)</span>  <span class="c1"># reduced effective mass</span>
+    <span class="k">return</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">mr</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">eps</span> <span class="o">/</span> <span class="n">q</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="alpha_c_hh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_c_hh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;     Absortion coefficient for incident light forming a transision between hh and c band of a quantum well</span>
+
+<span class="sd">    NB. Assumes that valence band is a zero energy, might need to manually apply an offset.</span>
+
+<span class="sd">    :param E: photon energy (units: J)</span>
+<span class="sd">    :param z: mesh points along growth direction (units: m)</span>
+<span class="sd">    :param E_e: Electron state energy (units: J)</span>
+<span class="sd">    :param E_hh: Heavy hole state energy (units: J)</span>
+<span class="sd">    :param psi_e: Electron envelope function (psi_e^2 must be normalised)</span>
+<span class="sd">    :param psi_hh: Heavy hole envelope function (psi_hh^2 must be normalised)</span>
+<span class="sd">    :param well_width: (units: m)</span>
+<span class="sd">    :param me: electron effective mass (units: kg)</span>
+<span class="sd">    :param mhh: heavy hole effective mass (units: kg)</span>
+<span class="sd">    :param Ep: the Kane parameter &quot;Optical dipole matrix elemet&quot;, sometimes &quot;Momentum matrix element&quot;, e.g. Ep for GaAs ~ 28eV</span>
+<span class="sd">    :param nr: refractive index</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">m0</span> <span class="o">=</span> <span class="n">electron_mass</span>
+    <span class="n">C0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">q</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">nr</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">vacuum_permittivity</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">E</span> <span class="o">/</span> <span class="n">hbar</span><span class="p">)</span>
+    <span class="n">mr</span> <span class="o">=</span> <span class="n">me</span> <span class="o">*</span> <span class="n">mhh</span> <span class="o">/</span> <span class="p">(</span><span class="n">me</span> <span class="o">+</span> <span class="n">mhh</span><span class="p">)</span>  <span class="c1"># reduced effective mass</span>
+    <span class="n">DOS_2D</span> <span class="o">=</span> <span class="n">mr</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">well_width</span><span class="p">)</span>
+    <span class="n">Mbsq_3D</span> <span class="o">=</span> <span class="n">m0</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">Ep</span>
+    <span class="n">Mbsq_2D</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Mbsq_3D</span>
+    <span class="n">Ieh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">psi_e</span> <span class="o">*</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Ieh</span> <span class="o">*</span> <span class="n">Mbsq_2D</span> <span class="o">*</span> <span class="n">DOS_2D</span> <span class="o">*</span> <span class="n">H</span><span class="p">(</span><span class="n">E</span> <span class="o">-</span> <span class="p">(</span><span class="n">E_e</span> <span class="o">-</span> <span class="n">E_hh</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="alpha_c_lh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_c_lh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;     Absortion coefficient for incident light forming a transision between hh and c band of a quantum well</span>
+<span class="sd">    </span>
+<span class="sd">    NB. Assumes that valence band is a zero energy, might need to manually apply an offset.</span>
+<span class="sd">    </span>
+<span class="sd">    :param E: photon energy (units: J)</span>
+<span class="sd">    :param z: mesh points along growth direction (units: m)</span>
+<span class="sd">    :param E_e: Electron state energy (units: J)</span>
+<span class="sd">    :param E_hh: Heavy hole state energy (units: J)</span>
+<span class="sd">    :param psi_e: Electron envelope function (psi_e^2 must be normalised)</span>
+<span class="sd">    :param psi_hh: Heavy hole envelope function (psi_hh^2 must be normalised)</span>
+<span class="sd">    :param well_width: (units: m)</span>
+<span class="sd">    :param me: electron effective mass (units: kg)</span>
+<span class="sd">    :param mhh: heavy hole effective mass (units: kg)</span>
+<span class="sd">    :param Ep: the Kane parameter &quot;Optical dipole matrix elemet&quot;, sometimes &quot;Momentum matrix element&quot;, e.g. Ep for GaAs ~ 28eV</span>
+<span class="sd">    :param nr: refractive index</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m0</span> <span class="o">=</span> <span class="n">electron_mass</span>
+    <span class="n">C0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">q</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">nr</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">vacuum_permittivity</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">E</span> <span class="o">/</span> <span class="n">hbar</span><span class="p">)</span>
+    <span class="n">mr</span> <span class="o">=</span> <span class="n">me</span> <span class="o">*</span> <span class="n">mlh</span> <span class="o">/</span> <span class="p">(</span><span class="n">me</span> <span class="o">+</span> <span class="n">mlh</span><span class="p">)</span>  <span class="c1"># reduced effective mass</span>
+    <span class="n">DOS_2D</span> <span class="o">=</span> <span class="n">mr</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">well_width</span><span class="p">)</span>
+    <span class="n">Mbsq_3D</span> <span class="o">=</span> <span class="n">m0</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">Ep</span>
+    <span class="n">Mbsq_2D</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Mbsq_3D</span>
+    <span class="n">Ieh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">psi_e</span> <span class="o">*</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Ieh</span> <span class="o">*</span> <span class="n">Mbsq_2D</span> <span class="o">*</span> <span class="n">DOS_2D</span> <span class="o">*</span> <span class="n">H</span><span class="p">(</span><span class="n">E</span> <span class="o">-</span> <span class="p">(</span><span class="n">E_e</span> <span class="o">-</span> <span class="n">E_lh</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="alpha_exciton_ehh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_ehh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_exciton_ehh_TE</span><span class="p">(</span><span class="n">exciton_index</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span>
+                         <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span> <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param exciton_index:</span>
+<span class="sd">    :param E:</span>
+<span class="sd">    :param z:</span>
+<span class="sd">    :param E_e:</span>
+<span class="sd">    :param E_hh:</span>
+<span class="sd">    :param psi_e:</span>
+<span class="sd">    :param psi_hh:</span>
+<span class="sd">    :param well_width:</span>
+<span class="sd">    :param me:</span>
+<span class="sd">    :param mhh:</span>
+<span class="sd">    :param Ep:</span>
+<span class="sd">    :param nr:</span>
+<span class="sd">    :param eps:</span>
+<span class="sd">    :param hwhm:</span>
+<span class="sd">    :param dimensionality:</span>
+<span class="sd">    :param line_shape:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">exciton_index</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The excition index must start on 1.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">dimensionality</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The dimensionality parameter of the exciton must be a number between 0 and 0.5 (inclusive).&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Borrow constants from the bound-to-bound calculation</span>
+    <span class="n">m0</span> <span class="o">=</span> <span class="n">electron_mass</span>
+    <span class="n">C0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">q</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">nr</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">vacuum_permittivity</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">E</span> <span class="o">/</span> <span class="n">hbar</span><span class="p">)</span>
+    <span class="n">mr</span> <span class="o">=</span> <span class="n">me</span> <span class="o">*</span> <span class="n">mhh</span> <span class="o">/</span> <span class="p">(</span><span class="n">me</span> <span class="o">+</span> <span class="n">mhh</span><span class="p">)</span>  <span class="c1"># reduced effective mass</span>
+    <span class="n">DOS_2D</span> <span class="o">=</span> <span class="n">mr</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">well_width</span><span class="p">)</span>
+    <span class="n">Mbsq_3D</span> <span class="o">=</span> <span class="n">m0</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">Ep</span>
+    <span class="n">Mbsq_2D</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Mbsq_3D</span>
+    <span class="n">Ieh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">psi_e</span> <span class="o">*</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Excitions are considered by modiftying the bulk absorption coefficient using an oscillator strength</span>
+    <span class="n">Ry_eff</span> <span class="o">=</span> <span class="n">exciton_rydberg_energy_2d</span><span class="p">(</span><span class="n">me</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">eps</span> <span class="o">/</span> <span class="n">vacuum_permittivity</span><span class="p">)</span>
+    <span class="n">En</span> <span class="o">=</span> <span class="o">-</span><span class="n">Ry_eff</span> <span class="o">/</span> <span class="p">((</span><span class="n">exciton_index</span> <span class="o">-</span> <span class="n">dimensionality</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Exciton binding energy</span>
+    <span class="n">Et</span> <span class="o">=</span> <span class="p">(</span><span class="n">E_e</span> <span class="o">-</span> <span class="n">E_hh</span><span class="p">)</span>
+    <span class="c1"># import pdb; pdb.set_trace()</span>
+    <span class="c1"># NOTE TO MARKUS: Added the possiblity of using a Gauss lineshape</span>
+    <span class="k">if</span> <span class="n">line_shape</span> <span class="ow">is</span> <span class="s2">&quot;Gauss&quot;</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">Gauss</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Et</span> <span class="o">+</span> <span class="n">En</span><span class="p">,</span> <span class="n">hwhm</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">L</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Et</span> <span class="o">+</span> <span class="n">En</span><span class="p">,</span> <span class="n">hwhm</span><span class="p">)</span>
+    <span class="c1"># NOTE TO MARKUS: It seems that there was a factor 2 missing in the oscilator strength as well as the exciton index. </span>
+    <span class="c1"># See: P C Klipstein and N Apsley 1986 J. Phys. C: Solid State Phys. 19 6461 doi:10.1088/0022-3719/19/32/020 </span>
+    <span class="n">oscillator_strength</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Ry_eff</span> <span class="o">/</span> <span class="p">(</span><span class="n">exciton_index</span> <span class="o">-</span> <span class="n">dimensionality</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Ieh</span> <span class="o">*</span> <span class="n">Mbsq_2D</span> <span class="o">*</span> <span class="n">DOS_2D</span> <span class="o">*</span> <span class="n">oscillator_strength</span> <span class="o">*</span> <span class="n">shape</span></div>
+
+
+<div class="viewcode-block" id="alpha_exciton_elh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_elh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_exciton_elh_TE</span><span class="p">(</span><span class="n">exciton_index</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span>
+                         <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span> <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param exciton_index:</span>
+<span class="sd">    :param E:</span>
+<span class="sd">    :param z:</span>
+<span class="sd">    :param E_e:</span>
+<span class="sd">    :param E_lh:</span>
+<span class="sd">    :param psi_e:</span>
+<span class="sd">    :param psi_lh:</span>
+<span class="sd">    :param well_width:</span>
+<span class="sd">    :param me:</span>
+<span class="sd">    :param mlh:</span>
+<span class="sd">    :param Ep:</span>
+<span class="sd">    :param nr:</span>
+<span class="sd">    :param eps:</span>
+<span class="sd">    :param hwhm:</span>
+<span class="sd">    :param dimensionality:</span>
+<span class="sd">    :param line_shape:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">exciton_index</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The excition index must start on 1.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">dimensionality</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The dimensionality parameter of the exciton must be a number between 0 and 0.5 (inclusive).&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Borrow constants from the bound-to-bound calculation</span>
+    <span class="n">m0</span> <span class="o">=</span> <span class="n">electron_mass</span>
+    <span class="n">C0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">q</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">nr</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">vacuum_permittivity</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">E</span> <span class="o">/</span> <span class="n">hbar</span><span class="p">)</span>
+    <span class="n">mr</span> <span class="o">=</span> <span class="n">me</span> <span class="o">*</span> <span class="n">mlh</span> <span class="o">/</span> <span class="p">(</span><span class="n">me</span> <span class="o">+</span> <span class="n">mlh</span><span class="p">)</span>  <span class="c1"># reduced effective mass</span>
+    <span class="n">DOS_2D</span> <span class="o">=</span> <span class="n">mr</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">well_width</span><span class="p">)</span>
+    <span class="n">Mbsq_3D</span> <span class="o">=</span> <span class="n">m0</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">Ep</span>
+    <span class="n">Mbsq_2D</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Mbsq_3D</span>
+    <span class="n">Ieh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">psi_e</span> <span class="o">*</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Excitions are considered by modiftying the bulk absorption coefficient using an oscillator strength</span>
+    <span class="n">Ry_eff</span> <span class="o">=</span> <span class="n">exciton_rydberg_energy_2d</span><span class="p">(</span><span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">eps</span> <span class="o">/</span> <span class="n">vacuum_permittivity</span><span class="p">)</span>
+    <span class="n">En</span> <span class="o">=</span> <span class="o">-</span><span class="n">Ry_eff</span> <span class="o">/</span> <span class="p">((</span><span class="n">exciton_index</span> <span class="o">-</span> <span class="n">dimensionality</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Exciton binding energy</span>
+    <span class="n">Et</span> <span class="o">=</span> <span class="p">(</span><span class="n">E_e</span> <span class="o">-</span> <span class="n">E_lh</span><span class="p">)</span>
+    <span class="c1"># NOTE TO MARKUS: Added the possiblity of using a Gauss lineshape</span>
+    <span class="k">if</span> <span class="n">line_shape</span> <span class="ow">is</span> <span class="s2">&quot;Gauss&quot;</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">Gauss</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Et</span> <span class="o">+</span> <span class="n">En</span><span class="p">,</span> <span class="n">hwhm</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">L</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Et</span> <span class="o">+</span> <span class="n">En</span><span class="p">,</span> <span class="n">hwhm</span><span class="p">)</span>
+    <span class="c1"># NOTE TO MARKUS: It seems that there was a factor 2 missing in the oscilator strength as well as the exciton index. </span>
+    <span class="c1"># See: P C Klipstein and N Apsley 1986 J. Phys. C: Solid State Phys. 19 6461 doi:10.1088/0022-3719/19/32/020 </span>
+    <span class="n">oscillator_strength</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Ry_eff</span> <span class="o">/</span> <span class="p">(</span><span class="n">exciton_index</span> <span class="o">-</span> <span class="n">dimensionality</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Ieh</span> <span class="o">*</span> <span class="n">Mbsq_2D</span> <span class="o">*</span> <span class="n">DOS_2D</span> <span class="o">*</span> <span class="n">oscillator_strength</span> <span class="o">*</span> <span class="n">shape</span></div>
+
+
+<div class="viewcode-block" id="sum_alpha_c_hh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_hh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param E:</span>
+<span class="sd">    :param z:</span>
+<span class="sd">    :param E_e:</span>
+<span class="sd">    :param E_hh:</span>
+<span class="sd">    :param psi_e:</span>
+<span class="sd">    :param psi_hh:</span>
+<span class="sd">    :param well_width:</span>
+<span class="sd">    :param me:</span>
+<span class="sd">    :param mh:</span>
+<span class="sd">    :param Ep:</span>
+<span class="sd">    :param nr:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">ee</span><span class="p">,</span> <span class="n">pe</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">E_e</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">eh</span><span class="p">,</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">):</span>
+            <span class="n">alpha</span> <span class="o">+=</span> <span class="n">alpha_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">ee</span><span class="p">,</span> <span class="n">eh</span><span class="p">,</span> <span class="n">pe</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alpha</span></div>
+
+
+<div class="viewcode-block" id="sum_alpha_c_lh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_lh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param E:</span>
+<span class="sd">    :param z:</span>
+<span class="sd">    :param E_e:</span>
+<span class="sd">    :param E_lh:</span>
+<span class="sd">    :param psi_e:</span>
+<span class="sd">    :param psi_lh:</span>
+<span class="sd">    :param well_width:</span>
+<span class="sd">    :param me:</span>
+<span class="sd">    :param mh:</span>
+<span class="sd">    :param Ep:</span>
+<span class="sd">    :param nr:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">ee</span><span class="p">,</span> <span class="n">pe</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">E_e</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">eh</span><span class="p">,</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">):</span>
+            <span class="n">alpha</span> <span class="o">+=</span> <span class="n">alpha_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">ee</span><span class="p">,</span> <span class="n">eh</span><span class="p">,</span> <span class="n">pe</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alpha</span></div>
+
+
+<div class="viewcode-block" id="sum_alpha_exciton_c_hh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_hh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_exciton_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span>
+                              <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param E:</span>
+<span class="sd">    :param z:</span>
+<span class="sd">    :param E_e:</span>
+<span class="sd">    :param E_hh:</span>
+<span class="sd">    :param psi_e:</span>
+<span class="sd">    :param psi_hh:</span>
+<span class="sd">    :param well_width:</span>
+<span class="sd">    :param me:</span>
+<span class="sd">    :param mh:</span>
+<span class="sd">    :param Ep:</span>
+<span class="sd">    :param nr:</span>
+<span class="sd">    :param eps:</span>
+<span class="sd">    :param hwhm:</span>
+<span class="sd">    :param dimensionality:</span>
+<span class="sd">    :param line_shape:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eh_pairs_with_zero_angular_momentum</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">E_e</span><span class="p">)),</span>
+                                              <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">E_hh</span><span class="p">)))</span>  <span class="c1"># l=0 for optically allowed transitions</span>
+    <span class="k">for</span> <span class="n">exciton_index</span><span class="p">,</span> <span class="n">eh_quantum_numbers</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eh_pairs_with_zero_angular_momentum</span><span class="p">):</span>
+        <span class="n">e_index</span> <span class="o">=</span> <span class="n">eh_quantum_numbers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">hh_index</span> <span class="o">=</span> <span class="n">eh_quantum_numbers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ee</span> <span class="o">=</span> <span class="n">E_e</span><span class="p">[</span><span class="n">e_index</span><span class="p">]</span>
+        <span class="n">ehh</span> <span class="o">=</span> <span class="n">E_hh</span><span class="p">[</span><span class="n">hh_index</span><span class="p">]</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="n">psi_e</span><span class="p">[</span><span class="n">e_index</span><span class="p">]</span>
+        <span class="n">phh</span> <span class="o">=</span> <span class="n">psi_hh</span><span class="p">[</span><span class="n">e_index</span><span class="p">]</span>
+        <span class="n">alpha</span> <span class="o">+=</span> <span class="n">alpha_exciton_ehh_TE</span><span class="p">(</span><span class="n">exciton_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">ee</span><span class="p">,</span> <span class="n">ehh</span><span class="p">,</span> <span class="n">pe</span><span class="p">,</span> <span class="n">phh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span>
+                                      <span class="n">hwhm</span><span class="o">=</span><span class="n">hwhm</span><span class="p">,</span> <span class="n">dimensionality</span><span class="o">=</span><span class="n">dimensionality</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="n">line_shape</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alpha</span></div>
+
+
+<div class="viewcode-block" id="sum_alpha_exciton_c_lh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_lh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_exciton_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span>
+                              <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param E:</span>
+<span class="sd">    :param z:</span>
+<span class="sd">    :param E_e:</span>
+<span class="sd">    :param E_lh:</span>
+<span class="sd">    :param psi_e:</span>
+<span class="sd">    :param psi_lh:</span>
+<span class="sd">    :param well_width:</span>
+<span class="sd">    :param me:</span>
+<span class="sd">    :param mlh:</span>
+<span class="sd">    :param Ep:</span>
+<span class="sd">    :param nr:</span>
+<span class="sd">    :param eps:</span>
+<span class="sd">    :param hwhm:</span>
+<span class="sd">    :param dimensionality:</span>
+<span class="sd">    :param line_shape:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eh_pairs_with_zero_angular_momentum</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">E_e</span><span class="p">)),</span>
+                                              <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">E_lh</span><span class="p">)))</span>  <span class="c1"># l=0 for optically allowed transitions</span>
+    <span class="k">for</span> <span class="n">exciton_index</span><span class="p">,</span> <span class="n">eh_quantum_numbers</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eh_pairs_with_zero_angular_momentum</span><span class="p">):</span>
+        <span class="n">e_index</span> <span class="o">=</span> <span class="n">eh_quantum_numbers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">lh_index</span> <span class="o">=</span> <span class="n">eh_quantum_numbers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ee</span> <span class="o">=</span> <span class="n">E_e</span><span class="p">[</span><span class="n">e_index</span><span class="p">]</span>
+        <span class="n">elh</span> <span class="o">=</span> <span class="n">E_lh</span><span class="p">[</span><span class="n">lh_index</span><span class="p">]</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="n">psi_e</span><span class="p">[</span><span class="n">e_index</span><span class="p">]</span>
+        <span class="n">plh</span> <span class="o">=</span> <span class="n">psi_lh</span><span class="p">[</span><span class="n">e_index</span><span class="p">]</span>
+        <span class="n">alpha</span> <span class="o">+=</span> <span class="n">alpha_exciton_elh_TE</span><span class="p">(</span><span class="n">exciton_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">ee</span><span class="p">,</span> <span class="n">elh</span><span class="p">,</span> <span class="n">pe</span><span class="p">,</span> <span class="n">plh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span>
+                                      <span class="n">hwhm</span><span class="o">=</span><span class="n">hwhm</span><span class="p">,</span> <span class="n">dimensionality</span><span class="o">=</span><span class="n">dimensionality</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="n">line_shape</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alpha</span></div>
+
+
+<div class="viewcode-block" id="calc_alpha"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.calc_alpha">[docs]</a><span class="k">def</span> <span class="nf">calc_alpha</span><span class="p">(</span><span class="n">QM_result</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">kane_parameter</span><span class="o">=</span><span class="mi">28</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span>
+               <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">12.9</span> <span class="o">*</span> <span class="n">vacuum_permittivity</span><span class="p">,</span> <span class="n">espace</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the absorption coeficient of a quantum well structure assuming the parabolic approximation for the</span>
+<span class="sd">    effective masses.</span>
+
+<span class="sd">    :param QM_result: The output of the Schrodinger solver, incldued in the &#39;quantum_mechanics&#39; package</span>
+<span class="sd">    :param well_width: The well width</span>
+<span class="sd">    :param kane_parameter: The Kane parameter</span>
+<span class="sd">    :param refractive_index: Refractive (effective) index of the QW</span>
+<span class="sd">    :param hwhm: Full width at half maximum of the excitonic lineshape</span>
+<span class="sd">    :param dimensionality:</span>
+<span class="sd">    :param theta:</span>
+<span class="sd">    :param eps:</span>
+<span class="sd">    :param espace:</span>
+<span class="sd">    :param line_shape:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">QM_result</span>
+
+    <span class="c1"># We pick the effective mass at the center of the structure as THE efective mass of the QW</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;effective_masses&quot;</span><span class="p">][</span><span class="s2">&quot;me&quot;</span><span class="p">])</span>
+    <span class="n">me</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;effective_masses&quot;</span><span class="p">][</span><span class="s2">&quot;me&quot;</span><span class="p">][</span><span class="nb">round</span><span class="p">(</span><span class="n">points</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mhh</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;effective_masses&quot;</span><span class="p">][</span><span class="s2">&quot;mhh&quot;</span><span class="p">][</span><span class="nb">round</span><span class="p">(</span><span class="n">points</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)]</span>
+        <span class="n">mlh</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;effective_masses&quot;</span><span class="p">][</span><span class="s2">&quot;mlh&quot;</span><span class="p">][</span><span class="nb">round</span><span class="p">(</span><span class="n">points</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="c1"># If the calculation mode for the bands is kp4x4 or kp6x6, we have to use the effective mass transverse to the</span>
+        <span class="c1"># growth direction (in the QW plane).</span>
+        <span class="n">mhh</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;effective_masses&quot;</span><span class="p">][</span><span class="s2">&quot;mhh_t&quot;</span><span class="p">][</span><span class="nb">round</span><span class="p">(</span><span class="n">points</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)]</span>
+        <span class="n">mlh</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;effective_masses&quot;</span><span class="p">][</span><span class="s2">&quot;mlh_t&quot;</span><span class="p">][</span><span class="nb">round</span><span class="p">(</span><span class="n">points</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)]</span>
+    <span class="c1">#    print (results[&quot;effective_masses&quot;][&quot;me&quot;][round(points/2.0)])</span>
+    <span class="c1">#    print (results[&quot;effective_masses&quot;][&quot;mhh&quot;][round(points/2.0)])</span>
+    <span class="c1">#    print (results[&quot;effective_masses&quot;][&quot;mlh&quot;][round(points/2.0)])</span>
+
+    <span class="n">result_c_hh_TE</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">result_c_lh_TE</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">result_ex_c_hh_TE</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">result_ex_c_lh_TE</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">espace</span><span class="p">:</span>
+        <span class="n">c_hh</span> <span class="o">=</span> <span class="n">sum_alpha_c_hh_TE</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">][</span><span class="s1">&#39;Ee&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">][</span><span class="s1">&#39;Ehh&#39;</span><span class="p">],</span>
+                                 <span class="n">results</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">][</span><span class="s1">&#39;psi_e&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">][</span><span class="s1">&#39;psi_hh&#39;</span><span class="p">],</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span>
+                                 <span class="n">mhh</span><span class="p">,</span> <span class="n">kane_parameter</span><span class="p">,</span> <span class="n">refractive_index</span><span class="p">)</span>
+        <span class="n">c_lh</span> <span class="o">=</span> <span class="n">sum_alpha_c_lh_TE</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">][</span><span class="s1">&#39;Ee&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">][</span><span class="s1">&#39;Elh&#39;</span><span class="p">],</span>
+                                 <span class="n">results</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">][</span><span class="s1">&#39;psi_e&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">][</span><span class="s1">&#39;psi_lh&#39;</span><span class="p">],</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span>
+                                 <span class="n">mlh</span><span class="p">,</span> <span class="n">kane_parameter</span><span class="p">,</span> <span class="n">refractive_index</span><span class="p">)</span>
+        <span class="n">ex_c_hh</span> <span class="o">=</span> <span class="n">sum_alpha_exciton_c_hh_TE</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">][</span><span class="s1">&#39;Ee&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">][</span><span class="s1">&#39;Ehh&#39;</span><span class="p">],</span>
+                                            <span class="n">results</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">][</span><span class="s1">&#39;psi_e&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">][</span><span class="s1">&#39;psi_hh&#39;</span><span class="p">],</span>
+                                            <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">kane_parameter</span><span class="p">,</span> <span class="n">refractive_index</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="n">hwhm</span><span class="p">,</span>
+                                            <span class="n">dimensionality</span><span class="o">=</span><span class="n">dimensionality</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="n">line_shape</span><span class="p">)</span>
+        <span class="n">ex_c_lh</span> <span class="o">=</span> <span class="n">sum_alpha_exciton_c_lh_TE</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">][</span><span class="s1">&#39;Ee&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">][</span><span class="s1">&#39;Elh&#39;</span><span class="p">],</span>
+                                            <span class="n">results</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">][</span><span class="s1">&#39;psi_e&#39;</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">][</span><span class="s1">&#39;psi_lh&#39;</span><span class="p">],</span>
+                                            <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">kane_parameter</span><span class="p">,</span> <span class="n">refractive_index</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="n">hwhm</span><span class="p">,</span>
+                                            <span class="n">dimensionality</span><span class="o">=</span><span class="n">dimensionality</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="n">line_shape</span><span class="p">)</span>
+        <span class="n">result_c_hh_TE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c_hh</span><span class="p">)</span>
+        <span class="n">result_c_lh_TE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c_lh</span><span class="p">)</span>
+        <span class="n">result_ex_c_hh_TE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ex_c_hh</span><span class="p">)</span>
+        <span class="n">result_ex_c_lh_TE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ex_c_lh</span><span class="p">)</span>
+
+    <span class="n">result_c_hh_TE</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">result_c_hh_TE</span><span class="p">)</span>
+    <span class="n">result_c_lh_TE</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">result_c_lh_TE</span><span class="p">)</span>
+    <span class="n">result_c_lh_TM</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">array</span><span class="p">(</span><span class="n">result_c_lh_TE</span><span class="p">)</span>
+    <span class="n">result_ex_c_hh_TE</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">result_ex_c_hh_TE</span><span class="p">)</span>
+    <span class="n">result_ex_c_lh_TE</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">result_ex_c_lh_TE</span><span class="p">)</span>
+    <span class="n">result_ex_c_lh_TM</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">array</span><span class="p">(</span><span class="n">result_ex_c_lh_TE</span><span class="p">)</span>
+    <span class="n">result_TE_raw</span> <span class="o">=</span> <span class="n">result_c_hh_TE</span> <span class="o">+</span> <span class="n">result_c_lh_TE</span> <span class="o">+</span> <span class="n">result_ex_c_hh_TE</span> <span class="o">+</span> <span class="n">result_ex_c_lh_TE</span>
+    <span class="n">result_TE</span> <span class="o">=</span> <span class="n">result_TE_raw</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">result_TM_raw</span> <span class="o">=</span> <span class="n">result_c_lh_TM</span> <span class="o">+</span> <span class="n">result_ex_c_lh_TM</span>
+    <span class="n">result_TM</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">result_TM_raw</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">result_sum</span> <span class="o">=</span> <span class="n">result_TE</span> <span class="o">+</span> <span class="n">result_TM</span>
+    <span class="k">return</span> <span class="n">espace</span><span class="p">,</span> <span class="n">result_sum</span><span class="p">,</span> <span class="n">result_TE</span><span class="p">,</span> <span class="n">result_TM</span><span class="p">,</span> <span class="n">result_TE_raw</span><span class="p">,</span> <span class="n">result_TM_raw</span></div>
+
+
+<div class="viewcode-block" id="NonBlackBodyEmission"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.NonBlackBodyEmission">[docs]</a><span class="k">def</span> <span class="nf">NonBlackBodyEmission</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">voltage</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param E:</span>
+<span class="sd">    :param voltage:</span>
+<span class="sd">    :param nr:</span>
+<span class="sd">    :param T:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nr</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">c</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="p">(</span><span class="n">E</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">voltage</span><span class="p">)</span> <span class="o">/</span> <span class="n">kb</span> <span class="o">/</span> <span class="n">T</span>
+
+    <span class="n">bb</span> <span class="o">=</span> <span class="n">A</span> <span class="o">*</span> <span class="n">E</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bb</span></div>
+
+
+<div class="viewcode-block" id="calc_emission"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.calc_emission">[docs]</a><span class="k">def</span> <span class="nf">calc_emission</span><span class="p">(</span><span class="n">QM_result</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">voltage</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param QM_result:</span>
+<span class="sd">    :param well_width:</span>
+<span class="sd">    :param voltage:</span>
+<span class="sd">    :param theta:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alfa</span> <span class="o">=</span> <span class="n">QM_result</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span>
+    <span class="n">aTE</span> <span class="o">=</span> <span class="n">alfa</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">aTM</span> <span class="o">=</span> <span class="n">alfa</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+    <span class="n">result_TE</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">result_TM</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">alfa</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">NonBlackBodyEmission</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">TE</span> <span class="o">=</span> <span class="n">bb</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">aTE</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">*</span> <span class="n">well_width</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="n">TM</span> <span class="o">=</span> <span class="n">bb</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">aTM</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">*</span> <span class="n">well_width</span> <span class="o">*</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="c1"># All = bb*(1-np.exp(-(aTE[index]+aTM[index])*well_width))</span>
+        <span class="n">All</span> <span class="o">=</span> <span class="n">TE</span> <span class="o">+</span> <span class="n">TM</span>
+        <span class="n">result_TE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TE</span><span class="p">)</span>
+        <span class="n">result_TM</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TM</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">All</span><span class="p">)</span>
+
+    <span class="n">result_TE</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">result_TE</span><span class="p">)</span>
+    <span class="n">result_TM</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">result_TM</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">alfa</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">result</span><span class="p">,</span> <span class="n">result_TE</span><span class="p">,</span> <span class="n">result_TM</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 4.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

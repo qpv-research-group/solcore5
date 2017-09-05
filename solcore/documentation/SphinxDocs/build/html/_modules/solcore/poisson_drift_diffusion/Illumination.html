@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>solcore.poisson_drift_diffusion.Illumination &mdash; Solcore 4.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '4.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Solcore 4.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 4.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.poisson_drift_diffusion.Illumination</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">solcore</span> <span class="kn">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">solcore.absorption_calculator</span> <span class="kn">import</span> <span class="n">adachi_alpha</span>
+<span class="kn">from</span> <span class="nn">solcore.solar_spectrum</span> <span class="kn">import</span> <span class="n">reference_spectra</span>
+
+<span class="n">q</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">q</span>
+<span class="n">pi</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">Gauss</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">centre</span><span class="p">,</span> <span class="n">hwhm</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">hwhm</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+    <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">centre</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">hwhm</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Gaussian (area normalised to 1)</span>
+
+
+<div class="viewcode-block" id="Illumination"><a class="viewcode-back" href="../../../PDD/Illumination.html#solcore.poisson_drift_diffusion.Illumination.Illumination">[docs]</a><span class="k">class</span> <span class="nc">Illumination</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Creates the illumination spectrum in photons m-2 m-1, so it can be used by the drift diffusion module.</span>
+
+<span class="sd">    :param spectrum: Either a string with the name of the standard spectrum (AM1.5g, AM1.5d, AM0) or an array containing the power density (in W m-2 nm-1). Default: AM1.5d</span>
+<span class="sd">    :param irradiance: A multiplicative factor of the spectrum. If the spectrum is in absolutine units, it represents the concentration factor. Default: 1.</span>
+<span class="sd">    :param wavelengths: An array of the same length that spectrum and containing the corresponding wavelenghts (in m). If a standard spectrum is used, the photon flux is interpolated at these values. Default: None.</span>
+<span class="sd">    :param central_WL: Central wavelength on an LED type illumination source, in nm.</span>
+<span class="sd">    :param width: Half-width of the gaussian illumination profile in the LED type source, in nm.</span>
+<span class="sd">    :param power_density: Power density in the LED type illumination profile, in W/m2.</span>
+<span class="sd">    :param resolution: Resolution of the spectrum in the LED type illumination profile, in nm.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="s2">&quot;AM1.5d&quot;</span><span class="p">,</span> <span class="n">irradiance</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wavelengths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">central_WL</span><span class="o">=</span><span class="mi">532</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">power_density</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                 <span class="n">resolution</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;AM1.5g&quot;</span><span class="p">,</span> <span class="s2">&quot;AM1.5d&quot;</span><span class="p">,</span> <span class="s2">&quot;AM0&quot;</span><span class="p">]:</span>
+            <span class="c1"># DEFAULT. We are using a standard spectrum from the ASTM</span>
+            <span class="n">spectrumfile</span> <span class="o">=</span> <span class="n">reference_spectra</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">spectrum</span> <span class="o">==</span> <span class="s2">&quot;AM1.5g&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">=</span> <span class="n">spectrumfile</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">total_power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span><span class="p">,</span> <span class="n">spectrumfile</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">spectrum</span> <span class="o">==</span> <span class="s2">&quot;AM0&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">=</span> <span class="n">spectrumfile</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">total_power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span><span class="p">,</span> <span class="n">spectrumfile</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">spectrum</span> <span class="o">==</span> <span class="s2">&quot;AM1.5d&quot;</span><span class="p">:</span>
+                <span class="c1"># DEFAULT</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">=</span> <span class="n">spectrumfile</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">total_power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span><span class="p">,</span> <span class="n">spectrumfile</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+            <span class="c1"># We interpolate the standard spectrum if we choose a different wavelength range</span>
+            <span class="k">if</span> <span class="n">wavelengths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wl</span> <span class="o">=</span> <span class="n">wavelengths</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">,</span> <span class="n">spectrumfile</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-9</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wl</span> <span class="o">=</span> <span class="n">spectrumfile</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-9</span>
+
+        <span class="k">elif</span> <span class="n">spectrum</span> <span class="o">==</span> <span class="s2">&quot;LED&quot;</span><span class="p">:</span>
+            <span class="c1"># We are using an LED type source (LED, laser, etc). We assume a gaussian profile</span>
+            <span class="c1"># The spread of the spectrum is 5xwidth on each side</span>
+            <span class="n">central_WL</span> <span class="o">=</span> <span class="n">central_WL</span> <span class="o">*</span> <span class="mf">1e-9</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">width</span> <span class="o">*</span> <span class="mf">1e-9</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="mf">1e-9</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">wl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">central_WL</span> <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="n">central_WL</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">=</span> <span class="n">power_density</span> <span class="o">*</span> <span class="n">Gauss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">,</span> <span class="n">central_WL</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-9</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e9</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We are using a custom spectrum</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wl</span> <span class="o">=</span> <span class="n">wavelengths</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">=</span> <span class="n">spectrum</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">)</span>
+
+        <span class="c1"># The above is not the actual photon flux but power density. We calculate the photon flux</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">power_density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">wl</span> <span class="o">/</span> <span class="mi">1240</span> <span class="o">/</span> <span class="n">q</span> <span class="o">*</span> <span class="mf">1e18</span>
+
+        <span class="c1"># We calculate some extra things    </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter_transmission</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">OD</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">irradiance</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span> <span class="o">=</span> <span class="mf">1e-9</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span> <span class="o">=</span> <span class="n">irradiance</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_transmission</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_current</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">output</span> <span class="o">*</span> <span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Illumination.filter"><a class="viewcode-back" href="../../../PDD/Illumination.html#solcore.poisson_drift_diffusion.Illumination.Illumination.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">OD</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a filter to be applied to the spectrum.</span>
+
+<span class="sd">        It can be either a square, long pass filter, defined by an edge wavelength (edge) and an optical density (OD)</span>
+<span class="sd">        or assuming a layer of certain thickness (thickness) made of certain solcore material (material). It can also</span>
+<span class="sd">        be provided externally as a function (func) that calculates a wavelength dependent optical density.</span>
+
+<span class="sd">        The optical density is used to calculate the transmission of the filter as:</span>
+
+<span class="sd">        .. math:: T = exp(-OD)</span>
+
+<span class="sd">        :param edge: Wavelength edge</span>
+<span class="sd">        :param OD: Optcial density above the edge</span>
+<span class="sd">        :param material: Solcore material</span>
+<span class="sd">        :param thickness: Thickness of the solcore material</span>
+<span class="sd">        :param T: Temperature</span>
+<span class="sd">        :param func: Function that takes wavelengths as input and returns the optical density at those wavelengths</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># We are using a function that provides the optical density</span>
+            <span class="k">assert</span> <span class="nb">callable</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">OD</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">edge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># DEFAULT. We are using a square filter with some &quot;nice&quot;, 10nm wide, exponential drop at the edge.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">OD</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">wl</span> <span class="o">&lt;=</span> <span class="n">edge</span><span class="p">]</span> <span class="o">=</span> <span class="n">OD</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">OD</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">wl</span> <span class="o">&gt;</span> <span class="n">edge</span><span class="p">]</span> <span class="o">=</span> <span class="n">OD</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">wl</span> <span class="o">&gt;</span> <span class="n">edge</span><span class="p">]</span> <span class="o">-</span> <span class="n">edge</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">10e-9</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">material</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># We are using a layer made of a certain material and thickness as filter</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">OD</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">)</span> <span class="o">*</span> <span class="n">thickness</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">OD</span> <span class="o">=</span> <span class="n">adachi_alpha</span><span class="o">.</span><span class="n">create_adachi_alpha</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">wl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">)</span> <span class="o">*</span> <span class="n">thickness</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Error: filter settings are empty. No filter will be used &quot;</span><span class="p">)</span>
+
+        <span class="c1"># We transform the optical density in actual absorptivity    </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter_transmission</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">OD</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Illumination.spectrum"><a class="viewcode-back" href="../../../PDD/Illumination.html#solcore.poisson_drift_diffusion.Illumination.Illumination.spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">irradiance</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the filtered spectrum optionally scaled by an irradiance.</span>
+
+<span class="sd">        :param irradiance: Irradiance multiplicative factor (in Suns).</span>
+<span class="sd">        :return: spectrum weighted by the irradiance and any filter defined previously.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">irradiance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">irradiance</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span> <span class="o">=</span> <span class="mf">1e-9</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span> <span class="o">=</span> <span class="n">irradiance</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photon_flux</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_transmission</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_current</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">output</span> <span class="o">*</span> <span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">power_density</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wl</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e9</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">irradiance</span>
+
+        <span class="k">return</span> <span class="n">output</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 4.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

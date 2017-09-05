@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>solcore.quantum_mechanics.high_level_kp_QW &mdash; Solcore 4.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '4.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Solcore 4.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 4.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.quantum_mechanics.high_level_kp_QW</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.kp_QW</span> <span class="kn">import</span> <span class="n">solve_bandstructure_QW</span>
+<span class="kn">from</span> <span class="nn">.heterostructure_alignment</span> <span class="kn">import</span> <span class="n">VBO_align</span>
+<span class="kn">from</span> <span class="nn">.structure_utilities</span> <span class="kn">import</span> <span class="n">structure_to_potentials</span>
+<span class="kn">from</span> <span class="nn">.potential_utilities</span> <span class="kn">import</span> <span class="n">potentials_to_wavefunctions_energies</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">graphics</span>
+<span class="kn">from</span> <span class="nn">solcore.absorption_calculator.absorption_QW</span> <span class="kn">import</span> <span class="n">calc_alpha</span>
+<span class="kn">from</span> <span class="nn">solcore.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
+
+<div class="viewcode-block" id="schrodinger"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.high_level_kp_QW.schrodinger">[docs]</a><span class="k">def</span> <span class="nf">schrodinger</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">plot_bands</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">kpoints</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">krange</span><span class="o">=</span><span class="mf">1e9</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">quasiconfined</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">return_qw_boolean_for_layer</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">Efield</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="s2">&quot;even&quot;</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;kp4x4&#39;</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">minimum_step_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">smallest_feature_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">filter_strength</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">periodic</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">graphtype</span><span class="o">=</span><span class="p">[],</span> <span class="n">calculate_absorption</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">alpha_params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Solves the Schrodinger equation of a 1 dimensional structure. Depending on the inputs, the method for solving</span>
+<span class="sd">    the problem is more or less sophisticated. In all cases, the output includes the band structure and effective</span>
+<span class="sd">    masses around k=0 as a function of the position, the energy levels of the QW (electrons and holes) and the</span>
+<span class="sd">    wavefunctions, although for the kp4x4 and kp6x6 modes, this is provided as a function of the k value, and therefore</span>
+<span class="sd">    there is much more information.</span>
+
+<span class="sd">    :param structure: The strucutre to solve</span>
+<span class="sd">    :param plot_bands: (False) If the bands should be plotted</span>
+<span class="sd">    :param kpoints: (30) The number of points in the k space</span>
+<span class="sd">    :param krange: (1e-9) The range in the k space</span>
+<span class="sd">    :param num_eigenvalues: (10) Maximum number of eigenvalues to calculate</span>
+<span class="sd">    :param symmetric: (True) If the structure is symmetric, in which case the calculation can be speed up</span>
+<span class="sd">    :param quasiconfined: (0.0) Energy above the band edges that an energy level can have before rejecting it</span>
+<span class="sd">    :param return_qw_boolean_for_layer: (False) Return an boolean array indicating which positions are inside the QW</span>
+<span class="sd">    :param Efield: (0) Electric field.</span>
+<span class="sd">    :param blur: (False) If the potentials and effective masses have to be blurred</span>
+<span class="sd">    :param blurmode: (&#39;even&#39;) Other values are &#39;right&#39; and &#39;left&#39;</span>
+<span class="sd">    :param mode: (&#39;kp4x4&#39;) The mode of calculating the bands and effective masses. See &#39;structure_utilities.structure_to_potentials&#39;</span>
+<span class="sd">    :param step_size: (None) The discretization step of the structure. If none, it is estimated based on the smallest feature.</span>
+<span class="sd">    :param minimum_step_size: (0) The minimum step size.</span>
+<span class="sd">    :param smallest_feature_steps: (20) The number of steps in the smallest feature</span>
+<span class="sd">    :param filter_strength: (0) If &gt; 0, defines the fraction of the wavefunction that has to be inside the QW in order to consider it &#39;confined&#39;</span>
+<span class="sd">    :param periodic: (False) If the strucuture is periodic. Affects the boundary conditions.</span>
+<span class="sd">    :param offset: (0) Energy offset used in the calculation of the energy levels in the case of the &#39;bulk&#39; solvers</span>
+<span class="sd">    :param graphtype: [] If &#39;potential&#39;, the band profile and wavefunctions are ploted</span>
+<span class="sd">    :return: A dictionary containing the band structure and wavefunctions as a function of the position and k</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">Efield</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">symmetric</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">aligned_structure</span> <span class="o">=</span> <span class="n">VBO_align</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+    <span class="n">potentials</span> <span class="o">=</span> <span class="n">structure_to_potentials</span><span class="p">(</span><span class="n">aligned_structure</span><span class="p">,</span> <span class="n">return_qw_boolean_for_layer</span><span class="o">=</span><span class="n">return_qw_boolean_for_layer</span><span class="p">,</span>
+                                         <span class="n">Efield</span><span class="o">=</span><span class="n">Efield</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="n">blur</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="n">step_size</span><span class="p">,</span>
+                                         <span class="n">minimum_step_size</span><span class="o">=</span><span class="n">minimum_step_size</span><span class="p">,</span>
+                                         <span class="n">smallest_feature_steps</span><span class="o">=</span><span class="n">smallest_feature_steps</span><span class="p">)</span>
+
+    <span class="c1"># Now that we have the potential and effective masses ready, we solve the problem.</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;kp4x4&#39;</span><span class="p">,</span> <span class="s1">&#39;kp6x6&#39;</span><span class="p">]:</span>
+        <span class="n">bands</span> <span class="o">=</span> <span class="n">solve_bandstructure_QW</span><span class="p">(</span><span class="n">potentials</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">num_eigenvalues</span><span class="p">,</span> <span class="n">kpoints</span><span class="o">=</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">krange</span><span class="o">=</span><span class="n">krange</span><span class="p">,</span>
+                                       <span class="n">symmetric</span><span class="o">=</span><span class="n">symmetric</span><span class="p">,</span> <span class="n">quasiconfined</span><span class="o">=</span><span class="n">quasiconfined</span><span class="p">,</span> <span class="n">plot_bands</span><span class="o">=</span><span class="n">plot_bands</span><span class="p">)</span>
+
+        <span class="n">result_band_edge</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span>
+            <span class="s2">&quot;potentials&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">potentials</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">potentials</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s2">&quot;Vx&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;effective_masses&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">potentials</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">potentials</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s2">&quot;mx&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;wavefunctions&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="n">key</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bands</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;psi&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">},</span>
+            <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="n">key</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bands</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;E&#39;</span><span class="p">},</span>
+        <span class="p">}</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bands</span> <span class="o">=</span> <span class="n">potentials_to_wavefunctions_energies</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="o">=</span><span class="n">num_eigenvalues</span><span class="p">,</span>
+                                                     <span class="n">filter_strength</span><span class="o">=</span><span class="n">filter_strength</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span><span class="p">,</span>
+                                                     <span class="o">**</span><span class="n">potentials</span><span class="p">)</span>
+
+        <span class="n">result_band_edge</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span>
+            <span class="s2">&quot;potentials&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">potentials</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">potentials</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s2">&quot;Vx&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;effective_masses&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">potentials</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">potentials</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s2">&quot;mx&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;wavefunctions&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bands</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;psi&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">},</span>
+            <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bands</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s2">&quot;E&quot;</span><span class="p">},</span>
+        <span class="p">}</span>
+
+    <span class="k">if</span> <span class="s2">&quot;potentials&quot;</span> <span class="ow">in</span> <span class="n">graphtype</span><span class="p">:</span>
+        <span class="n">schrodinger_plt</span> <span class="o">=</span> <span class="n">graphics</span><span class="o">.</span><span class="n">split_schrodinger_graph</span><span class="p">(</span><span class="n">result_band_edge</span><span class="p">)</span>
+        <span class="n">schrodinger_plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">calculate_absorption</span><span class="p">:</span>
+        <span class="n">result_band_edge</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calc_alpha</span><span class="p">(</span><span class="n">result_band_edge</span><span class="p">,</span> <span class="o">**</span><span class="n">alpha_params</span><span class="p">)</span>
+        <span class="n">result_band_edge</span><span class="p">[</span><span class="s2">&quot;alphaE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">result_band_edge</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">result_band_edge</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">result_band_edge</span><span class="p">,</span> <span class="n">bands</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 4.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>
