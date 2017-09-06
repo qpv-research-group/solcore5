@@ -13,6 +13,8 @@ from solcore.parameter_system import ParameterSystem
 from solcore.constants import h, c, q
 from solcore.singleton import Singleton
 from solcore.source_managed_class import SourceManagedClass
+from solcore.absorption_calculator.sopra_db import sopra_database, compounds_info
+from solcore.material_data import calculate_mobility
 
 
 class MaterialSystem(SourceManagedClass, metaclass=Singleton):
@@ -25,7 +27,7 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
         for name, path in sources.items():
             self.sources[name] = os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT))
 
-    def material(self, name):
+    def material(self, name, sopra=False):
         """ This function checks if the requested material exists and creates a class that contains its properties,
         assuming that the material does not exists in the database, yet.
 
@@ -43,35 +45,54 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
         >>> AlGaAs_1 = AlGaAs(Al=0.3)            # Instance of the class. For compounds, the variable element MUST be present
         >>> AlGaAs_2 = AlGaAs(Al=0.7, T=290)     # Different composition and T (the default is T=300K)
 
-        The material is created from the parameters in the parameter_system and the n and k data if available. If the
-        n and k data does not exists - at all or for that composition - then n=1 and k=0 at all wavelengths. Keep in
-        mind that the available n and k data is valid only at room temperature.
+        The material is created from the parameters in the parameter_system and the n and k.txt data if available. If the
+        n and k.txt data does not exists - at all or for that composition - then n=1 and k.txt=0 at all wavelengths. Keep in
+        mind that the available n and k.txt data is valid only at room temperature.
 
         :param name: Name of the material
+        :param sopra: If a SOPRA material must be used, rather than the normal database material, in case both exist.
         :return: A class of that material
         """
 
+        suffix = ''
         # First we check if the material exists. If not, some help is provided
         try:
-            ParameterSystem().database.options(name)
+            if sopra:
+                sopra_database(Material=name)
+                suffix = '_sopra'
+            else:
+                ParameterSystem().database.options(name)
         except configparser.NoSectionError:
-            valid_materials = sorted(ParameterSystem().database.sections())
-            valid_materials.remove('Immediate Calculables')
-            valid_materials.remove('Final Calculables')
-            print('\nMaterial ERROR: "{}" is not in the database. Valid materials are: '.format(name))
-            for v in valid_materials:
-                if "x" in ParameterSystem().database.options(v):
-                    x = ParameterSystem().database.get(v, 'x')
-                    print('\t {}  \tx = {}'.format(v, x))
-                else:
-                    print('\t {}'.format(v))
-            print('\nIn compounds, check that the order of the elements is the correct one (eg. GaInSb is OK but InGaSb'
-                  ' is not).')
-            sys.exit(1)
+            try:
+                sopra_database(Material=name)
+                sopra = True
+                suffix = '_sopra'
+            except:
+                valid_materials = sorted(ParameterSystem().database.sections())
+                valid_materials.remove('Immediate Calculables')
+                valid_materials.remove('Final Calculables')
+                print('\nMaterial ERROR: "{}" is not in the semiconductors database or in the SOPRA database. Valid semiconductor materials are: '.format(name))
+                for v in valid_materials:
+                    if "x" in ParameterSystem().database.options(v):
+                        x = ParameterSystem().database.get(v, 'x')
+                        print('\t {}  \tx = {}'.format(v, x))
+                    else:
+                        print('\t {}'.format(v))
+                print('\nIn compounds, check that the order of the elements is the correct one (eg. GaInSb is OK but InGaSb'
+                      ' is not).')
+                val = input('\nDo you want to see the list of available SOPRA materials (y/n)?')
+                if val in 'Yy':
+                    sopra_database.material_list()
+
+                sys.exit()
+        except solcore.absorption_calculator.sopra_db.SOPRAError:
+            pass
 
         # Then we check if the material has already been created. If not, we create it.
-        if name in self.known_materials:
-            return self.known_materials[name]
+        if name + suffix in self.known_materials:
+            return self.known_materials[name + suffix]
+        elif sopra:
+            return self.sopra_material(name)
         else:
             return self.parameterised_material(name)
 
@@ -104,12 +125,87 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
         self.known_materials[name] = SpecificMaterial
         return SpecificMaterial
 
+    def sopra_material(self, name):
+        """ Creates an optical material fromt he SOPRA database. """
+
+        try:
+            self.composition = [compounds_info.get(name, "x")]
+        except:
+            self.composition = []
+
+        class SpecificMaterial(BaseMaterial):
+            material_string = name
+            composition = self.composition
+            data = sopra_database(Material=name)
+
+            def __init__(self, T=300, **kwargs):
+                BaseMaterial.__init__(self, T=T, **kwargs)
+
+            def __getattr__(self, attrname):  # only used for unknown attributes
+                if attrname == "n":
+                    return self.n_interpolated
+                if attrname == "k":
+                    return self.k_interpolated
+
+                raise AttributeError('Parameter "{}" not available for this SOPRA material "{}".'.format(attrname, self.material_string))
+
+            @lru_cache(maxsize=1)
+            def load_n_data(self):
+                if len(self.composition) == 0:
+                    wl, n = self.data.load_n()
+                    self.n_data = np.vstack((wl*1e-9, n))
+
+            @lru_cache(maxsize=1)
+            def load_k_data(self):
+                if len(self.composition) == 0:
+                    wl, k = self.data.load_k()
+                    self.k_data = np.vstack((wl*1e-9, k))
+
+            def n_interpolated(self, x):
+                assert len(self.composition) <= 1, "Can't interpolate 2d spectra yet"
+
+                try:
+                    self.load_n_data()
+                except:
+                    print('Material "{}" has not n-data defined. Returning "ones"'.format(self.material_string))
+                    return np.ones_like(x)
+
+                if len(self.composition) == 0:
+                    y = np.interp(x, self.n_data[0], self.n_data[1])
+                else:
+                    wl, y, trash = self.data.load_composition(Lambda=x*1e9, **{self.composition[0]: self.main_fraction*100})
+
+                return y
+
+            def k_interpolated(self, x):
+                assert len(self.composition) <= 1, "Can't interpolate 2d spectra yet"
+
+                try:
+                    self.load_k_data()
+                except:
+                    print('Material "{}" has not k-data defined. Returning "ones"'.format(self.material_string))
+                    return np.ones_like(x)
+
+                if len(self.composition) == 0:
+                    y = np.interp(x, self.k_data[0], self.k_data[1])
+                else:
+                    wl, trash, y = self.data.load_composition(Lambda=x*1e9, **{self.composition[0]: self.main_fraction*100})
+
+                return y
+
+
+        SpecificMaterial.__name__ = name + '_sopra'
+
+        self.known_materials[name + '_sopra'] = SpecificMaterial
+        return SpecificMaterial
+
 
 class BaseMaterial:
     """ The solcore base material class
     """
     material_string = "Unnamed"
     composition = []
+    main_fraction = 0
     material_directory = None
     k_path = None
     n_path = None
@@ -135,9 +231,21 @@ class BaseMaterial:
         if attrname == "k":
             return self.k_interpolated
         if attrname == "electron_affinity":
-            # return 8.81197053e-19+3.8131799748e-19-self.valence_band_offset-self.band_gap
-            return (0.17 + 4.59) * q - self.valence_band_offset - self.band_gap
-            # from http://en.wikipedia.org/wiki/Anderson's_rule and GaAs values
+            try:
+                return ParameterSystem().get_parameter(self.material_string, attrname)
+            except:
+                # from http://en.wikipedia.org/wiki/Anderson's_rule and GaAs values
+                return (0.17 + 4.59) * q - self.valence_band_offset - self.band_gap
+        if attrname == "electron_mobility":
+            try:
+                return ParameterSystem().get_parameter(self.material_string, attrname)
+            except:
+                return calculate_mobility(self.material_string, False, self.Nd, self.main_fraction)
+        if attrname == "hole_mobility":
+            try:
+                return ParameterSystem().get_parameter(self.material_string, attrname)
+            except:
+                return calculate_mobility(self.material_string, True, self.Na, self.main_fraction)
 
         kwargs = {element: getattr(self, element) for element in self.composition}
         kwargs["T"] = self.T

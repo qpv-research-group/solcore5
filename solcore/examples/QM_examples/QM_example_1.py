@@ -19,12 +19,12 @@ GaAs = solcore.material("GaAs")(T=300)
 GaAsP = solcore.material("GaAsP")(P=0.3, T=300)
 InGaAs = solcore.material("InGaAs")(In=0.2, T=300)
 
-""" QM.kp_bands solve the 8x8 kp hamiltonian for all k-values in a specific direction of the reciprocal space,
-given by the effective_mass_direction. Optionally, the bands can be fitted around k=0 (the gamma point) to have an
+""" QM.kp_bands solve the 8x8 kp hamiltonian for all k.txt-values in a specific direction of the reciprocal space,
+given by the effective_mass_direction. Optionally, the bands can be fitted around k.txt=0 (the gamma point) to have an
 effective mass, affected by the strain.
 
-While the bands are calculated at all k-points in the specified direction, the output is just the band-edges
-(the energies at k=0) and effective masses, if requested.
+While the bands are calculated at all k.txt-points in the specified direction, the output is just the band-edges
+(the energies at k.txt=0) and effective masses, if requested.
 """
 bands_GaAsP = QM.kp_bands(GaAsP, GaAs, graph=False, fit_effective_mass=True, effective_mass_direction="X", return_so=True)
 bands_InGaAs = QM.kp_bands(InGaAs, GaAs, graph=False, fit_effective_mass=True, effective_mass_direction="X", return_so=True)
@@ -42,10 +42,10 @@ print('mso (m0)\t = {:.3f}\t{:.3f}'.format(bands_GaAsP[7]/m0, bands_InGaAs[7]/m0
 print()
 print()
 
-""" QM.KPbands is similar to the above but it has the option of returning the whole band (for all k-points) or only
-the band edges at k=0. The direction of the k-points is defined by two angles in the reciprocal space (t and p) and you
+""" QM.KPbands is similar to the above but it has the option of returning the whole band (for all k.txt-points) or only
+the band edges at k.txt=0. The direction of the k.txt-points is defined by two angles in the reciprocal space (t and p) and you
 (it defaults to the X direction) and you can choose to calculate just a certain fraction of that direction and not all
-the k-points untile the boundary of the Brillouin zone.
+the k.txt-points untile the boundary of the Brillouin zone.
 
 The effective masses are not calculated and therefore a separate function has to be used for that. The routine for that
 is slightly different, so the effective mases might also differ a bit from those of the QM.kp_bands.
@@ -74,7 +74,7 @@ print()
 
 """
 The last option is QM.kp8x8_bulk. This one uses KPbands to calculate the band edges and then calculates the effective
-masses by averaging the effective mass in all possible k-directions in the gamma-X-L plane. Yep, let's call this
+masses by averaging the effective mass in all possible k.txt-directions in the gamma-X-L plane. Yep, let's call this
 an "effective" effective mass.
 
 This is the method used by default when solving QWs in a bulk-like way

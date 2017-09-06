@@ -128,7 +128,7 @@ def add_materials_source(name, location):
     """ Adds a Materials source to Solcore.
 
     :param name: The name of the source.
-    :param location: The full path to the location of the source. The source must be a folder containing the n and k
+    :param location: The full path to the location of the source. The source must be a folder containing the n and k.txt
     data of the material. See the the Material System in the manual for more information.
     :return: None
     """

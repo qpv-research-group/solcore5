@@ -232,7 +232,7 @@ if __name__ == '__main__':
     # # for j in my_solar_cell.junction_indices:
     # #     plt.semilogy(V, abs(my_solar_cell(j).iv(V)))
     #
-    plt.plot(my_solar_cell.iv['IV'][0], abs(my_solar_cell.iv['IV'][1]), 'k', linewidth=2)
+    plt.plot(my_solar_cell.iv['IV'][0], abs(my_solar_cell.iv['IV'][1]), 'k.txt', linewidth=2)
     # plt.semilogy(abs(my_solar_cell.iv['Rseries IV'][0]), abs(my_solar_cell.iv['Rseries IV'][1]))
 
     # for j in range(len(my_solar_cell)):
@@ -248,7 +248,7 @@ if __name__ == '__main__':
     # # plt.contourf(wl, z, np.log(absorbed), 50, cmap='jet')
     # #
     # abs_vs_wl = np.trapz(absorbed, z * 1e-9, axis=0)
-    # plt.plot(wl, abs_vs_wl, 'k', linewidth=2)
+    # plt.plot(wl, abs_vs_wl, 'k.txt', linewidth=2)
 
     # abs_vs_z = np.trapz(absorbed, wl, axis=1)
     # plt.plot(z, abs_vs_z)

@@ -2,13 +2,22 @@ import numpy as np
 import os, sys
 import re
 from natsort import natsorted
+from configparser import ConfigParser
 from solcore.science_tracker import science_reference
 from solcore import config, SOLCORE_ROOT
 
 SOPRA_PATH = os.path.abspath(config['Others']['sopra'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
+compounds_path = os.path.join(SOPRA_PATH, "compounds.txt")
+compounds_info = ConfigParser()
+compounds_info.read(compounds_path)
+
+class SOPRAError(Exception):
+    def __init__(self, message):
+        self.message = message
+
 
 # Defining the SOPRA_DB class variable
-class SOPRA_DB:
+class sopra_database:
     """ Welcome to the SOPRA DB class for Solcore!
 
     This module gives access to the vast library of optical constant data, made freely available by the SOPRA-SA
@@ -18,7 +27,7 @@ class SOPRA_DB:
     Import the SOPRA_DB module from the solcore.material_system package and get started by selecting a material from
     the extensive list that SOPRA-SA compiled;
 
-    >>> GaAs = SOPRA_DB('GaAs')
+    >>> GaAs = sopra_database('GaAs')
 
     Once imported a number of useful methods can be called to return n, k and alpha data for the desired material.
     """
@@ -33,6 +42,7 @@ class SOPRA_DB:
         # Load in SOPRA_DB.csv database file
         DB = np.genfromtxt(os.path.join(self.__SOPRA_PATH, "SOPRA_DB_Updated.csv"), delimiter=",", dtype=str)
 
+        self.__fname = None
         for fname, symbol, range, info in DB:
 
             if re.fullmatch(Material.upper(), fname) is not None:
@@ -47,10 +57,7 @@ class SOPRA_DB:
                              "File Path": self.path}
 
         # If the material name is incorrect then the material attribute is not written to
-        try:
-            self.__fname
-
-        except AttributeError:
+        if self.__fname is None:
 
             print("SOPRA_DB :: ERROR :: Material not found in SOPRA_DB... Check materials list...")
             print("Similar Matches ::")
@@ -60,9 +67,11 @@ class SOPRA_DB:
                     print(fname)
 
             # If the exception is caught, exit the program as nothing else useful can be done...
-            sys.exit()
+            #sys.exit()
+            raise SOPRAError("Material not found in SOPRA database: {}".format(Material))
 
-    def material_list(self):
+    @staticmethod
+    def material_list():
         """ SOPRA_DB.material_list() :: Loads a list (.pdf file) of all available SOPRA materials. """
 
         print("Opening List of Available Materials in the SOPRA database")
@@ -70,7 +79,7 @@ class SOPRA_DB:
         # Need different treatment depending on computer OS.
         if sys.platform == 'darwin':
             # Find spaces in the filename and add a \ before (for unix based systems)
-            directory = self.__SOPRA_PATH.split(" ")
+            directory = SOPRA_PATH.split(" ")
 
             new_path = directory[0]
             for i in range(1, len(directory), 1):
@@ -80,7 +89,7 @@ class SOPRA_DB:
 
         elif sys.platform == 'linux':
             # Find spaces in the filename and add a \ before (for unix based systems)
-            directory = self.__SOPRA_PATH.split(" ")
+            directory = SOPRA_PATH.split(" ")
 
             new_path = directory[0]
             for i in range(1, len(directory), 1):
@@ -91,7 +100,7 @@ class SOPRA_DB:
         elif sys.platform == 'win32':
             # Find spaces in the filename and add a \ before (for unix based systems)
 
-            os.system("start " + os.path.join(self.__SOPRA_PATH, "List_Of_Files_Updated_PDF.pdf"))
+            os.system("start " + os.path.join(SOPRA_PATH, "List_Of_Files_Updated_PDF.pdf"))
 
     def load_n(self, Lambda=None):
         """ SOPRA_DB.load_n(Lambda) :: Load refractive index (n) data of the requested material.
@@ -156,14 +165,14 @@ class SOPRA_DB:
         return (Wav, ((4 * np.pi) / (Wav * 1E-9)) * k)
 
     def load_temperature(self, Lambda, T=300):
-        """ SOPRA_DB.load_temperature(T, Lambda) :: Loads n and k data for a set of materials with temperature dependent
+        """ SOPRA_DB.load_temperature(T, Lambda) :: Loads n and k.txt data for a set of materials with temperature dependent
                 data sets
             Optional argument T defaults to 300K
             Required argument Lambda specifies a wavelength range and the data is interpolated to fit. This is a
                 required argument here as not all data sets in a group are the same length (will be fixed in a
                 subsequent update).
 
-            Returns: Tuple of (Wavelength, n, k) """
+            Returns: Tuple of (Wavelength, n, k.txt) """
 
         T_degC = T - 273.15  # Convert from Kelvin to degC (units given in the data)...
 
@@ -198,7 +207,7 @@ class SOPRA_DB:
                                           skip_header=3, skip_footer=3, usecols=(2, 3, 4), unpack=True)
 
                 if Lambda is not None:
-                    # Interpolate if the Lambda argument is specified, if not pass loaded Wav, n and k...
+                    # Interpolate if the Lambda argument is specified, if not pass loaded Wav, n and k.txt...
                     n_interp = np.interp(Lambda, Wav, n)
                     k_interp = np.interp(Lambda, Wav, k)
 
@@ -257,7 +266,6 @@ class SOPRA_DB:
 
         # Navigate to the correct folder that contains temperature dependent data...
         path = os.path.join(self.__SOPRA_PATH, self.__fname + "_" + mat_fraction.upper())
-
         try:
             os.stat(path)
 

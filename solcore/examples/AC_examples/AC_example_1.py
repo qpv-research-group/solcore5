@@ -29,12 +29,12 @@ for i in range(len(e_inf)):
     plt.semilogx(x/1000, out['A'], 'r', label='A ' + label[i], ls=ls[i])
     plt.semilogx(x/1000, out['T'], 'g', label='T ' + label[i], ls=ls[i])
 
-    # And also want to know the n and k data
+    # And also want to know the n and k.txt data
     n = model.n_and_k(x)
 
     plt.figure(2)
     plt.semilogx(x/1000, np.real(n), 'b', label='n ' + label[i], ls=ls[i])
-    plt.semilogx(x/1000, np.imag(n), 'g', label='k ' + label[i], ls=ls[i])
+    plt.semilogx(x/1000, np.imag(n), 'g', label='k.txt ' + label[i], ls=ls[i])
 
 
 plt.figure(1)
@@ -45,7 +45,7 @@ plt.legend(loc=0)
 
 plt.figure(2)
 plt.xlabel('Wavelength (µm)')
-plt.ylabel('n & k')
+plt.ylabel('n & k.txt')
 plt.xlim((2, 20))
 plt.legend(loc=2)
 

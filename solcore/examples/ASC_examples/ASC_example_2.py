@@ -25,7 +25,7 @@ qe_bot = qe_result["junctions"][2]["qe_tot"]
 wl = eVnm(asUnit(E, 'eV'))[::-1]
 plt.plot(wl, qe_top[::-1], label='GaInP')
 plt.plot(wl, qe_mid[::-1], label='InGaAs')
-plt.plot(wl, qe_bot[::-1], label='Ge')
+plt.plot(wl, qe_bot[::-1], label='Levinshtein')
 plt.xlim((300, 2000))
 plt.xlabel('Wavelength (nm)')
 plt.ylabel('Quantum Efficiency (-)')

@@ -20,7 +20,7 @@ class WrongDimensionError(Exception):
 
 
 def generateConversionDictForSISuffix(suffix, centi=False, deci=False, non_base_si_factor=1):
-    prefixes = "Y,Z,E,P,T,G,M,k,,m,u,n,p,f,a,z,y".split(",")
+    prefixes = "Y,Z,E,P,T,G,M,k.txt,,m,u,n,p,f,a,z,y".split(",")
     exponents = list(range(8, -9, -1))
 
     if centi:

@@ -12,10 +12,7 @@ adachi_binaries: SOLCORE_ROOT/material_data/Adachi/binaries.txt
 adachi_compounds: SOLCORE_ROOT/material_data/Adachi/ternaries.txt
 vurgaftman_binaries: SOLCORE_ROOT/material_data/Vurgaftman/binaries.txt
 vurgaftman_compounds: SOLCORE_ROOT/material_data/Vurgaftman/ternaries.txt
-hamaker_binaries: SOLCORE_ROOT/material_data/Hamaker/binaries.txt
-hamaker_compounds: SOLCORE_ROOT/material_data/Hamaker/ternaries.txt
-Germanium: SOLCORE_ROOT/material_data/Ge/Ge.txt
-InGaAs_alternative: SOLCORE_ROOT/material_data/InGaAs_alternative/InGaAs.txt
+levinshtein_groupIV: SOLCORE_ROOT/material_data/Levinshtein/GroupIV.txt
 
 [Materials]
 GaAs: SOLCORE_ROOT/material_data/GaAs-Material
@@ -25,6 +22,7 @@ AlGaAs: SOLCORE_ROOT/material_data/AlGaAs-Material
 InGaAs: SOLCORE_ROOT/material_data/InGaAs-Material
 GaInSb: SOLCORE_ROOT/material_data/InGaSb-Materials
 Ge: SOLCORE_ROOT/material_data/Ge-Material
+Si: SOLCORE_ROOT/material_data/Si-Material
 
 [Others]
 sopra: SOLCORE_ROOT/material_data/SOPRA_DB

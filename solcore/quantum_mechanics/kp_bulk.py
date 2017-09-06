@@ -21,8 +21,8 @@ def eight_band_strain_hamiltonian(kx, ky, kz, Ev0, Ec0, exx, ezz, me_eff, gamma1
     
     See Hamiltonian in ref. but remove row 1 and 6 and column 1 and 6.
     http://prb.aps.org/pdf/PRB/v73/i12/e125348"""
-    science_reference("k.p Hamiltonian", "Stanko Tomic et al., Electronic structure of InyGa1yAs1xNxGaAs(N) quantum "
-                                         "dots by ten-band k.p theory. Phys. Rev. B 73, 125348 (2006)")
+    science_reference("k.txt.p Hamiltonian", "Stanko Tomic et al., Electronic structure of InyGa1yAs1xNxGaAs(N) quantum "
+                                         "dots by ten-band k.txt.p theory. Phys. Rev. B 73, 125348 (2006)")
 
     av = abs(
         av)  # The sign in Vurgaftmann is negative while Chuang (and Tomic) assumes it is possitve. We make sure it truly is.
@@ -258,7 +258,7 @@ def KPbands(material, host_material, return_edges_only=False, plot_result=False,
     """ New version of the above function that produces either the band edges or the full bands in one specifc direction
     from Gamma.
     
-    - Calculation of the full Brillouin zone is not allowed. After all, KP is only valid near k=0
+    - Calculation of the full Brillouin zone is not allowed. After all, KP is only valid near k.txt=0
     - The calculation of the effective masses is done externally by another function
     - The direction to calculate the bands is provided either with directory angles or a directory vector
     - The number of points of the bands and the fraction up to the border of the Brilluin zone in the given direction are also inputs
@@ -311,8 +311,8 @@ def KPbands(material, host_material, return_edges_only=False, plot_result=False,
     if plot_result:
         import matplotlib.pyplot as plt
         for i in range(1, len(output)):
-            plt.plot(output[0] * a0 / 2 / np.pi, output[i] / q, 'k')
-        plt.xlabel('k (2*pi/a)')
+            plt.plot(output[0] * a0 / 2 / np.pi, output[i] / q, 'k.txt')
+        plt.xlabel('k.txt (2*pi/a)')
         plt.ylabel('Energy (eV)')
         plt.show()
 
@@ -326,11 +326,11 @@ def fit_effective_masses(bands, material, host_material, plot_result=False, dk=0
     masses = []
     a0 = material.lattice_constant
 
-    # General maximum k value. The actual maximum value depends on the direction,
+    # General maximum k.txt value. The actual maximum value depends on the direction,
     # but the difference is generally not too big
     kmax = 2 * np.pi / a0
 
-    # We give more weight in the fit to those k points near k=0
+    # We give more weight in the fit to those k.txt points near k.txt=0
     weigth = np.exp(- bands[0] ** 2 / (dk * kmax) ** 2)
     for i in range(1, len(bands), 2):  # Bands are duplicated (at least for now) so we only fit half of them
         band = bands[i]
@@ -351,7 +351,7 @@ def fit_effective_masses(bands, material, host_material, plot_result=False, dk=0
 
         if plot_result:
             import matplotlib.pyplot as plt
-            plt.plot(bands[0] / kmax, band / q, 'k')
+            plt.plot(bands[0] / kmax, band / q, 'k.txt')
             plt.plot(bands[0] / kmax, fit / q, 'r')
 
     if a0 < host_material.lattice_constant:
@@ -360,7 +360,7 @@ def fit_effective_masses(bands, material, host_material, plot_result=False, dk=0
         masses[1], masses[2] = masses[2], masses[1]
 
     if plot_result:
-        plt.xlabel('k (2*pi/a)')
+        plt.xlabel('k.txt (2*pi/a)')
         plt.ylabel('Energy (eV)')
         plt.ylim(-2, 2)
         plt.show()
@@ -377,7 +377,7 @@ def average_inplane_effective_mass(material, host_material, averaging_points=10,
     """ Calculates the average in-plane effective mass for the four bands, assuming always the XY plane. """
 
     # p = phi = Polar angle, always constant for the XY plane
-    # t = theta = Azimuth. Given the symmetry of the problem, we need to average only 45˚ of the k space
+    # t = theta = Azimuth. Given the symmetry of the problem, we need to average only 45˚ of the k.txt space
     p = np.pi / 2
     t = np.linspace(0, np.pi / 4, averaging_points)
 

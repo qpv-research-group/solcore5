@@ -65,12 +65,12 @@ mid_cell_p_material.electron_minority_carrier_diffusion_length = si("5um")
 all_materials.append(mid_cell_n_material)
 all_materials.append(mid_cell_p_material)
 
-# BOTTOM CELL - Ge
+# BOTTOM CELL - Levinshtein
 # Idem
-Ge = material("Ge")
+Ge = material("Levinshtein")
 bot_cell_n_material = Ge(Nd=siUnits(2e18, "cm-3"), role="n")
 bot_cell_p_material = Ge(Na=siUnits(1e17, "cm-3"), role="p")
-Ge_alpha = np.loadtxt(this_dir_file("Ge-Palik.csv"), unpack=True, delimiter=",")
+Ge_alpha = np.loadtxt(this_dir_file("Levinshtein-Palik.csv"), unpack=True, delimiter=",")
 Ge.alphaE = interp1d(x=siUnits(Ge_alpha[0], 'eV'), y=Ge_alpha[1])
 bot_cell_n_material.hole_minority_carrier_diffusion_length = si("800nm")
 bot_cell_p_material.electron_minority_carrier_diffusion_length = si("50um")

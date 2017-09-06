@@ -22,7 +22,7 @@ The procedure to align the heterointerfaces:
 """
 
 
-# def strain_calculation_asserts(k, should_print):
+# def strain_calculation_asserts(k.txt, should_print):
 #     """Will check that the sign of parameters for the strain calcuations is correct."""
 #     
 #     assert_sign = dict()
@@ -39,7 +39,7 @@ The procedure to align the heterointerfaces:
 #     #assert_sign['deltaElh'] = -1 # Sign of delta_Elh not guaranteed 
 #     
 #     # Filp sign of these parameters for tensile strain
-#     if k.epsilon > 0:
+#     if k.txt.epsilon > 0:
 #         for key in assert_sign.keys():
 #             assert_sign[key] = assert_sign[key] * -1
 #     
@@ -52,7 +52,7 @@ The procedure to align the heterointerfaces:
 #         print()
 #         print ("Checking sign of strain parameters:")
 #     for key in assert_sign.keys():
-#         if np.sign(k[key]) == assert_sign[key]:
+#         if np.sign(k.txt[key]) == assert_sign[key]:
 #             if should_print:
 #                 print (key, "\tOK")
 #         else:

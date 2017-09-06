@@ -13,14 +13,14 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
                 periodic=False, offset=0, graphtype=[], calculate_absorption=False, alpha_params=None):
     """ Solves the Schrodinger equation of a 1 dimensional structure. Depending on the inputs, the method for solving
     the problem is more or less sophisticated. In all cases, the output includes the band structure and effective
-    masses around k=0 as a function of the position, the energy levels of the QW (electrons and holes) and the
-    wavefunctions, although for the kp4x4 and kp6x6 modes, this is provided as a function of the k value, and therefore
+    masses around k.txt=0 as a function of the position, the energy levels of the QW (electrons and holes) and the
+    wavefunctions, although for the kp4x4 and kp6x6 modes, this is provided as a function of the k.txt value, and therefore
     there is much more information.
 
     :param structure: The strucutre to solve
     :param plot_bands: (False) If the bands should be plotted
-    :param kpoints: (30) The number of points in the k space
-    :param krange: (1e-9) The range in the k space
+    :param kpoints: (30) The number of points in the k.txt space
+    :param krange: (1e-9) The range in the k.txt space
     :param num_eigenvalues: (10) Maximum number of eigenvalues to calculate
     :param symmetric: (True) If the structure is symmetric, in which case the calculation can be speed up
     :param quasiconfined: (0.0) Energy above the band edges that an energy level can have before rejecting it
@@ -36,7 +36,7 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
     :param periodic: (False) If the strucuture is periodic. Affects the boundary conditions.
     :param offset: (0) Energy offset used in the calculation of the energy levels in the case of the 'bulk' solvers
     :param graphtype: [] If 'potential', the band profile and wavefunctions are ploted
-    :return: A dictionary containing the band structure and wavefunctions as a function of the position and k
+    :return: A dictionary containing the band structure and wavefunctions as a function of the position and k.txt
     """
 
     if Efield != 0:

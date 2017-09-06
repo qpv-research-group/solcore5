@@ -522,11 +522,11 @@ def calculate_J02_from_rad_eff(J01, radiative_efficiency, V, T, R_shunt=1e15):
 #     return J02
 #
 #
-# def calculate_j02_from_J01_Jsc_reference_radiative_efficiency(J01, Jsc_ref, radiative_efficiency, T):
-#     Voc_reference = (kb * T / q) * np.log((Jsc_ref * radiative_efficiency / J01) + 1)
-#     J02 = (Jsc_ref - (radiative_efficiency * Jsc_ref)) / (np.exp(q * Voc_reference / (2 * kb * T)) - 1)
-#
-#     return J02
+def calculate_j02_from_J01_Jsc_reference_radiative_efficiency(J01, Jsc_ref, radiative_efficiency, T):
+    Voc_reference = (kb * T / q) * np.log((Jsc_ref * radiative_efficiency / J01) + 1)
+    J02 = (Jsc_ref - (radiative_efficiency * Jsc_ref)) / (np.exp(q * Voc_reference / (2 * kb * T)) - 1)
+
+    return J02
 
 
 def update_j0(junctions, T, Tref):

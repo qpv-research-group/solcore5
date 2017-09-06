@@ -132,10 +132,10 @@ class TestAbsorption(TestCase):
             self.assertAlmostEqual(data[i], n[i])
 
     def test_46_sopra_absorption(self):
-        from solcore.absorption_calculator import SOPRA_DB
+        from solcore.absorption_calculator import sopra_database
 
         # Import material constant data for Gallium Arsenide :: Do this by placing the material name as the sole argument...
-        SOPRA_Material = SOPRA_DB("GaAs")
+        SOPRA_Material = sopra_database("GaAs")
 
         # Can also load alpha data...
         GaAs_alpha = SOPRA_Material.load_alpha()

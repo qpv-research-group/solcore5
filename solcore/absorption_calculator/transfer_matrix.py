@@ -15,22 +15,22 @@ class OptiStack(object):
     """ Class that contains an optical structure: a sequence of layers with a thickness and a complex refractive index.
 
     It serves as an intermediate step between solcore layers and materials and the stack of thicknesses and
-    and n and k values necessary to run calculations involving TMM. When creating an OptiStack object, the thicknesses
+    and n and k.txt values necessary to run calculations involving TMM. When creating an OptiStack object, the thicknesses
     of all the layers forming the Solcore structure and the optical data of the materials of the layers are extracted
     and arranged in such a way they can be easily and fastly read by the TMM functions.
 
     In addition to a solcore structure with Layers, it can also take a list where each element represent a layer
-    written as a list and contains the layer thickness and the dielectrical model, the raw n and k data as a function
+    written as a list and contains the layer thickness and the dielectrical model, the raw n and k.txt data as a function
     of wavelengths, or a whole Device structure as the type used in the PDD model.
 
     In summary, this class acepts:
 
         - A solcore structure with layers
         - A list where each element is [thickness, DielectricModel]
-        - A list where each element is [thickness, wavelength, n, k]
+        - A list where each element is [thickness, wavelength, n, k.txt]
         - A list mixing the above:
             [ [thickness, DielectricModel],
-              [thickness, wavelength, n, k],
+              [thickness, wavelength, n, k.txt],
               solcore.Layer,
               solcore.Layer ]
 
@@ -40,7 +40,7 @@ class OptiStack(object):
     Yet anther way of defining the layers mixes experimental data with a DielectricModel within the same layer but in
     spectrally distinct regions. The syntaxis for the layer is:
 
-    layer = [thickness, wavelength, n, k, DielectricModel, mixing]
+    layer = [thickness, wavelength, n, k.txt, DielectricModel, mixing]
 
     where mixing is a list containing three elements: [the mixing point (nm), the mixing width (nm),  zero or one]
     depending if the mixing function should be increasing with the wavelength or decreasing. If increasing (zero), the
@@ -58,7 +58,7 @@ class OptiStack(object):
         supressed, usefull for ellipsometry calculations. This is done by creating an artificial highly absorbing but
         not reflecting layer just at the back.
 
-        Alternativelly, it can take simply a list of [thickness, DielectricModel] or [thickness, wavelength, n, k] for
+        Alternativelly, it can take simply a list of [thickness, DielectricModel] or [thickness, wavelength, n, k.txt] for
         each layer accounting for the refractive index of the layers. The three options can be mixed for maximum
         flexibility.
 
@@ -109,21 +109,21 @@ class OptiStack(object):
             return [np.inf] + self.widths + [np.inf]
 
     def _k_absorbing(self, wl):
-        """ k value of the back highly absorbing layer. It is the maximum between the bottom layer of the stack or a
+        """ k.txt value of the back highly absorbing layer. It is the maximum between the bottom layer of the stack or a
         finite, small value that will absorb all light within the absorbing layer thickness.
 
         :param wl: Wavelength of the light in nm.
-        :return: The k value at each wavelength.
+        :return: The k.txt value at each wavelength.
         """
         return max(wl / 1e-3, self.k_data[-1](wl))
 
     @staticmethod
     def _k_dummy(wl):
-        """ Dummy k value to be used with the dielectric model, which produces the refractive index as a complex
+        """ Dummy k.txt value to be used with the dielectric model, which produces the refractive index as a complex
         number.
 
         :param wl: Wavelength of the light in nm.
-        :return: The k value at each wavelength... set to zero.
+        :return: The k.txt value at each wavelength... set to zero.
         """
         return 0.
 
@@ -187,7 +187,7 @@ class OptiStack(object):
         self.k_data[idx1], self.k_data[idx2] = self.k_data[idx2], self.k_data[idx1]
 
     def _add_solcore_layer(self, layer):
-        """ Adds a Solcore layer to the end (bottom) of the stack, extracting its thickness and n and k data.
+        """ Adds a Solcore layer to the end (bottom) of the stack, extracting its thickness and n and k.txt data.
 
         :param layer: The Solcore layer
         :return: None
@@ -211,9 +211,9 @@ class OptiStack(object):
 
     def _add_raw_nk_layer(self, layer):
         """ Adds a layer to the end (bottom) of the stack. The layer must be defined as a list containing the layer
-        thickness in nm, the wavelength, the n and the k data as array-like objects.
+        thickness in nm, the wavelength, the n and the k.txt data as array-like objects.
 
-        :param layer: The new layer to add as [thickness, wavelength, n, k]
+        :param layer: The new layer to add as [thickness, wavelength, n, k.txt]
         :return: None
         """
         # We make sure that the wavelengths are increasing, revering the arrays otherwise.
@@ -449,7 +449,7 @@ if __name__ == '__main__':
     # for i, absorption in enumerate(out['absorption'][:]):
     #     A[i] = np.trapz(absorption, out['position'])
     #
-    # plt.plot(wavelength, A, 'k', label='Integrated Abs')
+    # plt.plot(wavelength, A, 'k.txt', label='Integrated Abs')
 
     #
     # plt.contourf(out['position'], wavelength, out['absorption'], 200)

@@ -131,7 +131,7 @@ if __name__ == "__main__":
     plt.yscale("log")
     nm = np.linspace(200, 1000, 1000)
     for k in data.keys():
-        # print (data[k][0]*1e9, data[k][1])
+        # print (data[k.txt][0]*1e9, data[k.txt][1])
         plt.plot(data[k][0] * 1e9, data[k][1], label=str(k), color="grey")
 
     resultx, resulty, crit = critical_point_interpolate(data, critical_points, 0, nm * 1e-9)

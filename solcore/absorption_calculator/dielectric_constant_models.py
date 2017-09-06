@@ -435,6 +435,6 @@ if __name__ == '__main__':
     n = model.n_and_k(E)
     #
     plt.semilogx(E, np.real(n), 'b', label='n')
-    plt.semilogx(E, np.imag(n), 'r', label='k')
+    plt.semilogx(E, np.imag(n), 'r', label='k.txt')
     plt.legend()
     plt.show()
