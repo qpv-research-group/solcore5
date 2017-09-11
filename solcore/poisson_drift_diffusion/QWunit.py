@@ -253,7 +253,7 @@ class QWunit(Structure):
                     self[index].material.absorption = \
                         adachi_alpha.create_adachi_alpha(SolcoreMaterialToStr(self[index].material), T=self.T,
                                                          wl=self.wl)[
-                            3]  # 0 = Energy, 1 = n, 2 = k.txt, 3 = Absorption
+                            3]  # 0 = Energy, 1 = n, 2 = k, 3 = Absorption
 
             # self[index].material.absorption[ edge_index: ] = 0
             if self.labels[index] is "well":

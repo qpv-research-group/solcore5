@@ -1,26 +1,27 @@
-from .kp_QW import solve_bandstructure_QW
-from .heterostructure_alignment import VBO_align
-from .structure_utilities import structure_to_potentials
-from .potential_utilities import potentials_to_wavefunctions_energies
-from . import graphics
+from solcore.quantum_mechanics.kp_QW import solve_bandstructure_QW
+from solcore.quantum_mechanics.heterostructure_alignment import VBO_align
+from solcore.quantum_mechanics.structure_utilities import structure_to_potentials
+from solcore.quantum_mechanics.potential_utilities import potentials_to_wavefunctions_energies
+from solcore.quantum_mechanics import graphics
 from solcore.absorption_calculator.absorption_QW import calc_alpha
 from solcore.interpolate import interp1d
+from solcore.constants import q, vacuum_permittivity
 
 
 def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenvalues=10, symmetric=True,
                 quasiconfined=0.0, return_qw_boolean_for_layer=False, Efield=0, blur=False, blurmode="even",
-                mode='kp4x4', step_size=None, minimum_step_size=0, smallest_feature_steps=20, filter_strength=0,
+                mode='kp8x8_bulk', step_size=None, minimum_step_size=0, smallest_feature_steps=20, filter_strength=0,
                 periodic=False, offset=0, graphtype=[], calculate_absorption=False, alpha_params=None):
     """ Solves the Schrodinger equation of a 1 dimensional structure. Depending on the inputs, the method for solving
     the problem is more or less sophisticated. In all cases, the output includes the band structure and effective
-    masses around k.txt=0 as a function of the position, the energy levels of the QW (electrons and holes) and the
-    wavefunctions, although for the kp4x4 and kp6x6 modes, this is provided as a function of the k.txt value, and therefore
+    masses around k=0 as a function of the position, the energy levels of the QW (electrons and holes) and the
+    wavefunctions, although for the kp4x4 and kp6x6 modes, this is provided as a function of the k value, and therefore
     there is much more information.
 
     :param structure: The strucutre to solve
     :param plot_bands: (False) If the bands should be plotted
     :param kpoints: (30) The number of points in the k.txt space
-    :param krange: (1e-9) The range in the k.txt space
+    :param krange: (1e-9) The range in the k space
     :param num_eigenvalues: (10) Maximum number of eigenvalues to calculate
     :param symmetric: (True) If the structure is symmetric, in which case the calculation can be speed up
     :param quasiconfined: (0.0) Energy above the band edges that an energy level can have before rejecting it
@@ -36,7 +37,7 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
     :param periodic: (False) If the strucuture is periodic. Affects the boundary conditions.
     :param offset: (0) Energy offset used in the calculation of the energy levels in the case of the 'bulk' solvers
     :param graphtype: [] If 'potential', the band profile and wavefunctions are ploted
-    :return: A dictionary containing the band structure and wavefunctions as a function of the position and k.txt
+    :return: A dictionary containing the band structure and wavefunctions as a function of the position and k
     """
 
     if Efield != 0:
@@ -64,7 +65,7 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
     else:
         bands = potentials_to_wavefunctions_energies(structure=structure, num_eigenvalues=num_eigenvalues,
                                                      filter_strength=filter_strength, offset=offset, periodic=periodic,
-                                                     **potentials)
+                                                     quasiconfined=quasiconfined, **potentials)
 
         result_band_edge = {
             "x": bands['x'],
@@ -83,3 +84,65 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
         result_band_edge["alphaE"] = interp1d(x=result_band_edge["alpha"][0], y=result_band_edge["alpha"][1])
 
     return result_band_edge, bands
+
+
+if __name__ == "__main__":
+    from solcore import si, material
+    from solcore.structure import Layer, Structure
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    bulk = material("GaAs")(T=293)
+    barrier = material("GaAsP")(T=293, P=0.1)
+
+    bulk.strained = False
+    barrier.strained = True
+
+    top_layer = Layer(width=si("30nm"), material=bulk)
+    inter = Layer(width=si("3nm"), material=bulk)
+    barrier_layer = Layer(width=si("15nm"), material=barrier)
+    bottom_layer = top_layer
+
+    E = np.linspace(1.15, 1.5, 300) * q
+    alfas = np.zeros((len(E), 6))
+
+    alfas[:, 0] = E/q
+
+    alpha_params = {
+        "well_width": si("7.2nm"),
+        "theta": 0,
+        "eps": 12.9 * vacuum_permittivity,
+        "espace": E,
+        "hwhm": si("6meV"),
+        "dimensionality": 0.16,
+        "line_shape": "Gauss"
+    }
+
+    for j, i in enumerate([0.05, 0.1, 0.15, 0.2, 0.25]):
+        QW = material("InGaAs")(T=293, In=i)
+        QW.strained = True
+        well_layer = Layer(width=si("7.2nm"), material=QW)
+
+        # test_structure = Structure([top_layer, barrier_layer, inter] + 1 * [well_layer, inter, barrier_layer, inter] +
+        #                            [bottom_layer])
+
+        test_structure = Structure([barrier_layer, inter] + 1 * [well_layer, inter] +
+                                   [barrier_layer])
+
+        # test_structure = Structure([top_layer, barrier_layer] + 10 * [well_layer, barrier_layer] +
+        #                            [bottom_layer])
+
+        test_structure.substrate = bulk
+
+
+        output = schrodinger(test_structure, quasiconfined=0,
+                             num_eigenvalues=10, alpha_params=alpha_params, calculate_absorption=True)
+
+        alfa = output[0]['alphaE'](E)
+        plt.plot(E/q, alfa)
+        alfas[:, j+1] = alfa/100
+
+    import os
+    root = os.path.expanduser('~')
+    # np.savetxt(root+'/abs.txt', alfas)
+    plt.show()

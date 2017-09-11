@@ -6,8 +6,8 @@ import numpy as np
 from solcore.constants import *
 from solcore.smooth import smooth
 from solcore.structure import *
-from .heterostructure_alignment import VBO_align
-from .strain import strain_calculation_parameters
+from solcore.quantum_mechanics.heterostructure_alignment import VBO_align
+from solcore.quantum_mechanics.strain import strain_calculation_parameters
 
 from solcore.quantum_mechanics.kp_QW import kp6x6, kp4x4
 from solcore.quantum_mechanics.kp_bulk import kp8x8_bulk
@@ -281,7 +281,8 @@ def structure_to_potentials(structure, step_size=None, minimum_step_size=0, smal
 
 
 if __name__ == "__main__":
-    from solcore import si, Layer, material
+    from solcore import si, material
+    from solcore.structure import Layer
     import matplotlib.pyplot as plt
 
     bulk = material("GaAs")(T=293)
@@ -310,13 +311,13 @@ if __name__ == "__main__":
     test_structure.substrate = bulk
 
     VBO_align(test_structure)
-    result = structure_to_potentials(test_structure, mode=True)
+    result = structure_to_potentials(test_structure, mode='kp8x8_bulk')
     print(test_structure)
 
-    #    plt.plot(result['x']*1e9, result['Ve']/q, result['x']*1e9, result['Vhh']/q, result['x']*1e9, result['Vlh']/q, result['x']*1e9, result['Vso']/q)
+    # plt.plot(result['x']*1e9, result['Ve']/q, result['x']*1e9, result['Vhh']/q, result['x']*1e9, result['Vlh']/q, result['x']*1e9, result['Vso']/q)
     #    plt.ylim(-1.5, 1.0)
-    #    plt.plot(result['x']*1e9, result['me']/m0, result['x']*1e9, result['mhh_p']/m0, result['x']*1e9, result['mlh_p']/m0)
-    plt.plot(result['x'] * 1e9, result['me'] / m0, result['x'] * 1e9, result['mhh_t'] / m0, result['x'] * 1e9,
-             result['mlh_t'] / m0)
+    # plt.plot(result['x']*1e9, result['me']/m0, result['x']*1e9, result['mhh_p']/m0, result['x']*1e9, result['mlh_p']/m0)
+    # plt.plot(result['x'] * 1e9, result['me'] / m0, result['x'] * 1e9, result['mhh_t'] / m0, result['x'] * 1e9,
+    #          result['mlh_t'] / m0)
 
     plt.show()

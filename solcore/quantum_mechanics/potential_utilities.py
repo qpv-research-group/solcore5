@@ -108,7 +108,7 @@ def schroedinger_solve(x, V, m, num_eigenvalues=10, periodic=False, offset=0, el
 
 
 def __potentials_to_wavefunctions_energies_internal(x, Ve, me, Vhh, mhh, Vlh, mlh, num_eigenvalues=10, periodic=False,
-                                                    offset=0, filter_strength=0, structure=None):
+                                                    offset=0, filter_strength=0, structure=None, quasiconfined=0):
     """Returns normalised wavefuctions from the potential profile.
 
     Arguments:
@@ -139,7 +139,25 @@ def __potentials_to_wavefunctions_energies_internal(x, Ve, me, Vhh, mhh, Vlh, ml
         Ehh, psi_hh = discard_unconfined(x, structure, Ehh, psi_hh, filter_strength)
         Elh, psi_lh = discard_unconfined(x, structure, Elh, psi_lh, filter_strength)
 
+    Ee, psi_e = discard_unconfined_energy(Ee, psi_e, Ve, quasiconfined)
+    Ehh, psi_hh = discard_unconfined_energy(Ehh, psi_hh, Vhh, quasiconfined)
+    Elh, psi_lh = discard_unconfined_energy(Elh, psi_lh, Vlh, quasiconfined)
+
     return x, Ee, psi_e, Ehh, psi_hh, Elh, psi_lh
+
+
+def discard_unconfined_energy(E, psi, V, quasiconfined):
+    before = len(E)
+    maxE = min(abs(V[0]), max(abs(V)) + quasiconfined)
+    try:
+        E, psi = zip(*[(E_i, psi_i)
+                       for (E_i, psi_i) in zip(E, psi)
+                       if abs(E_i) <= maxE])
+    except ValueError as exception:
+        print("Warning: wavefunction filter removed all states for this band, try reducing the filter strength.")
+        return ([], [])
+    print("Wavefunction filter removed %d state%s." % (before - len(E), "" if (before - len(E)) == 1 else "s"))
+    return E, psi
 
 
 def discard_unconfined(x, structure, E, psi, threshold=0.8):
@@ -165,11 +183,12 @@ def discard_unconfined(x, structure, E, psi, threshold=0.8):
 
 
 def potentials_to_wavefunctions_energies(x, Ve, me, Vhh, mhh, Vlh, mlh, num_eigenvalues=10, periodic=False, offset=0,
-                                         filter_strength=0, structure=None, **kwargs):
+                                         filter_strength=0, structure=None, quasiconfined=0, **kwargs):
     x, Ee, psi_e, Ehh, psi_hh, Elh, psi_lh = __potentials_to_wavefunctions_energies_internal(x, Ve, me, Vhh, mhh, Vlh,
                                                                                              mlh, num_eigenvalues,
                                                                                              periodic, offset,
-                                                                                             filter_strength, structure)
+                                                                                             filter_strength, structure,
+                                                                                             quasiconfined)
     return {
         "x": x,
         "Ee": Ee,

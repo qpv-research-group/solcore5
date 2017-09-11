@@ -21,7 +21,7 @@ def eight_band_strain_hamiltonian(kx, ky, kz, Ev0, Ec0, exx, ezz, me_eff, gamma1
     
     See Hamiltonian in ref. but remove row 1 and 6 and column 1 and 6.
     http://prb.aps.org/pdf/PRB/v73/i12/e125348"""
-    science_reference("k.txt.p Hamiltonian", "Stanko Tomic et al., Electronic structure of InyGa1yAs1xNxGaAs(N) quantum "
+    science_reference("k.p Hamiltonian", "Stanko Tomic et al., Electronic structure of InyGa1yAs1xNxGaAs(N) quantum "
                                          "dots by ten-band k.txt.p theory. Phys. Rev. B 73, 125348 (2006)")
 
     av = abs(
@@ -235,8 +235,7 @@ def kp_bands(material, host_material, kx=0, ky=0, kz=0, return_so=False, graph=F
                                    alpha=0.7))
 
             g.append(GraphData(x_graph, np.array(b) / electron_charge, color="black"))
-        a = Graph(g, xticks=ticks, xticklabels=labels, ylabel="$E$ (eV)", palette="hue wheel",
-                  title="8 Band Luttinger-Kohn with Pikus-Bir material strained", ylim=(-2, 1))
+        a = Graph(g, xticks=ticks, xticklabels=labels, ylabel="$E$ (eV)", xlabel="$k$", palette="hue wheel", ylim=(-2, 1))
         # a = Graph(g, xticks = xticks, ylabel="$E$ (eV)", palette="hue wheel", ylim = (-2,1))
         # a = Graph(g,  ylabel="$E$ (eV)", palette="hue wheel", title="{} on {} -- Luttinger-Kohn w/Pikus-Bir(Stanko)".format(str(material), str(host_material)), ylim = (-2,1))
         a.draw()
@@ -311,8 +310,8 @@ def KPbands(material, host_material, return_edges_only=False, plot_result=False,
     if plot_result:
         import matplotlib.pyplot as plt
         for i in range(1, len(output)):
-            plt.plot(output[0] * a0 / 2 / np.pi, output[i] / q, 'k.txt')
-        plt.xlabel('k.txt (2*pi/a)')
+            plt.plot(output[0] * a0 / 2 / np.pi, output[i] / q, 'k')
+        plt.xlabel('k (2*pi/a)')
         plt.ylabel('Energy (eV)')
         plt.show()
 
@@ -420,13 +419,13 @@ if __name__ == "__main__":
     # Material parameters
     GaAs = solcore.material("GaAs")(T=300)
     InGaAs2 = solcore.material("InGaAs")(In=0.28, T=300)
-    InGaAs3 = solcore.material("InGaAs")(In=0.2, T=300)
-    GaAsP = solcore.material("GaAsP")(P=0.1, T=300)
+    InGaAs3 = solcore.material("GaInAs")(In=0.2, T=300)
+    GaAsP = solcore.material("GaInP")(In=0.7, T=300)
 
-    bands = kp_bands(GaAs, GaAsP, kx=0, ky=0, kz=0, graph=True, fit_effective_mass=True, effective_mass_direction="L",
+    bands = kp_bands(GaAs, InGaAs3, kx=0, ky=0, kz=0, graph=True, fit_effective_mass=True, effective_mass_direction="L",
                      return_so=True)
 
-    bands = KPbands(GaAs, GaAsP, fraction=0.2, plot_result=False)
-    result = fit_effective_masses(bands, GaAs, GaAsP, plot_result=False)
-
-    print(result)
+    # bands = KPbands(GaAs, GaAsP, fraction=0.2, plot_result=False)
+    # result = fit_effective_masses(bands, GaAs, GaAsP, plot_result=False)
+    #
+    # print(result)

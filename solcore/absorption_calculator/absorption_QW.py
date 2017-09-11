@@ -201,8 +201,8 @@ def alpha_exciton_elh_TE(exciton_index, E, z, E_e, E_lh, psi_e, psi_lh, well_wid
         shape = Gauss(E, Et + En, hwhm)
     else:
         shape = L(E, Et + En, hwhm)
-    # NOTE TO MARKUS: It seems that there was a factor 2 missing in the oscilator strength as well as the exciton index. 
-    # See: P C Klipstein and N Apsley 1986 J. Phys. C: Solid State Phys. 19 6461 doi:10.1088/0022-3719/19/32/020 
+    # NOTE TO MARKUS: It seems that there was a factor 2 missing in the oscilator strength as well as the exciton index.
+    # See: P C Klipstein and N Apsley 1986 J. Phys. C: Solid State Phys. 19 6461 doi:10.1088/0022-3719/19/32/020
     oscillator_strength = (2 * Ry_eff / (exciton_index - dimensionality) ** 3)
     return C0 * Ieh * Mbsq_2D * DOS_2D * oscillator_strength * shape
 

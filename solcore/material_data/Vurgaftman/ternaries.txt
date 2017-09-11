@@ -45,6 +45,23 @@ F=1.77
 valence_band_offset=-0.38 eV
 a_c=2.61 eV
 
+[InGaAs]
+parent0=GaAs
+parent1=InAs
+x=In
+Eg_Gamma=0.477 eV
+Eg_X=1.4 eV
+Eg_L=0.33 eV
+spin_orbit_splitting=0.15 eV
+eff_mass_electron_Gamma=0.0091
+eff_mass_hh_001=-0.145
+eff_mass_lh_001=0.202
+gamma3_minus_gamma1=0.481
+interband_matrix_element=-1.48 eV
+F=1.77
+valence_band_offset=-0.38 eV
+a_c=2.61 eV
+
 [GaInSb]
 parent0=GaSb
 parent1=InSb
