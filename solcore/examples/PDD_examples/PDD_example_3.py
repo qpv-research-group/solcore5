@@ -13,7 +13,7 @@ full_path = os.path.join(this_dir, my_file)
 MyDevice = PDD.Load(full_path)
 
 # We use the default settings of the solver to calculate the dark IV.
-IV = PDD.IV(MyDevice, vfin=1.2, vstep=0.05)
+IV = PDD._IV(MyDevice, vfin=1.2, vstep=0.05)
 
 # Finally, we plot the different components of the dark current using the information stored in the output dictionaries
 plt.semilogy(IV['IV']['V'], IV['IV']['J'], 'o', label='Jtot')

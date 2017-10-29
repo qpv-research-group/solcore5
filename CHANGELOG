@@ -1,3 +1,11 @@
+**New in Solcore 5.0.0**
+- A new SolarCell class has been implemented to create solar cell structures, including not only the junctions but also optical layers.
+- All solar cell solvers have been re-written in order to use a common interface - the SolarCell class.
+- The calculation of the optical properties of a solar cell has been externalized. Added a transfer matrix algorithm and an interface for the S4 RCWA package.
+- Materials in the SOPRA database can now ve imported as normal Solcore materials.
+- Added the Modified_CPPB module to the absorption_calculator package.
+- The Solcore materials now use, automatically, the mobility calculator if available for that material.
+
 **New in Solcore 4.2.0.dev.3**
 - Mobility calculator and data moved to the material_data package
 

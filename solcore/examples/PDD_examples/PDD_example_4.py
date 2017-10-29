@@ -13,8 +13,8 @@ full_path = os.path.join(this_dir, my_file)
 MyDevice = PDD.Load(full_path)
 
 # We use the default settings of the solver to calculate the light IV.
-IV = PDD.IV(MyDevice, vfin=1.2, vstep=0.05, light=True)
-IVrs = PDD.IV(MyDevice, vfin=1.2, vstep=0.05, light=True, rs=0.001)
+IV = PDD._IV(MyDevice, vfin=1.2, vstep=0.05, light=True)
+IVrs = PDD._IV(MyDevice, vfin=1.2, vstep=0.05, light=True, rs=0.001)
 
 # Finally, we plot the two curves
 plt.plot(IV['IV']['V'], -IV['IV']['J'], label='Rs = 0 Ohm m2')

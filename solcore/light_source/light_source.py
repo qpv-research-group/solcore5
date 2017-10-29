@@ -467,34 +467,10 @@ class LightSource:
 
 
 if __name__ == '__main__':
-    from datetime import datetime
-
-    # wl = np.linspace(300, 3000, 200)
-    #
-    # # b = LightSource(source_type='SMARTS', x=wl)
-    # #
-    # # for h in range(7, 19):
-    # #     plt.plot(wl, b.spectrum(HOUR=h))
-    #
-    # # b.update(version='AM1.5g')
-    # b = LightSource(source_type='standard', x=wl, version='AM1.5g', output_units='photon_flux_per_nm')
-    #
-    # x = wl
-    # y = b.spectrum()
-    #
-    # d = LightSource(source_type='custom', x_data=x, y_data=y, input_units='photon_flux_per_nm')
-    #
-    # #
-    # # b.update(version='AM1.5d')
-    # wl2 = np.linspace(300, 1000, 200)
-    #
-    # plt.plot(wl2, d.spectrum(x=wl2, output_units='power_density_per_nm'), 'o')
-    # plt.plot(wl, b.spectrum(output_units='power_density_per_nm'), 'k.txt')
-    # plt.plot(x, y, 'k.txt')
-    #
-    #
 
     import numpy as np
+
+    plt.figure(figsize=(6, 4.5))
 
     # The wavelength range of the spectra
     wl = np.linspace(300, 3000, 200)
@@ -505,17 +481,17 @@ if __name__ == '__main__':
     smarts = LightSource(source_type='SMARTS', x=wl)
     spectral = LightSource(source_type='SPECTRAL2', x=wl)
 
-    plt.plot(*gauss.spectrum(), 'k.txt', label='Gauss')
-    plt.plot(*bb.spectrum(), 'g', label='Black body')
-    plt.plot(*am15g.spectrum(), 'b', label='AM1.5G')
-    plt.plot(*smarts.spectrum(), 'r', label='SMARTS')
-    plt.plot(*spectral.spectrum(), 'm', label='SPECTRAL2')
+    plt.plot(*gauss.spectrum(), label='Gauss')
+    plt.plot(*bb.spectrum(),  label='Black body')
+    plt.plot(*am15g.spectrum(),  label='AM1.5G')
+    plt.plot(*smarts.spectrum(),  label='SMARTS')
+    plt.plot(*spectral.spectrum(),  label='SPECTRAL2')
 
     plt.xlim(300, 3000)
     plt.xlabel('Wavelength (nm)')
     plt.ylabel('Power density (Wm$^{-2}$nm$^{-1}$)')
     plt.tight_layout()
-    plt.legend()
+    plt.legend(frameon=False)
 
-    plt.savefig('/Users/diego/light_source.pdf')
+    plt.savefig('/Users/diego/Desktop/light_source.pdf')
     plt.show()

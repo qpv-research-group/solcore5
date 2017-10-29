@@ -23,7 +23,7 @@ def check_ddModel_library_ok(test=False):
     if not (os.path.exists(lib_file) and os.path.getmtime(lib_file) > os.path.getmtime(code_file)):
 
         # Optimization flags for the fortran compiler
-        args = '--opt="-O3"'
+        # args = '--opt="-O3"'
         code = open(code_file, encoding='utf-8').read()
 
         # This is the currect directory. We need it in order to go back to it after compiling the code

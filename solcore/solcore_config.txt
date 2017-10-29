@@ -1,5 +1,5 @@
 [Configuration]
-version: 5.0.0.dev.1
+version: 5.0.0
 welcome_message: 1
 verbose_loading: 1
 
@@ -18,6 +18,7 @@ levinshtein_groupIV: SOLCORE_ROOT/material_data/Levinshtein/GroupIV.txt
 GaAs: SOLCORE_ROOT/material_data/GaAs-Material
 InSb: SOLCORE_ROOT/material_data/InSb-Material
 GaSb: SOLCORE_ROOT/material_data/GaSb-Material
+AlAs: SOLCORE_ROOT/material_data/AlAs-Material
 AlGaAs: SOLCORE_ROOT/material_data/AlGaAs-Material
 InGaAs: SOLCORE_ROOT/material_data/InGaAs-Material
 GaInSb: SOLCORE_ROOT/material_data/InGaSb-Materials
@@ -30,7 +31,6 @@ sopra: SOLCORE_ROOT/material_data/SOPRA_DB
 [External programs]
 spice:
 smarts:
-fortran:
 
 
 

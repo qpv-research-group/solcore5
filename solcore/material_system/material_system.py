@@ -227,9 +227,15 @@ class BaseMaterial:
 
     def __getattr__(self, attrname):  # only used for unknown attributes
         if attrname == "n":
-            return self.n_interpolated
+            try:
+                return self.n
+            except:
+                return self.n_interpolated
         if attrname == "k":
-            return self.k_interpolated
+            try:
+                return self.k
+            except:
+                return self.k_interpolated
         if attrname == "electron_affinity":
             try:
                 return ParameterSystem().get_parameter(self.material_string, attrname)

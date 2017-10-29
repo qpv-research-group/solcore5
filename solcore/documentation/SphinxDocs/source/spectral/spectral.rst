@@ -1,21 +1,27 @@
-Spectral irradiance model and database
-======================================
+Light Sources
+=============
 
-The tools that can be accessed directly when importing this package are:
+This class allows you to create and manage different light sources to be used in the solar cell solvers or as a standalone tool.
+
 
 - get_default_spectral2_object
 - calculate_spectrum_spectral2
 - get_default_smarts_object
 - calculate_spectrum_smarts
 - reference_spectra
+- LightSource
 
 Description of functions and modules
 ------------------------------------
 
-.. automodule:: solcore.solar_spectrum.smarts
+.. automodule:: solcore.light_source.light_source
     :members:
     :undoc-members:
 
-.. automodule:: solcore.solar_spectrum.spectral2
+.. automodule:: solcore.light_source.smarts
+    :members:
+    :undoc-members:
+
+.. automodule:: solcore.light_source.spectral2
     :members:
     :undoc-members:

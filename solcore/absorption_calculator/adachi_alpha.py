@@ -18,7 +18,8 @@ def create_adachi_alpha(material, Esteps=(1.42, 6, 3000), T=300, wl=None):
                       'S.Adachi, “Optical dispersion relations for GaP, GaAs, GaSb, InP, InAs, InSb, AlxGa1−xAs, '
                       'and In1−xGaxAsyP1−y” J.Appl.Phys., vol.66, no.12, pp.6030–12, 1989.')
 
-    material = material.plain_string()
+    if type(material) != str:
+        material = material.plain_string()
 
     e0 = get_parameter(material, "E0", T=T) + 0j
     Delta0 = get_parameter(material, "E0plusD0", T=T) + 0j - e0

@@ -42,6 +42,17 @@ MODULE DriftDiffusion
     REAL*16, DIMENSION(0:6000) :: Vn, Vp        !Band edge potentials with respect certain reference
     REAL*16, DIMENSION(0:6000) :: Cn, Cp        !Modified electric potentials
     !
+    ! Information for QWs
+    REAL*16, DIMENSION(0:6000) :: QW = 0    ! QW flag. It should be the same in all nodes within a QW. QW = 0 means not QW
+    REAL*16, DIMENSION(0:6000) :: Rqw    ! Generation/Recombination in QWs
+    REAL*16, DIMENSION(0:6000) :: Gqw    ! Generation/Recombination in QWs
+    REAL*16, DIMENSION(0:6000) :: nqw    ! Electron density in QWs
+    REAL*16, DIMENSION(0:6000) :: pqw    ! Hole density in QWs
+    REAL*16 :: tnc = 1.5e-12    ! Electrons capture time in QWs
+    REAL*16 :: tpc = 1.5e-12    ! Holes capture time in QWs
+    REAL*16 :: tne = 150e-12    ! Electrons escape time in QWs
+    REAL*16 :: tpe = 150e-12    ! Holes escape time in QWs
+    
     !
     ! Bulk generation and recombination, including all processes
     REAL*16, DIMENSION(0:6000) :: GR            ! Generation-Recombination = Rsrh + Rrad + Raug - G
@@ -64,6 +75,8 @@ MODULE DriftDiffusion
     REAL*16 :: Jtot2, CurrentsBias(6), Currents(6)
     LOGICAL :: SingleWL = .FALSE.                ! Controls the generation in IQE running mode
     LOGICAL :: Dynamic = .FALSE.                ! Controls if there is dynamic meshing or not
+    INTEGER :: TMM = 0                            ! If using the transfer matrix - created absorption profile. 1 = True
+    LOGICAL :: SmoothG = .TRUE.
     !
     ! Extra values for the boundary conditions    
 !     REAL*16 :: Sn, Sp                            !Surface recombination velocity of minority carriers
@@ -240,6 +253,7 @@ CONTAINS
                     Brad(j)    = DML(i, 13)
                     CCn(j)    = DML(i, 17)
                     CCp(j)    = DML(i, 18)
+                    QW(j)    = DML(i, 14)
                     
                     ni(j)    = SQRT(Nc(j)*Nv(j)*EXP( -b*Eg(j) ) )                    
 
@@ -338,6 +352,7 @@ CONTAINS
         DML(MReg, 13) = REAL(args(10),16)    ! Brad        
         DML(MReg, 17) = REAL(args(11),16)     ! CCn
         DML(MReg, 18) = REAL(args(12),16)    ! CCp
+        DML(MReg, 14) = 0.0                    ! QW? Not implemented yet
         
         DoppingLibrary(MReg, 1) = REAL(args(13),16)        ! Acceptors
         DoppingLibrary(MReg, 2) = REAL(args(14), 16)    ! Donors
@@ -360,15 +375,6 @@ CONTAINS
         AbsLibrary(MReg, 0:NumWL) = REAL(Ab(0:NumWL), 16)        
         
     END SUBROUTINE AddAbsorption
-!-------------------------------------------------    
-    SUBROUTINE set_generation(gen_profile, dum_m, dum_wl)
-        REAL*8 :: gen_profile(-1:dum_m, 0:dum_wl)
-        INTEGER :: dum_m, dum_wl
-    
-        AbsProfile(0:M, 0:NumWL) = REAL(gen_profile(0:dum_m, 0:dum_wl), 16)
-        AbsLibrary(-1, 0:NumWL) = REAL(gen_profile(-1, 0:dum_wl), 16)
-                    
-    END SUBROUTINE set_generation
 !-------------------------------------------------    
     SUBROUTINE AddMasterNode(newpoint)                    
         REAL*16 :: newpoint
@@ -725,6 +731,7 @@ CONTAINS
                     Brad(j)    = DML(i, 13)
                     CCn(j)    = DML(i, 17)
                     CCp(j)    = DML(i, 18)
+                    QW(j)    = DML(i, 14)
             
                     ni(j)    = SQRT(Nc(j)*Nv(j)*EXP( -b*Eg(j) ) )                    
             
@@ -739,7 +746,7 @@ CONTAINS
             CALL Bandedge(i)
             CALL ModPotential(i)
             CALL Carriers(i)
-            Rho(i)=q*( p(i)-n(i)+Nd(i)-Na(i))
+            Rho(i)=q*( p(i)-n(i)+Nd(i)-Na(i) + QW(i)*(pqw(i)-nqw(i)) )
         END DO
         CALL GR_sub        
         
@@ -787,6 +794,7 @@ CONTAINS
         Fn(:)     = 0.0
         Fp(:)     = 0.0
         Psi(:)     = 0.0
+        QW(:)    = 0.0
         AbsProfile(:, :) = 0.0
         f(:) = 0
         dsol(:) = 0
@@ -854,12 +862,18 @@ CONTAINS
                 Get(0:M) = REAL(nvhh(0:M), 8)
             CASE ( 'nvlh' )
                 Get(0:M) = REAL(nvlh(0:M), 8)
+            CASE ( 'qw' )
+                Get(0:M) = REAL(QW(0:M), 8)
                 
         ! Carrier and charge densites densities
             CASE ( 'n' )
                 Get(0:M) = REAL(n(0:M), 8)
             CASE ( 'p' )
                 Get(0:M) = REAL(p(0:M), 8)
+            CASE ( 'nqw' )
+                Get(0:M) = REAL(nqw(0:M), 8)
+            CASE ( 'pqw' )
+                Get(0:M) = REAL(pqw(0:M), 8)
             CASE ( 'rho' )
                 Get(0:M) = REAL(Rho(0:M), 8)
                 
@@ -1098,7 +1112,60 @@ CONTAINS
         n(i) = nir*EXP( Psi(i) - Fn(i) + Vn(i))
         p(i) = nir*EXP(-Psi(i) + Fp(i) + Vp(i))
         
+        IF (QW(i)==1) THEN        ! If this node has QW, we update its carrier densities
+             CALL CarriersQW(i)
+        ELSE
+            nqw(i) = 0
+            pqw(i) = 0
+        END IF
+        
     END SUBROUTINE Carriers
+!-------------------------------------------------
+    SUBROUTINE CarriersQW(i)                            
+        ! Calculation of the carrier densities inside the QW        
+        INTEGER :: i, iter, inf
+        REAL*16, DIMENSION(2) :: fqw
+        REAL*16, DIMENSION(2,2) :: JacQW
+        REAL*16 :: dn, dp, det, res, resOld
+        
+        inf = 0
+        iter = 0
+        res = 0
+        ! Create the rate equations, that should be zero, and the Jacobian    
+        CALL FillFQW(i, fqw)
+        
+        DO WHILE (inf==0)
+            resOld = res
+            iter = iter + 1
+            
+            CALL FillJacobianQW(i, JacQW)
+        
+            ! Solve the linear system of equations
+            det = JacQW(1,1)*JacQW(2,2) - JacQW(1,2)*JacQW(2,1)
+            dn = (fqw(2)*JacQW(1,2) - fqw(1)*JacQW(2,2)) / det
+            dp = (fqw(1)*JacQW(2,1) - fqw(2)*JacQW(1,1)) / det
+        
+            ! Correct the values of the carrier densities
+            nqw(i) = nqw(i) + dn
+            pqw(i) = pqw(i) + dp
+        
+            ! Calulate the residual
+            CALL FillFQW(i, fqw)
+            res = sqrt(fqw(1)**2 + fqw(2)**2)
+        
+            ! Evaluate the conditions to finalize the loop.
+            IF (iter >= nitermax) THEN
+                inf = 1
+            ELSE IF (res < Atol) THEN
+                inf = 2
+            ELSE IF ((ABS((res-resOld)/resOld) < Rtol).AND.(iter>1)) THEN
+                inf = 3
+            END IF    
+        END DO                
+        
+        ! Check termination condition
+    
+    END SUBROUTINE CarriersQW
 !-------------------------------------------------            
     SUBROUTINE Bandedge(i)                                 
         !Calculation of the bandegde potentials. Bandgap narrowing due to heavy dopping ignored
@@ -1508,25 +1575,27 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     !
     INTEGER :: k
     REAL*16 :: xx, T1, T2, T3
-    REAL*16 :: funcp(0:M), funcn(0:M)
+    REAL*16 :: funcp(0:M), funcn(0:M), nQWtrap(0:M), pQWtrap(0:M)
 
     !Update the potentials, carrier densities and the recombination rate
     DO k = 0, M            
         CALL ModPotential(k)
         CALL Carriers(k)
-        Rho(k)=q*( p(k)-n(k)+Nd(k)-Na(k) )
+        Rho(k)=q*( p(k)-n(k)+Nd(k)-Na(k) + QW(k)*(pqw(k)-nqw(k)) )
     END DO
     CALL GR_sub    
 
     DO k = 0, M-1
-        funcn(k) = -q*Mun(k)/b/dX(k)*n(k+1)*Z(Cn(k+1)-Cn(k))*(EXP(Fn(k+1)-Fn(k)) - 1) - GR(k)
-        funcp(k) = -q*Mup(k)/b/dX(k)*p(k)  *Z(Cp(k+1)-Cp(k))*(EXP(Fp(k+1)-Fp(k)) - 1) + GR(k)
+        nQWtrap(k) = -QW(k)*q*(nqw(k)/tne - n(k)/tnc)*dX(k)
+        pQWtrap(k) = -QW(k)*q*(pqw(k)/tpe - p(k)/tpc)*dX(k)
+        funcn(k) = -q*Mun(k)/b/dX(k)*n(k+1)*Z(Cn(k+1)-Cn(k))*(EXP(Fn(k+1)-Fn(k)) - 1) - (GR(k) + nQWtrap(k))*Y(Cn(k+1)-Cn(k))
+        funcp(k) = -q*Mup(k)/b/dX(k)*p(k)  *Z(Cp(k+1)-Cp(k))*(EXP(Fp(k+1)-Fp(k)) - 1) + (GR(k) + pQWtrap(k))*Y(Cp(k)-Cp(k+1))
     END DO
 
     ! At each internal node, currents of adjacet elements must balance
     DO k = 1, M-1
         ! Hole current equation
-        f(3*k+1) = funcp(k-1) - funcp(k) - GR(k-1)
+        f(3*k+1) = funcp(k-1) - funcp(k) - (GR(k-1) + pQWtrap(k-1))
 
         ! Poisson equation
         T1 = (Epsi(k+1)+Epsi(k))/dX(k)   * (Psi(k+1)-Psi(k))
@@ -1536,7 +1605,7 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
          f(3*k+2) = T1 - T2 + T3
 
         ! Electron current equation
-        f(3*k+3) = funcn(k-1) - funcn(k) + GR(k-1)
+        f(3*k+3) = funcn(k-1) - funcn(k) + (GR(k-1) + nQWtrap(k-1))
 
 !         f(3*k+1) = -f(3*k+1)    ! In "SolveLin" subroutine, f enters negative; we change it now.
 !         f(3*k+2) = -f(3*k+2)
@@ -1570,7 +1639,7 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     ! This subroutine calculates the Jacobian of "f" at each node.
     !
         INTEGER :: i, j, k
-        REAL*16 :: dfuncp(6,0:M), dfuncn(6,0:M), dgrec(6,0:M)
+        REAL*16 :: dfuncp(6,0:M), dfuncn(6,0:M), dgrec(6,0:M), dnQWtrap(6,0:M), dpQWtrap(6,0:M)
         REAL*16    :: urec, urad, term
                                 
         DO k = 0, M-1
@@ -1651,6 +1720,22 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
             ! dfuncp/dfn(k+1)
             dfuncp(6, k) = dgrec(6,k)*Y(Cp(k)-Cp(k+1))
 
+
+!             Calculate the derivatives of nQWtrap and pQWtrap 
+!             nQWtrap(k) = -QW(k)*q*(nqw(k)/tne - n(k)/tnc)*dX(k)
+!             Derivatives w.r.t. (k)
+!             dnQWtrap/dPsi(k)
+            dnQWtrap(2, k) = QW(k)*q*n(k)/tnc*dX(k)
+            ! dnQWtrap/dfn(k)
+            dnQWtrap(3, k) = -QW(k)*q*n(k)/tnc*dX(k)
+
+            ! pQWtrap(k) = -QW(k)*q*(pqw(k)/tpe - p(k)/tpc)*dX(k)
+            ! Derivatives w.r.t. (k)
+            ! dfuncp/dfp(k)
+            dpQWtrap(1, k) = QW(k)*q*p(k)/tpc*dX(k)
+            ! ddpQWtrap/dPsi(k)
+            dpQWtrap(2, k) = -QW(k)*q*p(k)/tpc*dX(k)
+
         END DO
 
         ! For each internal node, calculate derivatives of hole current function, 
@@ -1662,8 +1747,8 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
             ! Derivatives of hole current continuity equation
             !   f(3*k+1) = funcp(k-1) - funcp(k) - GR(k-1)
             ! w.r.t. (k-1)
-            Jac(i, 3) = dfuncp(1, k-1) - dgrec(1, k-1)
-            Jac(i, 4) = dfuncp(2, k-1) - dgrec(2, k-1)
+            Jac(i, 3) = dfuncp(1, k-1) - dgrec(1, k-1) - dpQWtrap(1, k-1)
+            Jac(i, 4) = dfuncp(2, k-1) - dgrec(2, k-1) - dpQWtrap(2, k-1)
             Jac(i, 5) = dfuncp(3, k-1) - dgrec(3, k-1)
             ! w.r.t. (k)
             Jac(i, 6) = dfuncp(4, k-1) - dfuncp(1, k) - dgrec(4, k-1)
@@ -1702,8 +1787,8 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
             !    f(3*k+3) = funcn(k-1) - funcn(k) + GR(k-1)
             ! w.r.t. (k-1)
             Jac(i, 1) = dfuncn(1, k-1) + dgrec(1, k-1)
-            Jac(i, 2) = dfuncn(2, k-1) + dgrec(2, k-1)
-            Jac(i, 3) = dfuncn(3, k-1) + dgrec(3, k-1)
+            Jac(i, 2) = dfuncn(2, k-1) + dgrec(2, k-1) + dnQWtrap(2, k-1)
+            Jac(i, 3) = dfuncn(3, k-1) + dgrec(3, k-1) + dnQWtrap(3, k-1)
             ! w.r.t. (k)
             Jac(i, 4) = dfuncn(4, k-1) - dfuncn(1, k) + dgrec(4, k-1)
             Jac(i, 5) = dfuncn(5, k-1) - dfuncn(2, k) + dgrec(5, k-1)
@@ -1793,7 +1878,7 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     SUBROUTINE GR_sub                                
     
         INTEGER :: k, j
-        REAL*16 :: urec, urad, uaug
+        REAL*16 :: urec, urad, uaug, Rqw
         
         DO k = 0, M-1
             
@@ -1821,6 +1906,62 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
         END DO
                     
     END SUBROUTINE GR_sub
+!-------------------------------------------------    
+    SUBROUTINE FillFQW(i, fqw)
+        ! Rate equations inside the QW. They have units of current density for coherence with the continuity equations        
+        INTEGER :: i
+        REAL*16, DIMENSION(2) :: fqw
+        REAL*16 :: Rqw
+    
+        CALL GR_sub_qw(i, Rqw)
+    
+        fqw(1) = (n(i)/tnc - nqw(i)/tne)*q*dX(i) + Gqw(i) - Rqw
+        fqw(2) = (p(i)/tpc - pqw(i)/tpe)*q*dX(i) + Gqw(i) - Rqw
+
+    END SUBROUTINE FillFQW
+!-------------------------------------------------
+    SUBROUTINE FillJacobianQW(i, JacQW)
+        ! Jacobian for the rate equations in the QW        
+        INTEGER :: i
+        REAL*16, DIMENSION(2,2) :: JacQW
+        REAL*16 :: a1, a2, a3, dRdnqw, dRdpqw
+    
+        a1 = nqw(i)*pqw(i)-ni(i)**2
+        a2 = tn(i)*(pqw(i) + ni(i)) + tp(i)*(nqw(i) + ni(i))
+        a3 = CCn(i)*nqw(i) + CCp(i)*pqw(i)
+    
+        dRdnqw = (pqw(i)*a2 - a1*tp(i))/a2**2 + Brad(i)*pqw(i) + CCn(i)*a1 + a3*pqw(i)
+        dRdpqw = (nqw(i)*a2 - a1*tn(i))/a2**2 + Brad(i)*nqw(i) + CCp(i)*a1 + a3*nqw(i)
+    
+        JacQW(1, 1) = -q*dX(i)*(1/tne + dRdnqw)
+        JacQW(1, 2) = -q*dX(i)*dRdpqw
+        JacQW(2, 1) = -q*dX(i)*dRdnqw
+        JacQW(2, 2) = -q*dX(i)*(1/tpe + dRdpqw)
+
+    END SUBROUTINE FillJacobianQW 
+!-------------------------------------------------
+    SUBROUTINE GR_sub_qw(k, Rqw)
+
+        INTEGER :: k
+        REAL*16 :: urecQW, uradQW, uaugQW, a1, a2, a3
+        REAL*16 :: Rqw
+        
+        a1 = nqw(k)*pqw(k)-ni(k)**2
+        a2 = tn(k)*(pqw(k) + ni(k)) + tp(k)*(nqw(k) + ni(k))
+        a3 = CCn(k)*nqw(k) + CCp(k)*pqw(k)
+
+        urecQW = a1 / a2
+        uradQW = Brad(k) * a1
+        uaugQW = a3 * a1
+
+        ! The average sheet R rate = average of volume R rate x element width
+        Rqw =       SRH* q*urecQW            ! Average sheet SRH recombination
+        Rqw = Rqw + RAD* q*uradQW            ! Average sheet radiative recombination
+        Rqw = Rqw + AUG* q*uaugQW            ! Average sheet Auger recombination
+        
+        Rqw = Rqw*dX(k)
+
+    END SUBROUTINE GR_sub_qw
 !-------------------------------------------------
     SUBROUTINE Generation(wl)                        
         REAL*16 :: photonfluxini, PFspectrumini(0:NumWL), PF, PFWL(0:NumWL), TempG, sigma, GG(0:M)
@@ -1828,31 +1969,73 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
         INTEGER, OPTIONAL :: wl
         
         ! No absorption
-        IF (GEN == 0) THEN
+        if (GEN == 0) THEN
             G(0:M) = 0.0
         
-        ! Broadband absorption 
-        ELSE IF (.NOT.SingleWL) THEN
+        ! No TMM absorption profile    
+        ELSE IF (TMM == 0) THEN
+            ! Broadband absorption not using TMM    
+            IF (.NOT.SingleWL) THEN
             
-            PFWL = q*PFspectrum(0:NumWL)
-            G(0:M) = 0.0
-            
-            DO j = 0, NumWl-1
-                GG(0:M) = (AbsProfile(0:M,j) * PFWL(j) + AbsProfile(0:M,j+1) * PFWL(j+1)) * (AbsLibrary(-1,j+1)-AbsLibrary(-1,j))/2
-                G(0:M) = G(0:M) + GG(0:M)          
-            END DO 
-            
-            G(0:M-1) = (G(0:M-1) + G(1:M)) * dX(0:M-1) / 2                 
-        
-        ! Single wavelength
-        ELSE
-            PF = q*PhotonFlux
-        
-            G(0:M) = 0.0    
-            G(0:M-1) = PF*(AbsProfile(0:M-1,wl) + AbsProfile(1:M,wl)) * dX(0:M-1) / 2      
-        END IF
+                ! IF ( MAXVAL(PFspectrum(0:NumWL))<=0.0 ) PFspectrum(0:NumWL) = PhotonFlux/( AbsLibrary(-1, NumWL)-AbsLibrary(-1, 0))    
+                PFWL = q*PFspectrum(0:NumWL)
+
+                G(0:M) = 0.0
+                Gqw(0:M) = 0.0    
+                DO k = 0, M-1        ! Loop for the elemenents 
+                    DO j = 0, NumWl-1    ! Loop for the wavelengths
+                        TempG =   PFWL(j)*(1-EXP(-AbsProfile(k+1, j)*dX(k)))   ! Sheet generation
+                        PFWL(j) = PFWL(j) - TempG                               ! And we reduce the number photons at this WL
+                        G(k) = G(k) + TempG*( AbsLibrary(-1,j+1)-AbsLibrary(-1, j) )
+                        ! If we are below the barrier bandgap, the generation happens in the QW
+                        IF (1240/Eg(k) <= AbsLibrary(-1, j)*1e9) Gqw(k) = Gqw(k) + TempG*( AbsLibrary(-1,j+1)-AbsLibrary(-1, j) )
+                    END DO
+                END DO
     
+            ! Single wavelength
+            ELSE        
+                PF = q*PhotonFlux
+            
+                G(0:M) = 0.0    
+                DO k = 0, M-1
+                    G(k) = PF*(1-EXP(-AbsProfile(k, wl)*dX(k)))    ! Sheet generation
+                    IF (1240/Eg(k) <= AbsLibrary(-1, wl)*1e9) Gqw(k) = G(k)
+                    PF   = PF-G(k)                           ! And we reduce the number of available photons
+                END DO
+            END IF
+        
+        ! TMM absorption profile    
+        ELSE
+            ! Broadband absorption using TMM    
+            IF (.NOT.SingleWL) THEN
+                
+                PFWL = q*PFspectrum(0:NumWL)
+                G(0:M) = 0.0
+                
+                DO j = 0, NumWl-1
+                    GG(0:M-1) = AbsProfile(0:M-1,j) * PFWL(j) * (AbsLibrary(-1,j+1)-AbsLibrary(-1,j))
+                    G(0:M-1) = G(0:M-1) + GG(0:M-1) * dX(0:M-1)            
+                END DO                
+            
+            ! Single wavelength
+            ELSE
+                PF = q*PhotonFlux
+            
+                G(0:M) = 0.0    
+                G(0:M-1) = PF*AbsProfile(0:M-1,wl) * dX(0:M-1)       
+            END IF
+        END IF
+        
     END SUBROUTINE Generation
+!-------------------------------------------------    
+    SUBROUTINE set_tmm_generation(gen_profile, dum_m, dum_wl)
+        REAL*8 :: gen_profile(-1:dum_m, 0:dum_wl)
+        INTEGER :: dum_m, dum_wl
+        
+        AbsProfile(0:M, 0:NumWL) = REAL(gen_profile(0:dum_m, 0:dum_wl), 16)
+        AbsLibrary(-1, 0:NumWL) = REAL(gen_profile(-1, 0:dum_wl), 16)
+                        
+    END SUBROUTINE set_tmm_generation
 !-------------------------------------------------    
 ! Running modes
 !-------------------------------------------------
@@ -1974,6 +2157,16 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
             G = GEN* TempG*10**(i-REAL(maxsteps,4))
             CALL SolveNonLin(sum, dum3, dum4, dum5, dum6, info, OutputLevel)
             IF (OutputLevel>=1) WRITE(ou, '(1I10, 5g14.4, 1I10)') i, Currents(1), sum, dum3, dum4, dum5, info
+!
+!             IF ((Dynamic).AND.(MOD(i*1.0,10.0)==0)) THEN
+!                 CALL DynamicMesh(0)
+!                 WRITE(ou,*) 'Remeshing...  M+1 = ',  M+1, ' nodes.'
+!                 CALL Generation
+!                 TempG(0:M) = G(0:M)
+!                 G = GEN* TempG*10**(i-REAL(maxsteps,4))
+!                 CALL SolveNonLin(sum, dum3, dum4, dum5, dum6, info, OutputLevel)
+!                 IF (OutputLevel>=1) WRITE(ou, '(1I10, 5g14.4, 1I10)') i, Currents(1), sum, dum3, dum4, dum5, info
+!             END IF
             
         END DO
         

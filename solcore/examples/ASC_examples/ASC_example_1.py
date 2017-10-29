@@ -51,7 +51,7 @@ all_materials.append(top_cell_p_material)
 
 # MID CELL  - InGaAs
 # The same thing.
-InGaAs = material("InGaAs")
+InGaAs = material("GaAs")
 mid_cell_n_material = InGaAs(In=0.01, Nd=siUnits(3e18, "cm-3"), role="n")
 mid_cell_p_material = InGaAs(In=0.01, Na=siUnits(1e17, "cm-3"), role="p")
 EeV, alpha = np.loadtxt(this_dir_file("in01gaas.csv"), unpack=True, delimiter=",")
@@ -66,10 +66,10 @@ all_materials.append(mid_cell_p_material)
 
 # BOTTOM CELL - Levinshtein
 # Idem
-Ge = material("Levinshtein")
+Ge = material("Ge")
 bot_cell_n_material = Ge(Nd=siUnits(2e18, "cm-3"), role="n")
 bot_cell_p_material = Ge(Na=siUnits(1e17, "cm-3"), role="p")
-EeV, alpha = np.loadtxt(this_dir_file("Levinshtein-Palik.csv"), unpack=True, delimiter=",")
+EeV, alpha = np.loadtxt(this_dir_file("Ge-Palik.csv"), unpack=True, delimiter=",")
 WLm = siUnits(eVnm(EeV), 'nm')
 bot_cell_n_material.alpha = interp1d(x=WLm[::-1], y=alpha[::-1], bounds_error=False, fill_value=0)
 bot_cell_p_material.alpha = bot_cell_n_material.alpha

@@ -118,7 +118,7 @@ class TestPDD(TestCase):
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
             filename = os.path.join(working_directory, 'solcore_log.txt')
             PDD.log(filename)
-            IV = PDD.IV(MyDevice, vfin=1.2, vstep=0.05, light=True)
+            IV = PDD._IV(MyDevice, vfin=1.2, vstep=0.05, light=True)
             Jsc = 194.25993896711984
         self.assertAlmostEqual(Jsc, IV['IV']['Jsc'])
 
@@ -126,7 +126,7 @@ class TestPDD(TestCase):
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
             filename = os.path.join(working_directory, 'solcore_log.txt')
             PDD.log(filename)
-            QE = PDD.QE(MyDevice)
+            QE = PDD._QE(MyDevice)
             qe_wl = 0.94589342955180866
         self.assertAlmostEqual(qe_wl, QE['QE']['IQE'][130])
 

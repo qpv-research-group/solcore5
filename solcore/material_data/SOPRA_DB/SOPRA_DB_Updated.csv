@@ -1,5 +1,6 @@
 Filename,Symbol,Range (nm),Description
 Individual Files,,,
+AIR,Air,100     1000000,Air
 7059,7059,250      900,Glass 7059
 AG,Ag,187     2066,Silver
 AL,Al,183     2479,Aluminum

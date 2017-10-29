@@ -1,0 +1,235 @@
+$ Modified CPPB model material parameters :: T. Wilson, September 12th 2016
+
+$ /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\ $
+$ TEST PARAMETERS :: These sets are used to run tests on the Adachi_CPPB and Mod_CPPB methods. NO NOT DELETE/ MODIFY!
+$ \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ $
+
+Material :: GaAs_TEST
+$ GaAs material parameters taken from S. Adachi (1990)
+$ Energy gap parameters
+E0 = 1.42
+E0_d0 = 1.77
+E1 = 2.9
+E1_d1 = 3.13
+E2 = 4.7
+Eg_ID = 1.73
+
+$ Fitting parameters
+A = 3.45
+$ B1 = 6.37
+$ B11 = 13.08
+B1 = 6.4
+B1s = 0.05
+Gamma = 0.05
+C = 2.39
+gamma = 0.146
+D = 24.2
+
+$ Additional material parameters
+eps1_inf = 1.6
+Ec = 2.90
+a0 = 5.65325
+Eph = 0.035
+eps_r = 12.9
+me = 0.063
+mhh = 0.51
+$END$
+
+$ /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\ $
+$ Custom_CPPB MATERIAL PARAMETERS :: Add additional materials below...
+$ \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ $
+
+Material :: GaAs
+$ Parameters used in the modified CPPB model, a merge of Adachi's expressions with the frequency dependent broadening
+$ parameter introduced by Charles Kim.
+$ Gap Energy parameters
+E0 = 1.425
+E0_d0 = 1.78
+E1 = 2.92
+E1_d1 = 3.11
+E2 = 4.72
+Eg_ID = 1.73
+
+$ E0 and E1 Transition fitting parameters
+A = 4.0
+B1 = 7.3
+B1s = 0.05
+Alpha_E0 = 0.3
+Gamma_E0 = 0.01
+Alpha_E1 = 0.3
+Gamma_E1 = 0.12
+
+$ E2 fitting parameters
+C = 1.6
+Alpha_E2 = 0.2
+Gamma_E2 = 0.2
+D = 18
+Alpha_Eg_ID = 0.05
+Gamma_Eg_ID = 0.041
+Ec = 2.92
+
+$ E0 Exciton contribution
+n = 0
+Alpha_Ex0 = 0.005
+Gamma_Ex0 = 0.005
+G_3D = 0.0046
+A_Ex = 0.003
+
+$ Additional material parameters.
+eps1_inf = 1.2
+a0 = 5.65325
+Eph = 0.035
+eps_r = 12.9
+me = 0.063
+mhh = 0.51
+$END$
+
+Material :: Ge
+$ Optical constant model parameters for Ge taken from;
+$ S. Adachi, "Optical dispersion relations for Si and Ge", J. Apply. Phys, 66(7) 3224, 1989
+E0 = 0.80
+E0_d0 = 1.09
+E1 = 2.08
+E1_d1 = 2.28
+E2 = 4.29
+Eg_ID = 0.66
+
+$ E0 and E1 Transition fitting parameters
+A = 5.2
+B1 = 8.0
+B1s = 1.0
+Alpha_E0 = 0.0
+Gamma_E0 = 0.05
+Alpha_E1 = 0.1
+Gamma_E1 = 0.1
+
+$ E2 fitting parameters
+C = 2.0
+Alpha_E2 = 0.0
+Gamma_E2 = 0.11
+D = 2.0
+Alpha_Eg_ID = 0.0
+Gamma_Eg_ID = 0.1
+Ec = 2.08
+
+$ E0 Triplet transitions
+Ea = 5.66
+Ea_C = 2.8
+Gamma_Ea = 0.9
+Alpha_Ea = 0.2
+Eb = 3.34
+Eb_C = 2.2
+Gamma_Eb = 0.5
+Alpha_Eb = 0.2
+Ed = 3.85
+Ed_C = 8.5
+Gamma_Ed = 0.8
+Alpha_Ed = 0.2
+
+$ E0 Exciton contribution
+n = 0
+Alpha_Ex0 = 0.005
+Gamma_Ex0 = 0.005
+G_3D = 0.0046
+A_Ex = 0.003
+
+$ Additional material parameters.
+eps1_inf = 2.7
+a0 = 5.658
+Eph = 0.037
+eps_r = 16.2
+me = 0.08
+mhh = 0.33
+$END$
+
+Material :: SiGeSn
+$ Optical constant model parameters for SiGeSn. Assumed Ge like response with shifted critical pointe energies
+E0 = 1.06
+E0_d0 = 1.11
+E1 = 2.05
+E1_d1 = 2.25
+E2 = 4.29
+Eg_ID = 0.8
+
+$ E0 and E1 Transition fitting parameters
+A = 1.7
+B1 = 5.5
+B1s = 1.9
+Alpha_E0 = 0.0
+Gamma_E0 = 0.05
+Alpha_E1 = 0.1
+Gamma_E1 = 0.09
+
+$ E2 fitting parameters
+C = 8.5
+Alpha_E2 = 0.2
+Gamma_E2 = 0.45
+D = 0.8
+Alpha_Eg_ID = 0.0
+Gamma_Eg_ID = 0.08
+Ec = 2.05
+
+$ E0 Triplet transitions
+Ea = 5.60
+Ea_C = 3.0
+Gamma_Ea = 0.9
+Alpha_Ea = 0.2
+Eb = 3.3
+Eb_C = 3.0
+Gamma_Eb = 0.5
+Alpha_Eb = 0.2
+Ed = 3.85
+Ed_C = 9.5
+Gamma_Ed = 0.8
+Alpha_Ed = 0.2
+
+$ E0 Exciton contribution
+n = 0
+Alpha_Ex0 = 0.005
+Gamma_Ex0 = 0.005
+G_3D = 0.0046
+A_Ex = 0.003
+
+$ Additional material parameters.
+eps1_inf = 2.7
+a0 = 5.658
+Eph = 0.037
+eps_r = 16.2
+me = 0.08
+mhh = 0.33
+$END$
+
+$ /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\ $
+$ Adachi_CPPB MATERIAL PARAMETERS :: Add additional materials below...
+$ \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ $
+
+Material :: GaAs_Adachi
+$ GaAs material parameters taken from S. Adachi (1990)
+$ Energy gap parameters
+E0 = 1.42
+E0_d0 = 1.77
+E1 = 2.9
+E1_d1 = 3.13
+E2 = 4.7
+Eg_ID = 1.73
+
+$ Fitting parameters
+A = 3.45
+$ B1 = 6.37
+$ B11 = 13.08
+B1 = 6.4
+B1s = 0.05
+Gamma = 0.05
+C = 2.39
+gamma = 0.146
+D = 24.2
+
+$ Additional material parameters
+eps1_inf = 1.6
+Ec = 2.90
+a0 = 5.65325
+Eph = 0.035
+eps_r = 12.9
+me = 0.063
+mhh = 0.51
+$END$

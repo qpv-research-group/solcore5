@@ -20,17 +20,17 @@ class OptiStack(object):
     and arranged in such a way they can be easily and fastly read by the TMM functions.
 
     In addition to a solcore structure with Layers, it can also take a list where each element represent a layer
-    written as a list and contains the layer thickness and the dielectrical model, the raw n and k.txt data as a function
+    written as a list and contains the layer thickness and the dielectrical model, the raw n and k data as a function
     of wavelengths, or a whole Device structure as the type used in the PDD model.
 
     In summary, this class acepts:
 
         - A solcore structure with layers
         - A list where each element is [thickness, DielectricModel]
-        - A list where each element is [thickness, wavelength, n, k.txt]
+        - A list where each element is [thickness, wavelength, n, k]
         - A list mixing the above:
             [ [thickness, DielectricModel],
-              [thickness, wavelength, n, k.txt],
+              [thickness, wavelength, n, k],
               solcore.Layer,
               solcore.Layer ]
 
@@ -40,7 +40,7 @@ class OptiStack(object):
     Yet anther way of defining the layers mixes experimental data with a DielectricModel within the same layer but in
     spectrally distinct regions. The syntaxis for the layer is:
 
-    layer = [thickness, wavelength, n, k.txt, DielectricModel, mixing]
+    layer = [thickness, wavelength, n, k, DielectricModel, mixing]
 
     where mixing is a list containing three elements: [the mixing point (nm), the mixing width (nm),  zero or one]
     depending if the mixing function should be increasing with the wavelength or decreasing. If increasing (zero), the
@@ -351,12 +351,14 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflexion=True)
         for j, wl in enumerate(wavelength):
             out = tmm.ellips(stack.get_indices(wl), stack.get_widths(), ang * degree, wl)
             output['psi'][j, i] = out['psi'] / degree
-            output['Delta'][j, i] = out['Delta'] / degree
 
-            if output['Delta'][j, i] < 0:
+            # We revere the sign of Delta in order to use Woollam sign convention
+            output['Delta'][j, i] = -out['Delta'] / degree
+
+            if output['Delta'][j, i] > 0:
                 output['Delta'][j, i] = -output['Delta'][j, i]
 
-            if output['Delta'][j, i] > 180:
+            if output['Delta'][j, i] < 180:
                 output['Delta'][j, i] = 180 - output['Delta'][j, i]
 
     return output

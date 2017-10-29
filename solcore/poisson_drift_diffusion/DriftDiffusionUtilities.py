@@ -6,7 +6,8 @@ from solcore.structure import Layer, Junction
 from solcore.state import State
 from .ddModel import driftdiffusion as dd
 from solcore.light_source import LightSource
-from .DeviceStructure import LoadAbsorption, calculate_reflection, calculate_optics, CreateDeviceStructure
+from .DeviceStructure import LoadAbsorption, calculate_reflection, calculate_optics, CreateDeviceStructure, \
+    CalculateAbsorptionProfile
 
 Epsi0 = constants.vacuum_permittivity
 q = constants.q
@@ -17,203 +18,37 @@ m0 = constants.electron_mass
 
 log = dd.log_file
 
-mesh_control = {'meshpoints': -400, 'growth_rate': 0.7, 'coarse': 20e-9, 'fine': 1e-9, 'ultrafine': 0.2e-9}
-convergence_control = {'clamp': 20, 'nitermax': 100, 'ATol': 1e14, 'RTol': 1e-6}
-recombination_control = {'srh': 1, 'rad': 1, 'aug': 0, 'sur': 1, 'gen': 0}
+pdd_options = State()
 
-default_wavelengths = np.linspace(300e-9, 1100e-9, 200)
-default_photon_flux = LightSource(source_type='standard', version='AM1.5g', x=default_wavelengths,
-                                  output_units='photon_flux_per_m').spectrum()[1]
+# Mesh control
+pdd_options.meshpoints = -400
+pdd_options.growth_rate = 0.7
+pdd_options.coarse = 20e-9
+pdd_options.fine = 1e-9
+pdd_options.ultrafine = 0.2e-9
 
+# Convergence control
+pdd_options.clamp = 20
+pdd_options.nitermax = 100
+pdd_options.ATol = 1e-14
+pdd_options.RTol = 1e-6
 
-def iv_pdd(junction, options):
-    T = options.T
-    light = options.light_iv
-    mpp = options.mpp
+# Recombination control
+pdd_options.srh = 1
+pdd_options.rad = 1
+pdd_options.aug = 0
+pdd_options.sur = 1
+pdd_options.gen = 0
 
-    junc = CreateDeviceStructure('Junction', T=T, layers=junction)
-
-    # We set the surface recombination of the first and last layer to those indicated in the Junction
-    if hasattr(junction, 'sn'):
-        junc['layers'][0]['properties']['sn'] = junction.sn
-        junc['layers'][-1]['properties']['sn'] = junction.sn
-
-    if hasattr(junction, 'sp'):
-        junc['layers'][0]['properties']['sp'] = junction.sp
-        junc['layers'][-1]['properties']['sp'] = junction.sp
-
-    # We define a sensible voltage range in which to calculate the results to avoid going above the bandgap
-    Eg = 10
-    for lay in junc['layers']:
-        Eg = min(Eg, lay['properties']['band_gap'] / q)
-
-    s = junc['layers'][0]['properties']['Nd'] > junc['layers'][0]['properties']['Na']
-    junction.voltage = options.internal_voltages
-    if not s:
-        volt = np.where(junction.voltage < Eg - 3 * kb * T / q, junction.voltage, Eg - 3 * kb * T / q)
-    else:
-        volt = np.where(junction.voltage > - Eg + 3 * kb * T / q, junction.voltage, -Eg + 3 * kb * T / q)
-
-    vmin = min(volt)
-    vmax = max(volt)
-    vstep = junction.voltage[1] - junction.voltage[0]
-
-    # Now it is time to perform the calculation, separating the positive and negative ranges
-    if not light:
-        output_pos = IV(junc, vfin=vmax, vstep=vstep, IV_info=False) if vmax > 0 else None
-        output_neg = IV(junc, vfin=vmin, vstep=(-1 * vstep), IV_info=False) if vmin < 0 else None
-
-    # Now we need to put together the data for the possitive and negative regions.
-    junction.pdd_data = State({'possitive_V': output_pos, 'negative_V': output_neg})
-
-    if output_pos is None:
-        V = output_neg['IV']['V']
-        J = output_neg['IV']['J']
-        Jrad = output_neg['IV']['Jrad']
-        Jsrh = output_neg['IV']['Jsrh']
-        Jaug = output_neg['IV']['Jaug']
-        Jsur = output_neg['IV']['Jsur']
-    elif output_neg is None:
-        V = output_pos['IV']['V']
-        J = output_pos['IV']['J']
-        Jrad = output_pos['IV']['Jrad']
-        Jsrh = output_pos['IV']['Jsrh']
-        Jaug = output_pos['IV']['Jaug']
-        Jsur = output_pos['IV']['Jsur']
-    else:
-        V = np.concatenate((output_neg['IV']['V'][:0:-1], output_pos['IV']['V']))
-        J = np.concatenate((output_neg['IV']['J'][:0:-1], output_pos['IV']['J']))
-        Jrad = np.concatenate((output_neg['IV']['Jrad'][:0:-1], output_pos['IV']['Jrad']))
-        Jsrh = np.concatenate((output_neg['IV']['Jsrh'][:0:-1], output_pos['IV']['Jsrh']))
-        Jaug = np.concatenate((output_neg['IV']['Jaug'][:0:-1], output_pos['IV']['Jaug']))
-        Jsur = np.concatenate((output_neg['IV']['Jsur'][:0:-1], output_pos['IV']['Jsur']))
-
-    # Finally, we calculate the currents at the desired voltages
-    R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, 'R_shunt') else 1e14
-
-    junction.current = np.interp(junction.voltage, V, J) + junction.voltage / R_shunt
-    Jrad = np.interp(junction.voltage, V, Jrad)
-    Jsrh = np.interp(junction.voltage, V, Jsrh)
-    Jaug = np.interp(junction.voltage, V, Jaug)
-    Jsur = np.interp(junction.voltage, V, Jsur)
-
-    junction.iv = interp1d(junction.voltage, junction.current, kind='linear', bounds_error=False, assume_sorted=True,
-                           fill_value=(junction.current[0], junction.current[-1]))
-    junction.recombination_currents = State({"Jrad": Jrad, "Jsrh": Jsrh, "Jaug": Jaug, "Jsur": Jsur})
-
-
-def solve_pdd(solar_cell, task, wavelength=None, incident_light=None, output_info=1, rs=0, vfin=1, vstep=0.01,
-              light=False, IV_info=True, escape=True):
-    """ Solves the chosen task of the Poisson-drift-difussion solver taking as input a standard SolarCell object with
-    any number of junctions. The only necessary inputs are the solar_cell and the task to be done. All other parameters
-    have default values.
-
-    :param solar_cell:
-    :param task:
-    :param wavelength:
-    :param incident_light:
-    :param output_info:
-    :param rs:
-    :param vfin:
-    :param vstep:
-    :param light:
-    :param IV_info:
-    :param escape:
-    :return:
-    """
-
-    # Get the energy range and incident spectrum. If they are not inputs, we create some sensible values.
-    if wavelength is None:
-        if incident_light is not None:
-            wavelength = incident_light[0]
-            bs = np.copy(incident_light[1])
-        else:
-            wavelength = default_wavelengths
-            bs = default_photon_flux
-            print('Using default light source, the AM1.5d solar spectrum between 300 and 1100 nm.')
-    else:
-        if incident_light is not None:
-            bs = np.interp(wavelength, incident_light[0], incident_light[1])
-        else:
-            bs = np.interp(wavelength, default_wavelengths, default_photon_flux)
-            print('Using default light source, the AM1.5d solar spectrum between 300 and 1100 nm.')
-
-    bs_initial = np.copy(bs)
-
-    # We include the shadowing losses
-    if hasattr(solar_cell, 'shading'):
-        bs *= (1 - solar_cell.shading)
-
-    # And the reflexion losses
-    if hasattr(solar_cell, 'reflectivity') and solar_cell.reflectivity is not None:
-        ref = solar_cell.reflectivity(wavelength)
-        bs *= (1 - ref)
-        reflected = ref * bs_initial
-    else:
-        reflected = np.zeros_like(bs)
-
-    R = reflected / bs_initial
-
-    # And now we perform the calculation, each junction at a time
-    passive_loss = np.ones_like(bs)
-
-    for i, layer_object in enumerate(solar_cell):
-
-        # Attenuation due to absorption in the AR coatings or any layer in the front that is not part of the
-        # junction
-        if type(layer_object) is Layer:
-            bs = bs * np.exp(-layer_object.material.alpha(wavelength) * layer_object.width)
-            passive_loss *= np.exp(-layer_object.material.alpha(wavelength) * layer_object.width)
-
-        # For each junction, we calculate the chosen task
-        elif type(layer_object) is Junction:
-
-            junction = CreateDeviceStructure('Junction', T=solar_cell.T, layers=layer_object,
-                                             substrate=solar_cell.substrate, reflection=solar_cell.reflectivity)
-
-            # We set the surface recombination of the first and last layer to those indicated in the Junction
-            if hasattr(layer_object, 'sn'):
-                junction['layers'][0]['properties']['sn'] = layer_object.sn
-                junction['layers'][-1]['properties']['sn'] = layer_object.sn
-
-            if hasattr(layer_object, 'sp'):
-                junction['layers'][0]['properties']['sp'] = layer_object.sp
-                junction['layers'][-1]['properties']['sp'] = layer_object.sp
-
-            if task == 'Equilibrium':
-                output = Equilibrium(junction, output_info=output_info)
-                solar_cell[i].equilibrium = output
-            elif task == 'ShortCircuit':
-                output = ShortCircuit(junction, wavelengths=wavelength, photon_flux=bs, output_info=output_info, rs=rs)
-                solar_cell[i].short_circuit = output
-            elif task == 'IV':
-                output = IV(junction, vfin=vfin, vstep=vstep, output_info=output_info, IV_info=IV_info, rs=rs,
-                            escape=escape, light=light, wavelengths=wavelength, photon_flux=bs)
-                solar_cell[i].iv = output
-            elif task == 'QE':
-                output = QE(junction, wavelengths=wavelength, photon_flux=bs, rs=rs, output_info=output_info)
-                T = bs / bs_initial
-                output['QE']['EQE'] = output['QE']['IQE'] * (1 - R) * T
-                solar_cell[i].qe = output
-            else:
-                raise RuntimeError(
-                    'ERROR in the PDD solver: Valid tasks are: "Equilibrium", "ShortCircuit", "IV" and "QE".')
-
-            # And we reduce the amount of light reaching the next junction
-            for junction_layer_object in layer_object:
-                bs *= np.exp(-junction_layer_object.material.alpha(wavelength) * junction_layer_object.width)
-
-        else:
-            raise ValueError("Strange layer-like object discovered in structure stack: {}".format(type(layer_object)))
-
-    solar_cell.R = R
-    solar_cell.passive_loss = 1 - passive_loss
-    solar_cell.T = bs / bs_initial
-    return
+# Output control
+pdd_options.output_equilibrium = 1
+pdd_options.output_sc = 1
+pdd_options.output_iv = 1
+pdd_options.output_qe = 1
 
 
 # Functions for creating the streucture in the fortran variables and executing the DD solver
-def ProcessStructure(device, wavelengths=None, use_Adachi=False):
+def ProcessStructure(device, meshpoints, wavelengths=None, use_Adachi=False):
     """ This function reads a dictionary containing all the device structure, extract the electrical and optical
     properties of the materials, and loads all that information into the Fortran variables. Finally, it initiallise the
     device (in fortran) calculating an initial mesh and all the properties as a function of the possition.
@@ -322,16 +157,14 @@ def ProcessStructure(device, wavelengths=None, use_Adachi=False):
                      0)
     dd.backboundary("ohmic", device['layers'][last]['properties']['sn'], device['layers'][last]['properties']['sp'], 0)
 
-    SetMeshParameters()
-
-    dd.initdevice(mesh_control['meshpoints'])
+    dd.initdevice(meshpoints)
     print('...done!\n')
 
     output['Properties'] = DumpInputProperties()
     return output
 
 
-def Equilibrium(device, output_info=2, wavelengths=None):
+def equilibrium_pdd(junction, options):
     """ Solves the Poisson-DD equations under equilibrium: in the dark with no external current and zero applied voltage. Internally, it calls *ProcessStructure*. Absorption coeficients are not calculated unless *wavelengths* is given as input.
 
     :param device: A dictionary containing the device structure. See PDD.DeviceStructure
@@ -339,19 +172,28 @@ def Equilibrium(device, output_info=2, wavelengths=None):
     :param wavelengths: (Optional) Wavelengths at which to calculate the optical properties.
     :return: Dictionary containing the device properties as a function of the position at equilibrium.
     """
+    T = options.T
+    wl = options.wavelength
+    output_info = options.output_equilibrium
+
+    SetConvergenceParameters(options)
+    SetMeshParameters(options)
+    SetRecombinationParameters(options)
+
+    device = CreateDeviceStructure('Junction', T=T, layers=junction)
+
     print('Solving equilibrium...')
-    output = ProcessStructure(device, wavelengths=wavelengths)
-    SetRecombinationParameters(gen=0)
-    SetConvergenceParameters()
+    output = ProcessStructure(device, options.meshpoints, wavelengths=wl)
+    dd.gen = 0
 
     dd.equilibrium(output_info)
     print('...done!\n')
 
     output['Bandstructure'] = DumpBandStructure()
-    return output
+    junction.equilibrium_data = State(**output)
 
 
-def ShortCircuit(device, wavelengths, photon_flux, rs=0, output_info=1):
+def short_circuit_pdd(junction, options):
     """ Solves the devices electronic properties at short circuit. Internally, it calls Equilibrium.
 
     :param device: A dictionary containing the device structure. See PDD.DeviceStructure
@@ -363,24 +205,28 @@ def ShortCircuit(device, wavelengths, photon_flux, rs=0, output_info=1):
     """
 
     # We run equilibrium
-    output = Equilibrium(device, output_info=output_info, wavelengths=wavelengths)
+    equilibrium_pdd(junction, options)
 
-    SetRecombinationParameters(gen=1)
+    wl = options.wavelength
+    wl, ph = options.light_source.spectrum(x=wl, output_units='photon_flux_per_m')
 
-    dd.illumination(photon_flux)
-    dd.tmm = 0
+    z = junction.equilibrium_data['Bandstructure']['x']
+    absorption = junction.absorbed if hasattr(junction, 'absorbed') else lambda x: 0
+    abs_profile = CalculateAbsorptionProfile(z, wl, absorption)
 
-    dd.set('rs', rs)
-    dd.lightsc(output_info, 1)
+    dd.set_generation(abs_profile)
+    dd.gen = 1
+
+    dd.illumination(ph)
+
+    dd.lightsc(options.output_sc, 1)
     print('...done!\n')
 
-    output['Bandstructure'] = DumpBandStructure()
+    output = {'Bandstructure' : DumpBandStructure()}
+    junction.short_circuit_data = State(**output)
 
-    return output
 
-
-def IV(device, vfin, vstep, output_info=1, IV_info=True, rs=0, escape=1, light=False, wavelengths=None,
-       photon_flux=None):
+def iv_pdd(junction, options):
     """ Calculates the IV curve of the device between 0 V and a given voltage. Depending if the "sol" parameter is set
     or not, the IV will be calculated in the dark (calling the Equilibrium function) or under illumination (calling
     the ShortCircuit function).
@@ -398,32 +244,91 @@ def IV(device, vfin, vstep, output_info=1, IV_info=True, rs=0, escape=1, light=F
     :return: A dictionary containing the IV curves, the different components and also the output of Equilibrium or ShortCircuit.
     """
     print('Solving IV...')
-    if light:
-        output = ShortCircuit(device, wavelengths=wavelengths, photon_flux=photon_flux, rs=rs, output_info=output_info)
-        escape = escape
-        IV_info = IV_info
+    light = options.light_iv
+    output_info = options.output_iv
+    T = options.T
+
+    junction.voltage = options.internal_voltages
+
+    Eg = 10
+    for layer in junction:
+        Eg = min([Eg, layer.material.band_gap/q])
+
+    s = True if junction[0].material.Na >= junction[-1].material.Nd else False
+
+    if s:
+        vmax = min(Eg - 3*kb*T/q, max(junction.voltage))
+        vmin = min(junction.voltage)
     else:
-        output = Equilibrium(device, output_info=output_info)
-        escape = 0
-        IV_info = False
+        vmax = max(junction.voltage)
+        vmin = max(-Eg + 3*kb*T/q, min(junction.voltage))
 
-    dd.set('rs', rs)
+    vstep = junction.voltage[1] - junction.voltage[0]
 
-    dd.runiv(vfin, vstep, output_info, escape)
+    # POSITIVE RANGE
+    output_pos = None
+    if vmax > 0:
+        if light:
+            short_circuit_pdd(junction, options)
+        else:
+            equilibrium_pdd(junction, options)
+
+        dd.runiv(vmax, vstep, output_info, 0)
+        output_pos = {'Bandstructure': DumpBandStructure(), 'IV': DumpIV()}
+
+    # NEGATIVE RANGE
+    output_neg = None
+    if vmin < 0:
+        if light:
+            short_circuit_pdd(junction, options)
+        else:
+            equilibrium_pdd(junction, options)
+
+        dd.runiv(vmin, (-1 * vstep), output_info, 0)
+        output_neg = {'Bandstructure': DumpBandStructure(), 'IV': DumpIV()}
+
     print('...done!\n')
 
-    # This is the bandstructure at the last V point, which might or might not be useful
-    output['Bandstructure'] = DumpBandStructure()
-    output['IV'] = DumpIV(IV_info=IV_info)
+    # Now we need to put together the data for the possitive and negative regions.
+    junction.pdd_data = State({'possitive_V': output_pos, 'negative_V': output_neg})
 
-    return output
+    if output_pos is None:
+        V = output_neg['IV']['V']
+        J = output_neg['IV']['J']
+        Jrad = output_neg['IV']['Jrad']
+        Jsrh = output_neg['IV']['Jsrh']
+        Jaug = output_neg['IV']['Jaug']
+        Jsur = output_neg['IV']['Jsur']
+    elif output_neg is None:
+        V = output_pos['IV']['V']
+        J = output_pos['IV']['J']
+        Jrad = output_pos['IV']['Jrad']
+        Jsrh = output_pos['IV']['Jsrh']
+        Jaug = output_pos['IV']['Jaug']
+        Jsur = output_pos['IV']['Jsur']
+    else:
+        V = np.concatenate((output_neg['IV']['V'][:0:-1], output_pos['IV']['V']))
+        J = np.concatenate((output_neg['IV']['J'][:0:-1], output_pos['IV']['J']))
+        Jrad = np.concatenate((output_neg['IV']['Jrad'][:0:-1], output_pos['IV']['Jrad']))
+        Jsrh = np.concatenate((output_neg['IV']['Jsrh'][:0:-1], output_pos['IV']['Jsrh']))
+        Jaug = np.concatenate((output_neg['IV']['Jaug'][:0:-1], output_pos['IV']['Jaug']))
+        Jsur = np.concatenate((output_neg['IV']['Jsur'][:0:-1], output_pos['IV']['Jsur']))
+
+    # Finally, we calculate the currents at the desired voltages
+    R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, 'R_shunt') else 1e14
+
+    junction.current = np.interp(junction.voltage, V, J) + junction.voltage / R_shunt
+    Jrad = np.interp(junction.voltage, V, Jrad)
+    Jsrh = np.interp(junction.voltage, V, Jsrh)
+    Jaug = np.interp(junction.voltage, V, Jaug)
+    Jsur = np.interp(junction.voltage, V, Jsur)
+
+    junction.iv = interp1d(junction.voltage, junction.current, kind='linear', bounds_error=False, assume_sorted=True,
+                           fill_value=(junction.current[0], junction.current[-1]))
+    junction.recombination_currents = State({"Jrad": Jrad, "Jsrh": Jsrh, "Jaug": Jaug, "Jsur": Jsur})
 
 
-def qe_pdd(solar_cell, args):
-    pass
-
-
-def QE(device, wavelengths, photon_flux, rs=0, output_info=1):
+def qe_pdd(junction, options):
     """ Calculates the quantum efficiency of the device at short circuit. Internally it calls ShortCircuit
 
     :param device: A dictionary containing the device structure. See PDD.DeviceStructure
@@ -434,16 +339,23 @@ def QE(device, wavelengths, photon_flux, rs=0, output_info=1):
     :return: The internal and external quantum efficiencies, in adition to the output of ShortCircuit.
     """
     print('Solving quantum efficiency...')
-    output = ShortCircuit(device, wavelengths=wavelengths, photon_flux=photon_flux, rs=rs, output_info=output_info)
+    output_info = options.output_qe
+
+    short_circuit_pdd(junction, options)
 
     dd.runiqe(output_info)
     print('...done!\n')
 
+    output = {}
     output['QE'] = DumpQE()
     output['QE']['wavelengths'] = output['Optics']['wavelengths']
 
-    return output
+    junction.qe_data = State(**output)
 
+    # The EQE is actually the IQE inside the fortran solver due to an error in the naming --> to be changed
+    wl = options.wavelength
+    junction.eqe = interp1d(wl, output['QE']['IQE'], kind='linear', bounds_error=False, assume_sorted=True,
+                            fill_value=(output['QE']['IQE'][0], output['QE']['IQE'][-1]))
 
 # ----
 # Functions for dumping data from the fortran variables
@@ -544,41 +456,23 @@ def DumpQE():
 
 # ----
 # Functions for setting the parameters controling the recombination, meshing and the numerial algorithm
-def SetMeshParameters(**kwargs):
-    global mesh_control
-    # We override the default mesh control, if necessary    
-    for key in kwargs.keys():
-        if key in mesh_control.keys():
-            mesh_control[key] = kwargs[key]
-
-    dd.set('coarse', mesh_control['coarse'])
-    dd.set('fine', mesh_control['fine'])
-    dd.set('ultrafine', mesh_control['ultrafine'])
-    dd.set('growth', mesh_control['growth_rate'])
+def SetMeshParameters(options):
+    dd.set('coarse', options.coarse)
+    dd.set('fine', options.fine)
+    dd.set('ultrafine', options.ultrafine)
+    dd.set('growth', options.growth_rate)
 
 
-def SetRecombinationParameters(**kwargs):
-    global recombination_control
-    # We override the default recombination control, if necessary 
-    for key in kwargs.keys():
-        if key in recombination_control.keys():
-            recombination_control[key] = kwargs[key]
-
-    dd.srh = recombination_control['srh']
-    dd.rad = recombination_control['rad']
-    dd.aug = recombination_control['aug']
-    dd.sur = recombination_control['sur']
-    dd.gen = recombination_control['gen']
+def SetRecombinationParameters(options):
+    dd.srh = options.srh
+    dd.rad = options.rad
+    dd.aug = options.aug
+    dd.sur = options.sur
+    dd.gen = options.gen
 
 
-def SetConvergenceParameters(**kwargs):
-    global convergence_control
-    # We override the default convergence control, if necessary 
-    for key in kwargs.keys():
-        if key in convergence_control.keys():
-            convergence_control[key] = kwargs[key]
-
-    dd.nitermax = convergence_control['nitermax']
-    dd.set('clamp', convergence_control['clamp'])
-    dd.set('atol', convergence_control['ATol'])
-    dd.set('rtol', convergence_control['RTol'])
+def SetConvergenceParameters(options):
+    dd.nitermax = options.nitermax
+    dd.set('clamp', options.clamp)
+    dd.set('atol', options.ATol)
+    dd.set('rtol', options.RTol)

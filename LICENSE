@@ -12,8 +12,8 @@ received a copy it along with Solcore. If not, see http://www.gnu.org/licenses/.
 If you find this software useful and help you produce any scientific
 publication, please cite the initial Solcore paper at:
 
-'CPV modelling with Solcore: An extensible modelling framework for the
-rapid computational simulation and evaluation of solar cell designs and concepts'
-Führer, Markus and Farrell, Daniel and Ekins-Daukes, Nicholas
-AIP Conference Proceedings, 1556, 34-37 (2013)
-DOI:http://dx.doi.org/10.1063/1.4822193
+“Solcore: A multi-scale, python-based library for the modelling of solar cells
+and semiconductor materials”
+D. Alonso-Alvarez, T. Wilson, P. Pearce, M. Führer, D. Farrell and N. Ekins-Daukes.
+https://arxiv.org/abs/1709.06741
+

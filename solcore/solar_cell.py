@@ -1,4 +1,4 @@
-from solcore.structure import Layer, Junction, Structure
+from solcore.structure import Layer, Junction, Structure, TunnelJunction
 from solcore import material, si
 
 import numpy as np
@@ -57,6 +57,7 @@ class SolarCell(Structure):
 
         for i, element in enumerate(layers):
             self.sort_layer_type(element, i)
+            self.R_series += element.R_series if hasattr(element, 'R_series') else 0
 
     def sort_layer_type(self, layer, i):
         """ Sorts the layer in different categories, depending on its type, and keeps record on the indices of that type of layer.
@@ -69,7 +70,7 @@ class SolarCell(Structure):
         if type(layer) == Junction:
             self.junction_indices.append(i)
             self.junctions += 1
-        if type(layer) == Tunel:
+        if type(layer) == TunnelJunction:
             self.tunel_indices.append(i)
 
     def append(self, new_layer, layer_label=None, repeats=1):
@@ -123,13 +124,7 @@ class SolarCell(Structure):
             print('ERROR updating junction: The junction index must be {} or less.'.format(len(self.junction_indices)))
 
     def __call__(self, i):
-
         return self[self.junction_indices[i]]
-
-
-class Tunel:
-    def __init__(self):
-        pass
 
 
 if __name__ == '__main__':

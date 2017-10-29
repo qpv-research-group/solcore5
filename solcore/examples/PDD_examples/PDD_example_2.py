@@ -14,8 +14,8 @@ MyDevice = PDD.Load(full_path)
 
 # Then we run two virtual experiments, just calculate the structure under equilibrum and under short circuit conditions.
 # We use the default settings of the solver.
-EQ = PDD.Equilibrium(MyDevice)
-SC = PDD.ShortCircuit(MyDevice)
+EQ = PDD._Equilibrium(MyDevice)
+SC = PDD._ShortCircuit(MyDevice)
 
 # Finally, we plot the carrier densities in both cases using the information stored in the output dictionaries
 plt.semilogy(EQ['Bandstructure']['x'] * 1e9, EQ['Bandstructure']['n'], 'b', label=' n equilibrium')

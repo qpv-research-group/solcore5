@@ -29,7 +29,7 @@ Functions
 All functions description
 -------------------------
 
-.. automodule:: solcore.poisson_drift_diffusion.mobility
+.. automodule:: solcore.material_data.mobility
 	:members:
 	
 References

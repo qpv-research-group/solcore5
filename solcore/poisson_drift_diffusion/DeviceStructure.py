@@ -3,6 +3,7 @@ import os
 import sys
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 from solcore import constants, material
 from solcore.absorption_calculator import adachi_alpha, calculate_absorption_profile, calculate_rat
@@ -72,6 +73,7 @@ def CreateDeviceStructure(name, role='device', T=293, layers=None, comments='', 
     output['layers'] = []
     output['substrate'] = SolcoreMaterialToStr(substrate)
     output['reflection'] = reflection
+    output['absorption'] = layers.absorbed if hasattr(layers, 'absorbed') else lambda x: 0
 
     AddLayers(output, layers)
 
@@ -235,35 +237,22 @@ def GetLayerProperties(layer, T):
             NewProperties[key] = getattr(layer.material, key)
         except ValueError:
             NewProperties[key] = DefaultProperties[key]
-            if key is "electron_mobility": updateMun = True
-            if key is "hole_mobility": updateMup = True
 
-    # We change the mobility if necessary. It has to be done afterwards since we need to know the doping levels first
-    name = NewProperties['composition']['material']
-    doping = NewProperties['Nd'] + NewProperties['Na']
-    x = 0.
-    if 'fraction' in NewProperties['composition'].keys():
-        x = NewProperties['composition']['fraction']
+    # The drift diffusion model uses the density of states. We calculate them now
+    try:
+        NewProperties["Nc"] = getattr(layer.material, 'Nc')
+    except:
+        me = NewProperties['eff_mass_electron_Gamma']
+        NewProperties["Nc"] = 2 * (2 * pi * me * m0 * kb * T / h ** 2) ** 1.5
 
-    if updateMun:
-        try:
-            NewProperties["electron_mobility"] = calculate_mobility(name, 0, doping, x=x, T=T)
-        except ValueError:
-            NewProperties["electron_mobility"] = DefaultProperties["electron_mobility"]
+    try:
+        NewProperties["Nv"] = getattr(layer.material, 'Nv')
+    except:
+        mhh = NewProperties['eff_mass_hh_z']
+        mlh = NewProperties['eff_mass_lh_z']
+        NewProperties["Nv"] = 2 * (2 * pi * mhh * m0 * kb * T / h ** 2) ** 1.5 + 2 * (
+                                                                                         2 * pi * mlh * m0 * kb * T / h ** 2) ** 1.5
 
-    if updateMup:
-        try:
-            NewProperties["hole_mobility"] = calculate_mobility(name, 1, doping, x=x, T=T)
-        except ValueError:
-            NewProperties["hole_mobility"] = DefaultProperties["hole_mobility"]
-
-    # The drift diffusion model uses the density of states. We calculate them now 
-    me = NewProperties['eff_mass_electron_Gamma']
-    mhh = NewProperties['eff_mass_hh_z']
-    mlh = NewProperties['eff_mass_lh_z']
-    NewProperties["Nc"] = 2 * (2 * pi * me * m0 * kb * T / h ** 2) ** 1.5
-    NewProperties["Nv"] = 2 * (2 * pi * mhh * m0 * kb * T / h ** 2) ** 1.5 + 2 * (
-                                                                                     2 * pi * mlh * m0 * kb * T / h ** 2) ** 1.5
     NewProperties["ni"] = np.sqrt(
         NewProperties["Nc"] * NewProperties["Nv"] * np.exp(-NewProperties["band_gap"] / (kb * T)))
 
@@ -324,7 +313,12 @@ def LoadAbsorption(layer, T, wavelengths, use_Adachi=False):
             print("Warning: Using Adachi calculation to estimate the absorption coefficient of material: ",
                   InLineComposition(layer))
             # 0 = Energy, 1 = n, 2 = k.txt, 3 = Absorption
-            absorption = adachi_alpha.create_adachi_alpha(InLineComposition(layer), T=T, wl=wavelengths)[3]
+            try:
+                absorption = adachi_alpha.create_adachi_alpha(InLineComposition(layer), T=T, wl=wavelengths)[3]
+            except:
+                print("Warning: No absorption information found for material {}. Setting it equal to zero.".format(
+                    InLineComposition(layer)))
+                absorption = 0 * wavelengths
 
     return [wavelengths.tolist(), absorption.tolist()]
 
@@ -365,7 +359,35 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
         if calculate_absorption:
             device['layers'][i]['properties']['absorption'] = [QW.wl.tolist(), QW[i].material.absorption.tolist()]
 
-    return output
+    # Finally, we re-build a list of layers with the effective properties
+    N = device['repeat']
+    T = device['T']
+    new_QW = []
+    for i in range(len(QW)):
+        # First, we create a dictionary with all the updated parameters
+        param = dict(device['layers'][i]['properties'])
+        del param['absorption']
+        del param['composition']
+        del param['width']
+
+        # We recover the composition and thickness
+        mat = device['layers'][i]['properties']['composition']
+        width = device['layers'][i]['properties']['width']
+
+        # Create the material with the updated properties
+        layer_mat = ToSolcoreMaterial(mat, T, execute=True, **param)
+
+        # In the end, we convert the absorption coeficient in extinction coefficient
+        kk = QW[i].material.absorption * QW.wl / 4 / np.pi
+        layer_mat.k = interp1d(QW.wl, kk, bounds_error=False, fill_value=(0, 0))
+
+        # And add the layer to the list of layers
+        new_QW.append(Layer(width, layer_mat))
+
+    # As the QW might be actually a MQW, we repeat this as many times as needed
+    new_QW = N * new_QW
+
+    return new_QW
 
 
 def calculate_reflection(device, wavelengths):
@@ -437,5 +459,11 @@ def calculate_optics(device, wavelengths, dist=None):
 
     output['position'] -= optics_thickness
 
-
     return output
+
+
+def CalculateAbsorptionProfile(z, wl, absorption):
+    out = np.array(wl)
+    out = np.vstack((out, absorption(z)))
+
+    return out

@@ -13,7 +13,7 @@ full_path = os.path.join(this_dir, my_file)
 MyDevice = PDD.Load(full_path)
 
 # We use the default settings of the solver to calculate the QE.
-QE = PDD.QE(MyDevice)
+QE = PDD._QE(MyDevice)
 
 # Finally, we plot the internal and external quantum efficiencies using the information stored in the output dictionaries
 plt.plot(QE['QE']['wavelengths'] / 1e-9, QE['QE']['IQE'] * 100, label='IQE')

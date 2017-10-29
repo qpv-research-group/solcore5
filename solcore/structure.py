@@ -1,6 +1,7 @@
 from collections import defaultdict
 import solcore
 
+
 class Structure(list):
     """ Subclass of lists that stores information of a 'sample' consisting of several 'layers'."""
 
@@ -64,7 +65,7 @@ class Layer:
     """ Class that stores the information about layers of materials, such as thickness and composition.
     It is the building block of the 'Structures' """
 
-    def __init__(self, width, material, role=None, **kwargs):
+    def __init__(self, width, material, role=None, geometry=None, **kwargs):
         """ Layer class constructor.
 
         :param width: Width of the layer, in SI units.
@@ -75,6 +76,7 @@ class Layer:
         self.width = width
         self.material = material
         self.role = role
+        self.geometry = geometry
         self.__dict__.update(**kwargs)
 
     def __str__(self):
@@ -92,6 +94,7 @@ class Layer:
 class Junction(list):
     """ Class that groups together the layers that make a junction. Esentially, it is just a list with attributes you can update.
     """
+
     def __init__(self, *args, **kwargs):
         self.__dict__.update(kwargs)
         list.__init__(self, *args)
@@ -99,6 +102,15 @@ class Junction(list):
     def __str__(self):
         layer_info = ["{}".format(layer) for layer in self]
         return "<Junction object \n\t{}\n\t{}>".format(str(self.__dict__), "\n\t".join(layer_info))
+
+
+class TunnelJunction(Junction):
+    """ Class that contains the minimum definitions for a tunnel junction, ie. a series resistance in our case.
+    """
+    def __init__(self, *args, **kwargs):
+        Junction.__init__(self, *args)
+
+        self.R_series = kwargs['R_series'] if 'R_series' in kwargs.keys() else 0
 
 
 # CONVERSION UTILITIES
@@ -136,7 +148,7 @@ def SolcoreMaterialToStr(material_input):
     return composition
 
 
-def ToSolcoreMaterial(comp, T, execute=False):
+def ToSolcoreMaterial(comp, T, execute=False, **kwargs):
     """ It provides a solcore material out of its string composition. The output can be a string with the command or
     a solcore material itself.
 
@@ -148,10 +160,15 @@ def ToSolcoreMaterial(comp, T, execute=False):
     # It provides a solcore material out of its string composition. The output can be a string with the comand or a solcore material itself.
     if 'element' in comp.keys():
         # A ternary material
-        out = 'solcore.material("%s")(T=%s, %s=%s) ' % (comp['material'], T, comp['element'], comp['fraction'])
+        out = 'solcore.material("%s")(T=%s, %s=%s' % (comp['material'], T, comp['element'], comp['fraction'])
     else:
         # A binary material
-        out = 'solcore.material("%s")(T=%s) ' % (comp['material'], T)
+        out = 'solcore.material("%s")(T=%s' % (comp['material'], T)
+
+    for key in kwargs.keys():
+        out = out + ', {}={}'.format(key, kwargs[key])
+
+    out = out + ') '
 
     if execute:
         return eval(out)

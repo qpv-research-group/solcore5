@@ -11,6 +11,5 @@ try:
     if result:
         from .DriftDiffusionUtilities import *
 except Exception as err:
-    print('\nERROR: The Drift Diffusion Utilities could not be loaded because of an issue with the solver library:')
-    print(err)
+    print('WARNING: The Poisson - Drift-Diffusion solver will not be available because the ddModel fortran library could not be imported.')
 

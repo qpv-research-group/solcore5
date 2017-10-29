@@ -1,6 +1,8 @@
 Analytic solar cells calculator
 ===============================
 
+**WARNING: Documentation not updated for Solcore 5**
+
 This package include the tools to calculate, using an analytical approach, the quantum efficiency or the IV characteristics of a solar cell (single junction or multi-junction). The tools that can be accessed directly when importing this package are:
 
 - multijunctionIV

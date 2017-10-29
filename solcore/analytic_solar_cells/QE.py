@@ -9,6 +9,10 @@ fs = 6.8e-5
 Ts = 5762.0
 
 
+
+#################
+### Old Functions
+
 def spectral_response_all_junctions(solar_cell, incident_light=None, energy=None, V=0, verbose=False):
     """ Calculates the spectral response of any number of junctions using analytical diode equations as described in
     J. Nelson's book "The Physics of Solar Cells" (2003). All parameters must be in SI units. It only works for
@@ -108,8 +112,6 @@ def spectral_response_all_junctions(solar_cell, incident_light=None, energy=None
             "reflected_fraction": reflected / bs_initial,
             "e": energy}
 
-def qe_multijunction(solar_cell, args):
-    pass
 
 def calculate_junction_sr(junc, energies, bs, bs_initial, V, printParameters=False):
     """ Calculates the total quantum efficiency, the QE splitted by regions, photocurrent and other parameters for a

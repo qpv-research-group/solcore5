@@ -1,6 +1,8 @@
 Poisson - Drift-Diffusion solver (PDD)
 ======================================
 
+**WARNING: Documentation not updated for Solcore 5**
+
 The PDD package provide all tools necesary to build a solar cell structure and calculate its properties by solving simultaneously the Poisson equation and the drfit diffusion equations. 
 
 **TO BE ADDED**: Some theory of drift diffusion and basics of the numerical solver.
@@ -29,18 +31,6 @@ With this, all the functionality of the package will be available to the user. T
 	File: solcore3/PDD/QWunit.py
 	
 	Contains utilities that transform the device structure into a *solcore3.Structure* that, in turn, can be used to solve the Schrodinger equation and the kp model. It also prepares the properties of the structure (bandedges, efective density of states, etc) in order to have a meaningful set of properties for the DD solver. 
-	
-#.	:doc:`Light source <Illumination>`
-
-	File: solcore3/PDD/Illumination.py
-	
-	Contains the information to create an illumination source to be used by th PDD solver. It can use either a standard spectrum or get a custom one as input. It includes utilities for changing the total irradiance or appliting a filter to the source.  
-	
-#.	:doc:`The mobility module <Mobility>`
-
-	File: solcore3/PDD/Mobility.py
-	
-	Contains a mobility calculator that is used to build the device structure. It can also be used standalone.  
 
 #.	**Drift Diffusion Fortran solver**
 
@@ -62,5 +52,3 @@ With this, all the functionality of the package will be available to the user. T
    DeviceStructure
    DriftDiffusionUtilities
    QWunit
-   Illumination
-   Mobility

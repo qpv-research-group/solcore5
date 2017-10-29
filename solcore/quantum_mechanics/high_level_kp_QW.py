@@ -118,7 +118,11 @@ if __name__ == "__main__":
         "line_shape": "Gauss"
     }
 
-    for j, i in enumerate([0.05, 0.1, 0.15, 0.2, 0.25]):
+    comp = [0.05, 0.1, 0.15, 0.2, 0.25]
+    colors = plt.cm.jet(np.linspace(0, 1, len(comp)))
+
+    plt.figure(figsize=(6, 4.5))
+    for j, i in enumerate(comp):
         QW = material("InGaAs")(T=293, In=i)
         QW.strained = True
         well_layer = Layer(width=si("7.2nm"), material=QW)
@@ -136,13 +140,20 @@ if __name__ == "__main__":
 
 
         output = schrodinger(test_structure, quasiconfined=0,
-                             num_eigenvalues=10, alpha_params=alpha_params, calculate_absorption=True)
+                             num_eigenvalues=20, alpha_params=alpha_params, calculate_absorption=True)
 
         alfa = output[0]['alphaE'](E)
-        plt.plot(E/q, alfa)
+        plt.plot(1240/(E/q), alfa/100, label='{}%'.format(int(i*100)))
         alfas[:, j+1] = alfa/100
+
+    plt.xlim(826, 1100)
+    plt.ylim(0, 23000)
+    plt.xlabel('Wavelength (nm)')
+    plt.ylabel('$\\alpha$ cm$^{-1}$')
+    plt.legend(loc='upper right', frameon=False)
+    plt.tight_layout()
 
     import os
     root = os.path.expanduser('~')
-    # np.savetxt(root+'/abs.txt', alfas)
+    plt.savefig(root+'/Desktop/abs.pdf')
     plt.show()

@@ -1,4 +1,4 @@
-from solcore.structure import Layer, Junction
+from solcore.structure import Layer, Junction, TunnelJunction
 import solcore.analytic_solar_cells as ASC
 
 import numpy as np
@@ -8,9 +8,15 @@ import matplotlib.pyplot as plt
 
 
 def solve_beer_lambert(solar_cell, options):
-    wl = options.wavelength
-    wl_m = wl * 1e-9
-    fraction = np.ones(wl.shape)
+    """ Calculates the reflection, transmission and absorption of a solar cell object using the Beer-Lambert law. Reflection is not really calculated and needs to be provided externally, otherwise it is assumed to be zero.
+
+    :param solar_cell:
+    :param options:
+    :return:
+    """
+    wl_m = options.wavelength
+    # wl_m = wl * 1e-9
+    fraction = np.ones(wl_m.shape)
     # absorbed = np.zeros(wl.shape)
 
     # We include the shadowing losses
@@ -35,22 +41,47 @@ def solve_beer_lambert(solar_cell, options):
             widths.append(layer_object.width)
             alphas.append(layer_object.material.alpha(wl_m))
 
-        # For each junction, we calculate the absorbance
+        # For each Tunnel junctions will have, at most, a resistance an some layers absorbing light.
+        elif type(layer_object) is TunnelJunction:
+            junction_width = 0
+            for i, layer in enumerate(layer_object):
+                junction_width += layer.width
+                widths.append(layer.width)
+                alphas.append(layer.material.alpha(wl_m))
+
+            solar_cell[j].width = junction_width
+
+        # For each junction, and layer within the junction, we get the absorption coeficient and the layer width.
         elif type(layer_object) is Junction:
 
-            if solar_cell[j].kind in ['PDD', 'DA']:
-                junction_width = 0
-                for i, layer in enumerate(layer_object):
-                    junction_width += layer.width
-                    widths.append(layer.width)
-                    alphas.append(layer.material.alpha(wl_m))
+            kind = solar_cell[j].kind if hasattr(solar_cell[j], 'kind') else None
 
-                solar_cell[j].width = junction_width
+            if kind == '2D':
+                # If the junction has a Jsc or EQE already defined, we ignore that junction in the optical calculation
+                if hasattr(solar_cell[j], 'jsc') or hasattr(solar_cell[j], 'eqe'):
+                    print('Warning: A junction of kind "2D" found. Junction ignored in the optics calculation!')
 
-            elif solar_cell[j].kind == '2D':
-                print('Warning: A junction of kind "2D" found. Junction ignored in the optics calculation!')
+                # Otherwise, we try to treat is as a DB junction from the optical point of view
+                else:
+                    ASC.absorptance_detailed_balance(solar_cell[j])
 
-            elif solar_cell[j].kind == 'DB':
+                    if hasattr(layer_object, 'width'):
+                        w = layer_object.width
+                    else:
+                        w = 1e-6  # 1 µm
+                        solar_cell[j].width = w
+
+                    def alf(x):
+                        return -1 / w * np.log(np.maximum(1 - layer_object.absorptance(x), 1e-3))
+
+                    solar_cell[j].alpha = alf
+                    solar_cell[j].reflected = interp1d(wl_m, solar_cell.reflected, bounds_error=False,
+                                                       fill_value=(0, 0))
+
+                    widths.append(w)
+                    alphas.append(alf(wl_m))
+
+            elif kind == 'DB':
                 # DB junctions do not often have a width and an absorption coefficient so we set an arbitrary width
                 # and back calculate the absorption coefficient from the absorptance, which needs to be provided
                 ASC.absorptance_detailed_balance(solar_cell[j])
@@ -65,16 +96,29 @@ def solve_beer_lambert(solar_cell, options):
                     return -1 / w * np.log(np.maximum(1 - layer_object.absorptance(x), 1e-3))
 
                 solar_cell[j].alpha = alf
+                solar_cell[j].reflected = interp1d(wl_m, solar_cell.reflected, bounds_error=False, fill_value=(0, 0))
 
                 widths.append(w)
-                alphas.append(alf(wl))
+                alphas.append(alf(wl_m))
 
             else:
-                raise ValueError(
-                    'ERROR in "solar_cell_solver":\n\tJunction {} has an invalid "kind". It must be "PDD", "DA", "2D" or "DB".')
+                junction_width = 0
 
-            solar_cell[j].offset = offset
-            offset += layer_object.width
+                try:
+                    for i, layer in enumerate(layer_object):
+                        junction_width += layer.width
+                        widths.append(layer.width)
+                        alphas.append(layer.material.alpha(wl_m))
+
+                    solar_cell[j].width = junction_width
+
+                except TypeError as err:
+                    print('ERROR in "solar_cell_solver: BL calculator":\n'
+                          '\tNo layers found in Junction {}.'.format(solar_cell.junction_indices[j]))
+                    raise err
+
+        solar_cell[j].offset = offset
+        offset += layer_object.width
 
     # With all this information, we are ready to calculate the absorbed light
     diff_absorption, transmitted, all_absorbed = calculate_absorption_beer_lambert(widths, alphas, fraction)

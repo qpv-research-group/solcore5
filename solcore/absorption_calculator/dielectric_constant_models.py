@@ -320,6 +320,24 @@ class PolySegment:
         return out
 
 
+# Oscillator class designed to build an optical constrant model structure for customised modelling...
+class Oscillator:
+    def __init__(self, oscillator_type, material_parameters=None, **kwargs):
+        self.oscillator = oscillator_type
+        self.material_parameters = material_parameters
+        self.arguments = kwargs
+
+        if self.material_parameters == None:
+
+            self.Material = "Not Specified"
+        else:
+
+            self.Material = self.material_parameters["Material"]
+
+    def __str__(self):
+        return "< Oscillator Type :: " + self.oscillator + ", Material :: " + self.Material + " >"
+
+
 class DielectricConstantModel(list):
     """ This class groups together several models for the dielectric constant applicable to a given layer. Based on
     all of them, it calculates the dielectric constant and the complex refractive index at any energy. It requires as

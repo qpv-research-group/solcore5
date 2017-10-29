@@ -9,14 +9,17 @@ default_config = os.path.join(here, 'solcore', 'solcore_config.txt')
 config = ConfigParser()
 config.read([default_config])
 
-# #Update the MANIFEST.in file with all the data from folder and subfolders within solcore
-# include = 'solcore'
-# exclude = ['__pycache__', 'egg']
-# with open('MANIFEST.in', 'w', encoding='utf-8') as f:
-#     for root, dir, files in os.walk("."):
-#         if not any(sub in root for sub in exclude) and root[2:9] == include:
-#             include_line = 'include ' + os.path.join(root[2:], '*') + '\n'
-#             f.write(include_line)
+if 'update_manifest' in sys.argv:
+    #Update the MANIFEST.in file with all the data from folder and subfolders within solcore
+    include = 'solcore'
+    exclude = ['__pycache__', 'egg']
+    with open('MANIFEST.in', 'w', encoding='utf-8') as f:
+        for root, dir, files in os.walk("."):
+            if not any(sub in root for sub in exclude) and root[2:9] == include:
+                include_line = 'include ' + os.path.join(root[2:], '*') + '\n'
+                f.write(include_line)
+
+    sys.exit()
 
 if 'install' in sys.argv:
     with open(os.path.join(here, 'LICENSE'), encoding='utf-8') as f:
