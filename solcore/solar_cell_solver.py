@@ -86,7 +86,7 @@ def solve_optics(solar_cell, options):
     - None: The calculation is skipped. Only useful for solar cells involving just "2-diode" kind of junctions.
     - BL: Uses the Beer-Lambert law to calculate the absorption in each layer. Front surface reflexion has to provided externally. It is the default method and the most flexible one.
     - TMM: Uses a transfer matrix calculation to obtain the RAT. Not valid for DB or 2D junction
-    - RWCA: Uses the rigorous wave coupled analysisto obtain the RAT. This allows to include 2D photonic crystals in the structure, for example. Not valid for DB or 2D junctions
+    - RCWA: Uses the rigorous wave coupled analysisto obtain the RAT. This allows to include 2D photonic crystals in the structure, for example. Not valid for DB or 2D junctions
 
     :param solar_cell: A solar_cell object
     :param options: Options for the optics solver
@@ -98,11 +98,11 @@ def solve_optics(solar_cell, options):
         solve_beer_lambert(solar_cell, options)
     elif options.optics_method == 'TMM':
         solve_tmm(solar_cell, options)
-    elif options.optics_method == 'RWCA':
+    elif options.optics_method == 'RCWA':
         solve_rcwa(solar_cell, options)
     else:
         raise ValueError(
-            'ERROR in "solar_cell_solver":\n\tOptics solver method must be None, "BL", "TMM" or "RWCA".')
+            'ERROR in "solar_cell_solver":\n\tOptics solver method must be None, "BL", "TMM" or "RCWA".')
 
 
 def solve_iv(solar_cell, options):
