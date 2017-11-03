@@ -379,6 +379,7 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
 
     :param structure: A solcore structure with layers and materials.
     :param wavelength: Wavelengths in which calculate the data (in nm). An array-like object.
+    :param z_limit: Maximum value in the z direction
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.
     """

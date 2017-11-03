@@ -24,7 +24,6 @@ include solcore/documentation/SphinxDocs/build/html/_modules/solcore/absorption_
 include solcore/documentation/SphinxDocs/build/html/_modules/solcore/quantum_mechanics/*
 include solcore/documentation/SphinxDocs/build/html/_modules/solcore/units_system/*
 include solcore/documentation/SphinxDocs/build/html/_modules/solcore/light_source/*
-include solcore/documentation/SphinxDocs/build/html/_modules/solcore/solar_spectrum/*
 include solcore/documentation/SphinxDocs/build/html/_modules/solcore/poisson_drift_diffusion/*
 include solcore/documentation/SphinxDocs/build/html/_modules/solcore/material_data/*
 include solcore/documentation/SphinxDocs/build/html/_modules/solcore/material_system/*
@@ -59,12 +58,8 @@ include solcore/absorption_calculator/cppm/*
 include solcore/quantum_mechanics/*
 include solcore/units_system/*
 include solcore/examples/*
-include solcore/examples/ASC_examples/*
 include solcore/examples/AC_examples/*
 include solcore/examples/AC_examples/Supporting_Data/*
-include solcore/examples/QM_examples/*
-include solcore/examples/PDD_examples/*
-include solcore/examples/graphing_examples/*
 include solcore/light_source/*
 include solcore/graphing/*
 include solcore/poisson_drift_diffusion/*

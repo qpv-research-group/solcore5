@@ -113,10 +113,8 @@ def solve_pv_module(solar_cell, options, totalcells=25, bias_start=0, bias_end=7
     spice_file = spice_file + ".plot dc i(vbias)\n"
     spice_file = spice_file + ".end \n\n"
 
-    print(spice_file)
     # And the definition of the spice file is finished. Now it's time to solve the problem
     raw_data = solve_circuit(spice_file)
-    print(raw_data)
 
     voltage = []
     current = []

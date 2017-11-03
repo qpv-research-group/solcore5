@@ -350,7 +350,7 @@ def fit_effective_masses(bands, material, host_material, plot_result=False, dk=0
 
         if plot_result:
             import matplotlib.pyplot as plt
-            plt.plot(bands[0] / kmax, band / q, 'k.txt')
+            plt.plot(bands[0] / kmax, band / q, 'k')
             plt.plot(bands[0] / kmax, fit / q, 'r')
 
     if a0 < host_material.lattice_constant:
@@ -359,7 +359,7 @@ def fit_effective_masses(bands, material, host_material, plot_result=False, dk=0
         masses[1], masses[2] = masses[2], masses[1]
 
     if plot_result:
-        plt.xlabel('k.txt (2*pi/a)')
+        plt.xlabel('k (2*pi/a)')
         plt.ylabel('Energy (eV)')
         plt.ylim(-2, 2)
         plt.show()

@@ -34,7 +34,7 @@ for i in range(len(e_inf)):
 
     plt.figure(2)
     plt.semilogx(x/1000, np.real(n), 'b', label='n ' + label[i], ls=ls[i])
-    plt.semilogx(x/1000, np.imag(n), 'g', label='k.txt ' + label[i], ls=ls[i])
+    plt.semilogx(x/1000, np.imag(n), 'g', label='k ' + label[i], ls=ls[i])
 
 
 plt.figure(1)
@@ -45,7 +45,7 @@ plt.legend(loc=0)
 
 plt.figure(2)
 plt.xlabel('Wavelength (µm)')
-plt.ylabel('n & k.txt')
+plt.ylabel('n & k')
 plt.xlim((2, 20))
 plt.legend(loc=2)
 

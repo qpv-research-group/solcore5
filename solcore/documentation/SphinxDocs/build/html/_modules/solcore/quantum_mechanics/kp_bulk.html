@@ -1,0 +1,518 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.quantum_mechanics.kp_bulk &#8212; Solcore 5.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.quantum_mechanics.kp_bulk</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="k">import</span> <span class="n">eig</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">lru_cache</span>
+
+<span class="kn">import</span> <span class="nn">solcore</span>
+<span class="kn">from</span> <span class="nn">solcore.graphing</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">solcore</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">solcore.crystals</span> <span class="k">import</span> <span class="n">traverse_brillouin</span><span class="p">,</span> <span class="n">brillouin_critical_points</span><span class="p">,</span> <span class="n">kvector</span>
+<span class="kn">from</span> <span class="nn">solcore.science_tracker</span> <span class="k">import</span> <span class="n">science_reference</span>
+
+<span class="n">electron_charge</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">q</span>
+<span class="n">hbar</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">hbar</span>
+<span class="n">m0</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">electron_mass</span>
+<span class="n">q</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">q</span>
+
+
+<div class="viewcode-block" id="eight_band_strain_hamiltonian"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.eight_band_strain_hamiltonian">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">typed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">eight_band_strain_hamiltonian</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">Ev0</span><span class="p">,</span> <span class="n">Ec0</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">ezz</span><span class="p">,</span> <span class="n">me_eff</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">,</span> <span class="n">gamma3</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">Delta</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span>
+                                  <span class="n">Ep</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Hamiltonian to calculate cb, hh, lh, so bands and include strain for the biaxial (along [001]) special case.</span>
+<span class="sd">    </span>
+<span class="sd">    See Hamiltonian in ref. but remove row 1 and 6 and column 1 and 6.</span>
+<span class="sd">    http://prb.aps.org/pdf/PRB/v73/i12/e125348&quot;&quot;&quot;</span>
+    <span class="n">science_reference</span><span class="p">(</span><span class="s2">&quot;k.p Hamiltonian&quot;</span><span class="p">,</span> <span class="s2">&quot;Stanko Tomic et al., Electronic structure of InyGa1yAs1xNxGaAs(N) quantum &quot;</span>
+                                         <span class="s2">&quot;dots by ten-band k.txt.p theory. Phys. Rev. B 73, 125348 (2006)&quot;</span><span class="p">)</span>
+
+    <span class="n">av</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span>
+        <span class="n">av</span><span class="p">)</span>  <span class="c1"># The sign in Vurgaftmann is negative while Chuang (and Tomic) assumes it is possitve. We make sure it truly is.</span>
+
+    <span class="n">Eg</span> <span class="o">=</span> <span class="n">Ec0</span> <span class="o">-</span> <span class="n">Ev0</span>
+    <span class="n">sqrt2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sqrt3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">sqrt6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">sqrt3o2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">m0</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">electron_mass</span>
+
+    <span class="c1"># The Kane matrix element (Vurgaftman &#39;interband matrix element&#39;)</span>
+    <span class="n">P0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Ep</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">m0</span><span class="p">))</span>  <span class="c1"># as a momentum</span>
+
+    <span class="c1"># &quot;Modified&quot; Luttinger parameters</span>
+    <span class="n">gc</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">me_eff</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">electron_mass</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">Ep</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="n">Eg</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">Eg</span> <span class="o">+</span> <span class="n">Delta</span><span class="p">))</span>
+    <span class="n">g1</span> <span class="o">=</span> <span class="n">gamma1</span> <span class="o">-</span> <span class="n">Ep</span> <span class="o">/</span> <span class="p">(</span>
+    <span class="mi">3</span> <span class="o">*</span> <span class="n">Eg</span> <span class="o">+</span> <span class="n">Delta</span><span class="p">)</span>  <span class="c1"># There was an error here. It was written as: g1 = gamma1 - Ep/(3*(Eg + Delta))</span>
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">gamma2</span> <span class="o">-</span> <span class="n">Ep</span> <span class="o">/</span> <span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">Eg</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Delta</span><span class="p">)</span>
+    <span class="n">g3</span> <span class="o">=</span> <span class="n">gamma3</span> <span class="o">-</span> <span class="n">Ep</span> <span class="o">/</span> <span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">Eg</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Delta</span><span class="p">)</span>
+
+    <span class="n">Ck</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">m0</span><span class="p">)</span>
+
+    <span class="c1"># Luttinger-Kohn terms</span>
+    <span class="n">Ok</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="n">Ck</span> <span class="o">*</span> <span class="n">gc</span> <span class="o">*</span> <span class="p">(</span><span class="n">kx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ky</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">kz</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Pk</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="n">Ck</span> <span class="o">*</span> <span class="n">g1</span> <span class="o">*</span> <span class="p">(</span><span class="n">kx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ky</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">kz</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Qk</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="n">Ck</span> <span class="o">*</span> <span class="n">g2</span> <span class="o">*</span> <span class="p">(</span><span class="n">kx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ky</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">kz</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Rk</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="n">Ck</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="p">(</span><span class="n">g2</span> <span class="o">*</span> <span class="p">(</span><span class="n">kx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">ky</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">g3</span> <span class="o">*</span> <span class="n">kx</span> <span class="o">*</span> <span class="n">ky</span><span class="p">)</span>
+    <span class="n">Sk</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="n">Ck</span> <span class="o">*</span> <span class="n">sqrt6</span> <span class="o">*</span> <span class="n">g3</span> <span class="o">*</span> <span class="p">(</span><span class="n">kx</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky</span><span class="p">)</span> <span class="o">*</span> <span class="n">kz</span>
+    <span class="n">Tk</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sqrt6</span> <span class="o">*</span> <span class="n">P0</span> <span class="o">*</span> <span class="p">(</span><span class="n">kx</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky</span><span class="p">)</span>
+    <span class="n">Uk</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">P0</span> <span class="o">*</span> <span class="n">kz</span>
+
+    <span class="c1"># Conjugate</span>
+    <span class="n">Rkc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="n">Ck</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="p">(</span><span class="n">g2</span> <span class="o">*</span> <span class="p">(</span><span class="n">kx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">ky</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">g3</span> <span class="o">*</span> <span class="n">kx</span> <span class="o">*</span> <span class="n">ky</span><span class="p">)</span>
+    <span class="n">Skc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="n">Ck</span> <span class="o">*</span> <span class="n">sqrt6</span> <span class="o">*</span> <span class="n">g3</span> <span class="o">*</span> <span class="p">(</span><span class="n">kx</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky</span><span class="p">)</span> <span class="o">*</span> <span class="n">kz</span>
+    <span class="n">Tkc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sqrt6</span> <span class="o">*</span> <span class="n">P0</span> <span class="o">*</span> <span class="p">(</span><span class="n">kx</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">ky</span><span class="p">)</span>
+
+    <span class="c1"># Strain terms (biaxial approximation makes many of these function zero)</span>
+    <span class="n">Oe</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">ac</span> <span class="o">*</span> <span class="p">(</span><span class="n">exx</span> <span class="o">+</span> <span class="n">eyy</span> <span class="o">+</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">Pe</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="o">-</span><span class="n">av</span> <span class="o">*</span> <span class="p">(</span><span class="n">exx</span> <span class="o">+</span> <span class="n">eyy</span> <span class="o">+</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">Qe</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="o">-</span><span class="n">b</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">exx</span> <span class="o">+</span> <span class="n">eyy</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="c1"># Re = lambda exx,eyy,ezz: 0</span>
+    <span class="c1"># Se = lambda exx,eyy,ezz: 0</span>
+    <span class="c1"># Tk = lambda exx,eyy,ezz: 0</span>
+    <span class="c1"># Uk = lambda exx,eyy,ezz: 0</span>
+
+    <span class="c1"># Complete terms</span>
+    <span class="n">O</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Ok</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span> <span class="o">+</span> <span class="n">Oe</span><span class="p">(</span><span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Pk</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span> <span class="o">+</span> <span class="n">Pe</span><span class="p">(</span><span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Qk</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span> <span class="o">+</span> <span class="n">Qe</span><span class="p">(</span><span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Rk</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span>  <span class="c1"># Here the strain term is zero</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Sk</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span>  <span class="c1"># Here the strain term is zero</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Tk</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span>  <span class="c1"># Here the strain term is zero</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Uk</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span>  <span class="c1"># Here the strain term is zero</span>
+
+    <span class="c1"># Conjugates</span>
+    <span class="n">Rc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Rkc</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span>  <span class="c1"># Here the strain term is zero</span>
+    <span class="n">Sc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Skc</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span>  <span class="c1"># Here the strain term is zero</span>
+    <span class="n">Tc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Tkc</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span>  <span class="c1"># Here the strain term is zero</span>
+
+    <span class="c1"># Bands</span>
+    <span class="n">Ecb</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Ec0</span> <span class="o">+</span> <span class="n">O</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">Ehh</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Ev0</span> <span class="o">-</span> <span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span> <span class="o">+</span> <span class="n">Q</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">))</span>
+    <span class="n">Elh</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Ev0</span> <span class="o">-</span> <span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span> <span class="o">-</span> <span class="n">Q</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">))</span>
+    <span class="n">Eso</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">:</span> <span class="n">Ev0</span> <span class="o">-</span> <span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span> <span class="o">+</span> <span class="n">Delta</span><span class="p">)</span>
+
+    <span class="n">eyy</span> <span class="o">=</span> <span class="n">exx</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">P</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">R</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">U</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">rc</span> <span class="o">=</span> <span class="n">Rc</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">sc</span> <span class="o">=</span> <span class="n">Sc</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">tc</span> <span class="o">=</span> <span class="n">Tc</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">cb</span> <span class="o">=</span> <span class="n">Ecb</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">hh</span> <span class="o">=</span> <span class="n">Ehh</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">lh</span> <span class="o">=</span> <span class="n">Elh</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+    <span class="n">so</span> <span class="o">=</span> <span class="n">Eso</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">)</span>
+
+    <span class="n">H_ST</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mat</span><span class="p">([</span>
+        <span class="p">[</span><span class="n">cb</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt3</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">u</span><span class="p">,</span> <span class="o">-</span><span class="n">u</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">tc</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt2</span> <span class="o">*</span> <span class="n">tc</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">sqrt3</span> <span class="o">*</span> <span class="n">tc</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">s</span><span class="p">,</span> <span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">r</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt2</span> <span class="o">*</span> <span class="n">r</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">sqrt2</span> <span class="o">*</span> <span class="n">u</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">sc</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt2</span> <span class="o">*</span> <span class="n">q</span><span class="p">,</span> <span class="n">tc</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">s</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">u</span><span class="p">,</span> <span class="o">-</span><span class="n">sc</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt2</span> <span class="o">*</span> <span class="n">q</span><span class="p">,</span> <span class="n">so</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">tc</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt3</span> <span class="o">*</span> <span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="n">cb</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt3</span> <span class="o">*</span> <span class="n">tc</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">u</span><span class="p">,</span> <span class="o">-</span><span class="n">u</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">rc</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">rc</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt3</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">sc</span><span class="p">,</span> <span class="o">-</span><span class="n">sc</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="n">rc</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt3</span> <span class="o">*</span> <span class="n">sc</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">u</span><span class="p">,</span> <span class="n">sqrt2</span> <span class="o">*</span> <span class="n">s</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt2</span> <span class="o">*</span> <span class="n">q</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">sqrt2</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt2</span> <span class="o">*</span> <span class="n">rc</span><span class="p">,</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">sc</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">u</span><span class="p">,</span> <span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="o">-</span><span class="n">sqrt2</span> <span class="o">*</span> <span class="n">q</span><span class="p">,</span> <span class="n">so</span><span class="p">]</span>
+    <span class="p">])</span>
+
+    <span class="c1">#     View hamiltonian, good for debugging</span>
+    <span class="c1">#     if True:</span>
+    <span class="c1">#         import pylab</span>
+    <span class="c1">#         pylab.imshow(numpy.real(H_ST))</span>
+    <span class="c1">#         pylab.show()</span>
+
+    <span class="n">H_ST</span> <span class="o">=</span> <span class="n">H_ST</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">E</span><span class="p">,</span> <span class="n">Psi</span> <span class="o">=</span> <span class="n">eig</span><span class="p">(</span><span class="n">H_ST</span><span class="p">)</span>  <span class="c1"># do all the math</span>
+
+    <span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="nb">sorted</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">real</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">bands</span></div>
+
+
+<div class="viewcode-block" id="effective_mass_energy"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.effective_mass_energy">[docs]</a><span class="k">def</span> <span class="nf">effective_mass_energy</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">m_eff</span><span class="p">,</span> <span class="n">E0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">E0</span> <span class="o">+</span> <span class="n">constants</span><span class="o">.</span><span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">m_eff</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span> <span class="o">**</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="kp_bands"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.kp_bands">[docs]</a><span class="k">def</span> <span class="nf">kp_bands</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">host_material</span><span class="p">,</span> <span class="n">kx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ky</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kz</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">return_so</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fit_effective_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+             <span class="n">effective_mass_direction</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="n">additional_traverse</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param material:</span>
+<span class="sd">    :param host_material:</span>
+<span class="sd">    :param kx:</span>
+<span class="sd">    :param ky:</span>
+<span class="sd">    :param kz:</span>
+<span class="sd">    :param return_so:</span>
+<span class="sd">    :param graph:</span>
+<span class="sd">    :param fit_effective_mass:</span>
+<span class="sd">    :param effective_mass_direction:</span>
+<span class="sd">    :param additional_traverse:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Delta</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">spin_orbit_splitting</span>
+    <span class="n">Eg</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">band_gap</span>
+    <span class="n">Ev0</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">valence_band_offset</span>
+    <span class="n">Ec0</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">valence_band_offset</span> <span class="o">+</span> <span class="n">Eg</span>
+    <span class="n">a0</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">lattice_constant</span>
+    <span class="n">g1</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">gamma1</span>
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">gamma2</span>
+    <span class="n">g3</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">gamma3</span>
+    <span class="n">ac</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">a_c</span>
+    <span class="n">av</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">a_v</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">b</span>
+    <span class="n">Ep</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">interband_matrix_element</span>
+    <span class="c1"># print (ac, av, b, Ep, a0)</span>
+    <span class="n">me_eff</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">eff_mass_electron_Gamma</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">electron_mass</span>
+
+    <span class="c1"># Strain parameters</span>
+    <span class="n">exx</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">material</span><span class="o">.</span><span class="n">lattice_constant</span> <span class="o">-</span> <span class="n">host_material</span><span class="o">.</span><span class="n">lattice_constant</span><span class="p">)</span> <span class="o">/</span> <span class="n">material</span><span class="o">.</span><span class="n">lattice_constant</span>
+    <span class="n">ezz</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">material</span><span class="o">.</span><span class="n">c12</span> <span class="o">/</span> <span class="n">material</span><span class="o">.</span><span class="n">c11</span> <span class="o">*</span> <span class="n">exx</span>  <span class="c1"># why this?</span>
+    <span class="c1">#print(&quot;suspect stuff around here&quot;)</span>
+    <span class="n">zMax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="n">a0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">kx</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">zMax</span>
+    <span class="n">ky</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">zMax</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">eight_band_strain_hamiltonian</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">Ev0</span><span class="p">,</span> <span class="n">Ec0</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">ezz</span><span class="p">,</span> <span class="n">me_eff</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">Delta</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">Ep</span><span class="p">)</span>
+    <span class="n">so</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">result</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">material</span><span class="o">.</span><span class="n">lattice_constant</span> <span class="o">&lt;</span> <span class="n">host_material</span><span class="o">.</span><span class="n">lattice_constant</span><span class="p">:</span>
+        <span class="c1">#print(&quot;CAUTION: BLINDLY SWAPPING HH,LH LABELS BASED ON LATTICE CONSTANT&quot;)</span>
+        <span class="n">lh</span><span class="p">,</span> <span class="n">hh</span> <span class="o">=</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span>
+
+    <span class="k">if</span> <span class="n">fit_effective_mass</span><span class="p">:</span>
+        <span class="n">fitpoint_x</span> <span class="o">=</span> <span class="mf">0.05</span>
+
+        <span class="n">critical_points</span> <span class="o">=</span> <span class="n">brillouin_critical_points</span><span class="p">(</span><span class="n">material</span><span class="o">.</span><span class="n">lattice_constant</span><span class="p">)</span>
+        <span class="n">critical_gamma</span> <span class="o">=</span> <span class="n">critical_points</span><span class="p">[</span><span class="s2">&quot;Gamma&quot;</span><span class="p">]</span>
+        <span class="n">critical_L</span> <span class="o">=</span> <span class="n">critical_points</span><span class="p">[</span><span class="n">effective_mass_direction</span><span class="p">]</span>
+
+        <span class="n">fitpoint</span> <span class="o">=</span> <span class="n">critical_gamma</span> <span class="o">+</span> <span class="p">(</span><span class="n">critical_L</span> <span class="o">-</span> <span class="n">critical_gamma</span><span class="p">)</span> <span class="o">*</span> <span class="n">fitpoint_x</span>
+        <span class="n">k_cGx</span><span class="p">,</span> <span class="n">k_cGy</span><span class="p">,</span> <span class="n">k_cGz</span> <span class="o">=</span> <span class="n">critical_gamma</span>
+        <span class="n">k_fx</span><span class="p">,</span> <span class="n">k_fy</span><span class="p">,</span> <span class="n">k_fz</span> <span class="o">=</span> <span class="n">fitpoint</span>
+        <span class="n">bands_at_gamma</span> <span class="o">=</span> <span class="n">eight_band_strain_hamiltonian</span><span class="p">(</span><span class="n">k_cGx</span><span class="p">,</span> <span class="n">k_cGy</span><span class="p">,</span> <span class="n">k_cGz</span><span class="p">,</span> <span class="n">Ev0</span><span class="p">,</span> <span class="n">Ec0</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">ezz</span><span class="p">,</span> <span class="n">me_eff</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span>
+                                                       <span class="n">Delta</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">Ep</span><span class="p">)</span>
+        <span class="n">bands_at_fitpoint</span> <span class="o">=</span> <span class="n">eight_band_strain_hamiltonian</span><span class="p">(</span><span class="n">k_fx</span><span class="p">,</span> <span class="n">k_fy</span><span class="p">,</span> <span class="n">k_fz</span><span class="p">,</span> <span class="n">Ev0</span><span class="p">,</span> <span class="n">Ec0</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">ezz</span><span class="p">,</span> <span class="n">me_eff</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span>
+                                                          <span class="n">Delta</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">Ep</span><span class="p">)</span>
+        <span class="n">k_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">fitpoint</span><span class="p">)</span>
+
+        <span class="n">effective_masses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">e0s</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">band</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)):</span>
+            <span class="n">fpE</span> <span class="o">=</span> <span class="n">bands_at_fitpoint</span><span class="p">[</span><span class="n">band</span><span class="p">]</span>
+            <span class="n">oE</span> <span class="o">=</span> <span class="n">bands_at_gamma</span><span class="p">[</span><span class="n">band</span><span class="p">]</span>
+
+            <span class="n">deltaE</span> <span class="o">=</span> <span class="n">fpE</span> <span class="o">-</span> <span class="n">oE</span>
+            <span class="n">m_eff_fit</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">deltaE</span><span class="p">)</span> <span class="o">*</span> <span class="n">k_max</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">effective_masses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_eff_fit</span><span class="p">)</span>
+            <span class="n">e0s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oE</span><span class="p">)</span>
+
+        <span class="n">m_eff_so</span><span class="p">,</span> <span class="n">m_eff_lh</span><span class="p">,</span> <span class="n">m_eff_hh</span><span class="p">,</span> <span class="n">m_eff_c</span> <span class="o">=</span> <span class="n">effective_masses</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">material</span><span class="o">.</span><span class="n">lattice_constant</span> <span class="o">&lt;</span> <span class="n">host_material</span><span class="o">.</span><span class="n">lattice_constant</span><span class="p">:</span>
+            <span class="c1">#print(&quot;CAUTION: BLINDLY SWAPPING EFF MASS HH,LH LABELS BASED ON LATTICE CONSTANT&quot;)</span>
+            <span class="n">m_eff_lh</span><span class="p">,</span> <span class="n">m_eff_hh</span> <span class="o">=</span> <span class="n">m_eff_hh</span><span class="p">,</span> <span class="n">m_eff_lh</span>
+
+    <span class="k">if</span> <span class="n">graph</span><span class="p">:</span>
+        <span class="n">traverse_order</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Gamma&quot;</span><span class="p">,</span> <span class="n">effective_mass_direction</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">additional_traverse</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">traverse_order</span> <span class="o">=</span> <span class="n">traverse_order</span> <span class="o">+</span> <span class="n">additional_traverse</span>
+        <span class="n">allk</span><span class="p">,</span> <span class="n">x_graph</span><span class="p">,</span> <span class="n">xticks</span> <span class="o">=</span> <span class="n">traverse_brillouin</span><span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="n">traverse_order</span><span class="o">=</span><span class="n">traverse_order</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  <span class="c1"># ()</span>
+
+        <span class="n">ticks</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xticks</span><span class="p">]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xticks</span><span class="p">]</span>
+
+        <span class="n">bands</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span> <span class="ow">in</span> <span class="n">allk</span><span class="p">:</span>
+            <span class="n">bands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">eight_band_strain_hamiltonian</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">Ev0</span><span class="p">,</span> <span class="n">Ec0</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">ezz</span><span class="p">,</span> <span class="n">me_eff</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">Delta</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span>
+                                              <span class="n">Ep</span><span class="p">))</span>
+
+        <span class="n">g</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bands</span><span class="p">)):</span>
+            <span class="c1"># print (asUnit(array(b),&quot;eV&quot;))</span>
+            <span class="k">if</span> <span class="n">fit_effective_mass</span><span class="p">:</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphData</span><span class="p">(</span><span class="n">x_graph</span><span class="p">,</span> <span class="n">effective_mass_energy</span><span class="p">(</span><span class="n">x_graph</span> <span class="o">/</span> <span class="n">fitpoint_x</span> <span class="o">*</span> <span class="n">k_max</span><span class="p">,</span> <span class="n">effective_masses</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                                  <span class="n">e0s</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">electron_charge</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                   <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">))</span>
+
+            <span class="n">g</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphData</span><span class="p">(</span><span class="n">x_graph</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="n">electron_charge</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">))</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">xticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span> <span class="n">xticklabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;$E$ (eV)&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;$k$&quot;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;hue wheel&quot;</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># a = Graph(g, xticks = xticks, ylabel=&quot;$E$ (eV)&quot;, palette=&quot;hue wheel&quot;, ylim = (-2,1))</span>
+        <span class="c1"># a = Graph(g,  ylabel=&quot;$E$ (eV)&quot;, palette=&quot;hue wheel&quot;, title=&quot;{} on {} -- Luttinger-Kohn w/Pikus-Bir(Stanko)&quot;.format(str(material), str(host_material)), ylim = (-2,1))</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">fit_effective_mass</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">return_so</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">so</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m_eff_c</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m_eff_hh</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m_eff_lh</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m_eff_so</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m_eff_c</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m_eff_hh</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m_eff_lh</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">return_so</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">so</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="KPbands"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.KPbands">[docs]</a><span class="k">def</span> <span class="nf">KPbands</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">host_material</span><span class="p">,</span> <span class="n">return_edges_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">points</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">vin</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; New version of the above function that produces either the band edges or the full bands in one specifc direction</span>
+<span class="sd">    from Gamma.</span>
+<span class="sd">    </span>
+<span class="sd">    - Calculation of the full Brillouin zone is not allowed. After all, KP is only valid near k.txt=0</span>
+<span class="sd">    - The calculation of the effective masses is done externally by another function</span>
+<span class="sd">    - The direction to calculate the bands is provided either with directory angles or a directory vector</span>
+<span class="sd">    - The number of points of the bands and the fraction up to the border of the Brilluin zone in the given direction are also inputs</span>
+<span class="sd">    - The default direction is X, as given by the angles theta (t) and phi (p)</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Delta</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">spin_orbit_splitting</span>
+    <span class="n">Eg</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">band_gap</span>
+    <span class="n">Ev0</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">valence_band_offset</span>
+    <span class="n">Ec0</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">valence_band_offset</span> <span class="o">+</span> <span class="n">Eg</span>
+    <span class="n">a0</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">lattice_constant</span>
+    <span class="n">g1</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">gamma1</span>
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">gamma2</span>
+    <span class="n">g3</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">gamma3</span>
+    <span class="n">ac</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">a_c</span>
+    <span class="n">av</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">a_v</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">b</span>
+    <span class="n">Ep</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">interband_matrix_element</span>
+    <span class="n">me_eff</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">eff_mass_electron_Gamma</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">electron_mass</span>
+
+    <span class="c1"># Strain parameters</span>
+    <span class="n">exx</span> <span class="o">=</span> <span class="p">(</span><span class="n">host_material</span><span class="o">.</span><span class="n">lattice_constant</span> <span class="o">-</span> <span class="n">a0</span><span class="p">)</span> <span class="o">/</span> <span class="n">a0</span>
+    <span class="n">ezz</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">material</span><span class="o">.</span><span class="n">c12</span> <span class="o">/</span> <span class="n">material</span><span class="o">.</span><span class="n">c11</span> <span class="o">*</span> <span class="n">exx</span>
+
+    <span class="k">if</span> <span class="n">return_edges_only</span><span class="p">:</span>
+        <span class="c1"># If we only want the band edges, we stop here</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">eight_band_strain_hamiltonian</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Ev0</span><span class="p">,</span> <span class="n">Ec0</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">ezz</span><span class="p">,</span> <span class="n">me_eff</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">Delta</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span>
+                                               <span class="n">Ep</span><span class="p">)</span>
+        <span class="n">so</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">result</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">a0</span> <span class="o">&lt;</span> <span class="n">host_material</span><span class="o">.</span><span class="n">lattice_constant</span><span class="p">:</span>
+            <span class="c1"># We need to figure out a safer way of doing this</span>
+            <span class="c1">#print(&quot;CAUTION: BLINDLY SWAPPING HH,LH LABELS BASED ON LATTICE CONSTANT&quot;)</span>
+            <span class="n">lh</span><span class="p">,</span> <span class="n">hh</span> <span class="o">=</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">so</span><span class="p">)</span>
+
+    <span class="n">allk</span> <span class="o">=</span> <span class="n">kvector</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a0</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="n">fraction</span><span class="p">,</span> <span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">,</span> <span class="n">vin</span><span class="o">=</span><span class="n">vin</span><span class="p">)</span>
+
+    <span class="n">bands</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span> <span class="ow">in</span> <span class="n">allk</span><span class="p">:</span>
+        <span class="n">bands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">eight_band_strain_hamiltonian</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">Ev0</span><span class="p">,</span> <span class="n">Ec0</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">ezz</span><span class="p">,</span> <span class="n">me_eff</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">Delta</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">Ep</span><span class="p">))</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vect</span><span class="p">)</span> <span class="k">for</span> <span class="n">vect</span> <span class="ow">in</span> <span class="n">allk</span><span class="p">])]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">band</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bands</span><span class="p">)):</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">band</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">plot_result</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">a0</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k (2*pi/a)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="fit_effective_masses"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.fit_effective_masses">[docs]</a><span class="k">def</span> <span class="nf">fit_effective_masses</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">material</span><span class="p">,</span> <span class="n">host_material</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dk</span><span class="o">=</span><span class="mf">0.026</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">curve_fit</span>
+
+    <span class="n">masses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">a0</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">lattice_constant</span>
+
+    <span class="c1"># General maximum k.txt value. The actual maximum value depends on the direction,</span>
+    <span class="c1"># but the difference is generally not too big</span>
+    <span class="n">kmax</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">a0</span>
+
+    <span class="c1"># We give more weight in the fit to those k.txt points near k.txt=0</span>
+    <span class="n">weigth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">dk</span> <span class="o">*</span> <span class="n">kmax</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>  <span class="c1"># Bands are duplicated (at least for now) so we only fit half of them</span>
+        <span class="n">band</span> <span class="o">=</span> <span class="n">bands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># The initial guess for the effective mass        </span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="mf">0.3</span>
+        <span class="k">if</span> <span class="n">band</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">band</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">p0</span> <span class="o">=</span> <span class="o">-</span><span class="n">p0</span>  <span class="c1"># If bands bend downwards, the curvature (the effective mass) is negative</span>
+
+        <span class="c1"># We consider only points with weight &gt; 0.01 to speed up the algorithm and prevent convergence errors</span>
+        <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">parabolic</span><span class="p">,</span> <span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">weigth</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">],</span> <span class="n">band</span><span class="p">[</span><span class="n">weigth</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">]</span> <span class="o">-</span> <span class="n">band</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p0</span><span class="o">=</span><span class="n">p0</span><span class="p">,</span>
+                               <span class="n">sigma</span><span class="o">=</span><span class="n">weigth</span><span class="p">[</span><span class="n">weigth</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">])</span>
+
+        <span class="c1"># Standard error in the calculation of the mass</span>
+        <span class="c1"># perr = np.sqrt(np.diag(pcov))</span>
+
+        <span class="n">masses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">fit</span> <span class="o">=</span> <span class="n">band</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">parabolic</span><span class="p">(</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">plot_result</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">kmax</span><span class="p">,</span> <span class="n">band</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">kmax</span><span class="p">,</span> <span class="n">fit</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">a0</span> <span class="o">&lt;</span> <span class="n">host_material</span><span class="o">.</span><span class="n">lattice_constant</span><span class="p">:</span>
+        <span class="c1"># We need to figure out a safer way of doing this</span>
+        <span class="c1">#print(&quot;CAUTION: BLINDLY SWAPPING HH,LH LABELS BASED ON LATTICE CONSTANT&quot;)</span>
+        <span class="n">masses</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">masses</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">masses</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">plot_result</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k (2*pi/a)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">masses</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">masses</span><span class="p">))</span> <span class="o">*</span> <span class="n">m0</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">masses</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="parabolic"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.parabolic">[docs]</a><span class="k">def</span> <span class="nf">parabolic</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">mr</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">*</span> <span class="n">mr</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span> <span class="o">**</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="average_inplane_effective_mass"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.average_inplane_effective_mass">[docs]</a><span class="k">def</span> <span class="nf">average_inplane_effective_mass</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">host_material</span><span class="p">,</span> <span class="n">averaging_points</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">dk</span><span class="o">=</span><span class="mf">0.026</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the average in-plane effective mass for the four bands, assuming always the XY plane. &quot;&quot;&quot;</span>
+
+    <span class="c1"># p = phi = Polar angle, always constant for the XY plane</span>
+    <span class="c1"># t = theta = Azimuth. Given the symmetry of the problem, we need to average only 45˚ of the k.txt space</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">averaging_points</span><span class="p">)</span>
+
+    <span class="n">mc</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">mhh</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">mlh</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">mso</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># We calculate the effective mass on each direction and average them</span>
+    <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span>
+        <span class="n">bands</span> <span class="o">=</span> <span class="n">KPbands</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">host_material</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">tt</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">fit_effective_masses</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">material</span><span class="p">,</span> <span class="n">host_material</span><span class="p">,</span> <span class="n">dk</span><span class="o">=</span><span class="n">dk</span><span class="p">)</span>
+
+        <span class="n">mc</span> <span class="o">=</span> <span class="n">mc</span> <span class="o">+</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">mhh</span> <span class="o">=</span> <span class="n">mhh</span> <span class="o">+</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">mlh</span> <span class="o">=</span> <span class="n">mlh</span> <span class="o">+</span> <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">mso</span> <span class="o">=</span> <span class="n">mso</span> <span class="o">+</span> <span class="n">result</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">mc</span> <span class="o">=</span> <span class="n">mc</span> <span class="o">/</span> <span class="n">averaging_points</span>
+    <span class="n">mhh</span> <span class="o">=</span> <span class="n">mhh</span> <span class="o">/</span> <span class="n">averaging_points</span>
+    <span class="n">mlh</span> <span class="o">=</span> <span class="n">mlh</span> <span class="o">/</span> <span class="n">averaging_points</span>
+    <span class="n">mso</span> <span class="o">=</span> <span class="n">mso</span> <span class="o">/</span> <span class="n">averaging_points</span>
+
+    <span class="k">return</span> <span class="n">mc</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">mso</span></div>
+
+
+<div class="viewcode-block" id="kp8x8_bulk"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.kp8x8_bulk">[docs]</a><span class="k">def</span> <span class="nf">kp8x8_bulk</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">host_material</span><span class="p">,</span> <span class="n">averaging_points</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">dk</span><span class="o">=</span><span class="mf">0.026</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Combines the above functions to provide a compact result of the band edges and the effective masses. &quot;&quot;&quot;</span>
+
+    <span class="n">mc</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">mso</span> <span class="o">=</span> <span class="n">average_inplane_effective_mass</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">host_material</span><span class="p">,</span> <span class="n">averaging_points</span><span class="o">=</span><span class="n">averaging_points</span><span class="p">,</span>
+                                                       <span class="n">dk</span><span class="o">=</span><span class="n">dk</span><span class="p">)</span>
+    <span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">so</span> <span class="o">=</span> <span class="n">KPbands</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">host_material</span><span class="p">,</span> <span class="n">return_edges_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">so</span><span class="p">,</span> <span class="n">mc</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">mso</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">solcore</span>
+
+    <span class="c1"># Material parameters</span>
+    <span class="n">GaAs</span> <span class="o">=</span> <span class="n">solcore</span><span class="o">.</span><span class="n">material</span><span class="p">(</span><span class="s2">&quot;GaAs&quot;</span><span class="p">)(</span><span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">InGaAs2</span> <span class="o">=</span> <span class="n">solcore</span><span class="o">.</span><span class="n">material</span><span class="p">(</span><span class="s2">&quot;InGaAs&quot;</span><span class="p">)(</span><span class="n">In</span><span class="o">=</span><span class="mf">0.28</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">InGaAs3</span> <span class="o">=</span> <span class="n">solcore</span><span class="o">.</span><span class="n">material</span><span class="p">(</span><span class="s2">&quot;GaInAs&quot;</span><span class="p">)(</span><span class="n">In</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">GaAsP</span> <span class="o">=</span> <span class="n">solcore</span><span class="o">.</span><span class="n">material</span><span class="p">(</span><span class="s2">&quot;GaInP&quot;</span><span class="p">)(</span><span class="n">In</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+    <span class="n">bands</span> <span class="o">=</span> <span class="n">kp_bands</span><span class="p">(</span><span class="n">GaAs</span><span class="p">,</span> <span class="n">InGaAs3</span><span class="p">,</span> <span class="n">kx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ky</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kz</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fit_effective_mass</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">effective_mass_direction</span><span class="o">=</span><span class="s2">&quot;L&quot;</span><span class="p">,</span>
+                     <span class="n">return_so</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># bands = KPbands(GaAs, GaAsP, fraction=0.2, plot_result=False)</span>
+    <span class="c1"># result = fit_effective_masses(bands, GaAs, GaAsP, plot_result=False)</span>
+    <span class="c1">#</span>
+    <span class="c1"># print(result)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

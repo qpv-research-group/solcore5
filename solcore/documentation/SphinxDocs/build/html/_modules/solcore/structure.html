@@ -1,0 +1,298 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.structure &#8212; Solcore 5.0.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '5.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.structure</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">solcore</span>
+
+
+<div class="viewcode-block" id="Structure"><a class="viewcode-back" href="../../structure.html#solcore.structure.Structure">[docs]</a><span class="k">class</span> <span class="nc">Structure</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Subclass of lists that stores information of a &#39;sample&#39; consisting of several &#39;layers&#39;.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Structure.append"><a class="viewcode-back" href="../../structure.html#solcore.structure.Structure.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_layer</span><span class="p">,</span> <span class="n">layer_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Pass the arguments to the superclass for extending</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">):</span>
+            <span class="c1"># Extend the structure labels</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_label</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_layer</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Structure.append_multiple"><a class="viewcode-back" href="../../structure.html#solcore.structure.Structure.append_multiple">[docs]</a>    <span class="k">def</span> <span class="nf">append_multiple</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">layer_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">([]),</span> <span class="s2">&quot;`append_multiple` only accepts lists for the first argument.&quot;</span>
+
+        <span class="k">if</span> <span class="n">layer_labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">layer_labels</span><span class="p">),</span> <span class="s2">&quot;When using `layer_labels` keyword a label must be specified for each layer added i.e. layers and layer_labels must have the same number of elements.  Either fix this or simply do not assign any labels (i.e. layer_labels=None).&quot;</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">):</span>
+            <span class="c1"># Extend the structure by appending layers</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+
+            <span class="c1"># Extend the structure labels by appending an equal number of None values</span>
+            <span class="c1"># or by appending the actual labels.</span>
+            <span class="k">if</span> <span class="n">layer_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">layer_labels</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">layer_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;  </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">layer</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">))]</span>
+
+        <span class="k">return</span> <span class="s2">&quot;&lt;Structure object</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">layer_info</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Structure.width"><a class="viewcode-back" href="../../structure.html#solcore.structure.Structure.width">[docs]</a>    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">layer</span><span class="o">.</span><span class="n">width</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Structure.relative_widths"><a class="viewcode-back" href="../../structure.html#solcore.structure.Structure.relative_widths">[docs]</a>    <span class="k">def</span> <span class="nf">relative_widths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">aggregate_widths</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">comment</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">):</span>
+            <span class="n">aggregate_widths</span><span class="p">[</span><span class="n">comment</span><span class="p">]</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span>
+
+        <span class="k">for</span> <span class="n">layername</span> <span class="ow">in</span> <span class="n">aggregate_widths</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">aggregate_widths</span><span class="p">[</span><span class="n">layername</span><span class="p">]</span> <span class="o">/=</span> <span class="n">total</span>
+
+        <span class="k">return</span> <span class="n">aggregate_widths</span></div></div>
+
+
+<div class="viewcode-block" id="Layer"><a class="viewcode-back" href="../../structure.html#solcore.structure.Layer">[docs]</a><span class="k">class</span> <span class="nc">Layer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Class that stores the information about layers of materials, such as thickness and composition.</span>
+<span class="sd">    It is the building block of the &#39;Structures&#39; &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">material</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Layer class constructor.</span>
+
+<span class="sd">        :param width: Width of the layer, in SI units.</span>
+<span class="sd">        :param material: Solcore material</span>
+<span class="sd">        :param role: Role of the layer.</span>
+<span class="sd">        :param kwargs: Any other keyword parameter which will become part of the layer attributes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">material</span> <span class="o">=</span> <span class="n">material</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Representation of the Layer object</span>
+<span class="sd">        :return: A string with a summary of the layer properties</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">widthstring</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:.3}</span><span class="s2">nm&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2">layer </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">widthstring</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">material</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Junction"><a class="viewcode-back" href="../../structure.html#solcore.structure.Junction">[docs]</a><span class="k">class</span> <span class="nc">Junction</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Class that groups together the layers that make a junction. Esentially, it is just a list with attributes you can update.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">list</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">layer_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Junction object </span><span class="se">\n\t</span><span class="si">{}</span><span class="se">\n\t</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">layer_info</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="TunnelJunction"><a class="viewcode-back" href="../../structure.html#solcore.structure.TunnelJunction">[docs]</a><span class="k">class</span> <span class="nc">TunnelJunction</span><span class="p">(</span><span class="n">Junction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Class that contains the minimum definitions for a tunnel junction, ie. a series resistance in our case.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">Junction</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">R_series</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;R_series&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;R_series&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span></div>
+
+
+<span class="c1"># CONVERSION UTILITIES</span>
+<span class="c1"># The following functions are used to move back and forth between the Solcore structures and the Device structures used</span>
+<span class="c1"># in the PDD solver</span>
+<div class="viewcode-block" id="InLineComposition"><a class="viewcode-back" href="../../structure.html#solcore.structure.InLineComposition">[docs]</a><span class="k">def</span> <span class="nf">InLineComposition</span><span class="p">(</span><span class="n">layer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Hack to use the Adachi-alfa calculator, provinding the composition as a single string</span>
+
+<span class="sd">    :param layer: A layer as defined in the Device structures of the PDD solver</span>
+<span class="sd">    :return: A mterial string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">comp</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;composition&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;element&#39;</span> <span class="ow">in</span> <span class="n">comp</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">comp</span><span class="p">[</span><span class="s1">&#39;material&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">comp</span><span class="p">[</span><span class="s1">&#39;element&#39;</span><span class="p">],</span> <span class="n">comp</span><span class="p">[</span><span class="s1">&#39;element&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">comp</span><span class="p">[</span><span class="s1">&#39;fraction&#39;</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">comp</span><span class="p">[</span><span class="s1">&#39;material&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="SolcoreMaterialToStr"><a class="viewcode-back" href="../../structure.html#solcore.structure.SolcoreMaterialToStr">[docs]</a><span class="k">def</span> <span class="nf">SolcoreMaterialToStr</span><span class="p">(</span><span class="n">material_input</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Translate a solcore material into something than can be easily stored in a file and read</span>
+
+<span class="sd">    :param material_input: A solcore material</span>
+<span class="sd">    :return: A dictionary with the name, consituents and composition of the material</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">material_string</span> <span class="o">=</span> <span class="n">material_input</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&lt;&gt;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">material_name</span> <span class="o">=</span> <span class="n">material_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+    <span class="n">composition</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;material&#39;</span><span class="p">:</span> <span class="n">material_name</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">material_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">material_composition</span> <span class="o">=</span> <span class="n">material_string</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">material_composition</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">material_name</span><span class="p">:</span>
+                <span class="n">composition</span><span class="p">[</span><span class="s1">&#39;element&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">material_composition</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">composition</span><span class="p">[</span><span class="s1">&#39;fraction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">material_composition</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">composition</span></div>
+
+
+<div class="viewcode-block" id="ToSolcoreMaterial"><a class="viewcode-back" href="../../structure.html#solcore.structure.ToSolcoreMaterial">[docs]</a><span class="k">def</span> <span class="nf">ToSolcoreMaterial</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">execute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; It provides a solcore material out of its string composition. The output can be a string with the command or</span>
+<span class="sd">    a solcore material itself.</span>
+
+<span class="sd">    :param comp: A Solcore material as a string</span>
+<span class="sd">    :param T: The temperature</span>
+<span class="sd">    :param execute: If a Solcore material must be provided or just a string that would do that.</span>
+<span class="sd">    :return: A Solcore material or a string with the command to calculate the solcore material</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># It provides a solcore material out of its string composition. The output can be a string with the comand or a solcore material itself.</span>
+    <span class="k">if</span> <span class="s1">&#39;element&#39;</span> <span class="ow">in</span> <span class="n">comp</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="c1"># A ternary material</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s1">&#39;solcore.material(&quot;</span><span class="si">%s</span><span class="s1">&quot;)(T=</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">comp</span><span class="p">[</span><span class="s1">&#39;material&#39;</span><span class="p">],</span> <span class="n">T</span><span class="p">,</span> <span class="n">comp</span><span class="p">[</span><span class="s1">&#39;element&#39;</span><span class="p">],</span> <span class="n">comp</span><span class="p">[</span><span class="s1">&#39;fraction&#39;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># A binary material</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s1">&#39;solcore.material(&quot;</span><span class="si">%s</span><span class="s1">&quot;)(T=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">comp</span><span class="p">[</span><span class="s1">&#39;material&#39;</span><span class="p">],</span> <span class="n">T</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="s1">&#39;, </span><span class="si">{}</span><span class="s1">=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="s1">&#39;) &#39;</span>
+
+    <span class="k">if</span> <span class="n">execute</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="ToLayer"><a class="viewcode-back" href="../../structure.html#solcore.structure.ToLayer">[docs]</a><span class="k">def</span> <span class="nf">ToLayer</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">material</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Creates a Layer based on strings containing the width, the material and the role</span>
+
+<span class="sd">    :param width: Width of the layer</span>
+<span class="sd">    :param material: Material of the layer, as a string</span>
+<span class="sd">    :param role: The role of the layer</span>
+<span class="sd">    :return: A Solcore Layer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;Layer( width=</span><span class="si">%s</span><span class="s1">, material=</span><span class="si">%s</span><span class="s1">, role=&quot;</span><span class="si">%s</span><span class="s1">&quot;  )&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">material</span><span class="p">,</span> <span class="n">role</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ToStructure"><a class="viewcode-back" href="../../structure.html#solcore.structure.ToStructure">[docs]</a><span class="k">def</span> <span class="nf">ToStructure</span><span class="p">(</span><span class="n">device</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Translate the device object (as used by the PDD solver) into a list of solcore Structure that can be used in</span>
+<span class="sd">    other plugings. Only translate the composition, for now. It works only on non-nested device structures</span>
+<span class="sd">    (QW, for example, but not in devices with QW)</span>
+
+<span class="sd">    :param device: A solcore device structure as used by the PDD solver</span>
+<span class="sd">    :return: A Solcore Structure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">LayersList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">MatList</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]):</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">MatList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ToSolcoreMaterial</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;composition&#39;</span><span class="p">],</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]))</span>
+        <span class="n">LayersList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ToLayer</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;width&#39;</span><span class="p">],</span> <span class="n">MatList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span>
+        <span class="n">LayersList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">strained</span> <span class="o">=</span> <span class="s1">&#39;True&#39;</span>
+
+    <span class="n">LayersList</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span><span class="n">LayersList</span><span class="p">)</span>
+    <span class="n">LayersList</span><span class="o">.</span><span class="n">substrate</span> <span class="o">=</span> <span class="n">ToSolcoreMaterial</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">],</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">LayersList</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

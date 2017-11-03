@@ -1,0 +1,312 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.light_source.spectral2 &#8212; Solcore 5.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.light_source.spectral2</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">solcore</span> <span class="k">import</span> <span class="n">spectral_conversion_nm_ev</span>
+<span class="kn">from</span> <span class="nn">solcore.science_tracker</span> <span class="k">import</span> <span class="n">science_reference</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">this_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="equation_of_time"><a class="viewcode-back" href="../../../spectral/spectral.html#solcore.light_source.spectral2.equation_of_time">[docs]</a><span class="k">def</span> <span class="nf">equation_of_time</span><span class="p">(</span><span class="n">day_angle</span><span class="p">):</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="mf">229.18</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.000075</span> <span class="o">+</span> <span class="mf">0.001868</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">day_angle</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.032077</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">day_angle</span><span class="p">)</span> <span class="o">-</span>
+                      <span class="mf">0.014615</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">day_angle</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.040849</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">day_angle</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="loadUtilitySpectra"><a class="viewcode-back" href="../../../spectral/spectral.html#solcore.light_source.spectral2.loadUtilitySpectra">[docs]</a><span class="k">def</span> <span class="nf">loadUtilitySpectra</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">am_zero_wavelength</span><span class="p">,</span> <span class="n">am_zero_irradiance</span><span class="p">,</span> <span class="n">waterspectra</span><span class="p">,</span> <span class="n">ozonespectra</span><span class="p">,</span> <span class="n">uniformgasspectra</span>
+
+    <span class="n">spctra</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">this_dir</span><span class="p">,</span> <span class="s2">&quot;SPCTRAL_si_units.txt&quot;</span><span class="p">),</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">am_zero_wavelength</span><span class="p">,</span> <span class="n">am_zero_irradiance</span><span class="p">,</span> <span class="n">waterspectra</span><span class="p">,</span> <span class="n">ozonespectra</span><span class="p">,</span> <span class="n">uniformgasspectra</span><span class="p">)</span> \
+        <span class="o">=</span> <span class="n">spctra</span>
+    <span class="n">waterspectra</span> <span class="o">=</span> <span class="n">waterspectra</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">ozonespectra</span> <span class="o">=</span> <span class="n">ozonespectra</span> <span class="o">/</span> <span class="mi">100</span></div>
+
+
+<span class="n">loadUtilitySpectra</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="get_default_spectral2_object"><a class="viewcode-back" href="../../../spectral/spectral.html#solcore.light_source.spectral2.get_default_spectral2_object">[docs]</a><span class="k">def</span> <span class="nf">get_default_spectral2_object</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Returns a default state object for use with calculate_spectrum. Parameters returned are for:</span>
+<span class="sd">        - Coventry (52.39°N,-1.56°E)</span>
+<span class="sd">        - for 12:30 pm on the 30th of June 2011 (that&#39;s in the future!) (not any more..)</span>
+<span class="sd">        - rural atmospheric conditions</span>
+<span class="sd">        - 30% humidity</span>
+<span class="sd">        - 1.42mm precipitated water</span>
+<span class="sd">        - 1030 hPa atmospheric pressure</span>
+<span class="sd">        - 0.34mm of Ozone</span>
+<span class="sd">        - turbidity of 15%.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">52.39</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>  <span class="c1"># Coventry</span>
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.56</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;dateAndTime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2011</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>  <span class="c1"># 12:30pm, 30th of June 2011</span>
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;aod_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rural&quot;</span>
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">103000.0</span>  <span class="c1"># si(&quot;1030 hPa&quot;)  #si (&quot;1 atm&quot;)</span>
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;humidity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>  <span class="c1"># si(&quot;30 %&quot;)</span>
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;precipwater&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.00142</span>  <span class="c1"># si(&quot;1.42 mm&quot;)    # unit?</span>
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;ozone&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.00034</span>  <span class="c1"># si(&quot;0.34 mm&quot;)          # unit?</span>
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;turbidity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.15</span>  <span class="c1"># unit?</span>
+
+    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;display units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;hPa&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="p">(</span><span class="sa">u</span><span class="s2">&quot;degrees&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="p">(</span><span class="sa">u</span><span class="s2">&quot;degrees&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">&quot;precipwater&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">&quot;ozone&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s2">&quot;humidity&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">defaults</span></div>
+
+
+<div class="viewcode-block" id="calculate_spectrum_spectral2"><a class="viewcode-back" href="../../../spectral/spectral.html#solcore.light_source.spectral2.calculate_spectrum_spectral2">[docs]</a><span class="k">def</span> <span class="nf">calculate_spectrum_spectral2</span><span class="p">(</span><span class="n">stateObject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">power_density_in_nm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates a solar spectrum using the SPECTRAL2 irradiance model developed by the NRL:</span>
+
+<span class="sd">    &quot;http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    :param stateObject:</span>
+<span class="sd">    :param suppress_nan:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">science_reference</span><span class="p">(</span><span class="s2">&quot;spectral2 irradiance model&quot;</span><span class="p">,</span> <span class="s2">&quot;http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">stateObject</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stateObject</span> <span class="o">=</span> <span class="n">get_default_spectral2_object</span><span class="p">()</span>
+
+    <span class="n">latitude</span> <span class="o">=</span> <span class="n">stateObject</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="n">stateObject</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+    <span class="n">dateAndTime</span> <span class="o">=</span> <span class="n">stateObject</span><span class="p">[</span><span class="s2">&quot;dateAndTime&quot;</span><span class="p">]</span>
+    <span class="n">aod_model</span> <span class="o">=</span> <span class="n">stateObject</span><span class="p">[</span><span class="s2">&quot;aod_model&quot;</span><span class="p">]</span>
+    <span class="n">pressure</span> <span class="o">=</span> <span class="n">stateObject</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">]</span>
+    <span class="n">humidity</span> <span class="o">=</span> <span class="n">stateObject</span><span class="p">[</span><span class="s2">&quot;humidity&quot;</span><span class="p">]</span>
+    <span class="n">ozone</span> <span class="o">=</span> <span class="n">stateObject</span><span class="p">[</span><span class="s2">&quot;ozone&quot;</span><span class="p">]</span>
+    <span class="n">turbidity</span> <span class="o">=</span> <span class="n">stateObject</span><span class="p">[</span><span class="s2">&quot;turbidity&quot;</span><span class="p">]</span>
+    <span class="n">precipwater</span> <span class="o">=</span> <span class="n">stateObject</span><span class="p">[</span><span class="s2">&quot;precipwater&quot;</span><span class="p">]</span>
+
+    <span class="k">assert</span> <span class="n">aod_model</span> <span class="ow">in</span> <span class="s2">&quot;rural urban maritime tropospheric&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="s2">&quot;aod_model must be rural, urban, maritime, or tropospheric&quot;</span>
+
+    <span class="n">time_since_new_years</span> <span class="o">=</span> <span class="n">dateAndTime</span> <span class="o">-</span> <span class="n">datetime</span><span class="p">(</span><span class="n">dateAndTime</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># 1/1/year, 0:00 am.</span>
+    <span class="n">time_since_midnight</span> <span class="o">=</span> <span class="n">dateAndTime</span> <span class="o">-</span> <span class="n">datetime</span><span class="p">(</span><span class="n">dateAndTime</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">dateAndTime</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">dateAndTime</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># hours_since_midnight = time_since_midnight.seconds / convert(time_since_midnight.seconds, &quot;s&quot;, &quot;h&quot;)</span>
+    <span class="n">hours_since_midnight</span> <span class="o">=</span> <span class="n">time_since_midnight</span><span class="o">.</span><span class="n">seconds</span> <span class="o">/</span> <span class="mi">3600</span>
+    <span class="n">day_number</span> <span class="o">=</span> <span class="n">time_since_new_years</span><span class="o">.</span><span class="n">days</span>
+
+    <span class="c1"># converting back go degrees for longitude rounding</span>
+    <span class="n">longitude_degrees</span> <span class="o">=</span> <span class="n">longitude</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">180</span>  <span class="c1"># convert(longitude,&quot;radians&quot;,u&quot;degrees&quot;)</span>
+
+    <span class="n">day_angle</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">day_number</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">))</span> <span class="o">/</span> <span class="mf">365.0</span>  <span class="c1"># this is in radians</span>
+    <span class="n">hour_angle_degrees</span> <span class="o">=</span> <span class="mf">15.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">hours_since_midnight</span> <span class="o">+</span> <span class="n">equation_of_time</span><span class="p">(</span><span class="n">day_angle</span><span class="p">)</span> <span class="o">/</span> <span class="mf">60.0</span> <span class="o">+</span>
+                                 <span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">longitude_degrees</span> <span class="o">/</span> <span class="mf">15.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">15.0</span> <span class="o">-</span> <span class="n">longitude_degrees</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.0</span><span class="p">)</span>
+                                 <span class="o">/</span> <span class="mf">60.0</span> <span class="o">+</span> <span class="mf">12.0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">360.0</span>  <span class="c1"># this is in degrees.</span>
+
+    <span class="n">hour_angle</span> <span class="o">=</span> <span class="n">hour_angle_degrees</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>  <span class="c1"># convert(hour_angle_degrees, &quot;degrees&quot;, &quot;radians&quot;)</span>
+
+    <span class="n">declination</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.006918</span>
+        <span class="o">-</span> <span class="mf">0.399912</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">day_angle</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mf">0.070257</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">day_angle</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mf">0.006758</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">day_angle</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mf">0.000907</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">day_angle</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mf">0.002697</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">day_angle</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mf">0.00148</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">day_angle</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">earth_sun_distance_factor</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">1.00011</span>
+        <span class="o">+</span> <span class="mf">0.034221</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">day_angle</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mf">0.001280</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">day_angle</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mf">0.000719</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">day_angle</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mf">0.000077</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">day_angle</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">solar_zenith_angle</span> <span class="o">=</span> <span class="n">arccos</span><span class="p">(</span>
+        <span class="n">cos</span><span class="p">(</span><span class="n">declination</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">hour_angle</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">declination</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">solar_zenith_angle_degrees</span> <span class="o">=</span> <span class="n">solar_zenith_angle</span> <span class="o">/</span> <span class="n">pi</span> <span class="o">*</span> <span class="mi">180</span>  <span class="c1"># convert(solar_zenith_angle,&quot;radians&quot;,u&#39;degrees&#39;)</span>
+    <span class="c1"># original code checked to stop sun dropping below horizon</span>
+    <span class="c1"># //Stop sun dropping below horizon</span>
+    <span class="c1">#     if(solar_zenith_angle &gt; 91)</span>
+    <span class="c1">#        solar_zenith_angle = 91; (was in degrees)</span>
+
+
+    <span class="c1"># this used to be 1/ could this cause issues in java?</span>
+    <span class="n">relative_am</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">solar_zenith_angle</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
+        <span class="mf">0.15</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">((</span><span class="mf">93.885</span> <span class="o">-</span> <span class="n">solar_zenith_angle_degrees</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.253</span><span class="p">)))</span>  <span class="c1">##AARG raised to the power of degrees</span>
+    <span class="n">pressure_corrected_am</span> <span class="o">=</span> <span class="n">relative_am</span> <span class="o">*</span> <span class="p">(</span><span class="n">pressure</span> <span class="o">/</span> <span class="mf">101325.33538686013</span><span class="p">)</span>  <span class="c1"># si(&quot;1 atm&quot;)</span>
+    <span class="n">effective_ozone_am</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">22.0</span> <span class="o">/</span> <span class="mf">6370.0</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="nb">pow</span><span class="p">((</span><span class="nb">pow</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">solar_zenith_angle</span><span class="p">),</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">22.0</span> <span class="o">/</span> <span class="mf">6370.0</span><span class="p">))),</span> <span class="mf">0.5</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">aod_model</span> <span class="o">==</span> <span class="s2">&quot;rural&quot;</span><span class="p">:</span>
+        <span class="n">c_coefficient</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.581</span><span class="p">,</span> <span class="mf">16.823</span><span class="p">,</span> <span class="mf">17.539</span><span class="p">]</span>
+        <span class="n">d_coefficient</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.8547</span><span class="p">,</span> <span class="mf">78.696</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">64.458</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">aod_model</span> <span class="o">==</span> <span class="s2">&quot;rural&quot;</span><span class="p">:</span>
+        <span class="n">c_coefficient</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2595</span><span class="p">,</span> <span class="mf">33.843</span><span class="p">,</span> <span class="mf">39.524</span><span class="p">]</span>
+        <span class="n">d_coefficient</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">84.254</span><span class="p">,</span> <span class="o">-</span><span class="mf">9.1</span><span class="p">,</span> <span class="mf">65.458</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">aod_model</span> <span class="o">==</span> <span class="s2">&quot;maritime&quot;</span><span class="p">:</span>
+        <span class="n">c_coefficient</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1134</span><span class="p">,</span> <span class="mf">0.8941</span><span class="p">,</span> <span class="mf">1.0796</span><span class="p">]</span>
+        <span class="n">d_coefficient</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.04435</span><span class="p">,</span> <span class="mf">1.6048</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.5298</span><span class="p">];</span>
+    <span class="k">elif</span> <span class="n">aod_model</span> <span class="o">==</span> <span class="s2">&quot;tropospheric&quot;</span><span class="p">:</span>
+        <span class="n">c_coefficient</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.6786</span><span class="p">,</span> <span class="mf">13.899</span><span class="p">,</span> <span class="mf">13.313</span><span class="p">]</span>
+        <span class="n">d_coefficient</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.8379</span><span class="p">,</span> <span class="mf">14.912</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">5.96</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">aod_model</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">c_coefficient</span><span class="p">,</span> <span class="n">d_coefficient</span> <span class="o">=</span> <span class="n">aod_model</span>
+
+    <span class="c1"># 0.9 degrees * something_in_percent rather than 90 degrees?? Honestly.</span>
+    <span class="n">x_humidity</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">humidity</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>  <span class="c1"># si(0.9,&quot;degrees&quot;,&quot;radians&quot;)</span>
+
+    <span class="n">alpha1</span> <span class="o">=</span> <span class="p">(</span><span class="n">c_coefficient</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">c_coefficient</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x_humidity</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">c_coefficient</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">x_humidity</span><span class="p">)</span>
+    <span class="n">alpha2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d_coefficient</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">d_coefficient</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x_humidity</span> <span class="o">+</span> <span class="n">d_coefficient</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">x_humidity</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">d_coefficient</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">x_humidity</span><span class="p">))</span>
+
+    <span class="n">wavelength_um</span> <span class="o">=</span> <span class="n">am_zero_wavelength</span> <span class="o">*</span> <span class="mf">1e6</span>  <span class="c1"># convert(am_zero_wavelength, &quot;m&quot;, &#39;um&#39;)</span>
+
+    <span class="n">rayleigh_coeff</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">pressure_corrected_am</span> <span class="o">/</span> <span class="p">(</span><span class="n">wavelength_um</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="mf">115.6406</span> <span class="o">-</span> <span class="mf">1.335</span> <span class="o">/</span> <span class="n">wavelength_um</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
+
+    <span class="n">aerosol_coeff</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">wavelength_um</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">,</span>
+                          <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">pressure_corrected_am</span> <span class="o">*</span> <span class="n">turbidity</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">**</span> <span class="p">(</span><span class="n">alpha2</span> <span class="o">-</span> <span class="n">alpha1</span><span class="p">)</span> <span class="o">*</span> <span class="n">wavelength_um</span> <span class="o">**</span> <span class="o">-</span><span class="n">alpha1</span><span class="p">),</span>
+                          <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">pressure_corrected_am</span> <span class="o">*</span> <span class="n">turbidity</span> <span class="o">*</span> <span class="n">wavelength_um</span> <span class="o">**</span> <span class="o">-</span><span class="n">alpha2</span><span class="p">)</span>
+                          <span class="p">)</span>
+
+    <span class="n">vapour_coeff</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mf">0.2385</span> <span class="o">*</span> <span class="n">precipwater</span> <span class="o">*</span> <span class="n">waterspectra</span> <span class="o">*</span> <span class="n">relative_am</span><span class="p">)</span>
+                       <span class="o">/</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">20.07</span> <span class="o">*</span> <span class="n">precipwater</span> <span class="o">*</span> <span class="n">waterspectra</span> <span class="o">*</span> <span class="n">relative_am</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.45</span><span class="p">)</span>
+
+    <span class="n">ozone_coeff</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">ozonespectra</span> <span class="o">*</span> <span class="n">ozone</span> <span class="o">*</span> <span class="n">effective_ozone_am</span><span class="p">)</span>
+
+    <span class="n">mixed_coeff</span> <span class="o">=</span> <span class="n">exp</span><span class="p">((</span><span class="o">-</span><span class="mf">1.41</span> <span class="o">*</span> <span class="n">uniformgasspectra</span> <span class="o">*</span> <span class="n">pressure_corrected_am</span><span class="p">)</span>
+                      <span class="o">/</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">118.93</span> <span class="o">*</span> <span class="n">uniformgasspectra</span> <span class="o">*</span> <span class="n">pressure_corrected_am</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.45</span><span class="p">);</span>
+
+    <span class="c1"># Apply attenuation/scatting coefficients to the per m specturm (SI wavelength spectrum)</span>
+    <span class="n">wavelength_m</span> <span class="o">=</span> <span class="n">am_zero_wavelength</span>
+    <span class="n">irradiance_per_m</span> <span class="o">=</span> <span class="n">am_zero_irradiance</span> <span class="o">*</span> <span class="n">earth_sun_distance_factor</span> <span class="o">*</span> <span class="n">rayleigh_coeff</span> <span class="o">*</span> <span class="n">aerosol_coeff</span> <span class="o">*</span> <span class="n">vapour_coeff</span> <span class="o">*</span> <span class="n">ozone_coeff</span> <span class="o">*</span> <span class="n">mixed_coeff</span>
+
+    <span class="k">if</span> <span class="n">suppress_nan</span><span class="p">:</span>
+        <span class="n">irradiance_per_m</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">irradiance_per_m</span><span class="p">)</span>
+
+    <span class="n">storage</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="c1"># Convert to per nm spectrum</span>
+    <span class="n">wavelength_nm</span> <span class="o">=</span> <span class="n">wavelength_m</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># asUnit(wavelength_m,&quot;nm&quot;)</span>
+    <span class="n">irradiance_per_nm</span> <span class="o">=</span> <span class="mf">1e-9</span> <span class="o">*</span> <span class="n">irradiance_per_m</span>  <span class="c1"># asUnit(irradiance_per_m,&quot;nm-1&quot;)</span>
+
+    <span class="k">if</span> <span class="n">power_density_in_nm</span><span class="p">:</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="n">wavelength_nm</span><span class="p">,</span> <span class="n">irradiance_per_nm</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Convert to per eV spectrum</span>
+        <span class="n">energy_ev</span><span class="p">,</span> <span class="n">irradiance_per_ev</span> <span class="o">=</span> <span class="n">spectral_conversion_nm_ev</span><span class="p">(</span><span class="n">wavelength_nm</span><span class="p">,</span> <span class="n">irradiance_per_nm</span><span class="p">)</span>
+
+        <span class="c1"># Covert to energy per Joule spectrum</span>
+        <span class="n">energy_j</span> <span class="o">=</span> <span class="n">energy_ev</span> <span class="o">*</span> <span class="mf">1.6e-19</span>  <span class="c1"># siUnits(energy_ev, &#39;J&#39;)</span>
+        <span class="n">irradiance_per_j</span> <span class="o">=</span> <span class="n">irradiance_per_ev</span> <span class="o">/</span> <span class="mf">1.6e-19</span>  <span class="c1"># siUnits(irradiance_per_ev, &#39;J-1&#39;)</span>
+
+        <span class="c1"># integrate to find power density</span>
+        <span class="n">power_density</span> <span class="o">=</span> <span class="n">trapz</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">wavelength_m</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">irradiance_per_m</span><span class="p">)</span>
+
+        <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;incident power density&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">power_density</span>
+        <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;incident spectrum wavelength si&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">wavelength_m</span><span class="p">,</span> <span class="n">irradiance_per_m</span><span class="p">])</span>
+        <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;incident spectrum wavelength nm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">wavelength_nm</span><span class="p">,</span> <span class="n">irradiance_per_nm</span><span class="p">])</span>
+        <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;incident spectrum energy si&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">energy_j</span><span class="p">,</span> <span class="n">irradiance_per_j</span><span class="p">])</span>
+        <span class="n">storage</span><span class="p">[</span><span class="s1">&#39;incident spectrum energy eV&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">energy_ev</span><span class="p">,</span> <span class="n">irradiance_per_ev</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">storage</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">calculate_spectrum_spectral2</span><span class="p">()</span>
+
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;incident spectrum wavelength nm&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;incident spectrum wavelength nm&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

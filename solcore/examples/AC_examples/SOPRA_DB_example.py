@@ -47,7 +47,7 @@ AX1_2.plot(GaAs_k[0], GaAs_k[1], linewidth=2, color='red')
 
 AX1.set_xlabel("Wavelength (nm)", fontweight="bold", fontstyle="italic")
 AX1.set_ylabel("Refractive Index, n", fontweight="bold", fontstyle="italic", color='blue')
-AX1.set_title("Example 1 :: n and k.txt data for GaAs", fontweight="bold", fontstyle="italic")
+AX1.set_title("Example 1 :: n and k data for GaAs", fontweight="bold", fontstyle="italic")
 
 AX1_2.set_ylabel("Extinction Coefficient, k.txt", fontweight="bold", fontstyle="italic", color='red')
 
@@ -66,9 +66,9 @@ for Wav, n, k in AlGaAs_k:
     AX2.plot(Wav, k, linewidth=2, label=("Al = %4.1f %%" % Al_frac[i]))
     i += 1
 
-AX2.set_title("Eaxmple 2 :: AlGaAs k.txt data for varying Al fraction", fontweight="bold", fontstyle="italic")
+AX2.set_title("Eaxmple 2 :: AlGaAs k data for varying Al fraction", fontweight="bold", fontstyle="italic")
 AX2.set_xlabel("Wavelength (nm)", fontweight="bold", fontstyle="italic")
-AX2.set_ylabel("Extinction Coefficient, k.txt", fontweight="bold", fontstyle="italic")
+AX2.set_ylabel("Extinction Coefficient, k", fontweight="bold", fontstyle="italic")
 AX2.legend(loc="upper right")
 plt.show()
 

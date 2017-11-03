@@ -493,5 +493,4 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.legend(frameon=False)
 
-    plt.savefig('/Users/diego/Desktop/light_source.pdf')
     plt.show()

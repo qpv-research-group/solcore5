@@ -348,13 +348,12 @@ def qe_pdd(junction, options):
 
     output = {}
     output['QE'] = DumpQE()
-    output['QE']['wavelengths'] = output['Optics']['wavelengths']
+    output['QE']['wavelengths'] = options.wavelength
 
     junction.qe_data = State(**output)
 
     # The EQE is actually the IQE inside the fortran solver due to an error in the naming --> to be changed
-    wl = options.wavelength
-    junction.eqe = interp1d(wl, output['QE']['IQE'], kind='linear', bounds_error=False, assume_sorted=True,
+    junction.eqe = interp1d(options.wavelength, output['QE']['IQE'], kind='linear', bounds_error=False, assume_sorted=True,
                             fill_value=(output['QE']['IQE'][0], output['QE']['IQE'][-1]))
 
 # ----

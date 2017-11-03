@@ -17,7 +17,7 @@ my_structure = Structure([
 
 # We want to calculate the absorption profile of this structure as a function of the position and wavelength
 x = np.linspace(400, 1000, 200)
-out = calculate_absorption_profile(my_structure, x, steps_thinest_layer=20, z_limit=3000)
+out = calculate_absorption_profile(my_structure, x, steps_size=1, z_limit=3000)
 
 # Finally, we plot the absorption profile. Note that absorption at short wavelengths take place near the surface of the
 # structure, in the AlGaAs layer and top of the GaAs layer, while longer wavelengths penetrate more. Wavelengths beyond

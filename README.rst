@@ -15,22 +15,28 @@ Installation
 
 After downloading Solcore, either using 'git' or as a zip file using one of the links on the right, installing it and become a user should be as easy as writing in the terminal::
 
-    >>> python3 setup.py install
+    >>> python setup.py install
 
 You will be asked to accept the license and then it will install all Solcore dependencies (except a Fortran compiler) and Solcore itself in the Python3 package tree. Using it will be as easy as making::
 
     >>> import solcore
 
-        Welcome to Solcore - version 4.1.0
+        Welcome to Solcore - version 5.0.0
         Copyright (c) 2017, Imperial College, London All rights reserved.
         Software released under the GNU Lesser General Public License.
 
 
-If you want to test first if Solcore will work in your computer, without actually installing it, or if you want to become a developer and therefore you need to have it in a more accessible place, you can test if solcore works with::
+If you want to test first if Solcore will work in your computer, without actually installing it, or if you want to become a developer and therefore you need to have it in a more accessible place, you can test if Solcore works with::
 
-    >>> python3 setup.py test
+    >>> python setup.py test
 
-This will install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them.
+This will install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore's functionality, but it will be expanded with time.
+
+Another thing that you might want to do before installing Solcore 5 is compiling the Poisson-drfit-diffusion solver. Assuming there is a Fortran compiler correctly configured to work with F2Py, compiling the library should be as easy as::
+
+    >>> python setup.py build_pdd
+
+This can also be done afterwards using the *config_tools* but you might need admin privileges, depending on where is the Python packages tree.
 
 Things that can go wrong
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -50,7 +56,7 @@ After installing Solcore (or even without installing it), there are a few things
 
     >>> import solcore.config_tools
 
-2. **Create a folder with Solcore examples:** This is the fastest way of getting started. The examples will be created in a subfoler called 'solcore/examples'. Simply use the config_tools, again::
+2. **Create a folder with Solcore examples:** This is the fastest way of getting started. The examples will be created in a subfolder called 'solcore/examples'. Simply use the config_tools, again::
 
     >>> import solcore.config_tools as config
 
@@ -63,7 +69,7 @@ After installing Solcore (or even without installing it), there are a few things
     >>> config.set_location_of_spice('/path/to/the/SPICE/executable')
     >>> config.set_location_of_smarts('/path/to/the/SMARTS/folder')
 
-4. **Open Solcore documentation:** It should contain a description (even minimal) of all Solcore functions, modules and packages. The idea is for it to be a useful tool although it is quite empty, for now. The documentation will open in a webbrowser and you might want to add it to your Bookmarks::
+4. **Open Solcore documentation:** It should contain a description (even minimal) of all Solcore functions, modules and packages. The idea is for it to be a useful tool although it is quite empty, for now. The documentation will open in a web browser and you might want to add it to your Bookmarks::
 
     >>> import solcore.config_tools as config
 
@@ -88,9 +94,7 @@ We have developed Solcore as part of our ongoing research activities to solve sp
 
 Some of the Solcore issues we are aware off are:
 
-- The poisson-drift-diffusion solver, written in Fortran, only works under Linux and Mac (which are the OS we mostly use). We have never been able to make F2Py and the Fortran compiler work together under Windows. Any help with this is more than welcome!!
-- The equations included in the quantum efficiency calculator need a full revision as it is not fuly clear that they include properly the intrinsic region in PIN and NIP solar cells, nor the dependence of the quantum efficiency with voltage.
-- Using an external generation profile in the poisson-drift-diffusion solver only works well for dense, homogeneous meshes. The interpolation scheme of the solver does not considers correctly the situation of fast-varying generation.
+- The poisson-drift-diffusion solver, written in Fortran, has been tested only under Linux and Mac. We have never been successful in making F2Py and the Fortran compiler work together under Windows, although they are supposed to work well. Any help with this is more than welcome!!
 - Documentation is incomplete or obscure, in many cases. Again, something to be solved soon.
 - The calculator of the generation profile using the TMM module is really, really slow as soon as the structure is slightly complicated or the mesh density is high. We'll need to do something about it sooner than later.
 

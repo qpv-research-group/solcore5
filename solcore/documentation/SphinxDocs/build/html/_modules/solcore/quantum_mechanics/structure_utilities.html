@@ -1,0 +1,410 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.quantum_mechanics.structure_utilities &#8212; Solcore 5.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.quantum_mechanics.structure_utilities</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="k">import</span> <span class="n">random</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">solcore.smooth</span> <span class="k">import</span> <span class="n">smooth</span>
+<span class="kn">from</span> <span class="nn">solcore.structure</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">solcore.quantum_mechanics.heterostructure_alignment</span> <span class="k">import</span> <span class="n">VBO_align</span>
+<span class="kn">from</span> <span class="nn">solcore.quantum_mechanics.strain</span> <span class="k">import</span> <span class="n">strain_calculation_parameters</span>
+
+<span class="kn">from</span> <span class="nn">solcore.quantum_mechanics.kp_QW</span> <span class="k">import</span> <span class="n">kp6x6</span><span class="p">,</span> <span class="n">kp4x4</span>
+<span class="kn">from</span> <span class="nn">solcore.quantum_mechanics.kp_bulk</span> <span class="k">import</span> <span class="n">kp8x8_bulk</span>
+
+<span class="n">m0</span> <span class="o">=</span> <span class="n">electron_mass</span>
+
+
+<div class="viewcode-block" id="assemble_qw_structure"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.assemble_qw_structure">[docs]</a><span class="k">def</span> <span class="nf">assemble_qw_structure</span><span class="p">(</span><span class="n">repeats</span><span class="p">,</span> <span class="n">well</span><span class="p">,</span> <span class="n">bulk_l_top</span><span class="p">,</span> <span class="n">bulk_l_bottom</span><span class="p">,</span> <span class="n">barrier</span><span class="p">,</span> <span class="n">well_interlayer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">structure_label</span><span class="o">=</span><span class="s2">&quot;QW Structure&quot;</span><span class="p">,</span> <span class="n">shift_wells</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">half_barrier</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">barrier</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">barrier</span><span class="o">.</span><span class="n">material</span><span class="p">)</span>
+    <span class="n">qw_structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">()</span>
+    <span class="c1"># qw_structure.append(bulk, layer_label=&quot;bulk&quot;)</span>
+    <span class="n">qw_structure</span><span class="o">.</span><span class="n">append_multiple</span><span class="p">([</span><span class="n">bulk_l_top</span><span class="p">],</span> <span class="n">layer_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bulk&quot;</span><span class="p">])</span>
+    <span class="n">qw_structure</span><span class="o">.</span><span class="n">append_multiple</span><span class="p">([</span><span class="n">half_barrier</span><span class="p">],</span> <span class="n">layer_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;half barrier&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">well_interlayer</span><span class="p">:</span>
+        <span class="n">qw_structure</span><span class="o">.</span><span class="n">append_multiple</span><span class="p">([</span><span class="n">well_interlayer</span><span class="p">,</span> <span class="n">well</span><span class="p">,</span> <span class="n">well_interlayer</span><span class="p">,</span> <span class="n">barrier</span><span class="p">],</span> <span class="n">layer_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;interlayer&quot;</span><span class="p">,</span>
+                                                                                                      <span class="s2">&quot;well&quot;</span><span class="p">,</span>
+                                                                                                      <span class="s2">&quot;interlayer&quot;</span><span class="p">,</span>
+                                                                                                      <span class="s2">&quot;barrier&quot;</span><span class="p">],</span>
+                                     <span class="n">repeats</span><span class="o">=</span><span class="n">repeats</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">qw_structure</span><span class="o">.</span><span class="n">append_multiple</span><span class="p">([</span><span class="n">well_interlayer</span><span class="p">,</span> <span class="n">well</span><span class="p">,</span> <span class="n">well_interlayer</span><span class="p">,</span> <span class="n">half_barrier</span><span class="p">,</span> <span class="n">bulk_l_bottom</span><span class="p">],</span>
+                                     <span class="n">layer_labels</span><span class="o">=</span><span class="p">[</span>
+                                         <span class="s2">&quot;interlayer&quot;</span><span class="p">,</span> <span class="s2">&quot;well&quot;</span><span class="p">,</span> <span class="s2">&quot;interlayer&quot;</span><span class="p">,</span> <span class="s2">&quot;half barrier&quot;</span><span class="p">,</span> <span class="s2">&quot;bulk&quot;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">qw_structure</span><span class="o">.</span><span class="n">append_multiple</span><span class="p">([</span><span class="n">well</span><span class="p">,</span> <span class="n">barrier</span><span class="p">],</span> <span class="n">layer_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;well&quot;</span><span class="p">,</span> <span class="s2">&quot;barrier&quot;</span><span class="p">],</span> <span class="n">repeats</span><span class="o">=</span><span class="n">repeats</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">qw_structure</span><span class="o">.</span><span class="n">append_multiple</span><span class="p">([</span><span class="n">well</span><span class="p">,</span> <span class="n">half_barrier</span><span class="p">,</span> <span class="n">bulk_l_bottom</span><span class="p">],</span> <span class="n">layer_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;well&quot;</span><span class="p">,</span> <span class="s2">&quot;half barrier&quot;</span><span class="p">,</span> <span class="s2">&quot;bulk&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">qw_structure</span></div>
+
+
+<div class="viewcode-block" id="vary_well_widths"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.vary_well_widths">[docs]</a><span class="k">def</span> <span class="nf">vary_well_widths</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">region_sought</span><span class="o">=</span><span class="s2">&quot;well&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns an array of indices which correspond to the region that are quantum wells in the structure.&quot;&quot;&quot;</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">structure</span><span class="o">.</span><span class="n">labels</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="o">!=</span> <span class="n">region_sought</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">layer</span><span class="o">.</span><span class="n">width</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">random</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">fraction</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">structure</span></div>
+
+
+<div class="viewcode-block" id="locate_regions"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.locate_regions">[docs]</a><span class="k">def</span> <span class="nf">locate_regions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">region_sought</span><span class="o">=</span><span class="s2">&quot;well&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns an array of indices which correspond to the region that are quantum wells in the structure.&quot;&quot;&quot;</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">well_structure_indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">labels</span><span class="p">))</span> <span class="k">if</span> <span class="n">structure</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span>
+                                      <span class="n">item</span><span class="p">]</span> <span class="o">==</span> <span class="n">region_sought</span><span class="p">])</span>  <span class="c1"># &lt;---- Uses new labels in the structure object</span>
+    <span class="n">well_z_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">well_structure_indices</span><span class="o">.</span><span class="n">issuperset</span><span class="p">([</span><span class="n">i</span><span class="p">]):</span>
+            <span class="n">well_z_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">well_z_indices</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">depth</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">depth</span> <span class="o">+</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">depth</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span>
+    <span class="k">return</span> <span class="n">well_z_indices</span></div>
+
+
+<div class="viewcode-block" id="well_regions"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.well_regions">[docs]</a><span class="k">def</span> <span class="nf">well_regions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">locate_regions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="s2">&quot;well&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="text_render"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.text_render">[docs]</a><span class="k">def</span> <span class="nf">text_render</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">structure</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">bulk</span> <span class="o">=</span> <span class="n">locate_regions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="s2">&quot;bulk&quot;</span><span class="p">)</span>
+    <span class="n">barrier</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">locate_regions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="s2">&quot;barrier&quot;</span><span class="p">))</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">locate_regions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="s2">&quot;half barrier&quot;</span><span class="p">))</span>
+    <span class="n">interlayer</span> <span class="o">=</span> <span class="n">locate_regions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="s2">&quot;interlayer&quot;</span><span class="p">)</span>
+    <span class="n">well</span> <span class="o">=</span> <span class="n">locate_regions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="s2">&quot;well&quot;</span><span class="p">)</span>
+
+    <span class="n">chars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;―&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">bulk</span> <span class="k">else</span> <span class="s2">&quot;_&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">well</span> <span class="k">else</span> <span class="s2">&quot;-&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">interlayer</span> <span class="k">else</span> <span class="s2">&quot;‾&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">barrier</span> <span class="k">else</span> <span class="s2">&quot;?&quot;</span> <span class="k">for</span> <span class="n">i</span>
+             <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">resolution</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chars</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="structure_to_potentials"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.structure_to_potentials">[docs]</a><span class="k">def</span> <span class="nf">structure_to_potentials</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">minimum_step_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">smallest_feature_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                            <span class="n">blur</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="s2">&quot;even&quot;</span><span class="p">,</span> <span class="n">return_qw_boolean_for_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">Efield</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;kp4x4&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Discretizes the structure as a function of the position, providing the potential for the electrons, HH, LH and</span>
+<span class="sd">    SO bands as well as the Luttinger parameters and the effective masses.</span>
+
+<span class="sd">    The result depend on the chosen mode:</span>
+<span class="sd">        - kp4x4, calculates the bands and effective masses at k.txt=0 coupling the HH and LH bands</span>
+<span class="sd">        - kp6x6, calculates the bands and effective masses at k.txt=0 coupling the HH, LH and SO bands</span>
+<span class="sd">        - kp8x8_bulk, calculates the four bands and fit the effective masses with a parabola around k.txt=0</span>
+<span class="sd">        - strain, just shifts the bands according to the strain</span>
+<span class="sd">        - relaxed, do nothing and things are calculated as if we had the bulk, unstrained materials</span>
+
+<span class="sd">    Notice that although the kp8x8_bulk couples the 4 (8) bands, the effective mass is the result of a fitting around</span>
+<span class="sd">    k.txt=0. Therefore, it is not valid to solve 1D problems, but just a bulk-like problem under a parabolic aproximation</span>
+
+<span class="sd">    Additionlly, the band structure can be blured - to simulate the intermixing of materials - as well as being under</span>
+<span class="sd">    an electric field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># We calculate the mesh based on the minimum feature of the structure and the number of points desired for that</span>
+    <span class="c1"># feature</span>
+
+    <span class="n">available_modes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kp6x6&#39;</span><span class="p">,</span> <span class="s1">&#39;kp4x4&#39;</span><span class="p">,</span> <span class="s1">&#39;kp8x8_bulk&#39;</span><span class="p">,</span> <span class="s1">&#39;strain&#39;</span><span class="p">,</span> <span class="s1">&#39;relaxed&#39;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">available_modes</span><span class="p">,</span> <span class="s1">&#39;ERROR: Calculation mode must be </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">available_modes</span><span class="p">)</span>
+
+
+    <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">width</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+    <span class="n">total_width</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">widths</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">step_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">smallest_feature_width</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">widths</span><span class="p">)</span>
+        <span class="n">step_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">smallest_feature_steps</span> <span class="o">/</span> <span class="n">smallest_feature_width</span> <span class="o">*</span> <span class="n">total_width</span><span class="p">)</span>
+        <span class="n">step_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">step_size</span><span class="p">,</span> <span class="n">minimum_step_size</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">total_width</span><span class="p">,</span> <span class="n">step_size</span><span class="p">)</span>
+    <span class="n">Ve</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># Electron potential</span>
+    <span class="n">Vhh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># Heavy hole    &quot;</span>
+    <span class="n">Vlh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># Light hole    &quot;</span>
+    <span class="n">Vso</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># SO band    &quot;</span>
+    <span class="n">me</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># Electron effective mass</span>
+    <span class="n">mhh_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># HH paralell effective mass</span>
+    <span class="n">mhh_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># HH transverse effective mass</span>
+    <span class="n">mlh_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># LH paralell effective mass</span>
+    <span class="n">mlh_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># LH transverse effective mass</span>
+    <span class="n">g1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># Gamma 1</span>
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># Gamma 2</span>
+    <span class="n">g3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># Gamma 3</span>
+    <span class="n">isWell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>  <span class="c1"># indicate where we have the QW    &quot;</span>
+
+    <span class="c1"># Spatially varying effective mass</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># At each position of the structure, we have to calculate the effective mass of electrons and holes, and the band</span>
+    <span class="c1"># edges.</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">(</span><span class="n">depth</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">depth</span> <span class="o">+</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+        <span class="n">me</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;eff_mass_electron&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">electron_mass</span>
+        <span class="n">g1</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gamma1&quot;</span><span class="p">)</span>
+        <span class="n">g2</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gamma2&quot;</span><span class="p">)</span>
+        <span class="n">g3</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gamma3&quot;</span><span class="p">)</span>
+        <span class="n">mhh_p</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">g1</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">g2</span><span class="p">[</span><span class="n">positions</span><span class="p">])</span> <span class="o">*</span> <span class="n">m0</span>
+        <span class="n">mhh_t</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">g1</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">g2</span><span class="p">[</span><span class="n">positions</span><span class="p">])</span> <span class="o">*</span> <span class="n">m0</span>
+        <span class="n">mlh_p</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">g1</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">+</span> <span class="n">g2</span><span class="p">[</span><span class="n">positions</span><span class="p">])</span> <span class="o">*</span> <span class="n">m0</span>
+        <span class="n">mlh_t</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">g1</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">-</span> <span class="n">g2</span><span class="p">[</span><span class="n">positions</span><span class="p">])</span> <span class="o">*</span> <span class="n">m0</span>
+
+        <span class="k">if</span> <span class="n">return_qw_boolean_for_layer</span><span class="p">:</span>
+            <span class="n">isWell</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">layer</span> <span class="o">==</span> <span class="n">return_qw_boolean_for_layer</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Ve</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">Ec</span>
+            <span class="n">Vhh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">Ev</span>
+            <span class="n">Vlh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">Ev</span>
+            <span class="n">Vso</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">Ev</span> <span class="o">-</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">spin_orbit_splitting</span>
+
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;There was a problem converting the structure to a potential because some information was missing &quot;</span>
+                  <span class="s2">&quot;from the structure state.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Try calling the function &#39;align_heterostructure_using_Vurgaftman&#39; before calling &quot;</span>
+                  <span class="s2">&quot;&#39;structure_to_potentials&#39;.&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">inst</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">inst</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="n">substrate</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">substrate</span>
+
+        <span class="c1"># Now we modify the band profile and effective masses according to the chosen mode:</span>
+        <span class="c1"># - kp4x4, calculates the bands and effective masses at k.txt=0 coupling the HH and LH bands</span>
+        <span class="c1"># - kp6x6, calculates the bands and effective masses at k.txt=0 coupling the HH, LH and SO bands</span>
+        <span class="c1"># - kp8x8_bulk, calculates the four bands and fit the effective masses with a parabola around k.txt=0</span>
+        <span class="c1"># - strain, just shifts the bands according to the strain</span>
+        <span class="c1"># - relaxed, do nothing and things are calculated as if we had the bulk, unstrained materials</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;kp6x6&#39;</span><span class="p">:</span>
+            <span class="c1"># The band edges are shifted and the effective mass of the LHs also changes.</span>
+            <span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">so</span><span class="p">,</span> <span class="n">mc_kp</span><span class="p">,</span> <span class="n">mhh_p_kp</span><span class="p">,</span> <span class="n">mlh_p_kp</span><span class="p">,</span> <span class="n">mso_p_kp</span><span class="p">,</span> <span class="n">mhh_t_kp</span><span class="p">,</span> <span class="n">mlh_t_kp</span><span class="p">,</span> <span class="n">mso_t_kp</span> <span class="o">=</span> <span class="n">kp6x6</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span>
+                                                                                                         <span class="n">substrate</span><span class="p">)</span>
+
+            <span class="n">mlh_p</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">mlh_p_kp</span>
+            <span class="n">mlh_t</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">mlh_t_kp</span>
+
+            <span class="n">Ve</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
+            <span class="n">Vhh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">hh</span>
+            <span class="n">Vlh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">lh</span>
+            <span class="n">Vso</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">so</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;kp4x4&#39;</span><span class="p">:</span>
+            <span class="c1"># The band edges are shifted but the effective masses around k.txt=0 are not affected.</span>
+            <span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">mc_kp</span><span class="p">,</span> <span class="n">mhh_p_kp</span><span class="p">,</span> <span class="n">mlh_p_kp</span><span class="p">,</span> <span class="n">mhh_t_kp</span><span class="p">,</span> <span class="n">mlh_t_kp</span> <span class="o">=</span> <span class="n">kp4x4</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="n">substrate</span><span class="p">)</span>
+
+            <span class="n">Ve</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
+            <span class="n">Vhh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">hh</span>
+            <span class="n">Vlh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">lh</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;kp8x8_bulk&#39;</span><span class="p">:</span>
+            <span class="c1"># The band edges and the effective mass of Electrons, HH, LH and the SO holes changes.</span>
+            <span class="n">c</span><span class="p">,</span> <span class="n">hh</span><span class="p">,</span> <span class="n">lh</span><span class="p">,</span> <span class="n">so</span><span class="p">,</span> <span class="n">mc</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">mso</span> <span class="o">=</span> <span class="n">kp8x8_bulk</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="n">substrate</span><span class="p">)</span>
+
+            <span class="n">me</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">mc</span>
+            <span class="n">mhh_p</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">mhh</span>
+            <span class="n">mlh_p</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">mlh</span>
+            <span class="n">mhh_t</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">mhh</span>
+            <span class="n">mlh_t</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">mlh</span>
+
+            <span class="n">Ve</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
+            <span class="n">Vhh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">hh</span>
+            <span class="n">Vlh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">lh</span>
+            <span class="n">Vso</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">so</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;strain&#39;</span><span class="p">:</span>
+            <span class="c1"># The bands are just shifted according to strain</span>
+            <span class="n">strain_parameters</span> <span class="o">=</span> <span class="n">strain_calculation_parameters</span><span class="p">(</span><span class="n">substrate</span><span class="p">,</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="n">SO</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">Ve</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ve</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">+</span> <span class="n">strain_parameters</span><span class="o">.</span><span class="n">delta_Ec</span>
+            <span class="n">Vhh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">Vhh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">+</span> <span class="n">strain_parameters</span><span class="o">.</span><span class="n">delta_Ehh</span>
+            <span class="n">Vlh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">=</span> <span class="n">Vlh</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span> <span class="o">+</span> <span class="n">strain_parameters</span><span class="o">.</span><span class="n">delta_Elh</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">depth</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span>
+
+    <span class="c1"># We blur the structure if required</span>
+    <span class="k">if</span> <span class="n">blur</span><span class="p">:</span>
+        <span class="n">Ve</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">Ve</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+        <span class="n">Vhh</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">Vhh</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+        <span class="n">Vlh</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">Vlh</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+        <span class="n">Vso</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">Vso</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+
+        <span class="n">me</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">me</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+        <span class="n">g1</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">g1</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+        <span class="n">g2</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">g2</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+        <span class="n">g3</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">g3</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+
+        <span class="n">mhh_p</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">mhh_p</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+        <span class="n">mhh_t</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">mhh_t</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+        <span class="n">mlh_p</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">mlh_p</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+        <span class="n">mlh_t</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">mlh_t</span><span class="p">,</span> <span class="n">blur</span> <span class="o">/</span> <span class="n">total_width</span> <span class="o">*</span> <span class="n">step_size</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">)</span>
+
+    <span class="c1"># We tilt the structure if there is an electric field</span>
+    <span class="k">if</span> <span class="n">Efield</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">Ve</span> <span class="o">=</span> <span class="n">Ve</span> <span class="o">+</span> <span class="n">q</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">Efield</span>
+        <span class="n">Vhh</span> <span class="o">=</span> <span class="n">Vhh</span> <span class="o">+</span> <span class="n">q</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">Efield</span>
+        <span class="n">Vlh</span> <span class="o">=</span> <span class="n">Vlh</span> <span class="o">+</span> <span class="n">q</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">Efield</span>
+        <span class="n">Vso</span> <span class="o">=</span> <span class="n">Vso</span> <span class="o">+</span> <span class="n">q</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">Efield</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;kp4x4&#39;</span><span class="p">,</span> <span class="s1">&#39;strain&#39;</span><span class="p">,</span> <span class="s1">&#39;relaxed&#39;</span><span class="p">]:</span>
+        <span class="n">Vso</span> <span class="o">=</span> <span class="n">Vso</span> <span class="o">*</span> <span class="mi">0</span>
+
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;kp4x4&#39;</span><span class="p">,</span> <span class="s1">&#39;kp6x6&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+                <span class="s2">&quot;Ve&quot;</span><span class="p">:</span> <span class="n">Ve</span><span class="p">,</span>
+                <span class="s2">&quot;me&quot;</span><span class="p">:</span> <span class="n">me</span><span class="p">,</span>
+                <span class="s2">&quot;Vhh&quot;</span><span class="p">:</span> <span class="n">Vhh</span><span class="p">,</span>
+                <span class="s2">&quot;g1&quot;</span><span class="p">:</span> <span class="n">g1</span><span class="p">,</span>
+                <span class="s2">&quot;Vlh&quot;</span><span class="p">:</span> <span class="n">Vlh</span><span class="p">,</span>
+                <span class="s2">&quot;g2&quot;</span><span class="p">:</span> <span class="n">g2</span><span class="p">,</span>
+                <span class="s2">&quot;Vso&quot;</span><span class="p">:</span> <span class="n">Vso</span><span class="p">,</span>
+                <span class="s2">&quot;g3&quot;</span><span class="p">:</span> <span class="n">g3</span><span class="p">,</span>
+                <span class="s2">&quot;isWell&quot;</span><span class="p">:</span> <span class="n">isWell</span><span class="p">,</span>
+                <span class="s2">&quot;mhh_p&quot;</span><span class="p">:</span> <span class="n">mhh_p</span><span class="p">,</span>
+                <span class="s2">&quot;mhh_t&quot;</span><span class="p">:</span> <span class="n">mhh_t</span><span class="p">,</span>
+                <span class="s2">&quot;mlh_p&quot;</span><span class="p">:</span> <span class="n">mlh_p</span><span class="p">,</span>
+                <span class="s2">&quot;mlh_t&quot;</span><span class="p">:</span> <span class="n">mlh_t</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+                <span class="s2">&quot;Ve&quot;</span><span class="p">:</span> <span class="n">Ve</span><span class="p">,</span>
+                <span class="s2">&quot;me&quot;</span><span class="p">:</span> <span class="n">me</span><span class="p">,</span>
+                <span class="s2">&quot;Vhh&quot;</span><span class="p">:</span> <span class="n">Vhh</span><span class="p">,</span>
+                <span class="s2">&quot;Vlh&quot;</span><span class="p">:</span> <span class="n">Vlh</span><span class="p">,</span>
+                <span class="s2">&quot;Vso&quot;</span><span class="p">:</span> <span class="n">Vso</span><span class="p">,</span>
+                <span class="s2">&quot;isWell&quot;</span><span class="p">:</span> <span class="n">isWell</span><span class="p">,</span>
+                <span class="s2">&quot;mhh&quot;</span><span class="p">:</span> <span class="n">mhh_p</span><span class="p">,</span>
+                <span class="s2">&quot;mlh&quot;</span><span class="p">:</span> <span class="n">mlh_p</span><span class="p">}</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">solcore</span> <span class="k">import</span> <span class="n">si</span><span class="p">,</span> <span class="n">material</span>
+    <span class="kn">from</span> <span class="nn">solcore.structure</span> <span class="k">import</span> <span class="n">Layer</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+    <span class="n">bulk</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;GaAs&quot;</span><span class="p">)(</span><span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">)</span>
+    <span class="n">QW</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;InGaAs&quot;</span><span class="p">)(</span><span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">,</span> <span class="n">In</span><span class="o">=</span><span class="mf">0.147</span><span class="p">)</span>
+    <span class="n">barrier</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;GaAsP&quot;</span><span class="p">)(</span><span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="n">bulk</span><span class="o">.</span><span class="n">strained</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">QW</span><span class="o">.</span><span class="n">strained</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">barrier</span><span class="o">.</span><span class="n">strained</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">top_layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">si</span><span class="p">(</span><span class="s2">&quot;50nm&quot;</span><span class="p">),</span> <span class="n">material</span><span class="o">=</span><span class="n">bulk</span><span class="p">)</span>
+    <span class="n">well_layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">si</span><span class="p">(</span><span class="s2">&quot;7.2nm&quot;</span><span class="p">),</span> <span class="n">material</span><span class="o">=</span><span class="n">QW</span><span class="p">)</span>
+    <span class="n">barrier_layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">si</span><span class="p">(</span><span class="s2">&quot;29nm&quot;</span><span class="p">),</span> <span class="n">material</span><span class="o">=</span><span class="n">barrier</span><span class="p">)</span>
+    <span class="n">bottom_layer</span> <span class="o">=</span> <span class="n">top_layer</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Here is a ASC_examples structure with no materials:&quot;</span><span class="p">)</span>
+
+    <span class="n">test_structure</span> <span class="o">=</span> <span class="n">assemble_qw_structure</span><span class="p">(</span>
+        <span class="n">repeats</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">well</span><span class="o">=</span><span class="n">well_layer</span><span class="p">,</span>
+        <span class="n">bulk_l_top</span><span class="o">=</span><span class="n">top_layer</span><span class="p">,</span>
+        <span class="n">bulk_l_bottom</span><span class="o">=</span><span class="n">bottom_layer</span><span class="p">,</span>
+        <span class="n">barrier</span><span class="o">=</span><span class="n">barrier_layer</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">test_structure</span><span class="o">.</span><span class="n">substrate</span> <span class="o">=</span> <span class="n">bulk</span>
+
+    <span class="n">VBO_align</span><span class="p">(</span><span class="n">test_structure</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">structure_to_potentials</span><span class="p">(</span><span class="n">test_structure</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;kp8x8_bulk&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_structure</span><span class="p">)</span>
+
+    <span class="c1"># plt.plot(result[&#39;x&#39;]*1e9, result[&#39;Ve&#39;]/q, result[&#39;x&#39;]*1e9, result[&#39;Vhh&#39;]/q, result[&#39;x&#39;]*1e9, result[&#39;Vlh&#39;]/q, result[&#39;x&#39;]*1e9, result[&#39;Vso&#39;]/q)</span>
+    <span class="c1">#    plt.ylim(-1.5, 1.0)</span>
+    <span class="c1"># plt.plot(result[&#39;x&#39;]*1e9, result[&#39;me&#39;]/m0, result[&#39;x&#39;]*1e9, result[&#39;mhh_p&#39;]/m0, result[&#39;x&#39;]*1e9, result[&#39;mlh_p&#39;]/m0)</span>
+    <span class="c1"># plt.plot(result[&#39;x&#39;] * 1e9, result[&#39;me&#39;] / m0, result[&#39;x&#39;] * 1e9, result[&#39;mhh_t&#39;] / m0, result[&#39;x&#39;] * 1e9,</span>
+    <span class="c1">#          result[&#39;mlh_t&#39;] / m0)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

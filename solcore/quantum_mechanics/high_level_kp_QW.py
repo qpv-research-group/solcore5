@@ -6,6 +6,7 @@ from solcore.quantum_mechanics import graphics
 from solcore.absorption_calculator.absorption_QW import calc_alpha
 from solcore.interpolate import interp1d
 from solcore.constants import q, vacuum_permittivity
+import numpy as np
 
 
 def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenvalues=10, symmetric=True,
@@ -72,7 +73,7 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
             "potentials": {key: potentials[key] for key in potentials.keys() if key[0] in "Vx"},
             "effective_masses": {key: potentials[key] for key in potentials.keys() if key[0] in "mx"},
             "wavefunctions": {key: bands[key] for key in bands.keys() if 'psi' in key},
-            "E": {key: bands[key] for key in bands.keys() if key[0] in "E"},
+            "E": {key: np.array(bands[key]) for key in bands.keys() if key[0] in "E"},
         }
 
     if "potentials" in graphtype:
