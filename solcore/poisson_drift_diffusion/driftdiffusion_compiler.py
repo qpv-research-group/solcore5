@@ -18,9 +18,16 @@ else:
 code_file = os.path.join(this_dir, fotran_source)
 
 
-def check_ddModel_library_ok(test=False):
-    # If the library file does not exists or it is older than the source file, we re-compile the code
-    if not (os.path.exists(lib_file) and os.path.getmtime(lib_file) > os.path.getmtime(code_file)):
+def check_ddModel_library_ok(force=False, test=False):
+    """ Check if the fortran PDD library exists and if it must be recompiled. If the library file does not exists or it is older than the source file, we re-compile the code. The compilation can be forced, too.
+
+    :param force: If the compilation and building of the library must be done
+    :param test: Use for testing purposes
+    :return:
+    """
+
+    do_it = (not (os.path.exists(lib_file) and os.path.getmtime(lib_file) > os.path.getmtime(code_file))) or force
+    if do_it:
 
         # Optimization flags for the fortran compiler
         # args = '--opt="-O3"'

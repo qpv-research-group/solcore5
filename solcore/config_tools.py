@@ -268,6 +268,17 @@ def set_fortran_compiler(location):
     save_user_config()
 
 
+def compile_poisson_drift_diffusion():
+    """ Compiles the fortran-based poisson-drift-diffusion solver, wrapping the resulting library using F2Py to be accessible from Python.
+
+    :return: none
+    """
+
+    from .poisson_drift_diffusion.driftdiffusion_compiler import check_ddModel_library_ok
+
+    check_ddModel_library_ok(force=True)
+
+
 def get_current_config():
     """ Prints the current Solcore configuration
 

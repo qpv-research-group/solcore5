@@ -10,7 +10,7 @@ config = ConfigParser()
 config.read([default_config])
 
 if 'update_manifest' in sys.argv:
-    #Update the MANIFEST.in file with all the data from folder and subfolders within solcore
+    # Update the MANIFEST.in file with all the data from folder and subfolders within solcore
     include = 'solcore'
     exclude = ['__pycache__', 'egg']
     with open('MANIFEST.in', 'w', encoding='utf-8') as f:
@@ -19,6 +19,13 @@ if 'update_manifest' in sys.argv:
                 include_line = 'include ' + os.path.join(root[2:], '*') + '\n'
                 f.write(include_line)
 
+    sys.exit()
+
+if 'build_pdd' in sys.argv:
+    # Compiles the fortran-based poisson-drift-diffusion solver, wrapping the resulting library using F2Py to be accessible from Python.
+    from solcore.poisson_drift_diffusion.driftdiffusion_compiler import check_ddModel_library_ok
+
+    check_ddModel_library_ok(force=True)
     sys.exit()
 
 if 'install' in sys.argv:
