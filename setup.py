@@ -50,7 +50,7 @@ setup(
     long_description=long_description,
     url='https://www.imperial.ac.uk/quantum-photovoltaics',
     author='The Quantum Photovoltaics Group',
-    author_email='n.ekins-daukes@imperial.ac.uk',
+    author_email='d.alonso-alvarez@imperial.ac.uk',
     license='GNU LGPL',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
