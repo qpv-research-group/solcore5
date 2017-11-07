@@ -201,3 +201,13 @@ Eg_Gamma=1.9 eV
 Eg_X=1.9 eV
 Eg_L=1.9 eV
 spin_orbit_splitting=0.75 eV
+
+[AlAsSb]
+parent0=AlAs
+parent1=AlSb
+x=Sb
+Eg_Gamma=0.19 eV
+Eg_X=0.24 eV
+Eg_L=0.16 eV
+spin_orbit_splitting=0.15 eV
+eff_mass_electron_Gamma=-1.71
