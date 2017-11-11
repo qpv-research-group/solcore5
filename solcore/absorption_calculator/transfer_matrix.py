@@ -1,5 +1,5 @@
 """ This module serves as interface between solcore structures (junctions, layers, materials...) and the
-transfer matrix package developed by Steven Byrnes and included in the PyPy repository.
+transfer matrix package developed by Steven Byrnes and included in the PyPi repository.
 
 """
 import numpy as np

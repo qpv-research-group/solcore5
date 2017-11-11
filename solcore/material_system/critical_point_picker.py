@@ -14,8 +14,8 @@ interactive_terminal = False
 float_re = re.compile(r"[-+]?[0-9]*\.?[0-9]+")
 
 class CPPicker:
-    """ This class can be used to pick the critical points out of a collection of n and k.txt curves for a range of
-    compositions in ternary alloys. Later, this critical points can be used later to calculate the n and k.txt data at any
+    """ This class can be used to pick the critical points out of a collection of n and k curves for a range of
+    compositions in ternary alloys. Later, this critical points can be used later to calculate the n and k data at any
     other intermediate composition.
 
     >>> directory = '/InGaSb-Material/k.txt'

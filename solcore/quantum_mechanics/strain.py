@@ -21,45 +21,6 @@ The procedure to align the heterointerfaces:
 
 """
 
-
-# def strain_calculation_asserts(k.txt, should_print):
-#     """Will check that the sign of parameters for the strain calcuations is correct."""
-#     
-#     assert_sign = dict()
-#     assert_sign = {
-#         'epsilon': -1,
-#         'e_xx': -1,
-#         'e_yy': -1,
-#         'e_zz':  1,
-#         'Pe':  1,
-#         'Qe': -1,
-#         'delta_Ec': 1,
-#     }
-#     #assert_sign['deltaEhh'] = -1 # Sign of delta_Ehh not guaranteed 
-#     #assert_sign['deltaElh'] = -1 # Sign of delta_Elh not guaranteed 
-#     
-#     # Filp sign of these parameters for tensile strain
-#     if k.txt.epsilon > 0:
-#         for key in assert_sign.keys():
-#             assert_sign[key] = assert_sign[key] * -1
-#     
-#     # Sign constant regardless of compressive or tensile strain
-#     assert_sign['ac']   = -1
-#     assert_sign['av']   =  1
-#     assert_sign['b']    = -1
-#     
-#     if should_print:
-#         print()
-#         print ("Checking sign of strain parameters:")
-#     for key in assert_sign.keys():
-#         if np.sign(k.txt[key]) == assert_sign[key]:
-#             if should_print:
-#                 print (key, "\tOK")
-#         else:
-#             if should_print:
-#                 print (key, "\tPROBLEM")
-#             raise ValueError("The parameter `%s' used by the qwell module appears to have the wrong sign." % key)
-
 def strain_calculation_asserts(k, should_print=False):
     """Will check that the sign of parameters for the strain calcuations is correct."""
     if should_print: print(k)

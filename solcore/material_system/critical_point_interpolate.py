@@ -1,5 +1,5 @@
 """
-This module interpolaes the n and k data of an alloy based on the known values at certain specific compositions.
+This module interpolates the n and k data of an alloy based on the known values at certain specific compositions.
 
 The way it works is by interpolating in a smart way certain critical points (usually the Adachi critical points) and
 then filling the gaps in between.
