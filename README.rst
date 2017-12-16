@@ -56,7 +56,7 @@ After installing Solcore (or even without installing it), there are a few things
 
     >>> import solcore.config_tools
 
-2. **Create a folder with Solcore examples:** This is the fastest way of getting started. The examples will be created in a subfolder called 'solcore/examples'. These examples include all the scripts used in the main Solcore paper (submitted to Computer Physics Communications, preprint in https://arxiv.org/abs/1709.06741 ) . Simply use the config_tools, again::
+2. **Create a folder with Solcore examples:** This is the fastest way of getting started. The examples will be created in a subfolder called 'solcore/examples'. These examples include all the scripts used in the main Solcore paper (submitted to Journal of Computational Electronics, preprint in https://arxiv.org/abs/1709.06741 ) . Simply use the config_tools, again::
 
     >>> import solcore.config_tools as config
 
