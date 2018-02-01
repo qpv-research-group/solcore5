@@ -3,135 +3,135 @@ MODULE DriftDiffusion
     IMPLICIT NONE
     
     ! Some constants
-    REAL*16, PARAMETER :: q     = 1.60217646e-19    !Electron charge (C)
-    REAL*16, PARAMETER :: kb     = 1.3806503e-23        !Boltzmann constant (m2 Kg s-2 K-1)
-    REAL*16, PARAMETER :: m0     = 9.10938188e-31    !Electron rest mass (kg)
-    REAL*16, PARAMETER :: Epsi0 = 8.854187817e-12    !Vacuum permitivity (F/m)
-    REAL*16, PARAMETER :: hp     = 6.626068e-34        !Planck's constant (m^2 Kg/s)
-    REAL*16, PARAMETER :: Pi     = 3.14159265359
+    REAl(KIND=16), PARAMETER :: q     = 1.60217646e-19    !Electron charge (C)
+    REAl(KIND=16), PARAMETER :: kb     = 1.3806503e-23        !Boltzmann constant (m2 Kg s-2 K-1)
+    REAl(KIND=16), PARAMETER :: m0     = 9.10938188e-31    !Electron rest mass (kg)
+    REAl(KIND=16), PARAMETER :: Epsi0 = 8.854187817e-12    !Vacuum permitivity (F/m)
+    REAl(KIND=16), PARAMETER :: hp     = 6.626068e-34        !Planck's constant (m^2 Kg/s)
+    REAl(KIND=16), PARAMETER :: Pi     = 3.14159265359
     !
     ! ---------------------------------------------------------------------------
     ! Everything included here are global variables available in the whole module
     ! ---------------------------------------------------------------------------
     ! Some useful variables
-    REAL*16 :: T = 300                             !Temperature. Default room temperature.
+    REAl(KIND=16) :: T = 300                             !Temperature. Default room temperature.
     ! 
     ! Variable inputs and/or outputs. They will have M+1 elements.
-    REAL*16, DIMENSION(0:6000) :: X                !Node possition (m)
-    REAL*16, DIMENSION(0:6000) :: dX            !Node spacing (m)
-    REAL*16, DIMENSION(0:6000) :: n, p            !Electron and hole densities (m-3)
-    REAL*16, DIMENSION(0:6000) :: Rho            !Total charge density Rho = Nd+p-Nd-n (m-3)
-    REAL*16, DIMENSION(0:6000) :: ni               !Carrier intrinsic densities (m-3)
-    REAL*16, DIMENSION(0:6000) :: Nc, Nv        !Total effective density of states of electrons and holes (m-3)
-    REAL*16, DIMENSION(0:6000) :: Nd, Na        !Density of ionised donors and acceptors (m-3).
-    REAL*16, DIMENSION(0:6000) :: Fn, Fp        !Quasi-Fermi potential for electrons and holes (V)
-    REAL*16, DIMENSION(0:6000) :: Psi            !Electrostatic potential (V)
-    REAL*16, DIMENSION(0:6000) :: Eg            !Energy gap (eV)
-    REAL*16, DIMENSION(0:6000) :: Xi            !Electron afinity (eV)
-    REAL*16, DIMENSION(0:6000) :: Mun, Mup        !Mobilities of electrons and holes (m^2/Vs)
-    REAL*16, DIMENSION(0:6000) :: Epsi            !Relative permitivity (-)
-    REAL*16, DIMENSION(0:6000) :: Ncc, Nvhh, Nvlh        !Effective density of states of electrons and holes (m-3)
-    REAL*16, DIMENSION(0:6000) :: tn, tp          !Lifetime of minority carriers in the SRH model
-    REAL*16, DIMENSION(0:6000) :: Brad            !Radiative recombination coeficient
-    REAL*16, DIMENSION(0:6000) :: CCn, CCp        !Auger recombination coeficients
-    REAL*16, DIMENSION(0:6000) :: alfa            !Absorption coefficient. 
-    REAL*16, DIMENSION(0:6000, 0:3000) :: AbsProfile    !Absorption coefficient as a function of wavelength.
-    REAL*16, DIMENSION(0:6000) :: IQE, IQEsrh, IQErad, IQEaug, IQEsurb, IQEsurf ! Internal quantum efficiency of the device as a function of wavelength 
+    REAl(KIND=16), DIMENSION(0:6000) :: X                !Node possition (m)
+    REAl(KIND=16), DIMENSION(0:6000) :: dX            !Node spacing (m)
+    REAl(KIND=16), DIMENSION(0:6000) :: n, p            !Electron and hole densities (m-3)
+    REAl(KIND=16), DIMENSION(0:6000) :: Rho            !Total charge density Rho = Nd+p-Nd-n (m-3)
+    REAl(KIND=16), DIMENSION(0:6000) :: ni               !Carrier intrinsic densities (m-3)
+    REAl(KIND=16), DIMENSION(0:6000) :: Nc, Nv        !Total effective density of states of electrons and holes (m-3)
+    REAl(KIND=16), DIMENSION(0:6000) :: Nd, Na        !Density of ionised donors and acceptors (m-3).
+    REAl(KIND=16), DIMENSION(0:6000) :: Fn, Fp        !Quasi-Fermi potential for electrons and holes (V)
+    REAl(KIND=16), DIMENSION(0:6000) :: Psi            !Electrostatic potential (V)
+    REAl(KIND=16), DIMENSION(0:6000) :: Eg            !Energy gap (eV)
+    REAl(KIND=16), DIMENSION(0:6000) :: Xi            !Electron afinity (eV)
+    REAl(KIND=16), DIMENSION(0:6000) :: Mun, Mup        !Mobilities of electrons and holes (m^2/Vs)
+    REAl(KIND=16), DIMENSION(0:6000) :: Epsi            !Relative permitivity (-)
+    REAl(KIND=16), DIMENSION(0:6000) :: Ncc, Nvhh, Nvlh        !Effective density of states of electrons and holes (m-3)
+    REAl(KIND=16), DIMENSION(0:6000) :: tn, tp          !Lifetime of minority carriers in the SRH model
+    REAl(KIND=16), DIMENSION(0:6000) :: Brad            !Radiative recombination coeficient
+    REAl(KIND=16), DIMENSION(0:6000) :: CCn, CCp        !Auger recombination coeficients
+    REAl(KIND=16), DIMENSION(0:6000) :: alfa            !Absorption coefficient. 
+    REAl(KIND=16), DIMENSION(0:6000, 0:3000) :: AbsProfile    !Absorption coefficient as a function of wavelength.
+    REAl(KIND=16), DIMENSION(0:6000) :: IQE, IQEsrh, IQErad, IQEaug, IQEsurb, IQEsurf ! Internal quantum efficiency of the device as a function of wavelength 
     !
     ! Some derived potentials useful for the calculation
-    REAL*16, DIMENSION(0:6000) :: Vn, Vp        !Band edge potentials with respect certain reference
-    REAL*16, DIMENSION(0:6000) :: Cn, Cp        !Modified electric potentials
+    REAl(KIND=16), DIMENSION(0:6000) :: Vn, Vp        !Band edge potentials with respect certain reference
+    REAl(KIND=16), DIMENSION(0:6000) :: Cn, Cp        !Modified electric potentials
     !
     !
     ! Bulk generation and recombination, including all processes
-    REAL*16, DIMENSION(0:6000) :: GR            ! Generation-Recombination = Rsrh + Rrad + Raug - G
-    REAL*16, DIMENSION(0:6000) :: Rrad            ! Radiative recombination    
-    REAL*16, DIMENSION(0:6000) :: Rsrh            ! SRH recombinaiton
-    REAL*16, DIMENSION(0:6000) :: Raug            ! Auger recombinaiton
-    REAL*16, DIMENSION(0:6000) :: G                ! Generation
-    REAL*16, DIMENSION(6000) :: vpoint            ! Voltage in an IV curve
-    REAL*16, DIMENSION(6000) :: jpoint            ! Total current in an IV curve
-    REAL*16, DIMENSION(6000) :: jsrhpoint        ! SRH current in an IV curve
-    REAL*16, DIMENSION(6000) :: jradpoint        ! Radiative current in an IV curve
-    REAL*16, DIMENSION(6000) :: jaugpoint        ! Auger current in an IV curve
-    REAL*16, DIMENSION(6000) :: jsurpoint        ! Surface recombination current in an IV curve
-    REAL*16, DIMENSION(6000) :: residual        ! residual in an IV curve
+    REAl(KIND=16), DIMENSION(0:6000) :: GR            ! Generation-Recombination = Rsrh + Rrad + Raug - G
+    REAl(KIND=16), DIMENSION(0:6000) :: Rrad            ! Radiative recombination    
+    REAl(KIND=16), DIMENSION(0:6000) :: Rsrh            ! SRH recombinaiton
+    REAl(KIND=16), DIMENSION(0:6000) :: Raug            ! Auger recombinaiton
+    REAl(KIND=16), DIMENSION(0:6000) :: G                ! Generation
+    REAl(KIND=16), DIMENSION(6000) :: vpoint            ! Voltage in an IV curve
+    REAl(KIND=16), DIMENSION(6000) :: jpoint            ! Total current in an IV curve
+    REAl(KIND=16), DIMENSION(6000) :: jsrhpoint        ! SRH current in an IV curve
+    REAl(KIND=16), DIMENSION(6000) :: jradpoint        ! Radiative current in an IV curve
+    REAl(KIND=16), DIMENSION(6000) :: jaugpoint        ! Auger current in an IV curve
+    REAl(KIND=16), DIMENSION(6000) :: jsurpoint        ! Surface recombination current in an IV curve
+    REAl(KIND=16), DIMENSION(6000) :: residual        ! residual in an IV curve
     INTEGER :: nvolt = 0
 
-    REAL*16 :: PhotonFlux                        ! Photon flux
-    REAL*16, DIMENSION(0:3000) :: PFspectrum = 0.0    ! Photon flux as a function of wavelength (same wl that the abs. coef.)
+    REAl(KIND=16) :: PhotonFlux                        ! Photon flux
+    REAl(KIND=16), DIMENSION(0:3000) :: PFspectrum = 0.0    ! Photon flux as a function of wavelength (same wl that the abs. coef.)
     INTEGER :: SRH, RAD, AUG, GEN                ! 1 = Included, 0 = Not included
-    REAL*16 :: Jtot2, CurrentsBias(6), Currents(6)
+    REAl(KIND=16) :: Jtot2, CurrentsBias(6), Currents(6)
     LOGICAL :: SingleWL = .FALSE.                ! Controls the generation in IQE running mode
     LOGICAL :: Dynamic = .FALSE.                ! Controls if there is dynamic meshing or not
     !
     ! Extra values for the boundary conditions    
-!     REAL*16 :: Sn, Sp                            !Surface recombination velocity of minority carriers
-    REAL*16 :: Snfront, Spfront, Snback, Spback    !Surface recombination velocity of minority carriers
-    REAL*16 :: fneq = 1
-    REAL*16 :: bneq = 1
-    REAL*16 :: fpeq = 1
-    REAL*16 :: bpeq = 1
+!     REAl(KIND=16) :: Sn, Sp                            !Surface recombination velocity of minority carriers
+    REAl(KIND=16) :: Snfront, Spfront, Snback, Spback    !Surface recombination velocity of minority carriers
+    REAl(KIND=16) :: fneq = 1
+    REAl(KIND=16) :: bneq = 1
+    REAl(KIND=16) :: fpeq = 1
+    REAl(KIND=16) :: bpeq = 1
     INTEGER :: FTYPE, BTYPE, FSUR, BSUR
-    REAL*16 :: Vbarf, Vbarb
+    REAl(KIND=16) :: Vbarf, Vbarb
     INTEGER :: EQ, SC, OC, OCn, OCp
     !
     ! Reference values, tipically those at x = 0, on the left end of the device
-    REAL*16 :: nir
-    REAL*16 :: Munr, Mupr
-    REAL*16 :: Xir
-    REAL*16 :: Ncr, Nvr
-    REAL*16 :: Egr
-    REAL*16 :: Epsir
+    REAl(KIND=16) :: nir
+    REAl(KIND=16) :: Munr, Mupr
+    REAl(KIND=16) :: Xir
+    REAl(KIND=16) :: Ncr, Nvr
+    REAl(KIND=16) :: Egr
+    REAl(KIND=16) :: Epsir
     !
     ! Doping in the device. We start asuming a simple pin junction
-    REAL*16 :: Aceptors, Intrinsic, Donors        ! Doping of the p, i and n regions.  
-    REAL*16 :: XD = 0.0
+    REAl(KIND=16) :: Aceptors, Intrinsic, Donors        ! Doping of the p, i and n regions.  
+    REAl(KIND=16) :: XD = 0.0
     !
     ! Other variables
     INTEGER :: M                                 ! The number of nodes -1
-    REAL*16 :: MasterNodes(1000) = 0                ! Array containing the position of the Masternodes
-    REAL*16 :: DML(1:1000, 20)                     ! DeviceMaterialsLibrary, array containing all the properties of the materials 
+    REAl(KIND=16) :: MasterNodes(1000) = 0                ! Array containing the position of the Masternodes
+    REAl(KIND=16) :: DML(1:1000, 20)                     ! DeviceMaterialsLibrary, array containing all the properties of the materials 
                                                 ! used in the device.
-    REAL*16 :: DoppingLibrary(200, 4)            ! An array containing all the constant doping profiles used in the device.
-    REAL*16 :: AbsLibrary(-1:1000, 0:3000) = 0.0    ! An array containing all the absorption profiles used in the device.
+    REAl(KIND=16) :: DoppingLibrary(200, 4)            ! An array containing all the constant doping profiles used in the device.
+    REAl(KIND=16) :: AbsLibrary(-1:1000, 0:3000) = 0.0    ! An array containing all the absorption profiles used in the device.
     INTEGER :: MGrid = 1                         ! The number of grid lines (Max MGrid=200)
     INTEGER :: MReg  = 0                         ! The number of different material regions (Max MReg=200)
 
     ! Mesh variables
     INTEGER :: NumWL  = 2                         ! The number of wavelengths in the photon flux and the absroption coefficient
-    REAL*16 :: Coarse, Fine, Ultrafine            ! The different mesh sizes
-    REAL*16 :: Growth                            ! Growth parameter for the dynamic meshing
+    REAl(KIND=16) :: Coarse, Fine, Ultrafine            ! The different mesh sizes
+    REAl(KIND=16) :: Growth                            ! Growth parameter for the dynamic meshing
     ! The clamp for the variables Fn, Psi and Fp.
-    REAL*16 :: clamp = 20
-    REAL*16 :: ATol = 3.1622776601683796e-17    ! SQRT of machine epsilon at quadruple precission
-    REAL*16 :: RTol = 1e-6
+    REAl(KIND=16) :: clamp = 20
+    REAl(KIND=16) :: ATol = 3.1622776601683796e-17    ! SQRT of machine epsilon at quadruple precission
+    REAl(KIND=16) :: RTol = 1e-6
     INTEGER :: nitermax = 40
     !
     ! Voltage, current an series resistance information
-    REAL*16 :: Vbi, Vi, Vap                            ! Built-in voltage, Vi = q*Vbi/kbT, applied voltage (used only in dep.aprox.)
-    REAL*16 :: Voc, Isc, Vmax, Imax, Pmax, FF
-    REAL*16 :: Rs = 0
+    REAl(KIND=16) :: Vbi, Vi, Vap                            ! Built-in voltage, Vi = q*Vbi/kbT, applied voltage (used only in dep.aprox.)
+    REAl(KIND=16) :: Voc, Isc, Vmax, Imax, Pmax, FF
+    REAl(KIND=16) :: Rs = 0
     !
     ! Set of equations to be solved simultaneously [f]=0. For each internal node k = 1, M-2:
     !     - f(3k-1) corresponds to the continuty of Jp, associated to Fp
     !     - f(3k) corresponds to the Poisson equation, associated to Psi
     !     - f(3k+1) corresponds to the continuity of Jn, associated to Fn
     ! The total vector of equations with 3M-1 elements and auxiliary vector
-    REAL*16, DIMENSION(18003) :: f, dsol
+    REAl(KIND=16), DIMENSION(18003) :: f, dsol
     ! The Jacobian matrix in compact form. It only contains the non-zero elements
-    REAL*16, DIMENSION(18003,11) :: Jac
+    REAl(KIND=16), DIMENSION(18003,11) :: Jac
     !
     !
     ! Scaling factors
-!     REAL*16 :: x0                                ! Max length scale x0 = total device thickness
-    REAL*16 :: b                                ! Inverse of thermal voltage b = q/(kb*T)
-    REAL*16 :: C0                                ! Maximum intrinsic concentration
-    REAL*16 :: Mu0                                ! Maximum mobility
-    REAL*16 :: D0                                ! D0 = Mu0/b
-    REAL*16 :: G0                                ! Recombination-Generation G0 = D0*C0/x0**2
-    REAL*16 :: t0                                ! t0 = X0/D0
-    REAL*16 :: J0                                ! Current density J0 = q*D0*C0/X0
+!     REAl(KIND=16) :: x0                                ! Max length scale x0 = total device thickness
+    REAl(KIND=16) :: b                                ! Inverse of thermal voltage b = q/(kb*T)
+    REAl(KIND=16) :: C0                                ! Maximum intrinsic concentration
+    REAl(KIND=16) :: Mu0                                ! Maximum mobility
+    REAl(KIND=16) :: D0                                ! D0 = Mu0/b
+    REAl(KIND=16) :: G0                                ! Recombination-Generation G0 = D0*C0/x0**2
+    REAl(KIND=16) :: t0                                ! t0 = X0/D0
+    REAl(KIND=16) :: J0                                ! Current density J0 = q*D0*C0/X0
     
     ! Output file name
     CHARACTER(200) :: output
@@ -201,7 +201,7 @@ CONTAINS
     SUBROUTINE InitDevice(MM)
         INTEGER :: i, j, k
         INTEGER :: MM
-        REAL*16 :: Nqw, Nbulk, Vconf
+        REAl(KIND=16) :: Nqw, Nbulk, Vconf
 
         CALL open_log()
         
@@ -313,11 +313,11 @@ CONTAINS
 !-------------------------------------------------    
     SUBROUTINE AddLayer(args, dum2)                        
         !External variables
-        REAL*8 :: args(0:dum2)
+        REAl(KIND=8) :: args(0:dum2)
         INTEGER :: dum2
         
         !Internal variables
-        REAL*16 :: xini, xfin
+        REAl(KIND=16) :: xini, xfin
         
         MReg = MReg + 1
         xini = XD
@@ -350,7 +350,7 @@ CONTAINS
 !-------------------------------------------------
     SUBROUTINE AddAbsorption(Ab, WL, dum)                
         ! Add the absorption coefficients to the structure. They MUST be added in the same order than the layers before initialise the structure.
-        REAL*8 :: Ab(0:dum), WL(0:dum)
+        REAl(KIND=8) :: Ab(0:dum), WL(0:dum)
         INTEGER :: dum
         
         IF (NumWL==2) THEN        ! If the number of wavelengths is equal to 2, then this is the first call to this function. 
@@ -362,7 +362,7 @@ CONTAINS
     END SUBROUTINE AddAbsorption
 !-------------------------------------------------    
     SUBROUTINE set_generation(gen_profile, dum_m, dum_wl)
-        REAL*8 :: gen_profile(-1:dum_m, 0:dum_wl)
+        REAl(KIND=8) :: gen_profile(-1:dum_m, 0:dum_wl)
         INTEGER :: dum_m, dum_wl
     
         AbsProfile(0:M, 0:NumWL) = REAL(gen_profile(0:dum_m, 0:dum_wl), 16)
@@ -371,7 +371,7 @@ CONTAINS
     END SUBROUTINE set_generation
 !-------------------------------------------------    
     SUBROUTINE AddMasterNode(newpoint)                    
-        REAL*16 :: newpoint
+        REAl(KIND=16) :: newpoint
         INTEGER :: i, j
         
         DO i = 1, MGrid
@@ -394,8 +394,8 @@ CONTAINS
 !-------------------------------------------------
     SUBROUTINE CreateMesh(MM)                              
         INTEGER :: i, j, k, lc, lf, lu, extra
-        REAL*16 :: delta, deltaF, deltaUF 
-        REAL*16 :: TempMasterNodes(1000)
+        REAl(KIND=16) :: delta, deltaF, deltaUF 
+        REAl(KIND=16) :: TempMasterNodes(1000)
         INTEGER :: MM
         
         IF (MM>0) THEN
@@ -514,14 +514,14 @@ CONTAINS
         INTEGER :: Initial
         ! Internal variables
         INTEGER :: i, j, k, l, frac, NodesPerRegion(1:MGrid), ilast
-        REAL*16 :: Xtemp(0:6000), Dpot, Dmaj, Dpot2, Dmaj2, Dvar, Dvar2, RegionSize(1:MGrid), DGR, DGR2, minSize
-        REAL*16 :: psiint, fpint, fnint, nint, pint, Gint, step
+        REAl(KIND=16) :: Xtemp(0:6000), Dpot, Dmaj, Dpot2, Dmaj2, Dvar, Dvar2, RegionSize(1:MGrid), DGR, DGR2, minSize
+        REAl(KIND=16) :: psiint, fpint, fnint, nint, pint, Gint, step
         LOGICAL :: Join, NotMasterNode(0:6000)
         
         ! Temporal material arrays
-        REAL*16, DIMENSION(0:6000) :: TempFn, TempFp        !Quasi-Fermi potential for electrons and holes (V)
-        REAL*16, DIMENSION(0:6000) :: TempPsi                !Electrostatic potential (V)
-        REAL*16, DIMENSION(0:6000, 0:3000) :: TempAbsProfile!Absorption coefficient as a function of wavelength.
+        REAl(KIND=16), DIMENSION(0:6000) :: TempFn, TempFp        !Quasi-Fermi potential for electrons and holes (V)
+        REAl(KIND=16), DIMENSION(0:6000) :: TempPsi                !Electrostatic potential (V)
+        REAl(KIND=16), DIMENSION(0:6000, 0:3000) :: TempAbsProfile!Absorption coefficient as a function of wavelength.
         
         l = 1
         RegionSize = 0.0
@@ -746,8 +746,8 @@ CONTAINS
     END SUBROUTINE DynamicMesh
 !-------------------------------------------------    
     FUNCTION Interpol(xx, x1, y1, x2, y2)                
-        REAL*16 :: xx, x1, y1, x2, y2, Interpol
-        REAL*16 :: a, b
+        REAl(KIND=16) :: xx, x1, y1, x2, y2, Interpol
+        REAl(KIND=16) :: a, b
         
         a = (y2-y1)/(x2-x1)
         b = (y1*x2-y2*x1)/(x2-x1)
@@ -807,7 +807,7 @@ CONTAINS
     END SUBROUTINE Reset
 !-------------------------------------------------    
     FUNCTION Get(VarName)                                
-        REAL*8 :: Get (0:6000)
+        REAl(KIND=8) :: Get (0:6000)
         INTEGER:: k
         CHARACTER(len=30) :: VarName
         
@@ -945,7 +945,7 @@ CONTAINS
 !-------------------------------------------------
     SUBROUTINE Set(VarName, VarVal, index, index2)        
         CHARACTER(len=30) :: VarName
-        REAL*8 :: VarVal
+        REAl(KIND=8) :: VarVal
         INTEGER, OPTIONAL :: index, index2
         
         SELECT CASE ( VarName )
@@ -1015,7 +1015,7 @@ CONTAINS
     END SUBROUTINE Set
 !-------------------------------------------------
     SUBROUTINE Illumination(spectrum, dum)                
-        REAL*8 :: spectrum(0:dum)
+        REAl(KIND=8) :: spectrum(0:dum)
         INTEGER:: dum, i
 
         PFspectrum(0:NumWL) = REAL(spectrum(0:NumWL),16)
@@ -1030,7 +1030,7 @@ CONTAINS
     SUBROUTINE FrontBoundary(type, surfe, surfh, barrier)        
         !External variables
         CHARACTER(len=30) :: type
-        REAL*8 :: surfe, surfh, barrier
+        REAl(KIND=8) :: surfe, surfh, barrier
         
         Snfront = REAL(surfe,16)
         Spfront = REAL(surfh,16)
@@ -1061,7 +1061,7 @@ CONTAINS
     SUBROUTINE BackBoundary(type, surfe, surfh, barrier)        
         !External variables
         CHARACTER(len=30) :: type
-        REAL*8 :: surfe, surfh, barrier
+        REAl(KIND=8) :: surfe, surfh, barrier
         
         Snback = REAL(surfe,16)
         Spback = REAL(surfh,16)
@@ -1121,9 +1121,9 @@ CONTAINS
 ! Auxiliary functions and their derivatives
 !-------------------------------------------------
     FUNCTION Z(u)
-        REAL*16 :: u
-        REAL*16 :: Z
-        REAL*16 :: tiny = 1.0e-6
+        REAl(KIND=16) :: u
+        REAl(KIND=16) :: Z
+        REAl(KIND=16) :: tiny = 1.0e-6
 
         IF (abs(u) < tiny) THEN
             Z = 1.0 - 0.5*u
@@ -1134,9 +1134,9 @@ CONTAINS
     END FUNCTION Z
 !-------------------------------------------------
     FUNCTION Y(u)
-        REAL*16 :: u
-        REAL*16 :: Y
-        REAL*16 :: tiny = 1.0e-6
+        REAl(KIND=16) :: u
+        REAl(KIND=16) :: Y
+        REAl(KIND=16) :: tiny = 1.0e-6
 
         IF (abs(u) < tiny) THEN
             Y = 0.5 - 1.0/12.0*u
@@ -1147,9 +1147,9 @@ CONTAINS
     END FUNCTION Y
 !-------------------------------------------------
     FUNCTION dZ(u)
-        REAL*16 :: u
-        REAL*16 :: dZ
-        REAL*16 :: tiny = 1.0e-6
+        REAl(KIND=16) :: u
+        REAl(KIND=16) :: dZ
+        REAl(KIND=16) :: tiny = 1.0e-6
 
         IF (abs(u) < tiny) THEN
             dZ = - 0.5 + 1.0/6.0*u
@@ -1160,9 +1160,9 @@ CONTAINS
     END FUNCTION dZ
 !-------------------------------------------------
     FUNCTION dY(u)
-        REAL*16 :: u
-        REAL*16 :: dY
-        REAL*16 :: tiny = 1.0e-6
+        REAl(KIND=16) :: u
+        REAl(KIND=16) :: dY
+        REAl(KIND=16) :: tiny = 1.0e-6
 
         IF (abs(u) < tiny) THEN
             dY = - 1.0/12.0 + 1.0/240.0*u**2
@@ -1195,11 +1195,11 @@ CONTAINS
         !      d        : stores +1 or -1 depending on whether the number of row interchanges is even or odd, respectively. 
         !
         INTEGER    :: m1, m2, mp, mp1, nrow, np, indx(nrow)
-        REAL*16    :: d, a(np, mp), al(np, mp1)
-        REAL*16, PARAMETER :: TINY = 1.0e-20    
+        REAl(KIND=16)    :: d, a(np, mp), al(np, mp1)
+        REAl(KIND=16), PARAMETER :: TINY = 1.0e-20    
         
         INTEGER :: i, j, k, l, mm
-        REAL*16  :: dum
+        REAl(KIND=16)  :: dum
         
         mm = m1+m2+1
         IF (mm>mp .or. m1>mp1 .or. nrow>np) STOP "Bad arguments at bandec."
@@ -1264,10 +1264,10 @@ CONTAINS
         !      b        : On input, it is the B vector of the equation. On output, it is the solution vector X.  
         ! 
         INTEGER    :: nrow, m1, m2, np, mp, mp1, indx(nrow)  
-        REAL*16    :: a(np, mp), b(np), al(np, mp1)
+        REAl(KIND=16)    :: a(np, mp), b(np), al(np, mp1)
         
         INTEGER :: i, k, l, mm 
-        REAL*16  :: dum 
+        REAl(KIND=16)  :: dum 
         
         mm = m1+m2+1
         IF (mm>mp .or. m1>mp1 .or. nrow>np) STOP "Bad arguments at bandbks."
@@ -1308,10 +1308,10 @@ CONTAINS
         !      bX        : On input, it is the B vector of the equation. On output, it is the solution vector X.  
         ! 
         INTEGER    :: nrow, m1, m2, np, mp 
-        REAL*16    :: ain(np, mp), bX(np)
+        REAl(KIND=16)    :: ain(np, mp), bX(np)
         
         INTEGER :: i, k, l, mm, indx(nrow), info 
-        REAL*16  :: dum, a(np, mp), al(np, m1), xtemp(np), xtemp2(np), d
+        REAl(KIND=16)  :: dum, a(np, mp), al(np, m1), xtemp(np), xtemp2(np), d
         
         info = 1
         mm = m1+m2+1
@@ -1328,8 +1328,8 @@ CONTAINS
     END SUBROUTINE SolveLin
 !-------------------------------------------------
     SUBROUTINE backtracking(sum0, outBacktrack, MaxCorr)            
-        REAL*16 :: CopyFp(0:M), CopyPsi(0:M), CopyFn(0:M), ModFp(0:M), ModPsi(0:M), ModFn(0:M)
-        REAL*16 :: lambda, alfa, sum0, sum1, sum2, sum3, dum, MaxCorr, corr
+        REAl(KIND=16) :: CopyFp(0:M), CopyPsi(0:M), CopyFn(0:M), ModFp(0:M), ModPsi(0:M), ModFn(0:M)
+        REAl(KIND=16) :: lambda, alfa, sum0, sum1, sum2, sum3, dum, MaxCorr, corr
         LOGICAL :: outBacktrack
         
         INTEGER :: i, l, k, j, maxi
@@ -1405,8 +1405,8 @@ CONTAINS
 !-------------------------------------------------
     SUBROUTINE SolveNonLin(sum, sum1, sum2, sum3, niter, info, OutputLevel)        
         
-        REAL*16 :: Jtot, Jsrh, Jrad, Jaug, Jsur, Jn, Jp
-        REAL*16 :: sum1, sum2, sum3, sum, sumOld, VeryOldSum, MaxCorrection
+        REAl(KIND=16) :: Jtot, Jsrh, Jrad, Jaug, Jsur, Jn, Jp
+        REAl(KIND=16) :: sum1, sum2, sum3, sum, sumOld, VeryOldSum, MaxCorrection
         INTEGER :: niter, info, HIconv
         INTEGER :: k
         INTEGER :: OutputLevel
@@ -1507,8 +1507,8 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     ! They should be zero in the steady state.
     !
     INTEGER :: k
-    REAL*16 :: xx, T1, T2, T3
-    REAL*16 :: funcp(0:M), funcn(0:M)
+    REAl(KIND=16) :: xx, T1, T2, T3
+    REAl(KIND=16) :: funcp(0:M), funcn(0:M)
 
     !Update the potentials, carrier densities and the recombination rate
     DO k = 0, M            
@@ -1570,8 +1570,8 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     ! This subroutine calculates the Jacobian of "f" at each node.
     !
         INTEGER :: i, j, k
-        REAL*16 :: dfuncp(6,0:M), dfuncn(6,0:M), dgrec(6,0:M)
-        REAL*16    :: urec, urad, term
+        REAl(KIND=16) :: dfuncp(6,0:M), dfuncn(6,0:M), dgrec(6,0:M)
+        REAl(KIND=16)    :: urec, urad, term
                                 
         DO k = 0, M-1
 
@@ -1793,7 +1793,7 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     SUBROUTINE GR_sub                                
     
         INTEGER :: k, j
-        REAL*16 :: urec, urad, uaug
+        REAl(KIND=16) :: urec, urad, uaug
         
         DO k = 0, M-1
             
@@ -1823,7 +1823,7 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     END SUBROUTINE GR_sub
 !-------------------------------------------------
     SUBROUTINE Generation(wl)                        
-        REAL*16 :: photonfluxini, PFspectrumini(0:NumWL), PF, PFWL(0:NumWL), TempG, sigma, GG(0:M)
+        REAl(KIND=16) :: photonfluxini, PFspectrumini(0:NumWL), PF, PFWL(0:NumWL), TempG, sigma, GG(0:M)
         INTEGER :: i, j, k
         INTEGER, OPTIONAL :: wl
         
@@ -1873,10 +1873,10 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     SUBROUTINE Equilibrium(OutputLevel)                
         ! Solve the DD equations at 0V in the Dark         
     
-        REAL*16 :: start_time, end_time
-        REAL*16 :: sum, Jtot
+        REAl(KIND=16) :: start_time, end_time
+        REAl(KIND=16) :: sum, Jtot
         INTEGER :: info, GENtemp
-        REAL*16 :: dum1, dum2, dum3, dum4, dum5, dum7    ! Dummy variables that must be different. 
+        REAl(KIND=16) :: dum1, dum2, dum3, dum4, dum5, dum7    ! Dummy variables that must be different. 
         INTEGER :: dum6
         INTEGER :: OutputLevel
 
@@ -1928,12 +1928,12 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     SUBROUTINE LightSC(OutputLevel, qmode)            
         ! Solve the DD equations at 0V and with illumination.         
     
-        REAL*16 :: start_time, end_time
-        REAL*16 :: sum, Jtot, Jsrh, Jrad, Jaug, Jsur
-        REAL*16 :: photonfluxini, PFspectrumini(0:NumWL), PF, PFWL(0:NumWL)!, TempG 
-        REAL*16, DIMENSION(0:6000) :: TempG    
+        REAl(KIND=16) :: start_time, end_time
+        REAl(KIND=16) :: sum, Jtot, Jsrh, Jrad, Jaug, Jsur
+        REAl(KIND=16) :: photonfluxini, PFspectrumini(0:NumWL), PF, PFWL(0:NumWL)!, TempG 
+        REAl(KIND=16), DIMENSION(0:6000) :: TempG    
         INTEGER :: info, i, j, k, maxsteps, qmode
-        REAL*16 :: dum1, dum2, dum3, dum4, dum5, dum7     ! Dummy variables that must be different. 
+        REAl(KIND=16) :: dum1, dum2, dum3, dum4, dum5, dum7     ! Dummy variables that must be different. 
         INTEGER :: dum6
         INTEGER :: OutputLevel, SWL
         
@@ -2004,17 +2004,17 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     SUBROUTINE RunIV(Vfin, Vstep, OutputLevel, escape)            
         ! Solve the DD equations as a function of voltage in the dark.         
     
-        REAL*16 :: start_time, end_time
-        REAL*8 :: Vini, Vfin, Vstep
-        REAL*16 :: Vapp, Vreal, step, Vend, factor
-        REAL*16 :: sum, sum1, sum2, sum3, Jtot, Jsrh, Jrad, Jaug, Jsur
-        REAL*16 :: intertot(3000)
+        REAl(KIND=16) :: start_time, end_time
+        REAl(KIND=8) :: Vini, Vfin, Vstep
+        REAl(KIND=16) :: Vapp, Vreal, step, Vend, factor
+        REAl(KIND=16) :: sum, sum1, sum2, sum3, Jtot, Jsrh, Jrad, Jaug, Jsur
+        REAl(KIND=16) :: intertot(3000)
         INTEGER :: info, niter
         INTEGER :: OutputLevel, LS, ESC
         INTEGER, OPTIONAL :: escape 
         INTEGER :: GENtemp
         LOGICAL :: continue_loop = .TRUE.
-        REAL*16 :: xx, yy, sol
+        REAl(KIND=16) :: xx, yy, sol
         
         INTEGER :: i
         
@@ -2129,17 +2129,17 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
 
         ! External variables
         INTEGER :: OutputLevel
-    !         REAL*8, OPTIONAL :: Vfin, Vstep
+    !         REAl(KIND=8), OPTIONAL :: Vfin, Vstep
     
         ! Internal variables
-        REAL*16 :: start_time, end_time
-        REAL*16 :: sumsum, Jtot, PF, Jsrh, Jrad, Jaug, Jsur
-        REAL*16 :: dum1, dum2, dum3, dum4, dum5, dum7     ! Dummy variables that must be different. 
+        REAl(KIND=16) :: start_time, end_time
+        REAl(KIND=16) :: sumsum, Jtot, PF, Jsrh, Jrad, Jaug, Jsur
+        REAl(KIND=16) :: dum1, dum2, dum3, dum4, dum5, dum7     ! Dummy variables that must be different. 
         INTEGER :: dum6
-        REAL*16 :: Jbias
+        REAl(KIND=16) :: Jbias
         INTEGER :: info, niter
         INTEGER :: i, k, maxsteps
-        REAL*16, DIMENSION(0:6000) :: TempG    
+        REAl(KIND=16), DIMENSION(0:6000) :: TempG    
 
         CALL open_log()
             

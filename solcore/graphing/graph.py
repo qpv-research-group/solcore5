@@ -18,7 +18,7 @@ graph_defaults = {
     "font_family": "serif",
     "palette": "bright hue wheel",
     "square": True,
-    "colormap": "spectral",
+    "colormap": "nipy_spectral",
     "grid": {"dash_capstyle": "round", "zorder": 1, "alpha": 0.5}
 }
 

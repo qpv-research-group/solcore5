@@ -1,8 +1,5 @@
 import os
-import numpy as np
 from scipy.interpolate import interp1d
-from scipy.integrate import quad
-import matplotlib.pyplot as plt
 
 from solcore.science_tracker import science_reference
 from solcore import spectral_conversion_nm_ev, spectral_conversion_nm_hz, eVnm, nmHz, nmJ
@@ -469,6 +466,7 @@ class LightSource:
 if __name__ == '__main__':
 
     import numpy as np
+    import matplotlib.pyplot as plt
 
     plt.figure(figsize=(6, 4.5))
 
