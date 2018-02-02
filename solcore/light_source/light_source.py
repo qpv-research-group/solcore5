@@ -1,5 +1,6 @@
 import os
 from scipy.interpolate import interp1d
+import numpy as np
 
 from solcore.science_tracker import science_reference
 from solcore import spectral_conversion_nm_ev, spectral_conversion_nm_hz, eVnm, nmHz, nmJ
@@ -465,7 +466,6 @@ class LightSource:
 
 if __name__ == '__main__':
 
-    import numpy as np
     import matplotlib.pyplot as plt
 
     plt.figure(figsize=(6, 4.5))
