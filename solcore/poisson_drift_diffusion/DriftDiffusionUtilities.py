@@ -1,13 +1,10 @@
 import numpy as np
 from scipy.interpolate import interp1d
 
-from solcore import siUnits, si, asUnit, constants, material
-from solcore.structure import Layer, Junction
+from solcore import asUnit, constants
 from solcore.state import State
 from .ddModel import driftdiffusion as dd
-from solcore.light_source import LightSource
-from .DeviceStructure import LoadAbsorption, calculate_reflection, calculate_optics, CreateDeviceStructure, \
-    CalculateAbsorptionProfile
+from .DeviceStructure import LoadAbsorption, CreateDeviceStructure, CalculateAbsorptionProfile
 
 Epsi0 = constants.vacuum_permittivity
 q = constants.q
