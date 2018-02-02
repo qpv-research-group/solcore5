@@ -30,7 +30,7 @@ if 'build_pdd' in sys.argv:
 
 if 'install' in sys.argv:
     with open(os.path.join(here, 'LICENSE'), encoding='utf-8') as f:
-        print(f.read())
+        print(f.read().encode("utf-8"))
 
     answer = input('Do you agree with these conditions (y/n)? ')
     answer = answer.lower()

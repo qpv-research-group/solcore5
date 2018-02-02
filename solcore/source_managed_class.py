@@ -70,9 +70,9 @@ class SourceManagedClass(metaclass=Singleton):
         if name is None:
             self.initialise_cache()
             for sourcename in self.sources.keys():
-                self.database.read(self.sources[sourcename])
+                self.database.read(self.sources[sourcename], encoding='utf-8')
         else:
-            self.database.read(self.sources[name])
+            self.database.read(self.sources[name], encoding='utf-8')
 
     def initialise_cache(self):
         """ Initialises th database, kept in a ConfigParser format. Quite convenient if you think about it. """
