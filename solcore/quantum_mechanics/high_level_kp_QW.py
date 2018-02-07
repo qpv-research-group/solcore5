@@ -140,7 +140,7 @@ if __name__ == "__main__":
         test_structure.substrate = bulk
 
 
-        output = schrodinger(test_structure, quasiconfined=0,
+        output = schrodinger(test_structure, quasiconfined=0, #mode='kp4x4', plot_bands=True,
                              num_eigenvalues=20, alpha_params=alpha_params, calculate_absorption=True)
 
         alfa = output[0]['alphaE'](E)

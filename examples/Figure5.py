@@ -46,11 +46,11 @@ well_layer = Layer(width=si("7.2nm"), material=QW)
 # test_structure = Structure([top_layer, barrier_layer, inter] + 10 * [well_layer, inter, barrier_layer, inter] +
 #                            [bottom_layer])
 
-# test_structure = Structure([barrier_layer, inter] + 1 * [well_layer, inter] +
-#                            [barrier_layer])
+test_structure = Structure([barrier_layer, inter] + 1 * [well_layer, inter] +
+                            [barrier_layer])
 
-test_structure = Structure([top_layer, barrier_layer] + 10 * [well_layer, barrier_layer] +
-                           [bottom_layer])
+#test_structure = Structure([top_layer, barrier_layer] + 10 * [well_layer, barrier_layer] +
+#                           [bottom_layer])
 
 test_structure.substrate = bulk
 

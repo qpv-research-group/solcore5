@@ -39,7 +39,7 @@ alpha_params = {
 comp = [0.05, 0.1, 0.15, 0.2, 0.25]
 colors = plt.cm.jet(np.linspace(0, 1, len(comp)))
 
-plt.figure(figsize=(6, 4.5))
+plt.figure(figsize=(4, 4.5))
 for j, i in enumerate(comp):
 
     # We create the QW material at the given composition
