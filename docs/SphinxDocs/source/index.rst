@@ -1,3 +1,6 @@
+.. image:: _static/header.png
+    :align: center
+
 Solcore
 =======
 
