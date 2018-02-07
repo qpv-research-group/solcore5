@@ -56,11 +56,7 @@ After installing Solcore (or even without installing it), there are a few things
 
     >>> import solcore.config_tools
 
-2. **Create a folder with Solcore examples:** This is the fastest way of getting started. The examples will be created in a subfolder called 'solcore/examples'. These examples include all the scripts used in the main Solcore paper (submitted to Journal of Computational Electronics, preprint in https://arxiv.org/abs/1709.06741 ) . Simply use the config_tools, again::
-
-    >>> import solcore.config_tools as config
-
-    >>> config.get_solcore_examples('/location/where/you/want/the/examples')
+2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper (submitted to Journal of Computational Electronics, preprint in https://arxiv.org/abs/1709.06741 ) and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time.
 
 3. **Set the location of a SPICE executable and the SMARTS folder:** You will need to do this eventually in order to use those tools::
 
@@ -69,11 +65,7 @@ After installing Solcore (or even without installing it), there are a few things
     >>> config.set_location_of_spice('/path/to/the/SPICE/executable')
     >>> config.set_location_of_smarts('/path/to/the/SMARTS/folder')
 
-4. **Open Solcore documentation:** It should contain a description (even minimal) of all Solcore functions, modules and packages. The idea is for it to be a useful tool although it is quite empty, for now. The documentation will open in a web browser and you might want to add it to your Bookmarks::
-
-    >>> import solcore.config_tools as config
-
-    >>> config.open_documentation()
+4. **Open Solcore documentation:** It should contain a description (even minimal) of all Solcore functions, modules and packages. The idea is for it to be a useful tool although it is quite empty, for now. You can find the documentation in the Solcore webpage: http://dalonsoa.github.io/solcore5/.
 
 5. **Getting specific information about Solcore:** Even though the documentation "should" be more complete, you can get information about any object in python (including any Solcore function, module and package) using the '__doc__' attribute, for example::
 
