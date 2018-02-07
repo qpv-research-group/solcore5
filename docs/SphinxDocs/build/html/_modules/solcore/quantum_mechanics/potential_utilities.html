@@ -1,0 +1,330 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.quantum_mechanics.potential_utilities &#8212; Solcore 5.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.quantum_mechanics.potential_utilities</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">ones</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">trapz</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="k">import</span> <span class="n">dia_matrix</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse.linalg</span> <span class="k">import</span> <span class="n">eigs</span>
+<span class="kn">from</span> <span class="nn">solcore.science_tracker</span> <span class="k">import</span> <span class="n">science_reference</span>
+<span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">itemgetter</span>
+
+<span class="n">sort_simultaneous</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">lists</span><span class="p">:</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">lists</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">)))]</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">structure_utilities</span>
+<span class="kn">from</span> <span class="nn">.graphics</span> <span class="k">import</span> <span class="n">Graph</span><span class="p">,</span> <span class="n">GraphData</span>
+
+
+<div class="viewcode-block" id="tridiag_euler"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.tridiag_euler">[docs]</a><span class="k">def</span> <span class="nf">tridiag_euler</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns eignvalue and eigenvectors of an arbitrary potential.</span>
+<span class="sd">    </span>
+<span class="sd">    A tridiagonal matrix is constructed by writing the variable effective</span>
+<span class="sd">    mass Schrodinger equation over a series of mesh points. The eigenvalues</span>
+<span class="sd">    of the matrix correspond to the allowed energy levels of the system.</span>
+<span class="sd">    </span>
+<span class="sd">    The previous solver, eig, has been replaced by the spare matrix version, eigs, that is faster to compute</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">science_reference</span><span class="p">(</span><span class="s2">&quot;Varible effective mass Schordinger equation and tridiagonal solution method.&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;Frensley, W. R. (1991). </span><span class="se">\</span>
+<span class="s2">                      Numerical evaluation of resonant states. </span><span class="se">\</span>
+<span class="s2">                      Superlattices and Microstructures, 11(3), 347350. </span><span class="se">\</span>
+<span class="s2">                      doi:10.1016/0749-6036(92)90396-M&quot;</span><span class="p">)</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">dz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">m</span> <span class="o">*</span> <span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+
+    <span class="c1"># Vectorise effective mass differences to avoid a loop</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)),</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">m_a</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># m_(j-1) from Frensley, W. R. (1991)</span>
+    <span class="n">m_b</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># m_j</span>
+    <span class="n">m_c</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>  <span class="c1"># m_(j+1)</span>
+
+    <span class="c1"># These are the interior diagonals of equation 18 in the above ref.</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">dz</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">m_a</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">m_b</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">m_c</span><span class="p">)</span> <span class="o">+</span> <span class="n">V</span>  <span class="c1"># d_j from Frensley, W. R. (1991)</span>
+    <span class="n">upper</span> <span class="o">=</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">dz</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">m_a</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">m_b</span><span class="p">)</span>  <span class="c1"># s_(j+1)</span>
+    <span class="n">lower</span> <span class="o">=</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">dz</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">m_b</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">m_c</span><span class="p">)</span>  <span class="c1"># s_j</span>
+
+    <span class="k">if</span> <span class="n">periodic</span><span class="p">:</span>
+        <span class="n">TopRight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axis</span><span class="p">))</span>
+        <span class="n">BottomLeft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axis</span><span class="p">))</span>
+        <span class="n">TopRight</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">lower</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># The last point becomes the one before the first one</span>
+        <span class="n">BottomLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">upper</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># The first point becomes the one after the last one</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">diagonals</span> <span class="o">=</span> <span class="p">(</span><span class="n">BottomLeft</span><span class="p">,</span> <span class="o">-</span><span class="n">lower</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="o">-</span><span class="n">upper</span><span class="p">,</span> <span class="n">TopRight</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">diagonals</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">lower</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="o">-</span><span class="n">upper</span><span class="p">)</span>
+
+    <span class="n">H</span> <span class="o">=</span> <span class="n">dia_matrix</span><span class="p">((</span><span class="n">diagonals</span><span class="p">,</span> <span class="n">index</span><span class="p">),</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+
+    <span class="c1"># H[0,-1] = -lower[-1]    # The last point becomes the one before the first one</span>
+    <span class="c1"># H[-1,0] = -upper[0]     # The first point becomes the one after the last one</span>
+
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>  <span class="c1"># The top of the potential (valence band) is the target energy for the eigenvalues</span>
+
+    <span class="c1"># The heavy numerical calculation</span>
+    <span class="n">E</span><span class="p">,</span> <span class="n">Psi</span> <span class="o">=</span> <span class="n">eigs</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">num_eigenvalues</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;LR&#39;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+
+    <span class="c1"># Allow for quasi confined levels to go through. They can be discarded later with the filter</span>
+    <span class="n">confined_levels</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span> <span class="o">&lt;</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">q</span><span class="p">]</span>
+    <span class="n">E</span><span class="p">,</span> <span class="n">Psi</span> <span class="o">=</span> <span class="n">E</span><span class="p">[</span><span class="n">confined_levels</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">array</span><span class="p">(</span><span class="n">Psi</span><span class="p">[:,</span> <span class="n">confined_levels</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">Psi</span> <span class="o">=</span> <span class="p">[(</span><span class="n">p</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">trapz</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="n">p</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">z</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">Psi</span><span class="p">]</span>
+
+    <span class="n">E</span><span class="p">,</span> <span class="n">Psi</span> <span class="o">=</span> <span class="n">sort_simultaneous</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Psi</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">Psi</span></div>
+
+
+<div class="viewcode-block" id="schroedinger_solve"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.schroedinger_solve">[docs]</a><span class="k">def</span> <span class="nf">schroedinger_solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">electron</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns normalised wavefuctions from the potential profile.</span>
+
+<span class="sd">    Arguments:</span>
+
+<span class="sd">        x -- spatial grid</span>
+<span class="sd">        V -- potential</span>
+<span class="sd">        m -- effective mass</span>
+
+<span class="sd">    Keywords:</span>
+
+<span class="sd">        electron -- whether the wavefunctions describe electrons or holes (default: True)</span>
+<span class="sd">        num_eigenvalues -- Number of eigenvalues to calculate (default = 10)</span>
+<span class="sd">        periodic   -- not to sure what this does (default: False)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">electron</span><span class="p">:</span>
+        <span class="n">v_shift</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">+</span> <span class="n">offset</span>
+        <span class="n">E</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="n">tridiag_euler</span><span class="p">(</span><span class="n">V</span> <span class="o">-</span> <span class="n">v_shift</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="o">=</span><span class="n">num_eigenvalues</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span><span class="p">)</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">+</span> <span class="n">v_shift</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">v_shift</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">-</span> <span class="n">offset</span>
+        <span class="n">E</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="n">tridiag_euler</span><span class="p">(</span><span class="o">-</span><span class="n">V</span> <span class="o">+</span> <span class="n">v_shift</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="o">=</span><span class="n">num_eigenvalues</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span><span class="p">)</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">+</span> <span class="n">v_shift</span>
+
+    <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">psi</span></div>
+
+
+<span class="k">def</span> <span class="nf">__potentials_to_wavefunctions_energies_internal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ve</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">Vhh</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Vlh</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                    <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">filter_strength</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quasiconfined</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns normalised wavefuctions from the potential profile.</span>
+
+<span class="sd">    Arguments:</span>
+
+<span class="sd">        x -- spatial grid</span>
+<span class="sd">        Ve -- electron potential</span>
+<span class="sd">        me -- electron effective mass</span>
+<span class="sd">        Vlh -- light hole potential</span>
+<span class="sd">        mlh -- light hole effective mass</span>
+<span class="sd">        Vhh -- heavy hole potential</span>
+<span class="sd">        mhh -- heavy hole effective mass</span>
+
+
+<span class="sd">    Keywords:</span>
+
+<span class="sd">        num_eigenvalues -- Number of eigenvalues to calculate (default = 10)</span>
+<span class="sd">        periodic   -- not to sure what this does (default: False)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Ee</span><span class="p">,</span> <span class="n">psi_e</span> <span class="o">=</span> <span class="n">schroedinger_solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ve</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="p">,</span> <span class="n">periodic</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">electron</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">Ehh</span><span class="p">,</span> <span class="n">psi_hh</span> <span class="o">=</span> <span class="n">schroedinger_solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Vhh</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="p">,</span> <span class="n">periodic</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">electron</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">Elh</span><span class="p">,</span> <span class="n">psi_lh</span> <span class="o">=</span> <span class="n">schroedinger_solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Vlh</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="p">,</span> <span class="n">periodic</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">electron</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filter_strength</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">structure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Need to provide structure to find well regions for filtering&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;filtering&quot;</span><span class="p">)</span>
+        <span class="n">Ee</span><span class="p">,</span> <span class="n">psi_e</span> <span class="o">=</span> <span class="n">discard_unconfined</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">Ee</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">filter_strength</span><span class="p">)</span>
+        <span class="n">Ehh</span><span class="p">,</span> <span class="n">psi_hh</span> <span class="o">=</span> <span class="n">discard_unconfined</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">Ehh</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">filter_strength</span><span class="p">)</span>
+        <span class="n">Elh</span><span class="p">,</span> <span class="n">psi_lh</span> <span class="o">=</span> <span class="n">discard_unconfined</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">Elh</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">filter_strength</span><span class="p">)</span>
+
+    <span class="n">Ee</span><span class="p">,</span> <span class="n">psi_e</span> <span class="o">=</span> <span class="n">discard_unconfined_energy</span><span class="p">(</span><span class="n">Ee</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">Ve</span><span class="p">,</span> <span class="n">quasiconfined</span><span class="p">)</span>
+    <span class="n">Ehh</span><span class="p">,</span> <span class="n">psi_hh</span> <span class="o">=</span> <span class="n">discard_unconfined_energy</span><span class="p">(</span><span class="n">Ehh</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">Vhh</span><span class="p">,</span> <span class="n">quasiconfined</span><span class="p">)</span>
+    <span class="n">Elh</span><span class="p">,</span> <span class="n">psi_lh</span> <span class="o">=</span> <span class="n">discard_unconfined_energy</span><span class="p">(</span><span class="n">Elh</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">Vlh</span><span class="p">,</span> <span class="n">quasiconfined</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">Ee</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">Ehh</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">Elh</span><span class="p">,</span> <span class="n">psi_lh</span>
+
+
+<div class="viewcode-block" id="discard_unconfined_energy"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.discard_unconfined_energy">[docs]</a><span class="k">def</span> <span class="nf">discard_unconfined_energy</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">psi</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">quasiconfined</span><span class="p">):</span>
+    <span class="n">before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+    <span class="n">maxE</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">))</span> <span class="o">+</span> <span class="n">quasiconfined</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">E</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="n">E_i</span><span class="p">,</span> <span class="n">psi_i</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="p">(</span><span class="n">E_i</span><span class="p">,</span> <span class="n">psi_i</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">psi</span><span class="p">)</span>
+                       <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">E_i</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">maxE</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: wavefunction filter removed all states for this band, try reducing the filter strength.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">([],</span> <span class="p">[])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Wavefunction filter removed </span><span class="si">%d</span><span class="s2"> state</span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">before</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">before</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;s&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">psi</span></div>
+
+
+<div class="viewcode-block" id="discard_unconfined"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.discard_unconfined">[docs]</a><span class="k">def</span> <span class="nf">discard_unconfined</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">psi</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">threshold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># bypass the filter code, saving time</span>
+        <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">psi</span>
+
+    <span class="n">indx</span> <span class="o">=</span> <span class="n">structure_utilities</span><span class="o">.</span><span class="n">well_regions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">structure</span><span class="p">)</span>
+
+    <span class="n">before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+    <span class="c1"># for (E_i, psi_i) in zip(E, psi): </span>
+    <span class="c1">#     print (psi_i[indx])</span>
+
+    <span class="k">try</span><span class="p">:</span>
+
+        <span class="n">E</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="n">E_i</span><span class="p">,</span> <span class="n">psi_i</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="p">(</span><span class="n">E_i</span><span class="p">,</span> <span class="n">psi_i</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">psi</span><span class="p">)</span>
+                       <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">psi_i</span><span class="p">[</span><span class="n">indx</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">indx</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">psi_i</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: wavefunction filter removed all states for this band, try reducing the filter strength.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">([],</span> <span class="p">[])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Wavefunction filter removed </span><span class="si">%d</span><span class="s2"> state</span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">before</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">before</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;s&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">psi</span></div>
+
+
+<div class="viewcode-block" id="potentials_to_wavefunctions_energies"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.potentials_to_wavefunctions_energies">[docs]</a><span class="k">def</span> <span class="nf">potentials_to_wavefunctions_energies</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ve</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">Vhh</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Vlh</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                         <span class="n">filter_strength</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quasiconfined</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">Ee</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">Ehh</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">Elh</span><span class="p">,</span> <span class="n">psi_lh</span> <span class="o">=</span> <span class="n">__potentials_to_wavefunctions_energies_internal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ve</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">Vhh</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Vlh</span><span class="p">,</span>
+                                                                                             <span class="n">mlh</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="p">,</span>
+                                                                                             <span class="n">periodic</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span>
+                                                                                             <span class="n">filter_strength</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span>
+                                                                                             <span class="n">quasiconfined</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+        <span class="s2">&quot;Ee&quot;</span><span class="p">:</span> <span class="n">Ee</span><span class="p">,</span>
+        <span class="s2">&quot;psi_e&quot;</span><span class="p">:</span> <span class="n">psi_e</span><span class="p">,</span>
+        <span class="s2">&quot;Ehh&quot;</span><span class="p">:</span> <span class="n">Ehh</span><span class="p">,</span>
+        <span class="s2">&quot;psi_hh&quot;</span><span class="p">:</span> <span class="n">psi_hh</span><span class="p">,</span>
+        <span class="s2">&quot;Elh&quot;</span><span class="p">:</span> <span class="n">Elh</span><span class="p">,</span>
+        <span class="s2">&quot;psi_lh&quot;</span><span class="p">:</span> <span class="n">psi_lh</span><span class="p">,</span>
+        <span class="s2">&quot;Ve&quot;</span><span class="p">:</span> <span class="n">Ve</span><span class="p">,</span>
+        <span class="s2">&quot;me&quot;</span><span class="p">:</span> <span class="n">me</span><span class="p">,</span>
+        <span class="s2">&quot;Vhh&quot;</span><span class="p">:</span> <span class="n">Vhh</span><span class="p">,</span>
+        <span class="s2">&quot;Vlh&quot;</span><span class="p">:</span> <span class="n">Vlh</span><span class="p">,</span>
+        <span class="s2">&quot;mhh&quot;</span><span class="p">:</span> <span class="n">mhh</span><span class="p">,</span>
+        <span class="s2">&quot;mlh&quot;</span><span class="p">:</span> <span class="n">mlh</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="graph"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.graph">[docs]</a><span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ve</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">Vhh</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Vlh</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;edit&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">y</span> <span class="o">/</span> <span class="n">q</span><span class="p">),</span>
+        <span class="s2">&quot;xlabel&quot;</span><span class="p">:</span> <span class="s2">&quot;Depth (nm)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ylabel&quot;</span><span class="p">:</span> <span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">normalise_psi</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="mf">5e-6</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ve</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Vlh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dashes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Vhh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">g</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

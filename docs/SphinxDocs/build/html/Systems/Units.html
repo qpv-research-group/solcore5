@@ -1,0 +1,570 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>The Units System &#8212; Solcore 5.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '5.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Parameters System" href="Parameters.html" />
+    <link rel="prev" title="Structures and support classes" href="../structure.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Parameters.html" title="The Parameters System"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../structure.html" title="Structures and support classes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">Structures and support classes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The Units System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Parameters.html">The Parameters System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Materials.html">The Materials System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Mobility.html">The mobility module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ASC/ASC.html">Analytic solar cells calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../structure.html"
+                        title="previous chapter">Structures and support classes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Parameters.html"
+                        title="next chapter">The Parameters System</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Systems/Units.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-units-system">
+<h1>The Units System<a class="headerlink" href="#the-units-system" title="Permalink to this headline">¶</a></h1>
+<p>Most of these functions can be acccessed directly from Solcore:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">solcore</span> <span class="k">import</span> <span class="n">eV</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">eV</span><span class="p">(</span><span class="mf">1e-19</span><span class="p">))</span>
+<span class="go">0.624 eV</span>
+</pre></div>
+</div>
+<span class="target" id="module-solcore.units_system.units_system"></span><dl class="exception">
+<dt id="solcore.units_system.units_system.UnitError">
+<em class="property">exception </em><code class="descclassname">solcore.units_system.units_system.</code><code class="descname">UnitError</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="solcore.units_system.units_system.WrongDimensionError">
+<em class="property">exception </em><code class="descclassname">solcore.units_system.units_system.</code><code class="descname">WrongDimensionError</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#WrongDimensionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.WrongDimensionError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.units_system.units_system.generateConversionDictForSISuffix">
+<code class="descclassname">solcore.units_system.units_system.</code><code class="descname">generateConversionDictForSISuffix</code><span class="sig-paren">(</span><em>suffix</em>, <em>centi=False</em>, <em>deci=False</em>, <em>non_base_si_factor=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#generateConversionDictForSISuffix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.generateConversionDictForSISuffix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="solcore.units_system.units_system.UnitsSystem">
+<em class="property">class </em><code class="descclassname">solcore.units_system.units_system.</code><code class="descname">UnitsSystem</code><span class="sig-paren">(</span><em>sources=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains all the functions related with the conversion of units. While defined inside this class, most of these
+functions are available outside it, being decorated with ‘breakout’ (see ‘Singleton’)</p>
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the units file and creates a database with all units and conversion factors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.safe_eval">
+<code class="descname">safe_eval</code><span class="sig-paren">(</span><em>string_expression</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.safe_eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.safe_eval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.siUnits">
+<code class="descname">siUnits</code><span class="sig-paren">(</span><em>value</em>, <em>unit</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.siUnits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.siUnits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert value from unit to equivalent si-unit</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">siUnits</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;mm&quot;</span><span class="p">))</span> <span class="c1"># yields meters</span>
+<span class="go">0.001</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">siUnits</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;um&quot;</span><span class="p">))</span> <span class="c1"># yields meters</span>
+<span class="go">1e-06</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> – the value to convert</li>
+<li><strong>unit</strong> – the units of the value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the value expresed in SI units</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.asUnit">
+<code class="descname">asUnit</code><span class="sig-paren">(</span><em>value</em>, <em>unit</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.asUnit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.asUnit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts from si unit to other unit. It is the reversed of siUnits function</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">asUnit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;mA&quot;</span><span class="p">))</span> <span class="c1"># print 1A in mA.</span>
+<span class="go">1000.0</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> – the value to convert, assumed in SI units</li>
+<li><strong>unit</strong> – the new units</li>
+<li><strong>dimension</strong> – the value expressed in the new units.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.si">
+<code class="descname">si</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.si"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.si" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility function that forwards to either siUnit or siUnitFromString</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.siUnitFromString">
+<code class="descname">siUnitFromString</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.siUnitFromString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.siUnitFromString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a string of a number with units into si units of that quantity</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">si</span><span class="p">(</span><span class="s2">&quot;5 mm s-1&quot;</span><span class="p">))</span> <span class="c1"># output in m/s</span>
+<span class="go">0.005</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">si</span><span class="p">(</span><span class="s2">&quot;5e-0mm-2&quot;</span><span class="p">))</span> <span class="c1"># output in m2</span>
+<span class="go">5000000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">si</span><span class="p">(</span><span class="s2">&quot;5&quot;</span><span class="p">))</span>
+<span class="go">5.0</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> – the string to convert</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the value in SI units</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.convert">
+<code class="descname">convert</code><span class="sig-paren">(</span><em>value</em>, <em>from_unit</em>, <em>to_unit</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.convert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts between comparable units, does NOT check if units are comparable.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;nm&quot;</span><span class="p">,</span> <span class="s2">&quot;mm&quot;</span><span class="p">))</span>
+<span class="go">1e-06</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;um&quot;</span><span class="p">,</span> <span class="s2">&quot;nm&quot;</span><span class="p">))</span>
+<span class="go">1000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;cm s-1&quot;</span><span class="p">,</span> <span class="s2">&quot;km h-1&quot;</span><span class="p">))</span>
+<span class="go">0.036</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> – the value ot convert</li>
+<li><strong>from_unit</strong> – the original unit</li>
+<li><strong>to_unit</strong> – the final unit</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the value expressed in the final unit</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.eVnm">
+<code class="descname">eVnm</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.eVnm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.eVnm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bi-directional conversion between nm and eV.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">eVnm</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+<span class="go">1.240</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">round</span><span class="p">(</span><span class="n">eVnm</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+<span class="go">1240</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> – a number with units [nm] or [eV].</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">either the conversion [nm] –&gt; [eV], or [eV] –&gt; [nm]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.nmJ">
+<code class="descname">nmJ</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.nmJ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.nmJ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bi-directional conversion between nm and J.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">nmJ</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+<span class="go">1.9864452126e-19</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">nmJ</span><span class="p">(</span><span class="mf">2e-18</span><span class="p">))</span>
+<span class="go">99.3222606298</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> – a number with units [nm] or [J].</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">either the conversion [nm] –&gt; [J], or [J] –&gt; [nm]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.mJ">
+<code class="descname">mJ</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.mJ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.mJ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bi-directional conversion between m and J.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mJ</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+<span class="go">1.986445212595144e-25</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mJ</span><span class="p">(</span><span class="mf">2e-18</span><span class="p">))</span>
+<span class="go">9.93222606297572e-08</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> – a number with units [m] or [J].</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">either the conversion [m] –&gt; [J], or [J] –&gt; [m]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.nmHz">
+<code class="descname">nmHz</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.nmHz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.nmHz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bi-directional conversion between nm and Hz.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> – a number with units [nm] or [Hz].</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Either a number which is the conversion [nm] –&gt; [Hz] or [Hz] –&gt; [nm]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.spectral_conversion_nm_ev">
+<code class="descname">spectral_conversion_nm_ev</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.spectral_conversion_nm_ev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.spectral_conversion_nm_ev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bi-directional conversion between a spectrum per nanometer and a spectrum per electronvolt.</p>
+<p>Example:
+1) nm –&gt; eV conversion
+wavelength_nm
+photon_flux_per_nm
+energy_ev, photon_flux_per_ev = spectral_conversion_nm_ev(wavelength_nm, photon_flux_per_nm)</p>
+<p>2) eV –&gt; nm conversion
+energy_ev
+photon_flux_per_ev
+wavelength_nm, photon_flux_per_nm = spectral_conversion_nm_ev(energy_ev, photon_flux_per_ev)</p>
+<p>Discussion:
+A physical quantities such as total number of photon in a spectrum or
+total energy of a spectrum should remain invariant after a transformation
+to different units. This is called a spectral conversion. This function
+is bi-directional because the mathematics of the conversion processes
+is symmetrical.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">area_before</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x_new</span><span class="p">,</span> <span class="n">y_new</span> <span class="o">=</span> <span class="n">spectral_conversion_nm_ev</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">area_after</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y_new</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x_new</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">compare_floats</span><span class="p">(</span><span class="n">area_before</span><span class="p">,</span> <span class="n">area_after</span><span class="p">,</span> <span class="n">relative_precision</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – abscissa of the spectrum in units of [nm] or [eV]</li>
+<li><strong>y</strong> – ordinate of the spectrum in units of [something/nm] or [something/eV]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple (x, y) which has units either [eV, something/eV] or [nm. something/nm].</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.spectral_conversion_nm_hz">
+<code class="descname">spectral_conversion_nm_hz</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.spectral_conversion_nm_hz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.spectral_conversion_nm_hz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bi-directional conversion between a spectrum per nanometer and a spectrum per Hertz.</p>
+<p>Example:
+1) nm –&gt; Hz conversion
+wavelength_nm
+photon_flux_per_nm
+energy_hz, photon_flux_per_hz = spectral_conversion_nm_hz(wavelength_nm, photon_flux_per_nm)</p>
+<p>2) Hz –&gt; nm conversion
+energy_hz
+photon_flux_per_hz
+wavelength_nm, photon_flux_per_nm = spectral_conversion_nm_ev(energy_hz, photon_flux_per_hz)</p>
+<p>Discussion:
+A physical quantities such as total number of photon in a spectrum or
+total energy of a spectrum should remain invariant after a transformation
+to different units. This is called a spectral conversion. This function
+is bi-directional because the mathematics of the conversion processes
+is symmetrical.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">area_before</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x_new</span><span class="p">,</span> <span class="n">y_new</span> <span class="o">=</span> <span class="n">spectral_conversion_nm_hz</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">area_after</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y_new</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x_new</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">compare_floats</span><span class="p">(</span><span class="n">area_before</span><span class="p">,</span> <span class="n">area_after</span><span class="p">,</span> <span class="n">relative_precision</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – abscissa of the spectrum in units of [nm] or [Hz]</li>
+<li><strong>y</strong> – ordinate of the spectrum in units of [something/nm] or [something/Hz]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple (x, y) which has units either [eV, something/nm] or [nm. something/Hz].</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.sensibleUnits">
+<code class="descname">sensibleUnits</code><span class="sig-paren">(</span><em>value</em>, <em>dimension</em>, <em>precision=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.sensibleUnits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.sensibleUnits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to convert a physical quantity of a particular dimension to the most sensible units</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sensibleUnits</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span><span class="s2">&quot;length&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="go">1 mm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sensibleUnits</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span><span class="s2">&quot;length&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="go">1 km</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sensibleUnits</span><span class="p">(</span><span class="n">si</span><span class="p">(</span><span class="s2">&quot;0.141 days&quot;</span><span class="p">),</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="go">3.38400 h</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> – The value to re-calculate in SI units</li>
+<li><strong>dimension</strong> – The dimension of the value. Possible values are: ‘luminous intensity’, ‘pressure’, ‘time’,
+‘angle’, ‘temperature’, ‘current’, ‘force’, ‘charge’, ‘power’, ‘voltage’, ‘resistance’, ‘mass’, ‘length’, ‘energy’</li>
+<li><strong>precision</strong> – Precission of the converted value.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A string with the value in the more ‘sensible’ units and the units.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.eV">
+<code class="descname">eV</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.eV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.eV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform an energy value in SI units in a string expresing the value in eV.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">eV</span><span class="p">(</span><span class="mf">1e-19</span><span class="p">))</span>
+<span class="go">0.624 eV</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>e</strong> – Energy value in SI units</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A string with the energy converted in eV and its units.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.guess_dimension">
+<code class="descname">guess_dimension</code><span class="sig-paren">(</span><em>unit</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.guess_dimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.guess_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Guess the dimension of a unit.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">guess_dimension</span><span class="p">(</span><span class="s2">&quot;nm&quot;</span><span class="p">)</span>
+<span class="go">length</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>unit</strong> – the unit.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.units_system.units_system.UnitsSystem.list_dimensions">
+<code class="descname">list_dimensions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#UnitsSystem.list_dimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.UnitsSystem.list_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.units_system.units_system.compare_floats">
+<code class="descclassname">solcore.units_system.units_system.</code><code class="descname">compare_floats</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>absoulte_precision=1e-12</em>, <em>relative_precision=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#compare_floats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.compare_floats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the absolute difference between the numbers a and b is less than the precision.</p>
+<p>Arguments:
+a – a float
+b – a float</p>
+<p>Keyword Arguments (optional):
+absolute_precision – the absolute precision, abs(a-b) of the comparison.
+relative_precision – the relative precision, max(a,b)/min(a,b) - 1. of the comparison.</p>
+<p>Returns:
+True if the numbers are the same within the limits of the precision.
+False if the number are not the same within the limits of the precision.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.units_system.units_system.independent_nm_ev">
+<code class="descclassname">solcore.units_system.units_system.</code><code class="descname">independent_nm_ev</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#independent_nm_ev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.independent_nm_ev" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.units_system.units_system.independent_nm_J">
+<code class="descclassname">solcore.units_system.units_system.</code><code class="descname">independent_nm_J</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#independent_nm_J"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.independent_nm_J" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.units_system.units_system.independent_m_J">
+<code class="descclassname">solcore.units_system.units_system.</code><code class="descname">independent_m_J</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#independent_m_J"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.independent_m_J" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.units_system.units_system.reverse">
+<code class="descclassname">solcore.units_system.units_system.</code><code class="descname">reverse</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/units_system/units_system.html#reverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.units_system.units_system.reverse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Parameters.html" title="The Parameters System"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../structure.html" title="Structures and support classes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

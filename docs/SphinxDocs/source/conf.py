@@ -12,14 +12,13 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
-import os
+
 from configparser import ConfigParser
 import sys
 import os
 
 this_dir = os.path.split(__file__)[0]
-solcore_root = this_dir.split('/solcore/')[0]
+solcore_root = this_dir.split('/docs/')[0]
 print(solcore_root)
 
 sys.path.append(solcore_root)
@@ -63,7 +62,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Solcore'
-copyright = u'2016, Quantum Photovoltaics Group, Imperial College London'
+copyright = u'2018, Quantum Photovoltaics Group, Imperial College London'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -123,12 +122,16 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+#html_theme = 'default'
+html_theme = 'sphinxdoc'
+#html_theme = 'alabaster'
+
+
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+#html_theme_options = {'logo': 'header2.png'}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -142,7 +145,8 @@ html_theme = 'default'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = 'header2.png'
+
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -169,6 +173,7 @@ html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
+html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'], }
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -178,13 +183,13 @@ html_static_path = ['_static']
 #html_domain_indices = True
 
 # If false, no index is generated.
-#html_use_index = True
+html_use_index = True
 
 # If true, the index is split into individual pages for each letter.
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 #html_show_sphinx = True

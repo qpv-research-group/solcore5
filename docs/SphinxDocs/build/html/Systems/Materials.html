@@ -1,0 +1,338 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>The Materials System &#8212; Solcore 5.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '5.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The mobility module" href="Mobility.html" />
+    <link rel="prev" title="The Parameters System" href="Parameters.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Mobility.html" title="The mobility module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Parameters.html" title="The Parameters System"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Units.html">The Units System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Parameters.html">The Parameters System</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The Materials System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Mobility.html">The mobility module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ASC/ASC.html">Analytic solar cells calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Parameters.html"
+                        title="previous chapter">The Parameters System</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Mobility.html"
+                        title="next chapter">The mobility module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Systems/Materials.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-solcore.material_system.material_system">
+<span id="the-materials-system"></span><h1>The Materials System<a class="headerlink" href="#module-solcore.material_system.material_system" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="solcore.material_system.material_system.MaterialSystem">
+<em class="property">class </em><code class="descclassname">solcore.material_system.material_system.</code><code class="descname">MaterialSystem</code><span class="sig-paren">(</span><em>sources=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#MaterialSystem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.MaterialSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>The core class that manage the materials in solcore.</p>
+<dl class="method">
+<dt id="solcore.material_system.material_system.MaterialSystem.material">
+<code class="descname">material</code><span class="sig-paren">(</span><em>name</em>, <em>sopra=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#MaterialSystem.material"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.MaterialSystem.material" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if the requested material exists and creates a class that contains its properties,
+assuming that the material does not exists in the database, yet.</p>
+<p>Such class will serve as the base class for all the derived materials based on that SpecificMaterial.
+For example, N-type GaAs and P-type GaAs use the same SpecificMaterial, just with a different doping, and the
+happens with GaAs at 300K or 200K.</p>
+<p>The derived materials based on a SpecificMaterial are instances of the SpecificMaterial class.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GaAs</span> <span class="o">=</span> <span class="n">solcore</span><span class="o">.</span><span class="n">material</span><span class="p">(</span><span class="s1">&#39;GaAs&#39;</span><span class="p">)</span>      <span class="c1"># The SpecificMaterial class</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_GaAs</span> <span class="o">=</span> <span class="n">GaAs</span><span class="p">(</span><span class="n">Nd</span><span class="o">=</span><span class="mf">1e23</span><span class="p">)</span>               <span class="c1"># Instance of the class</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p_GaAs</span> <span class="o">=</span> <span class="n">GaAs</span><span class="p">(</span><span class="n">Na</span><span class="o">=</span><span class="mf">1e22</span><span class="p">)</span>               <span class="c1"># Another instance of GaAs with different doping</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">AlGaAs</span> <span class="o">=</span> <span class="n">solcore</span><span class="o">.</span><span class="n">material</span><span class="p">(</span><span class="s1">&#39;AlGaAs&#39;</span><span class="p">)</span>  <span class="c1"># The SpecificMaterial class</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AlGaAs_1</span> <span class="o">=</span> <span class="n">AlGaAs</span><span class="p">(</span><span class="n">Al</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>            <span class="c1"># Instance of the class. For compounds, the variable element MUST be present</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AlGaAs_2</span> <span class="o">=</span> <span class="n">AlGaAs</span><span class="p">(</span><span class="n">Al</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">290</span><span class="p">)</span>     <span class="c1"># Different composition and T (the default is T=300K)</span>
+</pre></div>
+</div>
+<p>The material is created from the parameters in the parameter_system and the n and k.txt data if available. If the
+n and k.txt data does not exists - at all or for that composition - then n=1 and k.txt=0 at all wavelengths. Keep in
+mind that the available n and k.txt data is valid only at room temperature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> – Name of the material</li>
+<li><strong>sopra</strong> – If a SOPRA material must be used, rather than the normal database material, in case both exist.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A class of that material</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.MaterialSystem.parameterised_material">
+<code class="descname">parameterised_material</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#MaterialSystem.parameterised_material"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.MaterialSystem.parameterised_material" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function that actually creates the material class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.MaterialSystem.sopra_material">
+<code class="descname">sopra_material</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#MaterialSystem.sopra_material"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.MaterialSystem.sopra_material" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an optical material fromt he SOPRA database.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="solcore.material_system.material_system.BaseMaterial">
+<em class="property">class </em><code class="descclassname">solcore.material_system.material_system.</code><code class="descname">BaseMaterial</code><span class="sig-paren">(</span><em>T</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial" title="Permalink to this definition">¶</a></dt>
+<dd><p>The solcore base material class</p>
+<dl class="attribute">
+<dt id="solcore.material_system.material_system.BaseMaterial.material_string">
+<code class="descname">material_string</code><em class="property"> = 'Unnamed'</em><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.material_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="solcore.material_system.material_system.BaseMaterial.composition">
+<code class="descname">composition</code><em class="property"> = []</em><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.composition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="solcore.material_system.material_system.BaseMaterial.material_directory">
+<code class="descname">material_directory</code><em class="property"> = None</em><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.material_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="solcore.material_system.material_system.BaseMaterial.k_path">
+<code class="descname">k_path</code><em class="property"> = None</em><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.k_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="solcore.material_system.material_system.BaseMaterial.n_path">
+<code class="descname">n_path</code><em class="property"> = None</em><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.n_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="solcore.material_system.material_system.BaseMaterial.strained">
+<code class="descname">strained</code><em class="property"> = False</em><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.strained" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="solcore.material_system.material_system.BaseMaterial.main_fraction">
+<code class="descname">main_fraction</code><em class="property"> = 0</em><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.main_fraction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="solcore.material_system.material_system.BaseMaterial.load_n_data">
+<code class="descname">load_n_data</code><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.load_n_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.load_n_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="solcore.material_system.material_system.BaseMaterial.load_k_data">
+<code class="descname">load_k_data</code><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.load_k_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.load_k_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.BaseMaterial.n_interpolated">
+<code class="descname">n_interpolated</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.n_interpolated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.n_interpolated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.BaseMaterial.k_interpolated">
+<code class="descname">k_interpolated</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.k_interpolated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.k_interpolated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.BaseMaterial.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.BaseMaterial.alpha">
+<code class="descname">alpha</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.alpha"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.alpha" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.BaseMaterial.alphaE">
+<code class="descname">alphaE</code><span class="sig-paren">(</span><em>energy</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.alphaE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.alphaE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.BaseMaterial.latex_string">
+<code class="descname">latex_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.latex_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.latex_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.BaseMaterial.plain_string">
+<code class="descname">plain_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.plain_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.plain_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.material_system.BaseMaterial.html_string">
+<code class="descname">html_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#BaseMaterial.html_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.BaseMaterial.html_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-solcore.material_system.critical_point_picker"></span><dl class="class">
+<dt id="solcore.material_system.critical_point_picker.CPPicker">
+<em class="property">class </em><code class="descclassname">solcore.material_system.critical_point_picker.</code><code class="descname">CPPicker</code><span class="sig-paren">(</span><em>directory</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class can be used to pick the critical points out of a collection of n and k curves for a range of
+compositions in ternary alloys. Later, this critical points can be used later to calculate the n and k data at any
+other intermediate composition.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">directory</span> <span class="o">=</span> <span class="s1">&#39;/InGaSb-Material/k.txt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pickerApp</span> <span class="o">=</span> <span class="n">CPPicker</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pickerApp</span><span class="o">.</span><span class="n">loop</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="solcore.material_system.critical_point_picker.CPPicker.guess_fraction">
+<code class="descname">guess_fraction</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker.guess_fraction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker.guess_fraction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.critical_point_picker.CPPicker.gather_files">
+<code class="descname">gather_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker.gather_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker.gather_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.critical_point_picker.CPPicker.plot_a_curve">
+<code class="descname">plot_a_curve</code><span class="sig-paren">(</span><em>curve_id</em>, <em>background=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker.plot_a_curve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker.plot_a_curve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.critical_point_picker.CPPicker.setup_plot">
+<code class="descname">setup_plot</code><span class="sig-paren">(</span><em>keep_limits=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker.setup_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker.setup_plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.critical_point_picker.CPPicker.plot_all">
+<code class="descname">plot_all</code><span class="sig-paren">(</span><em>keep_limits=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker.plot_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker.plot_all" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.critical_point_picker.CPPicker.loop">
+<code class="descname">loop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker.loop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker.loop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.critical_point_picker.CPPicker.onpick">
+<code class="descname">onpick</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker.onpick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker.onpick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.critical_point_picker.CPPicker.onkey">
+<code class="descname">onkey</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker.onkey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker.onkey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.material_system.critical_point_picker.CPPicker.save">
+<code class="descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Mobility.html" title="The mobility module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Parameters.html" title="The Parameters System"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
