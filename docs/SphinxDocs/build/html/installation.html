@@ -54,8 +54,6 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#things-that-can-go-wrong">Things that can go wrong</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#the-config-tools">The config_tools</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="structure.html">Structures and support classes</a></li>
@@ -103,23 +101,28 @@
             
   <div class="section" id="installation-and-configuration">
 <h1>Installation and configuration<a class="headerlink" href="#installation-and-configuration" title="Permalink to this headline">¶</a></h1>
-<p>After downloading Solcore, either using ‘git’ or as a zip file, installing it and become a user should be as easy as writing in the terminal:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+<p>After downloading Solcore, either using ‘git’ or as a zip file using one of the links on the right, installing it and become a user should be as easy as writing in the terminal:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
 <p>You will be asked to accept the license and then it will install all Solcore dependencies (except a Fortran compiler) and Solcore itself in the Python3 package tree. Using it will be as easy as making:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">solcore</span>
 
-<span class="go">    Welcome to Solcore - version 4.1.0</span>
+<span class="go">    Welcome to Solcore - version 5.0.0</span>
 <span class="go">    Copyright (c) 2017, Imperial College, London All rights reserved.</span>
 <span class="go">    Software released under the GNU Lesser General Public License.</span>
 </pre></div>
 </div>
-<p>If you want to test first if Solcore will work in your computer, without actually installing it, or if you want to become a developer and therefore you need to have it in a more accessible place, you can test if solcore works with:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span>
+<p>If you want to test first if Solcore will work in your computer, without actually installing it, or if you want to become a developer and therefore you need to have it in a more accessible place, you can test if Solcore works with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span>
 </pre></div>
 </div>
-<p>This will install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them.</p>
+<p>This will install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore’s functionality, but it will be expanded with time.</p>
+<p>Another thing that you might want to do before installing Solcore 5 is compiling the Poisson-drfit-diffusion solver. Assuming there is a Fortran compiler correctly configured to work with F2Py, compiling the library should be as easy as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">build_pdd</span>
+</pre></div>
+</div>
+<p>This can also be done afterwards using the <em>config_tools</em> but you might need admin privileges, depending on where is the Python packages tree.</p>
 <div class="section" id="things-that-can-go-wrong">
 <h2>Things that can go wrong<a class="headerlink" href="#things-that-can-go-wrong" title="Permalink to this headline">¶</a></h2>
 <p>There are several things that can go wrong in the above description, specially in Windows.</p>
@@ -127,9 +130,8 @@
 <li><strong>The tests associated with the Poisson-Drift-Diffusion solver fail</strong>: This is usually the result of not having a Fortran compiler installed in your system, not being correctly configured or having a temperamental F2PY version, the tool - included in numpy - that makes Fotran code accesible from Python. For the first two problems, make sure you actually have a Fortran compiler installed and in the system path. For the latter, it appears in Windows and we have not been able to solve it, yet. Please, let us know if you have a solution.</li>
 <li><strong>Some of the dependencies fail to install</strong>: That is rarely the case, as all dependencies are in the main Python repositories. However, there might be issues (again in Windows) with Numpy, Matplotlib and Scipy. These packages need to be compiled and it is often easy to get them as a scientific bundle. You can check Anaconda &lt;<a class="reference external" href="https://www.continuum.io/downloads">https://www.continuum.io/downloads</a>&gt; which provides all these packages together already configured for the correct OS.</li>
 </ol>
-</div>
 <div class="section" id="getting-started">
-<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<h3>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h3>
 <p>After installing Solcore (or even without installing it), there are a few things you might want to do in order to personalise it and start using it.</p>
 <ol class="arabic">
 <li><p class="first"><strong>Create a user configuration file:</strong> This can be done automatically by importing the config_tools. If you do not already have a (hidden) solcore_config.txt file in your home directory, you will be asked if you want to create it:</p>
@@ -137,12 +139,7 @@
 </pre></div>
 </div>
 </li>
-<li><p class="first"><strong>Create a folder with Solcore examples:</strong> This is the fastest way of getting started. The examples will be created in a subfoler called ‘solcore/examples’. Simply use the config_tools, again:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">solcore.config_tools</span> <span class="k">as</span> <span class="nn">config</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span><span class="o">.</span><span class="n">get_solcore_examples</span><span class="p">(</span><span class="s1">&#39;/location/where/you/want/the/examples&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
+<li><p class="first"><strong>Check Solcore examples:</strong> This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper (submitted to Journal of Computational Electronics, preprint in <a class="reference external" href="https://arxiv.org/abs/1709.06741">https://arxiv.org/abs/1709.06741</a> ) and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time.</p>
 </li>
 <li><p class="first"><strong>Set the location of a SPICE executable and the SMARTS folder:</strong> You will need to do this eventually in order to use those tools:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">solcore.config_tools</span> <span class="k">as</span> <span class="nn">config</span>
@@ -152,12 +149,7 @@
 </pre></div>
 </div>
 </li>
-<li><p class="first"><strong>Open Solcore documentation:</strong> It should contain a description (even minimal) of all Solcore functions, modules and packages. The idea is for it to be a useful tool although it is quite empty, for now. The documentation will open in a webbrowser and you might want to add it to your Bookmarks:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">solcore.config_tools</span> <span class="k">as</span> <span class="nn">config</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span><span class="o">.</span><span class="n">open_documentation</span><span class="p">()</span>
-</pre></div>
-</div>
+<li><p class="first"><strong>Open Solcore documentation:</strong> It should contain a description (even minimal) of all Solcore functions, modules and packages. The idea is for it to be a useful tool although it is quite empty, for now. You can find the documentation in the Solcore webpage: <a class="reference external" href="http://dalonsoa.github.io/solcore5/">http://dalonsoa.github.io/solcore5/</a>.</p>
 </li>
 <li><p class="first"><strong>Getting specific information about Solcore:</strong> Even though the documentation “should” be more complete, you can get information about any object in python (including any Solcore function, module and package) using the ‘__doc__’ attribute, for example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">solcore.config_tools</span> <span class="k">as</span> <span class="nn">config</span>
@@ -174,8 +166,18 @@
 </li>
 </ol>
 </div>
+<div class="section" id="known-issues">
+<h3>Known issues<a class="headerlink" href="#known-issues" title="Permalink to this headline">¶</a></h3>
+<p>We have developed Solcore as part of our ongoing research activities to solve specific challenges, it has (almost) never been a goal in itself. These means that there are parts of Solcore that might not be as polished as they should, that have been just partly implemented or that are only valid under some assumptions (good for us, but maybe not that good for others).</p>
+<p>Some of the Solcore issues we are aware off are:</p>
+<ul class="simple">
+<li>The poisson-drift-diffusion solver, written in Fortran, has been tested only under Linux and Mac. We have never been successful in making F2Py and the Fortran compiler work together under Windows, although they are supposed to work well. Any help with this is more than welcome!!</li>
+<li>Documentation is incomplete or obscure, in many cases. Again, something to be solved soon.</li>
+<li>The calculator of the generation profile using the TMM module is really, really slow as soon as the structure is slightly complicated or the mesh density is high. We’ll need to do something about it sooner than later.</li>
+</ul>
+</div>
 <div class="section" id="the-config-tools">
-<h2>The config_tools<a class="headerlink" href="#the-config-tools" title="Permalink to this headline">¶</a></h2>
+<h3>The config_tools<a class="headerlink" href="#the-config-tools" title="Permalink to this headline">¶</a></h3>
 <p>This module contains all the functions that will help you to setup and configure your Solcore installation, as it has been highlighted above. The full description of the funcitons included in this module are:</p>
 <span class="target" id="module-solcore.config_tools"></span><p>This module contains tools for configuring the solcore installation, adding/removing sources with material data,
 etc.</p>
@@ -569,6 +571,7 @@ replaced by the new one.</p>
 </table>
 </dd></dl>
 
+</div>
 </div>
 </div>
 
