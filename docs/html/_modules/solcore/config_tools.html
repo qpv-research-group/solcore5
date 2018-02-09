@@ -285,36 +285,36 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">user_config_data</span><span class="p">[</span><span class="s1">&#39;Configuration&#39;</span><span class="p">][</span><span class="s1">&#39;verbose_loading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">show</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="get_solcore_examples"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.get_solcore_examples">[docs]</a><span class="k">def</span> <span class="nf">get_solcore_examples</span><span class="p">(</span><span class="n">destination</span><span class="o">=</span><span class="n">home_folder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Copies all Solcore examples to a user designated folder.</span>
-
-<span class="sd">    :param destination:</span>
-<span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">examples_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">solcore</span><span class="o">.</span><span class="n">SOLCORE_ROOT</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">)</span>
-    <span class="n">destination</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="s1">&#39;solcore&#39;</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">destination</span><span class="p">):</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;The destination folder for the examples already exists: </span><span class="se">\n\t</span><span class="si">{}</span><span class="se">\n</span><span class="s1">It will be deleted. &#39;</span>
-                         <span class="s1">&#39;Do you want to continue (Y/n)?&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">destination</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">response</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s1">&#39;Yy&#39;</span><span class="p">:</span>
-            <span class="k">return</span>
-
-        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
-
-    <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">examples_folder</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
-
-    <span class="c1"># We remove all the files/folders that are unnecesary</span>
-    <span class="n">pushdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
-    <span class="n">init_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;**&#39;</span><span class="p">,</span> <span class="s1">&#39;__init__.py&#39;</span><span class="p">),</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">init_files</span><span class="p">:</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="n">init_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;**&#39;</span><span class="p">,</span> <span class="s1">&#39;__pycache__&#39;</span><span class="p">),</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">init_files</span><span class="p">:</span>
-        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">pushdir</span><span class="p">)</span></div>
+<span class="c1">#</span>
+<span class="c1"># def get_solcore_examples(destination=home_folder):</span>
+<span class="c1">#     &quot;&quot;&quot; Copies all Solcore examples to a user designated folder.</span>
+<span class="c1">#</span>
+<span class="c1">#     :param destination:</span>
+<span class="c1">#     :return:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     examples_folder = os.path.join(solcore.SOLCORE_ROOT, &#39;examples&#39;)</span>
+<span class="c1">#     destination = os.path.join(destination, &#39;solcore&#39;, &#39;examples&#39;)</span>
+<span class="c1">#</span>
+<span class="c1">#     if os.path.isdir(destination):</span>
+<span class="c1">#         response = input(&#39;The destination folder for the examples already exists: \n\t{}\nIt will be deleted. &#39;</span>
+<span class="c1">#                          &#39;Do you want to continue (Y/n)?&#39;.format(destination))</span>
+<span class="c1">#         if response not in &#39;Yy&#39;:</span>
+<span class="c1">#             return</span>
+<span class="c1">#</span>
+<span class="c1">#         shutil.rmtree(destination)</span>
+<span class="c1">#</span>
+<span class="c1">#     shutil.copytree(examples_folder, destination)</span>
+<span class="c1">#</span>
+<span class="c1">#     # We remove all the files/folders that are unnecesary</span>
+<span class="c1">#     pushdir = os.getcwd()</span>
+<span class="c1">#     os.chdir(destination)</span>
+<span class="c1">#     init_files = glob.glob(os.path.join(&#39;**&#39;, &#39;__init__.py&#39;), recursive=True)</span>
+<span class="c1">#     for f in init_files:</span>
+<span class="c1">#         os.remove(f)</span>
+<span class="c1">#     init_files = glob.glob(os.path.join(&#39;**&#39;, &#39;__pycache__&#39;), recursive=True)</span>
+<span class="c1">#     for f in init_files:</span>
+<span class="c1">#         shutil.rmtree(f)</span>
+<span class="c1">#     os.chdir(pushdir)</span>
 
 
 <div class="viewcode-block" id="set_location_of_spice"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.set_location_of_spice">[docs]</a><span class="k">def</span> <span class="nf">set_location_of_spice</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
@@ -370,18 +370,18 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">user_config_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">option</span><span class="p">)))</span>
 
         <span class="nb">print</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="open_documentation"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.open_documentation">[docs]</a><span class="k">def</span> <span class="nf">open_documentation</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Opens Solcore documentation in a new tab in your web browser.</span>
-
-<span class="sd">    :return: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">webbrowser</span>
-
-    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;file:&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">solcore</span><span class="o">.</span><span class="n">SOLCORE_ROOT</span><span class="p">,</span> <span class="s1">&#39;documentation&#39;</span><span class="p">,</span> <span class="s1">&#39;Solcore.html&#39;</span><span class="p">)</span>
-    <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div>
-
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># def open_documentation():</span>
+<span class="c1">#     &quot;&quot;&quot; Opens Solcore documentation in a new tab in your web browser.</span>
+<span class="c1">#</span>
+<span class="c1">#     :return: None</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     import webbrowser</span>
+<span class="c1">#</span>
+<span class="c1">#     url = &#39;file:&#39; + os.path.join(solcore.SOLCORE_ROOT, &#39;documentation&#39;, &#39;Solcore.html&#39;)</span>
+<span class="c1">#     webbrowser.open(url)</span>
+<span class="c1">#</span>
 
 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_config_data</span><span class="o">.</span><span class="n">sections</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
     <span class="n">response</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;No user configuration was detected. Do you want to create one (Y/n)?&#39;</span><span class="p">)</span>
