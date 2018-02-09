@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Structures and support classes" href="structure.html" />
-    <link rel="prev" title="Solcore" href="index.html" /> 
+    <link rel="prev" title="Contents:" href="index.html" /> 
   </head>
   <body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -40,7 +40,7 @@
           <a href="structure.html" title="Structures and support classes"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Solcore"
+          <a href="index.html" title="Contents:"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
       </ul>
@@ -70,7 +70,7 @@
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
-                        title="previous chapter">Solcore</a></p>
+                        title="previous chapter">Contents:</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="structure.html"
                         title="next chapter">Structures and support classes</a></p>
@@ -101,7 +101,17 @@
             
   <div class="section" id="installation-and-configuration">
 <h1>Installation and configuration<a class="headerlink" href="#installation-and-configuration" title="Permalink to this headline">¶</a></h1>
-<p>After downloading Solcore, either using ‘git’ or as a zip file using one of the links on the right, installing it and become a user should be as easy as writing in the terminal:</p>
+<p>In order to install Solcore in your computer, you will need the following:</p>
+<ul class="simple">
+<li>Python &gt;3.4</li>
+<li>pip</li>
+<li>setuptools</li>
+</ul>
+<p><em>Pip</em> is normally part of the standard Python 3 installation, but you might need to install <em>setuptools</em> manually with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pip</span> <span class="n">install</span> <span class="n">setuptools</span>
+</pre></div>
+</div>
+<p>After downloading Solcore, either using ‘git’ or as a zip file using one of the links on the right, installing it and become a user should be as easy as writing in the terminal (within the Solcore5 folder, where there is the <em>setup.py</em> file):</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
@@ -117,12 +127,12 @@
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span>
 </pre></div>
 </div>
-<p>This will install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore’s functionality, but it will be expanded with time.</p>
+<p>This will also install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore’s functionality, but it will be expanded with time.</p>
 <p>Another thing that you might want to do before installing Solcore 5 is compiling the Poisson-drfit-diffusion solver. Assuming there is a Fortran compiler correctly configured to work with F2Py, compiling the library should be as easy as:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">build_pdd</span>
 </pre></div>
 </div>
-<p>This can also be done afterwards using the <em>config_tools</em> but you might need admin privileges, depending on where is the Python packages tree.</p>
+<p>This can also be done afterwards using the <em>config_tools</em> (see below) but you might need admin privileges, depending on where the Python packages tree is located. Solcore will try to compile the fortran code automatically the first time that any of the modules using it are imported. During the compilation, you will see many warnings printed. Don’t worry, it is normal and, hopefully, the compilation should complete without any critical error.</p>
 <div class="section" id="things-that-can-go-wrong">
 <h2>Things that can go wrong<a class="headerlink" href="#things-that-can-go-wrong" title="Permalink to this headline">¶</a></h2>
 <p>There are several things that can go wrong in the above description, specially in Windows.</p>
@@ -149,7 +159,7 @@
 </pre></div>
 </div>
 </li>
-<li><p class="first"><strong>Open Solcore documentation:</strong> It should contain a description (even minimal) of all Solcore functions, modules and packages. The idea is for it to be a useful tool although it is quite empty, for now. You can find the documentation in the Solcore webpage: <a class="reference external" href="http://dalonsoa.github.io/solcore5/">http://dalonsoa.github.io/solcore5/</a>.</p>
+<li><p class="first"><strong>Installing S4:</strong> The rigorous-coupled wave analysis (RCWA) solver S4, created by the Stanford University, needs to be installed separately using <a href="#id1"><span class="problematic" id="id2">`the fork by Phoebe Pearce http://github.com/phoebe-p/S4`_</span></a>. The original version <strong>do not work</strong> with Python 3, only with Python 2. You can find more information about the solver in the <a href="#id3"><span class="problematic" id="id4">`project webpage http://web.stanford.edu/group/fan/S4/`_</span></a>. An example of its use with Solcore is included in the examples folder, <em>Figure9.py</em>.</p>
 </li>
 <li><p class="first"><strong>Getting specific information about Solcore:</strong> Even though the documentation “should” be more complete, you can get information about any object in python (including any Solcore function, module and package) using the ‘__doc__’ attribute, for example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">solcore.config_tools</span> <span class="k">as</span> <span class="nn">config</span>
@@ -594,7 +604,7 @@ replaced by the new one.</p>
           <a href="structure.html" title="Structures and support classes"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Solcore"
+          <a href="index.html" title="Contents:"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
       </ul>
