@@ -6,13 +6,11 @@ entirely in Python 3, to address some of the task we had to solve more
 often, such as fitting dark IV curves or luminescence decays. With time,
 however, it has evolved as a complete semiconductor solver able of
 modelling the optical and electrical properties of a wide range of solar
-cells, from quantum well devices to multi-junction solar cells. Some of its features are summarised in the following figure: 
+cells, from quantum well devices to multi-junction solar cells. Please, visit [Solcore\'s
+Documentation](http://dalonsoa.github.io/solcore5) and check the
+Examples of the examples folder. Some of its features are summarised in the following figure: 
 
 ![infographics](docs/source/Infographics.jpg "Overview of Solcore")
-
-Please, visit [Solcore\'s
-Documentation](http://dalonsoa.github.io/solcore5) and check the
-Examples of the examples folder.
 
 Contributors
 ------------
