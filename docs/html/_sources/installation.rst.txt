@@ -58,7 +58,7 @@ After installing Solcore (or even without installing it), there are a few things
     >>> config.set_location_of_spice('/path/to/the/SPICE/executable')
     >>> config.set_location_of_smarts('/path/to/the/SMARTS/folder')
 
-4. **Installing S4:** The rigorous-coupled wave analysis (RCWA) solver S4, created by the Stanford University, needs to be installed separately using `the fork by Phoebe Pearce http://github.com/phoebe-p/S4`_. The original version **do not work** with Python 3.x, only with Python 2. You can find more information about the solver in the `project webpage http://web.stanford.edu/group/fan/S4/`_. An example of its use with Solcore is included in the examples folder, *Figure9.py*.
+4. **Installing S4:** The rigorous-coupled wave analysis (RCWA) solver S4, created by the Stanford University, needs to be installed separately using `the fork by Phoebe Pearce <http://github.com/phoebe-p/S4>`_. The original version **do not work** with Python 3.x, only with Python 2. You can find more information about the solver in the `project webpage <http://web.stanford.edu/group/fan/S4/>`_. An example of its use with Solcore is included in the examples folder, *Figure9.py*.
 
 5. **Getting specific information about Solcore:** Even though the documentation "should" be more complete, you can get information about any object in python (including any Solcore function, module and package) using the '__doc__' attribute, for example::
 
