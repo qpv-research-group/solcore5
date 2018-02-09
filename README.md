@@ -8,7 +8,7 @@ however, it has evolved as a complete semiconductor solver able of
 modelling the optical and electrical properties of a wide range of solar
 cells, from quantum well devices to multi-junction solar cells. Some of its features are summarised in the following figure: 
 
-![infographics](docs/source/infographics.jpg "Overview of Solcore")
+![infographics](solcore5/docs/source/Infographics.jpg "Overview of Solcore")
 
 Please, visit [Solcore\'s
 Documentation](http://dalonsoa.github.io/solcore5) and check the
