@@ -40,7 +40,7 @@ if 'install' in sys.argv:
         sys.exit()
 
 # Get the long description from the README file
-with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
+with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
