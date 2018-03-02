@@ -25,7 +25,7 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
     :param krange: (1e-9) The range in the k space
     :param num_eigenvalues: (10) Maximum number of eigenvalues to calculate
     :param symmetric: (True) If the structure is symmetric, in which case the calculation can be speed up
-    :param quasiconfined: (0.0) Energy above the band edges that an energy level can have before rejecting it
+    :param quasiconfined: (0.0 eV) Energy above the band edges that an energy level can have before rejecting it
     :param return_qw_boolean_for_layer: (False) Return an boolean array indicating which positions are inside the QW
     :param Efield: (0) Electric field.
     :param blur: (False) If the potentials and effective masses have to be blurred
@@ -35,7 +35,7 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
     :param minimum_step_size: (0) The minimum step size.
     :param smallest_feature_steps: (20) The number of steps in the smallest feature
     :param filter_strength: (0) If > 0, defines the fraction of the wavefunction that has to be inside the QW in order to consider it 'confined'
-    :param periodic: (False) If the strucuture is periodic. Affects the boundary conditions.
+    :param periodic: (False) If the structure is periodic. Affects the boundary conditions.
     :param offset: (0) Energy offset used in the calculation of the energy levels in the case of the 'bulk' solvers
     :param graphtype: [] If 'potential', the band profile and wavefunctions are ploted
     :return: A dictionary containing the band structure and wavefunctions as a function of the position and k

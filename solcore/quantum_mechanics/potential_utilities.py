@@ -13,7 +13,7 @@ from . import structure_utilities
 from .graphics import Graph, GraphData
 
 
-def tridiag_euler(V, z, m, periodic=False, num_eigenvalues=10):
+def tridiag_euler(V, z, m, periodic=False, num_eigenvalues=10, quasiconfined=0):
     """
     Returns eignvalue and eigenvectors of an arbitrary potential.
     
@@ -69,7 +69,7 @@ def tridiag_euler(V, z, m, periodic=False, num_eigenvalues=10):
     E, Psi = eigs(H, k=num_eigenvalues, which='LR', sigma=sigma)
 
     # Allow for quasi confined levels to go through. They can be discarded later with the filter
-    confined_levels = [i for i, e in enumerate(E) if e < 0.01 * q]
+    confined_levels = [i for i, e in enumerate(E) if e < quasiconfined * q]
     E, Psi = E[confined_levels].real, array(Psi[:, confined_levels]).transpose()
     Psi = [(p / sqrt(trapz(p * p, x=z))).real for p in Psi]
 
@@ -78,7 +78,7 @@ def tridiag_euler(V, z, m, periodic=False, num_eigenvalues=10):
     return E, Psi
 
 
-def schroedinger_solve(x, V, m, num_eigenvalues=10, periodic=False, offset=0, electron=True):
+def schroedinger_solve(x, V, m, num_eigenvalues=10, periodic=False, offset=0, electron=True, quasiconfined=0):
     """Returns normalised wavefuctions from the potential profile.
 
     Arguments:
@@ -96,12 +96,12 @@ def schroedinger_solve(x, V, m, num_eigenvalues=10, periodic=False, offset=0, el
 
     if electron:
         v_shift = max(V) + offset
-        E, psi = tridiag_euler(V - v_shift, x, m, num_eigenvalues=num_eigenvalues, periodic=periodic)
+        E, psi = tridiag_euler(V - v_shift, x, m, num_eigenvalues=num_eigenvalues, periodic=periodic, quasiconfined=quasiconfined)
         E = list() if len(E) == 0 else np.array(E) + v_shift
 
     else:
         v_shift = min(V) - offset
-        E, psi = tridiag_euler(-V + v_shift, x, m, num_eigenvalues=num_eigenvalues, periodic=periodic)
+        E, psi = tridiag_euler(-V + v_shift, x, m, num_eigenvalues=num_eigenvalues, periodic=periodic, quasiconfined=quasiconfined)
         E = list() if len(E) == 0 else -np.array(E) + v_shift
 
     return E, psi
@@ -128,9 +128,9 @@ def __potentials_to_wavefunctions_energies_internal(x, Ve, me, Vhh, mhh, Vlh, ml
         periodic   -- not to sure what this does (default: False)
     """
 
-    Ee, psi_e = schroedinger_solve(x, Ve, me, num_eigenvalues, periodic, offset, electron=True)
-    Ehh, psi_hh = schroedinger_solve(x, Vhh, mhh, num_eigenvalues, periodic, offset, electron=False)
-    Elh, psi_lh = schroedinger_solve(x, Vlh, mlh, num_eigenvalues, periodic, offset, electron=False)
+    Ee, psi_e = schroedinger_solve(x, Ve, me, num_eigenvalues, periodic, offset, electron=True, quasiconfined=quasiconfined)
+    Ehh, psi_hh = schroedinger_solve(x, Vhh, mhh, num_eigenvalues, periodic, offset, electron=False, quasiconfined=quasiconfined)
+    Elh, psi_lh = schroedinger_solve(x, Vlh, mlh, num_eigenvalues, periodic, offset, electron=False, quasiconfined=quasiconfined)
 
     if filter_strength != 0:
         assert structure is not None, "Need to provide structure to find well regions for filtering"
@@ -139,16 +139,16 @@ def __potentials_to_wavefunctions_energies_internal(x, Ve, me, Vhh, mhh, Vlh, ml
         Ehh, psi_hh = discard_unconfined(x, structure, Ehh, psi_hh, filter_strength)
         Elh, psi_lh = discard_unconfined(x, structure, Elh, psi_lh, filter_strength)
 
-    Ee, psi_e = discard_unconfined_energy(Ee, psi_e, Ve, quasiconfined)
-    Ehh, psi_hh = discard_unconfined_energy(Ehh, psi_hh, Vhh, quasiconfined)
-    Elh, psi_lh = discard_unconfined_energy(Elh, psi_lh, Vlh, quasiconfined)
+    # Ee, psi_e = discard_unconfined_energy(Ee, psi_e, Ve, quasiconfined)
+    # Ehh, psi_hh = discard_unconfined_energy(Ehh, psi_hh, Vhh, quasiconfined)
+    # Elh, psi_lh = discard_unconfined_energy(Elh, psi_lh, Vlh, quasiconfined)
 
     return x, Ee, psi_e, Ehh, psi_hh, Elh, psi_lh
 
 
 def discard_unconfined_energy(E, psi, V, quasiconfined):
     before = len(E)
-    maxE = min(abs(V[0]), max(abs(V)) + quasiconfined)
+    maxE = min(abs(V[0]), max(abs(V))) + quasiconfined
     try:
         E, psi = zip(*[(E_i, psi_i)
                        for (E_i, psi_i) in zip(E, psi)

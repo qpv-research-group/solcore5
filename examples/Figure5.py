@@ -14,7 +14,7 @@ bulk.strained = False
 barrier.strained = True
 
 # As well as some of the layers
-top_layer = Layer(width=si("30nm"), material=barrier)
+top_layer = Layer(width=si("15nm"), material=barrier)
 inter = Layer(width=si("3nm"), material=bulk)
 barrier_layer = Layer(width=si("5nm"), material=barrier)
 bottom_layer = top_layer
@@ -46,8 +46,8 @@ well_layer = Layer(width=si("7.2nm"), material=QW)
 # test_structure = Structure([top_layer, barrier_layer, inter] + 10 * [well_layer, inter, barrier_layer, inter] +
 #                            [bottom_layer])
 
-test_structure = Structure([barrier_layer, inter] + 1 * [well_layer, inter] +
-                            [barrier_layer])
+test_structure = Structure([top_layer, inter] + 1 * [well_layer, inter] +
+                            [bottom_layer])
 
 #test_structure = Structure([top_layer, barrier_layer] + 10 * [well_layer, barrier_layer] +
 #                           [bottom_layer])
@@ -55,6 +55,6 @@ test_structure = Structure([barrier_layer, inter] + 1 * [well_layer, inter] +
 test_structure.substrate = bulk
 
 # Finally, the quantum properties are claculated here
-output = QM.schrodinger(test_structure, quasiconfined=0, graphtype='potentials',
-                     num_eigenvalues=50, alpha_params=alpha_params, calculate_absorption=True)
+output = QM.schrodinger(test_structure, quasiconfined=0.1, graphtype='potentials', periodic=False,
+                     num_eigenvalues=200, alpha_params=alpha_params, calculate_absorption=False, Efield=0)
 
