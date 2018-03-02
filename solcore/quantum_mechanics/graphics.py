@@ -1,6 +1,11 @@
 import copy
-from solcore.graphing import Graph, GraphData
+from solcore.graphing import Graph, GraphData, graph_defaults
+from solcore.graphing.graph_support import open_with_os
 from solcore.constants import *
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import FigureCanvasPdf
+import tempfile
 
 defaults = {
     "edit": lambda x, y: (x * 1e9, y / q),
@@ -136,6 +141,7 @@ def split_schrodinger_graph(schrodinger_result,
     energy_levels = schrodinger_result["E"]
     x = schrodinger_result["x"]
 
+    # This is used when doing the 4x4 kp calculation rather than the single band calculation
     if 'EU' in energy_levels.keys():
         energy_levels['Ehh'] = energy_levels['EU']
         energy_levels['Elh'] = energy_levels['EU']
@@ -166,3 +172,96 @@ def split_schrodinger_graph(schrodinger_result,
     g.add_subplot(conduction_data, subplot=211, **options)
     # g.axis.get_xaxis().set_ticklabels([])
     return g
+
+
+def split_schrodinger_graph_LDOS(schrodinger_result, **kwargs):
+    defaults = {'step': 0.002, 'margin': 0.05, 'pdf': True, 'show': False, 'dpi': 100, 'fontsize': 12,
+                'figsize': (7, 6)}
+    defaults.update(kwargs)
+
+    effective_masses = schrodinger_result["effective_masses"]
+    potentials = schrodinger_result["potentials"]
+    wavefunctions = schrodinger_result["wavefunctions"]
+    energy_levels = schrodinger_result["E"]
+    x = schrodinger_result["x"]
+
+    if 'EU' in energy_levels.keys():
+        energy_levels['Ehh'] = energy_levels['EU']
+        energy_levels['Elh'] = energy_levels['EU']
+        wavefunctions["psi_hh"] = wavefunctions["psi_g1"]
+        wavefunctions["psi_lh"] = wavefunctions["psi_g2"]
+
+    Ee, LDOSe = LDOS_e(x, energy_levels, wavefunctions, effective_masses, defaults['step'], defaults['margin'])
+    Eh, LDOSh = LDOS_h(x, energy_levels, wavefunctions, effective_masses, defaults['step'], defaults['margin'])
+
+    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=defaults['figsize'], dpi=defaults['dpi'])
+
+    ax1.contourf(x * 1e9, Ee / q, LDOSe, 100, cmap='gnuplot2_r', vmin=0, vmax=max(LDOSe.flatten()) * 1.2)
+    ax1.plot(x * 1e9, potentials["Ve"] / q, 'k', linewidth=2, label='Ve')
+    ax1.set_ylabel('Energy (eV)', fontsize=defaults["fontsize"])
+    ax1.tick_params(labelsize=defaults["fontsize"])
+
+    ax2.contourf(x * 1e9, Eh / q, LDOSh, 100, cmap='gnuplot2_r', vmin=0, vmax=max(LDOSh.flatten()) * 1.2)
+    ax2.plot(x * 1e9, potentials["Vlh"] / q, 'k--', linewidth=2, label="Vlh"),
+    ax2.plot(x * 1e9, potentials["Vhh"] / q, 'k', linewidth=2, label="Vhh")
+    ax2.set_ylabel('Energy (eV)', fontsize=defaults["fontsize"])
+    ax2.set_xlabel('Possition (nm)', fontsize=defaults["fontsize"])
+    ax2.tick_params(labelsize=defaults["fontsize"])
+
+    if defaults["show"]:
+        plt.tight_layout()
+        plt.show()
+
+    if defaults["pdf"]:
+        handle, path = tempfile.mkstemp(prefix="tmp_solcore_", suffix=".%s" % graph_defaults["format"])
+        canvas = FigureCanvasPdf(fig)
+        canvas.print_figure(path, dpi=defaults["dpi"], bbox_inches='tight')
+        open_with_os(path)
+
+    return Ee, LDOSe, Eh, LDOSh
+
+
+def LDOS_e(x, E, psi, m, step=0.002, margin=0.05):
+    Emax = max(E['Ee']) + margin * q
+    Emin = min(E['Ee']) - margin * q
+
+    energy = np.arange(Emin, Emax, step * q)
+    LDOS = np.zeros((len(energy), len(x)))
+
+    for i, ee in enumerate(E['Ee']):
+        m_plane = calculate_in_plane_masses(x, psi['psi_e'], m['me'])
+        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer((energy >= ee), psi['psi_e'][i] ** 2)
+
+    # plt.contourf(x, energy/q, DOS, 50, cmap='gnuplot2_r', vmin=0, vmax=max(DOS.flatten())*1.2)
+    # plt.clim(0, max(DOS.flatten())*1.2)
+    # plt.show()
+
+    return energy, LDOS
+
+
+def LDOS_h(x, E, psi, m, step=0.002, margin=0.05):
+    Emax = max(max(E['Ehh']), max(E['Elh'])) + margin * q
+    Emin = min(min(E['Ehh']), min(E['Elh'])) - margin * q
+
+    energy = np.arange(Emin, Emax, step * q)
+    LDOS = np.zeros((len(energy), len(x)))
+
+    for i, ee in enumerate(E['Ehh']):
+        m_plane = calculate_in_plane_masses(x, psi['psi_hh'], m['mhh'])
+        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer((energy <= ee), psi['psi_hh'][i] ** 2)
+
+    for i, ee in enumerate(E['Elh']):
+        m_plane = calculate_in_plane_masses(x, psi['psi_lh'], m['mlh'])
+        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer((energy <= ee), psi['psi_lh'][i] ** 2)
+
+    return energy, LDOS
+
+
+def calculate_in_plane_masses(x, psi, m):
+    """ Calculates the in-plane effective mass for each level, considering that the wavefunction leaks into the barriers."""
+
+    m_out = []
+    for ps in psi:
+        m_out.append(np.trapz(ps ** 2 * m, x))
+
+    return m_out

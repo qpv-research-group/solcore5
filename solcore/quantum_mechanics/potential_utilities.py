@@ -96,12 +96,14 @@ def schroedinger_solve(x, V, m, num_eigenvalues=10, periodic=False, offset=0, el
 
     if electron:
         v_shift = max(V) + offset
-        E, psi = tridiag_euler(V - v_shift, x, m, num_eigenvalues=num_eigenvalues, periodic=periodic, quasiconfined=quasiconfined)
+        E, psi = tridiag_euler(V - v_shift, x, m, num_eigenvalues=num_eigenvalues, periodic=periodic,
+                               quasiconfined=quasiconfined)
         E = list() if len(E) == 0 else np.array(E) + v_shift
 
     else:
         v_shift = min(V) - offset
-        E, psi = tridiag_euler(-V + v_shift, x, m, num_eigenvalues=num_eigenvalues, periodic=periodic, quasiconfined=quasiconfined)
+        E, psi = tridiag_euler(-V + v_shift, x, m, num_eigenvalues=num_eigenvalues, periodic=periodic,
+                               quasiconfined=quasiconfined)
         E = list() if len(E) == 0 else -np.array(E) + v_shift
 
     return E, psi
@@ -128,9 +130,12 @@ def __potentials_to_wavefunctions_energies_internal(x, Ve, me, Vhh, mhh, Vlh, ml
         periodic   -- not to sure what this does (default: False)
     """
 
-    Ee, psi_e = schroedinger_solve(x, Ve, me, num_eigenvalues, periodic, offset, electron=True, quasiconfined=quasiconfined)
-    Ehh, psi_hh = schroedinger_solve(x, Vhh, mhh, num_eigenvalues, periodic, offset, electron=False, quasiconfined=quasiconfined)
-    Elh, psi_lh = schroedinger_solve(x, Vlh, mlh, num_eigenvalues, periodic, offset, electron=False, quasiconfined=quasiconfined)
+    Ee, psi_e = schroedinger_solve(x, Ve, me, num_eigenvalues, periodic, offset, electron=True,
+                                   quasiconfined=quasiconfined)
+    Ehh, psi_hh = schroedinger_solve(x, Vhh, mhh, num_eigenvalues, periodic, offset, electron=False,
+                                     quasiconfined=quasiconfined)
+    Elh, psi_lh = schroedinger_solve(x, Vlh, mlh, num_eigenvalues, periodic, offset, electron=False,
+                                     quasiconfined=quasiconfined)
 
     if filter_strength != 0:
         assert structure is not None, "Need to provide structure to find well regions for filtering"
@@ -142,6 +147,12 @@ def __potentials_to_wavefunctions_energies_internal(x, Ve, me, Vhh, mhh, Vlh, ml
     # Ee, psi_e = discard_unconfined_energy(Ee, psi_e, Ve, quasiconfined)
     # Ehh, psi_hh = discard_unconfined_energy(Ehh, psi_hh, Vhh, quasiconfined)
     # Elh, psi_lh = discard_unconfined_energy(Elh, psi_lh, Vlh, quasiconfined)
+
+    # print(me/electron_mass, mhh/electron_mass, mlh/electron_mass)
+    # print(me_plane, mhh_plane, mlh_plane)
+    #
+    # import sys
+    # sys.exit()
 
     return x, Ee, psi_e, Ehh, psi_hh, Elh, psi_lh
 
@@ -184,11 +195,11 @@ def discard_unconfined(x, structure, E, psi, threshold=0.8):
 
 def potentials_to_wavefunctions_energies(x, Ve, me, Vhh, mhh, Vlh, mlh, num_eigenvalues=10, periodic=False, offset=0,
                                          filter_strength=0, structure=None, quasiconfined=0, **kwargs):
-    x, Ee, psi_e, Ehh, psi_hh, Elh, psi_lh = __potentials_to_wavefunctions_energies_internal(x, Ve, me, Vhh, mhh, Vlh,
-                                                                                             mlh, num_eigenvalues,
-                                                                                             periodic, offset,
-                                                                                             filter_strength, structure,
-                                                                                             quasiconfined)
+    x, Ee, psi_e, Ehh, psi_hh, Elh, psi_lh = __potentials_to_wavefunctions_energies_internal(
+        x, Ve, me, Vhh, mhh, Vlh, mlh, num_eigenvalues,
+        periodic, offset,
+        filter_strength, structure,
+        quasiconfined)
     return {
         "x": x,
         "Ee": Ee,

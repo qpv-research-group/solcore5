@@ -12,7 +12,7 @@ import numpy as np
 def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenvalues=10, symmetric=True,
                 quasiconfined=0.0, return_qw_boolean_for_layer=False, Efield=0, blur=False, blurmode="even",
                 mode='kp8x8_bulk', step_size=None, minimum_step_size=0, smallest_feature_steps=20, filter_strength=0,
-                periodic=False, offset=0, graphtype=[], calculate_absorption=False, alpha_params=None):
+                periodic=False, offset=0, graphtype=[], calculate_absorption=False, alpha_params=None, **kwargs):
     """ Solves the Schrodinger equation of a 1 dimensional structure. Depending on the inputs, the method for solving
     the problem is more or less sophisticated. In all cases, the output includes the band structure and effective
     masses around k=0 as a function of the position, the energy levels of the QW (electrons and holes) and the
@@ -76,9 +76,13 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
             "E": {key: np.array(bands[key]) for key in bands.keys() if key[0] in "E"},
         }
 
-    if "potentials" in graphtype:
+    if "potentials" is graphtype:
         schrodinger_plt = graphics.split_schrodinger_graph(result_band_edge)
         schrodinger_plt.draw()
+
+    if "potentialsLDOS" is graphtype:
+        Ee, LDOSe, Eh, LDOSh = graphics.split_schrodinger_graph_LDOS(result_band_edge, **kwargs)
+        result_band_edge["LDOS"] = {"x": bands['x'], 'Ee': Ee, 'LDOSe': LDOSe, 'Eh': Eh, 'LDOSh': LDOSh}
 
     if calculate_absorption:
         result_band_edge["alpha"] = calc_alpha(result_band_edge, **alpha_params)
@@ -107,7 +111,7 @@ if __name__ == "__main__":
     E = np.linspace(1.15, 1.5, 300) * q
     alfas = np.zeros((len(E), 6))
 
-    alfas[:, 0] = E/q
+    alfas[:, 0] = E / q
 
     alpha_params = {
         "well_width": si("7.2nm"),
@@ -139,13 +143,12 @@ if __name__ == "__main__":
 
         test_structure.substrate = bulk
 
-
-        output = schrodinger(test_structure, quasiconfined=0, #mode='kp4x4', plot_bands=True,
+        output = schrodinger(test_structure, quasiconfined=0,  # mode='kp4x4', plot_bands=True,
                              num_eigenvalues=20, alpha_params=alpha_params, calculate_absorption=True)
 
         alfa = output[0]['alphaE'](E)
-        plt.plot(1240/(E/q), alfa/100, label='{}%'.format(int(i*100)))
-        alfas[:, j+1] = alfa/100
+        plt.plot(1240 / (E / q), alfa / 100, label='{}%'.format(int(i * 100)))
+        alfas[:, j + 1] = alfa / 100
 
     plt.xlim(826, 1100)
     plt.ylim(0, 23000)
@@ -155,6 +158,7 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     import os
+
     root = os.path.expanduser('~')
-    plt.savefig(root+'/Desktop/abs.pdf')
+    plt.savefig(root + '/Desktop/abs.pdf')
     plt.show()
