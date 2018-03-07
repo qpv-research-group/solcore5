@@ -8,17 +8,16 @@ from solcore.state import State
 
 
 def iv_depletion(junction, options):
-    """ Calculates the total quantum efficiency, the QE splitted by regions, photocurrent and other parameters for a
-    given junction at a given voltage.
+    """ Calculates the IV curve of a junction object using the depletion approximation as described in J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003). The junction is then updated with an "iv" function that calculates the IV curve at any voltage.
 
-    :param junc: The junction object
-    :param energies: The energies at which to perform the calculation
-    :param bs: The spectral power density reaching the junction
-    :param bsInitial: The initial power density
-    :param V: The voltage at which to perform the calculations (not implemented, yet)
-    :param printParameters: If a list of all parameters must be printed
-    :return:
+    :param junction: A junction object.
+    :param options: Solver options.
+    :return: None.
     """
+
+    science_reference('Depletion approximation',
+                      'J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).')
+
     junction.voltage = options.internal_voltages
     T = options.T
 
@@ -373,17 +372,16 @@ def get_J_sc_SCR(xa, xb, g, wl, ph):
 
 
 def qe_depletion(junction, options):
-    """ Calculates the total quantum efficiency, the QE splitted by regions, photocurrent and other parameters for a
-     given junction at a given voltage.
+    """ Calculates the QE curve of a junction object using the depletion approximation as described in J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003). The junction is then updated with an "iqe" and several "eqe" functions that calculates the QE curve at any wavelength.
 
-     :param junc: The junction object
-     :param energies: The energies at which to perform the calculation
-     :param bs: The spectral power density reaching the junction
-     :param bsInitial: The initial power density
-     :param V: The voltage at which to perform the calculations (not implemented, yet)
-     :param printParameters: If a list of all parameters must be printed
-     :return:
-     """
+    :param junction: A junction object.
+    :param options: Solver options.
+    :return: None.
+    """
+
+    science_reference('Depletion approximation',
+                      'J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).')
+
     T = options.T
 
     # First we have to figure out if we are talking about a PN, NP, PIN or NIP junction

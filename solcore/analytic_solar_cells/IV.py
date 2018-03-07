@@ -39,6 +39,7 @@ def iv_multijunction(solar_cell, options):
 
     # The current and junction voltage arrays
     num_jun = solar_cell.junctions
+    tunnel_jun = solar_cell.tunnel_indices
     V_junction_array = np.zeros((len(output_V), num_jun))
 
     # The following assumes that all junctions have the currents defined at the same voltages
@@ -54,8 +55,15 @@ def iv_multijunction(solar_cell, options):
     for j in range(num_jun):
         temp_V_junction_array[:, j] = np.interp(minimum_J, solar_cell(j).current, solar_cell(j).voltage)
 
-    # We calculate the total voltage
+    # We calculate the total voltage related to the...
+    # ... series resistance
     temp_V_total = Rs * minimum_J
+
+    # ... tunnel junctions
+    for j in tunnel_jun:
+        temp_V_total -= solar_cell[j].vi(-minimum_J)
+
+    # ... and the normal junctions
     for j in range(num_jun):
         temp_V_total += temp_V_junction_array[:, j]
 
@@ -123,11 +131,15 @@ def iv_multijunction(solar_cell, options):
 def solve_radiative_coupling(solar_cell, options, V_junction_array):
     """ Calculates the radiative IV curve of a MJ solar cell in the presence of radiative coupling between subcells.
 
+    WARNING: Tunnel junctions are not implemented in the radiative coupling mode, yet.
+
     :param solar_cell: The MJ solar cell structure
     :param options: General options of the solver
     :param V_junction_array: Array with all the junction voltages without coupling. Only the first element is used, actually.
     :return: A tupple with J, V_junction_array in the presence of coupling and the coupled current
     """
+    print('Calculating IV curve with radiative coupling...')
+    print('WARNING: Tunnel junctions are not implemented in the radiative coupling calculator, yet.')
 
     output_V = options.voltages
     wl = options.wavelength

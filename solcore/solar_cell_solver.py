@@ -126,6 +126,21 @@ def solve_iv(solar_cell, options):
                 'ERROR in "solar_cell_solver":\n\tJunction {} has an invalid "type". It must be "PDD", "DA", "2D" or "DB".'.format(
                     j))
 
+    for j in solar_cell.tunnel_indices:
+
+        if solar_cell[j].kind == 'resistive':
+            # The tunnel junction is modeled as a simple resistor
+            ASC.resistive_tunnel_junction(solar_cell[j], options)
+        elif solar_cell[j].kind == 'parametric':
+            # The tunnel junction is modeled using a simple parametric model
+            ASC.parametric_tunnel_junction(solar_cell[j], options)
+        elif solar_cell[j].kind == 'analytic':
+            print('Sorry, the analytical tunel junction model is not implemented, yet.')
+        else:
+            raise ValueError(
+                'ERROR in "solar_cell_solver":\n\tTunnel junction {} has an invalid "type". It must be "parametric", "analytic" or "resistive".'.format(
+                    j))
+
     ASC.iv_multijunction(solar_cell, options)
 
 

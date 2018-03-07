@@ -108,9 +108,9 @@ class TunnelJunction(Junction):
     """ Class that contains the minimum definitions for a tunnel junction, ie. a series resistance in our case.
     """
     def __init__(self, *args, **kwargs):
-        Junction.__init__(self, *args)
+        Junction.__init__(self, *args, **kwargs)
 
-        self.R_series = kwargs['R_series'] if 'R_series' in kwargs.keys() else 0
+        self.R = kwargs['R'] if 'R' in kwargs.keys() else 1e-16
 
 
 # CONVERSION UTILITIES

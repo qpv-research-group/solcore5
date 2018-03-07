@@ -8,9 +8,12 @@ from .detailed_balance import iv_detailed_balance
 
 
 def iv_2diode(junction, options):
-    """ Calculates the IV curve of a junction object using the 2-diode equation. All parameters needed for the calculation need to be included in the junction object. Series resistance is included at solar cell level, not at junction level.
+    """ Calculates the IV curve of a junction object using the 2-diode equation. All parameters needed for the calculation need to be included in the junction object. Series resistance is included at solar cell level, not at junction level. The junction is then updated with an "iv" function that calculates the IV curve at any voltage.
 
-    The junction is then updated with an "iv" function that calculates the IV curve at any voltage. """
+    :param junction: A junction object.
+    :param options: Solver options.
+    :return: None.
+    """
 
     T = options.T
     light = options.light_iv
@@ -47,8 +50,9 @@ def iv_2diode(junction, options):
 
             # If the saturation currents correspond to a different temperature, we update them for the current temperature.
             if hasattr(junction, 'Tref') and (T != junction.Tref):
-                assert hasattr(junction, 'Eg'), 'ERROR: The bandgap for each junction (Eg) must be provided if the working ' \
-                                                'temperature (T) is different that the reference temperature (Tref). '
+                assert hasattr(junction,
+                               'Eg'), 'ERROR: The bandgap for each junction (Eg) must be provided if the working ' \
+                                      'temperature (T) is different that the reference temperature (Tref). '
 
                 Eg = junction.Eg
                 Tref = junction.Tref
@@ -70,7 +74,6 @@ def iv_2diode(junction, options):
 
     except AttributeError as err:
         raise AttributeError('ERROR in 2-diode equation. Junction is missing one essential argument. {}'.format(err))
-
 
     def iv(v):
         out = j01 * (np.exp(q * v / (n1 * kb * T)) - 1) + j02 * (np.exp(q * v / (n2 * kb * T)) - 1) + v / R_shunt - jsc

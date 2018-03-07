@@ -51,7 +51,7 @@ class SolarCell(Structure):
         self.reflectivity = reflectivity
         self.junctions = 0
         self.junction_indices = []
-        self.tunel_indices = []
+        self.tunnel_indices = []
         self.substrate = substrate
         self.R_series = R_series
 
@@ -71,7 +71,7 @@ class SolarCell(Structure):
             self.junction_indices.append(i)
             self.junctions += 1
         if type(layer) == TunnelJunction:
-            self.tunel_indices.append(i)
+            self.tunnel_indices.append(i)
 
     def append(self, new_layer, layer_label=None, repeats=1):
         """ Appends a layer to the structure a certain number of times to the structure.
