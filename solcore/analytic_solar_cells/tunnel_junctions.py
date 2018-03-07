@@ -81,6 +81,38 @@ def parametric_tunnel_junction(junction, options):
     junction.vi = vi
 
 
+def external_tunnel_junction(junction, options):
+    """ Calculates the IV curve of a tunnel junction when it is modelled with external data. The external voltage and current must be defined with the input parameters external_voltage and external_current, respectively. It assumes that the interesting part of the curve is in the 1st quadrant (V>0 and I>0).
+
+    :param junction: A junction object.
+    :param options: Solver options.
+    :return: None.
+    """
+
+    try:
+        # We put everything together in an IV curve function using the external data
+        def iv(v):
+            return np.interp(v, junction.external_voltage, junction.external_current)
+
+    except AttributeError:
+        raise
+
+    # Also, we calculate the inverse, needed for the calculation of the IV curve in MJ solar cells
+    MJ_current = np.zeros_like(junction.external_current)
+    MJ_current[0] = junction.external_current[0]
+    for i in range(len(junction.external_current) - 1):
+        MJ_current[i + 1] = max(MJ_current[i], junction.current[i + 1])
+
+    # And the corresponding function doing that
+    def vi(j):
+        return np.interp(j, MJ_current, junction.external_voltage)
+
+    junction.voltage = options.internal_voltages
+    junction.current = iv(junction.voltage)
+    junction.iv = iv
+    junction.vi = vi
+
+
 def example_resistive_tunnel_junction(show=True):
     from solcore.structure import TunnelJunction
     from solcore.solar_cell_solver import default_options

@@ -134,11 +134,14 @@ def solve_iv(solar_cell, options):
         elif solar_cell[j].kind == 'parametric':
             # The tunnel junction is modeled using a simple parametric model
             ASC.parametric_tunnel_junction(solar_cell[j], options)
+        elif solar_cell[j].kind == 'external':
+            # The tunnel junction is modeled using a simple parametric model
+            ASC.external_tunnel_junction(solar_cell[j], options)
         elif solar_cell[j].kind == 'analytic':
-            print('Sorry, the analytical tunel junction model is not implemented, yet.')
+            print('Sorry, the analytical tunnel junction model is not implemented, yet.')
         else:
             raise ValueError(
-                'ERROR in "solar_cell_solver":\n\tTunnel junction {} has an invalid "type". It must be "parametric", "analytic" or "resistive".'.format(
+                'ERROR in "solar_cell_solver":\n\tTunnel junction {} has an invalid "type". It must be "parametric", "analytic", "external" or "resistive".'.format(
                     j))
 
     ASC.iv_multijunction(solar_cell, options)
