@@ -3,9 +3,10 @@ import numpy
 from configparser import ConfigParser
 import os
 import matplotlib
-import matplotlib.pyplot as plt
 
 matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
+
 
 
 
@@ -200,6 +201,6 @@ class CPPicker:
 
 
 if __name__ == '__main__':
-    directory = '/Users/diego/Dropbox/WorkIC/Developement/solcore4/solcore/material_system/InGaSb-Material/k.txt'
+    directory = '/Users/diego/OneDrive - Imperial College London/Developement/draft/GaInP_material/k'
     pickerApp = CPPicker(directory)
     pickerApp.loop()
