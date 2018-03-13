@@ -1,5 +1,5 @@
 [Configuration]
-version: 5.0.2
+version: 5.2.0.dev.1
 welcome_message: 1
 verbose_loading: 1
 
@@ -21,9 +21,11 @@ GaSb: SOLCORE_ROOT/material_data/GaSb-Material
 AlAs: SOLCORE_ROOT/material_data/AlAs-Material
 AlGaAs: SOLCORE_ROOT/material_data/AlGaAs-Material
 InGaAs: SOLCORE_ROOT/material_data/InGaAs-Material
-GaInSb: SOLCORE_ROOT/material_data/InGaSb-Materials
+GaInSb: SOLCORE_ROOT/material_data/InGaSb-Material
 Ge: SOLCORE_ROOT/material_data/Ge-Material
 Si: SOLCORE_ROOT/material_data/Si-Material
+GaInP: SOLCORE_ROOT/material_data/GaInP-Material
+GaAsP: SOLCORE_ROOT/material_data/GaAsP-Material
 
 [Others]
 sopra: SOLCORE_ROOT/material_data/SOPRA_DB
