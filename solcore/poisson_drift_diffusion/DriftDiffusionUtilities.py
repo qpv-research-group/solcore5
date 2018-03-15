@@ -87,9 +87,10 @@ def ProcessStructure(device, meshpoints, wavelengths=None, use_Adachi=False):
 
         i = i + device['layers'][i]['numlayers']
 
-    # We set the surface recombination velocities. This needs to be improved at some to consider other boundary conditions
-    dd.frontboundary("ohmic", device['layers'][0]['properties']['sn'], device['layers'][0]['properties']['sp'], 0)
-    dd.backboundary("ohmic", device['layers'][-1]['properties']['sn'], device['layers'][-1]['properties']['sp'], 0)
+    # We set the surface recombination velocities. This needs to be improved at some point
+    # to consider other boundary conditions
+    dd.frontboundary("ohmic", device['sn'], device['sp'], 0)
+    dd.backboundary("ohmic", device['sn'], device['sp'], 0)
 
     dd.initdevice(meshpoints)
     print('...done!\n')

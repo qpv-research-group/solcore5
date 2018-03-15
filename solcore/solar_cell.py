@@ -37,10 +37,7 @@ class SolarCell(Structure):
         :param kwargs: Other possible attributes.
         """
 
-        if layers is None:
-            layers = [default_GaAs(T)]
-        else:
-            assert isinstance(layers, list), "Layers must be provided inside a list, even if it is just one layer."
+        assert isinstance(layers, list), "Layers must be provided inside a list, even if it is just one layer."
 
         super(SolarCell, self).__init__(layers)
         self.__dict__.update(kwargs)

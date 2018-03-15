@@ -28,6 +28,9 @@ DefaultProperties = {'band_gap': DefaultMaterial.band_gap,  # J
                      'eff_mass_lh_z': DefaultMaterial.eff_mass_lh_z,  # relative to m0
                      'electron_mobility': calculate_mobility("GaAs", 0, 1),  # m2 V-1 s-1
                      'hole_mobility': calculate_mobility("GaAs", 1, 1),  # m2 V-1 s-1
+                     'ni': DefaultMaterial.ni,  # m-3
+                     'Nc': DefaultMaterial.Nc,  # m-3
+                     'Nv': DefaultMaterial.Nv,  # m-3
                      'electron_minority_lifetime': 3e-6,  # s
                      'hole_minority_lifetime': 2.5e-7,  # s
                      'permittivity': 12.9,  # relative to epsilon0
@@ -74,6 +77,8 @@ def CreateDeviceStructure(name, role='device', T=293, layers=None, comments='', 
     output['substrate'] = SolcoreMaterialToStr(substrate)
     output['reflection'] = reflection
     output['absorption'] = layers.absorbed if hasattr(layers, 'absorbed') else lambda x: 0
+    output['sn'] = layers.sn if hasattr(layers, 'sn') else 1e6
+    output['sp'] = layers.sp if hasattr(layers, 'sp') else 1e6
 
     AddLayers(output, layers)
 
@@ -90,27 +95,16 @@ def AddLayers(device, layers):
     for layer in layers:
         NewLayer = {}
 
-        if type(layer) is Layer:
-            NewLayer['label'] = layer.role
-            NewLayer['class'] = 'Layer'
-            NewLayer['group'] = None
-            NewLayer['numlayers'] = 1
-            NewLayer['repeat'] = 1
-            NewLayer['properties'] = GetLayerProperties(layer, device['T'])
-            if 'absorption_file' in layer.material.__dict__.keys():
-                NewLayer['absorption_file'] = layer.material.absorption_file
+        NewLayer['label'] = layer.role
+        NewLayer['class'] = 'Layer'
+        NewLayer['group'] = None
+        NewLayer['numlayers'] = 1
+        NewLayer['repeat'] = 1
+        NewLayer['properties'] = GetLayerProperties(layer, device['T'])
 
-            device['layers'].append(NewLayer)
-            device['numlayers'] = device['numlayers'] + 1
+        device['layers'].append(NewLayer)
+        device['numlayers'] = device['numlayers'] + 1
 
-        elif type(layer) is dict:
-            for sublayer in layer['layers']:
-                device['layers'].append(copy.deepcopy(sublayer))
-                device['numlayers'] = device['numlayers'] + 1
-
-                device['layers'][-1]['group'] = layer['name']
-                device['layers'][-1]['numlayers'] = layer['numlayers']
-                device['layers'][-1]['repeat'] = layer['repeat']
 
 def RemoveLayer(device, i):
     """ Remove a layer from the device structure
@@ -136,29 +130,10 @@ def GetLayerProperties(layer, T):
     NewProperties['width'] = layer.width
 
     for key in DefaultProperties.keys():
-        # Numpy floats are not the same as python's so we need to make a conversion in order for Yaml to produce sensible files. 
         try:
             NewProperties[key] = getattr(layer.material, key)
         except ValueError:
             NewProperties[key] = DefaultProperties[key]
-
-    # The drift diffusion model uses the density of states. We calculate them now
-    try:
-        NewProperties["Nc"] = getattr(layer.material, 'Nc')
-    except:
-        me = NewProperties['eff_mass_electron_Gamma']
-        NewProperties["Nc"] = 2 * (2 * pi * me * m0 * kb * T / h ** 2) ** 1.5
-
-    try:
-        NewProperties["Nv"] = getattr(layer.material, 'Nv')
-    except:
-        mhh = NewProperties['eff_mass_hh_z']
-        mlh = NewProperties['eff_mass_lh_z']
-        NewProperties["Nv"] = 2 * (2 * pi * mhh * m0 * kb * T / h ** 2) ** 1.5 + 2 * (
-                                                                                         2 * pi * mlh * m0 * kb * T / h ** 2) ** 1.5
-
-    NewProperties["ni"] = np.sqrt(
-        NewProperties["Nc"] * NewProperties["Nv"] * np.exp(-NewProperties["band_gap"] / (kb * T)))
 
     return NewProperties
 
@@ -286,7 +261,7 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
         # In the end, we convert the absorption coeficient in extinction coefficient
         kk = QW[i].material.absorption * QW.wl / 4 / np.pi
         layer_mat.k = interp1d(QW.wl, kk, bounds_error=False, fill_value=(0, 0))
-        #layer_mat.alpha = interp1d(QW.wl, QW[i].material.absorption, bounds_error=False, fill_value=(0, 0))
+        # layer_mat.alpha = interp1d(QW.wl, QW[i].material.absorption, bounds_error=False, fill_value=(0, 0))
 
         # And add the layer to the list of layers
         new_QW.append(Layer(width, layer_mat))
@@ -374,96 +349,129 @@ def CalculateAbsorptionProfile(z, wl, absorption):
     out = np.vstack((out, absorption(z)))
 
     return out
-#
-#
-# def Load(filename, yaml=False):
-#     """ Loads a device structure stored in a file. By default, the file must be JSON format
-#
-#     :param filename: The filename
-#     :param yaml: If the format is YALM rather than JSON
-#     :return: A device structure
-#     """
-#     if yaml:
-#         try:
-#             # If chosen, we try to use yaml. If anything fails, we try with json.
-#             import yaml
-#             stream = open(filename + '.yaml', 'r')
-#             output = yaml.load(stream)
-#         except:
-#             import json
-#             stream = open(filename + '.json', 'r')
-#             output = json.load(stream)
-#     else:
-#         import json
-#         stream = open(filename + '.json', 'r')
-#         output = json.load(stream)
-#
-#     stream.close()
-#
-#     for i in range(output['numlayers']):
-#         if 'absorption_file' in output['layers'][i].keys():
-#             # If there is a file containing the absorption in this layer, we try to load it. It must have at least to columns: wavelengths and absorption coefficient. Both must be in SI units. The result is interpolated to the current working wavelengths.
-#             try:
-#                 data = np.loadtxt(output['layers'][i]['absorption_file'])
-#                 output['layers'][i]['properties']['absorption'] = [data[:, 0].tolist(), data[:, 1].tolist()]
-#             except:
-#                 # The file can not be loaded. Maybe it does not exists or is not in the correct format. We move forward to calculating the absorption. Later, the calculated absorption can be saved with this filename.
-#                 print('Error loading absorption file %s. The absorption will be calculated later if necesary. ' % (
-#                     output['layers'][i]['absorption_file']))
-#
-#     return output
-#
-#
-# def Save(device, filename, save_absorptions_individually=False, remove_absorption_from_json=False,
-#          override_absorption=False, directory='default', yaml=False):
-#     """ Save the device structure to a file.
-#
-#     :param device: The device structure to save
-#     :param filename: The filename
-#     :param save_absorptions_individually: If the absorption of the materials must be saved in individual files
-#     :param remove_absorption_from_json: If the absorption must be removed from the JSON file to make it more readable
-#     :param override_absorption: If the external absrption files must override the default absorption
-#     :param directory: Directory in which to save the absorption data
-#     :param yaml: If YALM should be used rather than JSON
-#     :return: None
-#     """
-#     if save_absorptions_individually:
-#         # The absorption coefficient of each layer is saved in an individual file. Optionally, it removes them from the structure so they are not saved also in in the json file
-#         for i in range(device['numlayers']):
-#             if 'absorption' not in device['layers'][i]['properties'].keys(): continue
-#             # if ('absorption_file' in device['layers'][i].keys()) and override_absorption:
-#             #     abs_filename = device['layers'][i]['absorption_file']
-#             # else:
-#             #     abs_filename = '%s_inputs/%s_%s_%s_%s.dat'   %(filename.split('.')[0], device['name'], InLineComposition(device['layers'][i]), device['layers'][i]['label'], i)
-#
-#             if directory == 'default': directory = '%s_inputs' % (filename)
-#
-#             abs_filename = '%s/%s_%s_%s_%s.dat' % (
-#                 directory, device['name'], i, InLineComposition(device['layers'][i]), device['layers'][i]['label'])
-#
-#             os.makedirs(directory, exist_ok=True)
-#             device['layers'][i]['absorption_file'] = abs_filename
-#             np.savetxt(abs_filename, np.transpose(device['layers'][i]['properties']['absorption']))
-#
-#     if remove_absorption_from_json:
-#         for i in range(device['numlayers']):
-#             if 'absorption' not in device['layers'][i]['properties'].keys(): continue
-#             del device['layers'][i]['properties']['absorption']
-#
-#     if yaml:
-#         try:
-#             # If chosen, we try to use yaml. If anything fails, we try with json.
-#             import yaml
-#             stream = open(filename + '.yaml', 'w')
-#             yaml.dump(device, stream, default_flow_style=False)
-#         except:
-#             import json
-#             stream = open(filename + '.json', 'w')
-#             json.dump(device, stream, sort_keys=True, indent=2)
-#     else:
-#         import json
-#         stream = open(filename + '.json', 'w')
-#         json.dump(device, stream, sort_keys=True, indent=2)
-#
-#     stream.close()
-#
+    #
+    #
+    # def Load(filename, yaml=False):
+    #     """ Loads a device structure stored in a file. By default, the file must be JSON format
+    #
+    #     :param filename: The filename
+    #     :param yaml: If the format is YALM rather than JSON
+    #     :return: A device structure
+    #     """
+    #     if yaml:
+    #         try:
+    #             # If chosen, we try to use yaml. If anything fails, we try with json.
+    #             import yaml
+    #             stream = open(filename + '.yaml', 'r')
+    #             output = yaml.load(stream)
+    #         except:
+    #             import json
+    #             stream = open(filename + '.json', 'r')
+    #             output = json.load(stream)
+    #     else:
+    #         import json
+    #         stream = open(filename + '.json', 'r')
+    #         output = json.load(stream)
+    #
+    #     stream.close()
+    #
+    #     for i in range(output['numlayers']):
+    #         if 'absorption_file' in output['layers'][i].keys():
+    #             # If there is a file containing the absorption in this layer, we try to load it. It must have at least to columns: wavelengths and absorption coefficient. Both must be in SI units. The result is interpolated to the current working wavelengths.
+    #             try:
+    #                 data = np.loadtxt(output['layers'][i]['absorption_file'])
+    #                 output['layers'][i]['properties']['absorption'] = [data[:, 0].tolist(), data[:, 1].tolist()]
+    #             except:
+    #                 # The file can not be loaded. Maybe it does not exists or is not in the correct format. We move forward to calculating the absorption. Later, the calculated absorption can be saved with this filename.
+    #                 print('Error loading absorption file %s. The absorption will be calculated later if necesary. ' % (
+    #                     output['layers'][i]['absorption_file']))
+    #
+    #     return output
+    #
+    #
+    # def Save(device, filename, save_absorptions_individually=False, remove_absorption_from_json=False,
+    #          override_absorption=False, directory='default', yaml=False):
+    #     """ Save the device structure to a file.
+    #
+    #     :param device: The device structure to save
+    #     :param filename: The filename
+    #     :param save_absorptions_individually: If the absorption of the materials must be saved in individual files
+    #     :param remove_absorption_from_json: If the absorption must be removed from the JSON file to make it more readable
+    #     :param override_absorption: If the external absrption files must override the default absorption
+    #     :param directory: Directory in which to save the absorption data
+    #     :param yaml: If YALM should be used rather than JSON
+    #     :return: None
+    #     """
+    #     if save_absorptions_individually:
+    #         # The absorption coefficient of each layer is saved in an individual file. Optionally, it removes them from the structure so they are not saved also in in the json file
+    #         for i in range(device['numlayers']):
+    #             if 'absorption' not in device['layers'][i]['properties'].keys(): continue
+    #             # if ('absorption_file' in device['layers'][i].keys()) and override_absorption:
+    #             #     abs_filename = device['layers'][i]['absorption_file']
+    #             # else:
+    #             #     abs_filename = '%s_inputs/%s_%s_%s_%s.dat'   %(filename.split('.')[0], device['name'], InLineComposition(device['layers'][i]), device['layers'][i]['label'], i)
+    #
+    #             if directory == 'default': directory = '%s_inputs' % (filename)
+    #
+    #             abs_filename = '%s/%s_%s_%s_%s.dat' % (
+    #                 directory, device['name'], i, InLineComposition(device['layers'][i]), device['layers'][i]['label'])
+    #
+    #             os.makedirs(directory, exist_ok=True)
+    #             device['layers'][i]['absorption_file'] = abs_filename
+    #             np.savetxt(abs_filename, np.transpose(device['layers'][i]['properties']['absorption']))
+    #
+    #     if remove_absorption_from_json:
+    #         for i in range(device['numlayers']):
+    #             if 'absorption' not in device['layers'][i]['properties'].keys(): continue
+    #             del device['layers'][i]['properties']['absorption']
+    #
+    #     if yaml:
+    #         try:
+    #             # If chosen, we try to use yaml. If anything fails, we try with json.
+    #             import yaml
+    #             stream = open(filename + '.yaml', 'w')
+    #             yaml.dump(device, stream, default_flow_style=False)
+    #         except:
+    #             import json
+    #             stream = open(filename + '.json', 'w')
+    #             json.dump(device, stream, sort_keys=True, indent=2)
+    #     else:
+    #         import json
+    #         stream = open(filename + '.json', 'w')
+    #         json.dump(device, stream, sort_keys=True, indent=2)
+    #
+    #     stream.close()
+    #
+    #
+    #
+    # def OldAddLayers(device, layers):
+    #     """ Add layers to the structure
+    #
+    #     :param device: The device structure
+    #     :param layers: A list with the layers to add
+    #     :return: None
+    #     """
+    #     for layer in layers:
+    #         NewLayer = {}
+    #
+    #         if type(layer) is Layer:
+    #             NewLayer['label'] = layer.role
+    #             NewLayer['class'] = 'Layer'
+    #             NewLayer['group'] = None
+    #             NewLayer['numlayers'] = 1
+    #             NewLayer['repeat'] = 1
+    #             NewLayer['properties'] = GetLayerProperties(layer, device['T'])
+    #             if 'absorption_file' in layer.material.__dict__.keys():
+    #                 NewLayer['absorption_file'] = layer.material.absorption_file
+    #
+    #             device['layers'].append(NewLayer)
+    #             device['numlayers'] = device['numlayers'] + 1
+    #
+    #         elif type(layer) is dict:
+    #             for sublayer in layer['layers']:
+    #                 device['layers'].append(copy.deepcopy(sublayer))
+    #                 device['numlayers'] = device['numlayers'] + 1
+    #
+    #                 device['layers'][-1]['group'] = layer['name']
+    #                 device['layers'][-1]['numlayers'] = layer['numlayers']
+    #                 device['layers'][-1]['repeat'] = layer['repeat']

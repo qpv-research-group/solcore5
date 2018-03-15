@@ -101,20 +101,20 @@ p_GaAs = material('GaAs')(T=T, Na=8e22)
 bsf_bottom = material('GaInP')(T=T, Na=5e24, In=0.49)
 
 GaAs_junction = Junction([Layer(width=10e-9, material=window_bottom, role="Window"),
-                   Layer(width=150e-9, material=n_GaAs, role="Emitter")] + 
-                   QW_list + 
-                   [Layer(width=3000e-9, material=p_GaAs, role="Base"),
-                   Layer(width=200e-9, material=bsf_bottom, role="BSF")], sn=1e6, sp=1e6, T=T, kind='PDD')
-                   
+                          Layer(width=150e-9, material=n_GaAs, role="Emitter")] +
+                         QW_list +
+                         [Layer(width=3000e-9, material=p_GaAs, role="Base"),
+                          Layer(width=200e-9, material=bsf_bottom, role="BSF")], sn=1e6, sp=1e6, T=T, kind='PDD')
+
 ## Materials for the TOP junction
-window_top = material('AlGaAs')(T=T, Nd=5e24, Al=0.8)
+window_top = material('AlInP')(T=T, Nd=5e24, Al=0.53)
 n_GaInP = material('GaInP')(T=T, Nd=5e24, In=0.49)
 p_GaInP = material('GaInP')(T=T, Na=8e22, In=0.49)
-bsf_top = material('AlGaAs')(T=T, Na=5e24, Al=0.8)
+bsf_top = material('AlInP')(T=T, Na=5e24, Al=0.53)
 
-GaInP_junction = Junction([Layer(width=40e-9, material=window_top, role="Window"),
-                   Layer(width=120e-9, material=p_GaAs, role="Emitter"),
-                   Layer(width=400e-9, material=n_GaAs, role="Base"),
-                   Layer(width=30e-9, material=bsf_top, role="BSF")], sn=1e6, sp=1e6, T=T, kind='PDD')
+GaInP_junction = Junction([Layer(width=120e-9, material=n_GaInP, role="Emitter"),
+                           Layer(width=800e-9, material=p_GaInP, role="Base")], sn=0e2, sp=0e2, T=T, kind='PDD')
 ```
+
+As it can be seen, while we have defined the window and back surface field layer (BSF) for the TOP junction, we have not included it into the Junction definition. The reason for this is that very wide bandgap materials cause convergence problems when doing calculations under illumination, specially when working as the front-most window layers. In order to account for its presence, two things are done: (1) the surface recombination velocity of the top junction is set to a low value to mimic the passivating effect of the window and BSF layers, and (2) the missing layers are added outside the Junction object when creating the full solar cell in order to consider their optical properties (see below). 
 

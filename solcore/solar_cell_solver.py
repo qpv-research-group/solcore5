@@ -64,6 +64,7 @@ def solar_cell_solver(solar_cell, task, user_options=None):
         options = merge_dicts(default_options)
 
     prepare_solar_cell(solar_cell)
+    options.T = solar_cell.T
 
     if task == 'optics':
         solve_optics(solar_cell, options)

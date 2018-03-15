@@ -10,7 +10,7 @@ import configparser
 import solcore
 from solcore.material_system import critical_point_interpolate
 from solcore.parameter_system import ParameterSystem
-from solcore.constants import h, c, q
+from solcore.constants import h, c, q, kb, pi, electron_mass as m0
 from solcore.singleton import Singleton
 from solcore.source_managed_class import SourceManagedClass
 from solcore.absorption_calculator.sopra_db import sopra_database, compounds_info
@@ -20,6 +20,7 @@ from solcore.material_data import calculate_mobility
 class MaterialSystem(SourceManagedClass, metaclass=Singleton):
     """ The core class that manage the materials in solcore.
     """
+
     def __init__(self, sources=None):
         SourceManagedClass.__init__(self)
         self.known_materials = {}
@@ -71,15 +72,18 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
                 valid_materials = sorted(ParameterSystem().database.sections())
                 valid_materials.remove('Immediate Calculables')
                 valid_materials.remove('Final Calculables')
-                print('\nMaterial ERROR: "{}" is not in the semiconductors database or in the SOPRA database. Valid semiconductor materials are: '.format(name))
+                print(
+                    '\nMaterial ERROR: "{}" is not in the semiconductors database or in the SOPRA database. Valid semiconductor materials are: '.format(
+                        name))
                 for v in valid_materials:
                     if "x" in ParameterSystem().database.options(v):
                         x = ParameterSystem().database.get(v, 'x')
                         print('\t {}  \tx = {}'.format(v, x))
                     else:
                         print('\t {}'.format(v))
-                print('\nIn compounds, check that the order of the elements is the correct one (eg. GaInSb is OK but InGaSb'
-                      ' is not).')
+                print(
+                    '\nIn compounds, check that the order of the elements is the correct one (eg. GaInSb is OK but InGaSb'
+                    ' is not).')
                 val = input('\nDo you want to see the list of available SOPRA materials (y/n)?')
                 if val in 'Yy':
                     sopra_database.material_list()
@@ -147,19 +151,20 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
                 if attrname == "k":
                     return self.k_interpolated
 
-                raise AttributeError('Parameter "{}" not available for this SOPRA material "{}".'.format(attrname, self.material_string))
+                raise AttributeError(
+                    'Parameter "{}" not available for this SOPRA material "{}".'.format(attrname, self.material_string))
 
             @lru_cache(maxsize=1)
             def load_n_data(self):
                 if len(self.composition) == 0:
                     wl, n = self.data.load_n()
-                    self.n_data = np.vstack((wl*1e-9, n))
+                    self.n_data = np.vstack((wl * 1e-9, n))
 
             @lru_cache(maxsize=1)
             def load_k_data(self):
                 if len(self.composition) == 0:
                     wl, k = self.data.load_k()
-                    self.k_data = np.vstack((wl*1e-9, k))
+                    self.k_data = np.vstack((wl * 1e-9, k))
 
             def n_interpolated(self, x):
                 assert len(self.composition) <= 1, "Can't interpolate 2d spectra yet"
@@ -173,7 +178,8 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
                 if len(self.composition) == 0:
                     y = np.interp(x, self.n_data[0], self.n_data[1])
                 else:
-                    wl, y, trash = self.data.load_composition(Lambda=x*1e9, **{self.composition[0]: self.main_fraction*100})
+                    wl, y, trash = self.data.load_composition(Lambda=x * 1e9,
+                                                              **{self.composition[0]: self.main_fraction * 100})
 
                 return y
 
@@ -189,10 +195,10 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
                 if len(self.composition) == 0:
                     y = np.interp(x, self.k_data[0], self.k_data[1])
                 else:
-                    wl, trash, y = self.data.load_composition(Lambda=x*1e9, **{self.composition[0]: self.main_fraction*100})
+                    wl, trash, y = self.data.load_composition(Lambda=x * 1e9,
+                                                              **{self.composition[0]: self.main_fraction * 100})
 
                 return y
-
 
         SpecificMaterial.__name__ = name + '_sopra'
 
@@ -252,6 +258,17 @@ class BaseMaterial:
                 return ParameterSystem().get_parameter(self.material_string, attrname)
             except:
                 return calculate_mobility(self.material_string, True, self.Na, self.main_fraction)
+        if attrname == "Nc":
+            return 2 * (2 * pi * self.eff_mass_electron_Gamma * m0 * kb * self.T / h ** 2) ** 1.5
+        if attrname == "Nv":
+            # Strictly speaking, this is valid only for III-V, zinc-blend semiconductors
+            mhh = self.eff_mass_hh_z
+            mlh = self.eff_mass_lh_z
+            Nvhh = 2 * (2 * pi * mhh * m0 * kb * self.T / h ** 2) ** 1.5
+            Nvlh = 2 * (2 * pi * mlh * m0 * kb * self.T / h ** 2) ** 1.5
+            return Nvhh + Nvlh
+        if attrname == "ni":
+            return np.sqrt(self.Nc * self.Nv * np.exp(-self.band_gap / (kb * self.T)))
 
         kwargs = {element: getattr(self, element) for element in self.composition}
         kwargs["T"] = self.T
