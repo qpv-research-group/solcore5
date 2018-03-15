@@ -4,6 +4,7 @@ import sys
 
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.integrate import quad
 
 from solcore import constants, material
 from solcore.absorption_calculator import adachi_alpha, calculate_absorption_profile, calculate_rat
@@ -18,6 +19,7 @@ h = constants.h
 kb = constants.kb
 m0 = constants.electron_mass
 vacuum_permittivity = constants.vacuum_permittivity
+c = constants.c
 
 # The default material is a set of minimum properties that are used for the layers unless otherwise stated
 DefaultMaterial = material("GaAs")(T=293)
@@ -36,7 +38,8 @@ DefaultProperties = {'band_gap': DefaultMaterial.band_gap,  # J
                      'permittivity': 12.9,  # relative to epsilon0
                      'electron_auger_recombination': 1e-42,  # m6 s-1,
                      'hole_auger_recombination': 1e-42,  # m6 s-1
-                     'radiative_recombination': 7.2e-16,  # m3 s-1
+                     # 'radiative_recombination': 7.2e-16,  # m3 s-1
+                     'radiative_recombination': DefaultMaterial.radiative_recombination,  # m3 s-1
                      'Nd': 1,  # m-3
                      'Na': 1,  # m3
                      'sn': 1e6,  # m s-1
@@ -223,6 +226,8 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
     :param alpha_params:
     :return: A dictionary with the output of the Schrodinger solver.
     """
+    T = device['T']
+
     QW = QWunit(ToStructure(device), substrate=ToSolcoreMaterial(device['substrate'], device['T'], execute=True))
     output = QW.solve(calculate_absorption=calculate_absorption, WLsteps=WLsteps, wavelengths=wavelengths,
                       T=device['T'], periodic=periodic, filter_strength=filter_strength, blur=blur, blurmode=blurmode,
@@ -236,14 +241,15 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
         device['layers'][i]['properties']['eff_mass_lh_z'] = QW[i].material.eff_mass_lh_z
         device['layers'][i]['properties']['Nc'] = QW[i].material.Nc
         device['layers'][i]['properties']['Nv'] = QW[i].material.Nv
+        device['layers'][i]['properties']['ni'] = np.sqrt(QW[i].material.Nc * QW[i].material.Nv * np.exp(-QW[i].eff_band_gap / (kb * T)))
 
         if calculate_absorption:
             device['layers'][i]['properties']['absorption'] = [QW.wl.tolist(), QW[i].material.absorption.tolist()]
 
     # Finally, we re-build a list of layers with the effective properties
     N = device['repeat']
-    T = device['T']
     new_QW = []
+
     for i in range(len(QW)):
         # First, we create a dictionary with all the updated parameters
         param = dict(device['layers'][i]['properties'])
@@ -261,7 +267,13 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
         # In the end, we convert the absorption coeficient in extinction coefficient
         kk = QW[i].material.absorption * QW.wl / 4 / np.pi
         layer_mat.k = interp1d(QW.wl, kk, bounds_error=False, fill_value=(0, 0))
-        # layer_mat.alpha = interp1d(QW.wl, QW[i].material.absorption, bounds_error=False, fill_value=(0, 0))
+        #layer_mat.alpha = interp1d(QW.wl, QW[i].material.absorption, bounds_error=False, fill_value=(0, 0))
+
+        # And the radiative recombination parameter
+        inter = lambda E: layer_mat.n(E) ** 2 * layer_mat.alphaE(E) * np.exp(-E / (kb * T)) * E ** 2
+        upper = layer_mat.band_gap + 10 * kb * T
+        Br = 1.0 / layer_mat.ni ** 2 * 2 * pi / (h ** 3 * c ** 2) * quad(inter, 0, upper)[0]
+        layer_mat.radiative_recombination = Br
 
         # And add the layer to the list of layers
         new_QW.append(Layer(width, layer_mat))

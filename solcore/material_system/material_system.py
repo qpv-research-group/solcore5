@@ -5,6 +5,7 @@ from copy import copy
 from functools import lru_cache  # cache function calls to stop things taking forever / recalculating smae things
 
 import numpy as np
+from scipy.integrate import quad
 import configparser
 
 import solcore
@@ -231,7 +232,7 @@ class BaseMaterial:
 
         self.key_parameters = sorted(list(kwargs.keys()))
 
-    def __getattr__(self, attrname):  # only used for unknown attributes
+    def __getattr__(self, attrname):  # only used for unknown attributes.
         if attrname == "n":
             try:
                 return self.n
@@ -269,6 +270,10 @@ class BaseMaterial:
             return Nvhh + Nvlh
         if attrname == "ni":
             return np.sqrt(self.Nc * self.Nv * np.exp(-self.band_gap / (kb * self.T)))
+        if attrname == "radiative_recombination":
+            inter = lambda E: self.n(E) ** 2 * self.alphaE(E) * np.exp(-E / (kb * self.T)) * E ** 2
+            upper = self.band_gap + 10 * kb * self.T
+            return 1.0 / self.ni ** 2 * 2 * pi / (h ** 3 * c ** 2) * quad(inter, 0, upper)[0]
 
         kwargs = {element: getattr(self, element) for element in self.composition}
         kwargs["T"] = self.T

@@ -298,14 +298,14 @@ class QWunit(Structure):
                     "espace": E,
                     "hwhm": si("4meV"),
                     "dimensionality": 0.2,
-                    # "line_shape": "Gauss"
+                    #"line_shape": "Gauss"
                 }
             else:
                 self.wl = 1240 / (alpha_params["espace"] * 1e-9) * q
 
         SR, bands = schrodinger(self, mode=mode, periodic=True, calculate_absorption=calculate_absorption,
                                 Efield=Efield,
-                                blur=None, blurmode="left", alpha_params=alpha_params, filter_strength=filter_strength)
+                                blur=None, blurmode=blurmode, alpha_params=alpha_params, filter_strength=filter_strength)
         self.__dict__["elevels"] = (SR["E"]["Ee"][:] - min(SR["potentials"]["Ve"])) / q
         self.__dict__["hhlevels"] = (max(SR["potentials"]["Vhh"]) - SR["E"]["Ehh"][:]) / q
         self.__dict__["lhlevels"] = (max(SR["potentials"]["Vlh"]) - SR["E"]["Elh"][:]) / q
