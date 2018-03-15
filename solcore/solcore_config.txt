@@ -26,6 +26,7 @@ Ge: SOLCORE_ROOT/material_data/Ge-Material
 Si: SOLCORE_ROOT/material_data/Si-Material
 GaInP: SOLCORE_ROOT/material_data/GaInP-Material
 GaAsP: SOLCORE_ROOT/material_data/GaAsP-Material
+AlInP: SOLCORE_ROOT/material_data/AlInP-Material
 
 [Others]
 sopra: SOLCORE_ROOT/material_data/SOPRA_DB

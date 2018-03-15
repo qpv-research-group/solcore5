@@ -5,7 +5,7 @@ This tutorial will guide you, step-by-step, in the creation of a solar cell and 
 
 **What do we have?**
 
-- Dual junction InGaP/GaAs solar cell, lattice matched to GaAs. 
+- Dual junction GaInP/GaAs solar cell, lattice matched to GaAs. 
 - The bottom cell has 30 strained-balanced quantum wells (QW), made of GaAsP/InGaAs.
 - There is a distributed Brag reflector on the back of the cell, designed to reflect the radiation in the wavelength range of the QWs. 
 - There is a tunnel junction in between the subcells.
@@ -81,4 +81,40 @@ output = QM.schrodinger(QW)
 
 While *Solcore* can solve the Schrödinger equation in a structure with any number of layers, the absorption calculator for QWs can only deal properly with single QWs. That is the reason of modelling only 1 QW despite having 30 in the structure. This will clearly represent a limitation when modelling the absorption of superlattices, where there is a strong coupling between neighbouring QWs. 
 
-In the code above, we have used the "PDD.SolveQWproperties" and "QM.schrodinger" functions with the default values, but they both can have a number of optional input parameters to define the number of confine states to calculate, the energy of quasiconfine states, electric field, boundary conditions, etc. Please, visit the documentation of those functions to find out all the available options. 
+In the code above, we have used the "PDD.SolveQWproperties" and "QM.schrodinger" functions with the default values, but they both can have a number of optional input parameters to define the number of confined states to calculate, the energy of quasiconfined states, electric field, boundary conditions, etc. Please, visit the documentation of those functions to find out all the available options.
+
+**Defining the junctions:**
+
+In order to calculate the properties of a solar junction using the PDD solver, we need to give all the layers and materials the junciton is made of, in a similar way we have done for the QWs. One thing to note is that if *Solcore* cannot find a property it needs to solve the PDD equations, *it will take the corresponding property for GaAs as a default value*. So, be sure you provide all the required values or that you are happy with the defaults. 
+
+***NOTE***: The different code snippets are additive in order to get a final, complete script. Normally, all the "import" statements would be packed together at the beginning. 
+
+```python
+from solcore.structure import Junction
+
+T = 300 
+
+## Materials for the BOTTOM junction
+window_bottom = material('GaInP')(T=T, Nd=5e24, In=0.49)
+n_GaAs = material('GaAs')(T=T, Nd=1e24)
+p_GaAs = material('GaAs')(T=T, Na=8e22)
+bsf_bottom = material('GaInP')(T=T, Na=5e24, In=0.49)
+
+GaAs_junction = Junction([Layer(width=10e-9, material=window_bottom, role="Window"),
+                   Layer(width=150e-9, material=n_GaAs, role="Emitter")] + 
+                   QW_list + 
+                   [Layer(width=3000e-9, material=p_GaAs, role="Base"),
+                   Layer(width=200e-9, material=bsf_bottom, role="BSF")], sn=1e6, sp=1e6, T=T, kind='PDD')
+                   
+## Materials for the TOP junction
+window_top = material('AlGaAs')(T=T, Nd=5e24, Al=0.8)
+n_GaInP = material('GaInP')(T=T, Nd=5e24, In=0.49)
+p_GaInP = material('GaInP')(T=T, Na=8e22, In=0.49)
+bsf_top = material('AlGaAs')(T=T, Na=5e24, Al=0.8)
+
+GaInP_junction = Junction([Layer(width=40e-9, material=window_top, role="Window"),
+                   Layer(width=120e-9, material=p_GaAs, role="Emitter"),
+                   Layer(width=400e-9, material=n_GaAs, role="Base"),
+                   Layer(width=30e-9, material=bsf_top, role="BSF")], sn=1e6, sp=1e6, T=T, kind='PDD')
+```
+
