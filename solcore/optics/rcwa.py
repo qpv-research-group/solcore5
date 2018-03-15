@@ -14,11 +14,11 @@ rcwa_options.pol = 'u'
 
 
 def solve_rcwa(solar_cell, options):
-    """ Calculates the reflection, transmission and absorption of a solar cell object using the transfer matrix method
+    """ Calculates the reflection, transmission and absorption of a solar cell object using the rigorous coupled-wave analysis solver.
 
-    :param solar_cell:
-    :param options:
-    :return:
+    :param solar_cell: A solar_cell object
+    :param options: Options for the solver
+    :return: None
     """
     wl = options.wavelength
 
@@ -26,39 +26,22 @@ def solve_rcwa(solar_cell, options):
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1
 
     # Now we calculate the absorbed and transmitted light. We first get all the relevant parameters from the objects
-    widths = []
-    offset = 0
     all_layers = []
     for j, layer_object in enumerate(solar_cell):
 
         # Attenuation due to absorption in the AR coatings or any layer in the front that is not part of the junction
         if type(layer_object) is Layer:
             all_layers.append(layer_object)
-            widths.append(layer_object.width)
 
         # For each junction, and layer within the junction, we get the absorption coefficient and the layer width.
         elif type(layer_object) in [TunnelJunction, Junction]:
-            junction_width = 0
-            try:
-                for i, layer in enumerate(layer_object):
-                    all_layers.append(layer)
-                    junction_width += layer.width
-                    widths.append(layer.width)
-
-                solar_cell[j].width = junction_width
-
-            except TypeError as err:
-                print('ERROR in "solar_cell_solver: RCWA solver":\n'
-                      '\tNo layers found in Junction or TunnelJunction objects.')
-                raise err
-
-        solar_cell[j].offset = offset
-        offset += layer_object.width
+            for i, layer in enumerate(layer_object):
+                all_layers.append(layer)
 
     # With all the information, we create the optical stack
     stack = all_layers
 
-    dist = np.logspace(0, np.log10(offset * 1e9), int(300 * np.log10(offset * 1e9)))
+    dist = np.logspace(0, np.log10(solar_cell.width * 1e9), int(300 * np.log10(solar_cell.width * 1e9)))
     position = options.position if 'position' in options.keys() else dist
     # angle_theta = options.angle_theta if 'angle_theta' in options.keys() else 0
     # angle_phi = options.angle_phi if 'angle_phi' in options.keys() else 0
@@ -75,7 +58,7 @@ def solve_rcwa(solar_cell, options):
                                             dist=position, theta=options.theta, phi=options.phi, pol=options.pol)
 
     # With all this information, we are ready to calculate the differential absorption function
-    diff_absorption, all_absorbed = calculate_absorption_tmm(out)
+    diff_absorption, all_absorbed = calculate_absorption_rcwa(out)
 
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
@@ -93,7 +76,7 @@ def absorbed(self, z):
     return out.T
 
 
-def calculate_absorption_tmm(tmm_out):
+def calculate_absorption_rcwa(tmm_out):
     all_z = tmm_out['position'] * 1e-9
     all_abs = tmm_out['absorption'] / 1e-9
 

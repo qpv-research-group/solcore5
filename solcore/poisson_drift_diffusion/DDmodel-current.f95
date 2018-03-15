@@ -364,7 +364,7 @@ CONTAINS
     SUBROUTINE set_generation(gen_profile, dum_m, dum_wl)
         REAl(KIND=8) :: gen_profile(-1:dum_m, 0:dum_wl)
         INTEGER :: dum_m, dum_wl
-    
+        NumWL = dum_wl
         AbsProfile(0:M, 0:NumWL) = REAL(gen_profile(0:dum_m, 0:dum_wl), 16)
         AbsLibrary(-1, 0:NumWL) = REAL(gen_profile(-1, 0:dum_wl), 16)
                     

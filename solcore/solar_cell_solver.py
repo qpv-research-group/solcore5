@@ -4,6 +4,7 @@ import solcore.analytic_solar_cells as ASC
 from solcore.light_source import LightSource
 from solcore.state import State
 from solcore.optics import solve_beer_lambert, solve_tmm, solve_rcwa, rcwa_options
+from solcore.structure import Layer, Junction, TunnelJunction
 
 try:
     import solcore.poisson_drift_diffusion as PDD
@@ -61,6 +62,8 @@ def solar_cell_solver(solar_cell, task, user_options=None):
         options = merge_dicts(default_options, user_options)
     else:
         options = merge_dicts(default_options)
+
+    prepare_solar_cell(solar_cell)
 
     if task == 'optics':
         solve_optics(solar_cell, options)
@@ -158,7 +161,6 @@ def solve_qe(solar_cell, options):
     solve_optics(solar_cell, options)
 
     for j in solar_cell.junction_indices:
-
         if solar_cell[j].kind is 'PDD':
             PDD.qe_pdd(solar_cell[j], options)
         elif solar_cell[j].kind is 'DA':
@@ -207,3 +209,49 @@ def solve_short_circuit(solar_cell, options):
         else:
             print('WARNING: Only PDD junctions can be solved in "short_circuit".')
 
+
+def prepare_solar_cell(solar_cell):
+    """ This function scans all the layers and junctions of the cell, calculating the relative possition of each of them with respect the front surface (offset). This information will later be use by the optical calculators, for example.
+
+    :param solar_cell: A solar_cell object
+    :return: None
+    """
+    offset = 0
+    for j, layer_object in enumerate(solar_cell):
+
+        # Independent layers, for example in a AR coating
+        if type(layer_object) is Layer:
+            pass
+
+        # Each Tunnel junctions can also have some layers with a given thickness.
+        elif type(layer_object) is TunnelJunction:
+            junction_width = 0
+            for i, layer in enumerate(layer_object):
+                junction_width += layer.width
+            solar_cell[j].width = junction_width
+
+        # For each junction, and layer within the junction, we get the layer width.
+        elif type(layer_object) is Junction:
+
+            try:
+                kind = solar_cell[j].kind
+            except AttributeError as err:
+                print('ERROR preparing the solar cell: Junction {} has no kind!'.format(j))
+                raise err
+
+            # This junctions will not, typically, have a width
+            if kind in ['2D', 'DB']:
+                # 2D and DB junctions do not often have a width (or need it) so we set an arbitrary width
+                if not hasattr(layer_object, 'width'):
+                    solar_cell[j].width = 1e-6  # 1 µm
+
+            else:
+                junction_width = 0
+                for i, layer in enumerate(layer_object):
+                    junction_width += layer.width
+                solar_cell[j].width = junction_width
+
+        solar_cell[j].offset = offset
+        offset += solar_cell[j].width
+
+    solar_cell.width = offset
