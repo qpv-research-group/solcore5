@@ -176,25 +176,31 @@ if __name__ == '__main__':
     # tunnel = example_parametric_tunnel_junction(False)
     # example_resistive_tunnel_junction()
 
-    tunnel = TunnelJunction(v_peak=0.5, j_peak=100, v_valley=0.5, j_valley=0, prefactor=1, j01=1e-23, kind='parametric')
+    tunnel = TunnelJunction(v_peak=0.2, j_peak=100, v_valley=0.9, j_valley=10, prefactor=10, j01=1e-21, kind='parametric')
     parametric_tunnel_junction(tunnel, default_options)
 
     v = tunnel.voltage
 
-    I = np.linspace(0, 20, 10)
+    I = np.linspace(0, 150, 100)
 
     plt.plot(v, tunnel.tunnel_current(v), 'r--', label='Tunnel')
     plt.plot(v, tunnel.excess_current(v), 'g--', label='Excess')
     plt.plot(v, tunnel.diffusion_current(v), 'b--', label='Diffusion')
-    plt.plot(v, tunnel.current, 'k', linewidth=2, label='Total')
+    plt.plot(v, tunnel.current, 'k', linewidth=3, color='DimGray', label='Total')
     # plt.plot(v, MJ_current, 'k-o', linewidth=2, label='MJ current')
-    plt.plot(tunnel.vi(I), I, linewidth=2, label='Test')
+    # plt.plot(tunnel.vi(I), I, '--', color='grey', linewidth=2, label='MJ current')
+    plt.plot((0.2, 0.9), (100, 10), 'ko')
 
-    plt.legend(fontsize=12)
+    plt.annotate('V$_P$, J$_P$', xy=(0.2, 110), fontsize=12)
+    plt.annotate('V$_V$, J$_V$', xy=(0.6, 10), fontsize=12)
+
+
+    plt.legend(fontsize=12, frameon=False)
     plt.ylim(0, 150)
-    plt.xlim(0, 2.5)
+    plt.xlim(0, 2)
     plt.ylabel('Current Density(A/$m^2$)', fontsize=12)
     plt.xlabel('Voltage(V)', fontsize=12)
     plt.tick_params(labelsize=12)
     plt.tight_layout()
+
     plt.show()

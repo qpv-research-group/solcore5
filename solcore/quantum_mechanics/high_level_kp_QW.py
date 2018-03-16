@@ -77,8 +77,8 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
         }
 
     if "potentials" is graphtype:
-        schrodinger_plt = graphics.split_schrodinger_graph(result_band_edge)
-        schrodinger_plt.draw()
+        schrodinger_plt = graphics.split_schrodinger_graph_potentials(result_band_edge, **kwargs)
+        # schrodinger_plt.draw()
 
     if "potentialsLDOS" is graphtype:
         Ee, LDOSe, Eh, LDOSh = graphics.split_schrodinger_graph_LDOS(result_band_edge, **kwargs)

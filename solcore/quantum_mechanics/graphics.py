@@ -174,6 +174,73 @@ def split_schrodinger_graph(schrodinger_result,
     return g
 
 
+def split_schrodinger_graph_potentials(schrodinger_result,
+                            trim_levels_beyond=1e-2,
+                            linewidth=1,
+                            scale=0.3,
+                            suppress_invert=False,
+                            probability_density=False,
+                            wfalpha=0.8,
+                            potentialalpha=0.8,
+                            **kwargs):
+
+    defaults = {'step': 0.002, 'margin': 0.05, 'pdf': True, 'show': False, 'dpi': 100, 'fontsize': 12,
+                'figsize': (7, 6)}
+    options = copy.copy(defaults)
+    options["square"] = False
+
+    defaults.update(kwargs)
+    potentials = schrodinger_result["potentials"]
+    wavefunctions = schrodinger_result["wavefunctions"]
+    energy_levels = schrodinger_result["E"]
+    x = schrodinger_result["x"]
+
+    # This is used when doing the 4x4 kp calculation rather than the single band calculation
+    if 'EU' in energy_levels.keys():
+        energy_levels['Ehh'] = energy_levels['EU']
+        energy_levels['Elh'] = energy_levels['EU']
+        wavefunctions["psi_hh"] = wavefunctions["psi_g1"]
+        wavefunctions["psi_lh"] = wavefunctions["psi_g2"]
+
+    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=defaults['figsize'], dpi=defaults['dpi'])
+
+    ax1.plot(x * 1e9, potentials["Ve"] / q, 'k', linewidth=2, label='Ve')
+    ax1.set_ylabel('Energy (eV)', fontsize=defaults["fontsize"])
+    ax1.tick_params(labelsize=defaults["fontsize"])
+    ax1.grid(color='grey', linestyle='--', linewidth=0.5)
+
+    ax2.plot(x * 1e9, potentials["Vlh"] / q, 'k--', linewidth=2, label="Vlh"),
+    ax2.plot(x * 1e9, potentials["Vhh"] / q, 'k', linewidth=2, label="Vhh")
+    ax2.set_ylabel('Energy (eV)', fontsize=defaults["fontsize"])
+    ax2.set_xlabel('Possition (nm)', fontsize=defaults["fontsize"])
+    ax2.tick_params(labelsize=defaults["fontsize"])
+    ax2.grid(color='grey', linestyle='--', linewidth=0.5)
+
+    e_data = prepare_wavefunction_data_only(x, energy_levels["Ee"] / q, wavefunctions["psi_e"], trim_levels_beyond, linewidth, "blue",
+                                  0.03/q, suppress_invert, alpha=wfalpha, square=probability_density)
+    hh_data = prepare_wavefunction_data_only(x, energy_levels["Ehh"] / q, wavefunctions["psi_hh"], trim_levels_beyond, linewidth,
+                                  "green", 0.03/q, suppress_invert, alpha=wfalpha, square=probability_density)
+    lh_data = prepare_wavefunction_data_only(x, energy_levels["Elh"] / q, wavefunctions["psi_lh"], trim_levels_beyond, linewidth,
+                                  "red", 0.03/q, suppress_invert, alpha=wfalpha, square=probability_density)
+
+    for x, y in e_data:
+        ax1.plot(x * 1e9, y, 'blue', linewidth=2, label='e')
+    for x, y in hh_data:
+        ax2.plot(x * 1e9, y, 'green', linewidth=2, label='hh')
+    for x, y in lh_data:
+        ax2.plot(x * 1e9, y, 'red', linewidth=2, label='lh')
+
+    if defaults["show"]:
+        plt.tight_layout()
+        plt.show()
+
+    if defaults["pdf"]:
+        handle, path = tempfile.mkstemp(prefix="tmp_solcore_", suffix=".%s" % graph_defaults["format"])
+        canvas = FigureCanvasPdf(fig)
+        canvas.print_figure(path, dpi=defaults["dpi"], bbox_inches='tight')
+        open_with_os(path)
+
+
 def split_schrodinger_graph_LDOS(schrodinger_result, **kwargs):
     defaults = {'step': 0.002, 'margin': 0.05, 'pdf': True, 'show': False, 'dpi': 100, 'fontsize': 12,
                 'figsize': (7, 6)}
@@ -265,3 +332,17 @@ def calculate_in_plane_masses(x, psi, m):
         m_out.append(np.trapz(ps ** 2 * m, x))
 
     return m_out
+
+def prepare_wavefunction_data_only(x, E, Psi, trim_levels_beyond, linewidth, color, scale, suppress_invert=False,
+                              square=False, alpha=1, label="untitled"):
+    data = []
+    for e, psi in zip(E, Psi):
+        norm_psi = normalise_psi(psi if not square else psi ** 2)
+        trim_to = norm_psi ** 2 / q ** 2 > trim_levels_beyond ** 2
+        trimmed_x = x[trim_to]
+        norm_psi = norm_psi[trim_to]
+        invert = -1 if norm_psi[0] < 0 and not suppress_invert and not square else 1
+
+        data.append((trimmed_x, e + norm_psi * scale * invert))
+
+    return data
