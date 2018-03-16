@@ -1,3 +1,17 @@
+**New in Solcore 5.2.0.dev.1**
+- Improvements in the quantum solver
+- Added plot generation for LDOS
+- Corrected an error in the parameters for InP
+- Implemented parametric tunnel junction model
+- Added support for external tunnel junction IV characteristics
+- Improved external optics option
+- Added optical properties for GaAsP, GaInP and AlInP, although with just 2 or three-point interpolation
+- Started a simple tutorial
+- Polished the PDD solver and separated the preparation of the solar cell from the optical solvers
+- Material system updated with new properties, and other minor changes
+- Radiative recombination coefficient for PDD is calculated from the absorption coefficient
+- Improvements in the tunnel junction and the plotting of wavefunctions
+
 **New in Solcore 5.0.0**
 - A new SolarCell class has been implemented to create solar cell structures, including not only the junctions but also optical layers.
 - All solar cell solvers have been re-written in order to use a common interface - the SolarCell class.
