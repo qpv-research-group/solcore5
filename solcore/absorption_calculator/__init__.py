@@ -4,6 +4,7 @@ from .transfer_matrix import calculate_absorption_profile, calculate_rat, calcul
 from .dielectric_constant_models import DielectricConstantModel
 from .sopra_db import sopra_database
 from .cppm import Custom_CPPB
+from .tmm_core_vec import inc_tmm, position_resolved, inc_tmm, unpolarized_RT, ellips, find_in_structure
 
 try:
     from .rigorous_coupled_wave import calculate_absorption_profile_rcwa, calculate_rat_rcwa, \

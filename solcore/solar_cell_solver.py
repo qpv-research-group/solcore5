@@ -93,6 +93,7 @@ def solve_optics(solar_cell, options):
     :param options: Options for the optics solver
     :return: None
     """
+    print('Solving optics of the solar cell...')
     if options.optics_method is None:
         print('Warning: Not solving the optics of the solar cell.')
     elif options.optics_method == 'external':

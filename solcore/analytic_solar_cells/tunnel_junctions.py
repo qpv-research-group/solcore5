@@ -176,12 +176,12 @@ if __name__ == '__main__':
     # tunnel = example_parametric_tunnel_junction(False)
     # example_resistive_tunnel_junction()
 
-    tunnel = TunnelJunction(v_peak=0.2, j_peak=100, v_valley=0.9, j_valley=10, prefactor=10, j01=1e-21, kind='parametric')
+    tunnel = TunnelJunction(v_peak=0.2, j_peak=7.5e4, v_valley=1, j_valley=40000, prefactor=5, j01=1e-23, kind='parametric')
     parametric_tunnel_junction(tunnel, default_options)
 
     v = tunnel.voltage
 
-    I = np.linspace(0, 150, 100)
+    I = np.linspace(0, 105000, 100)
 
     plt.plot(v, tunnel.tunnel_current(v), 'r--', label='Tunnel')
     plt.plot(v, tunnel.excess_current(v), 'g--', label='Excess')
@@ -196,7 +196,7 @@ if __name__ == '__main__':
 
 
     plt.legend(fontsize=12, frameon=False)
-    plt.ylim(0, 150)
+    plt.ylim(0, 105000)
     plt.xlim(0, 2)
     plt.ylabel('Current Density(A/$m^2$)', fontsize=12)
     plt.xlabel('Voltage(V)', fontsize=12)

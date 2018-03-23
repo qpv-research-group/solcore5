@@ -118,3 +118,42 @@ GaInP_junction = Junction([Layer(width=120e-9, material=n_GaInP, role="Emitter")
 
 As it can be seen, while we have defined the window and back surface field layer (BSF) for the TOP junction, we have not included it into the Junction definition. The reason for this is that very wide bandgap materials cause convergence problems when doing calculations under illumination, specially when working as the front-most window layers. In order to account for its presence, two things are done: (1) the surface recombination velocity of the top junction is set to a low value to mimic the passivating effect of the window and BSF layers, and (2) the missing layers are added outside the Junction object when creating the full solar cell in order to consider their optical properties (see below). 
 
+The only tunnel junction of this solar cell will be defined according to the parametric model and we will assume it is made of GaInP layers, 40 nm-thick in total, that will block part of the light reaching the bottom junction. Since the top junction is also made of GaInP, most of the light should already be absorbed and therefore it should not represent a very important loss. We will use a relatively low peak current to demonstrate the effect of tunnel junction breakdown when working at high concentration.
+
+**TRICK:** The TMM solver work best with "thin" layers therefore, if the results of optical calculations look strange, try dividing thick layers (> 2-3 µm) into thinner ones (~500 nm). The reason is that the waves propagating forwards and backwards, leading to interference are ultimately complex exponentials that increase (or decrease) quite fast away from the interfaces, resulting in a loss of numerical accuracy when they try to interact far from the interfaces. 
+
+```python
+from solcore.structure import TunnelJunction
+
+tunnel = TunnelJunction([Layer(width=40e-9, material=n_GaInP, role="TJ")],
+                        v_peak=0.2, j_peak=7.5e4, v_valley=1, j_valley=4e4, prefactor=5, j01=1e-23, kind='parametric')
+```
+
+**Defining the AR coating:**
+
+The AR coating will reduce the front surface reflection and, therefore, increase the photocurrent of the solar cell. We use a simple dual layer coating made of MgF2 and ZnS. Both materials are available in the SOPRA database of optical constants ("MgF2" and "ZnScub", respectively). 
+
+```python
+MgF2 = material('MgF2')()
+ZnS = material('ZnScub')()
+```
+
+**Creating the solar cell:**
+
+With all the materials and structures defined, we just need to put everything togeteher, including the front window layer and the BSF layer of the top junction.
+
+```python
+from solcore.solar_cell import SolarCell
+
+my_solar_cell = SolarCell([Layer(width=110e-9, material=MgF2, role="ARC1"),
+                           Layer(width=60 - 9, material=ZnS, role="ARC2"),
+                           Layer(width=30e-9, material=window_top, role="window"),
+                           GaInP_junction,
+                           Layer(width=100e-9, material=bsf_top, role="BSF"),
+                           tunnel,
+                           GaAs_junction],
+                           T=T, substrate=n_GaAs)
+```
+
+
+

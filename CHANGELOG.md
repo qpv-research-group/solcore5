@@ -11,6 +11,7 @@
 - Material system updated with new properties, and other minor changes
 - Radiative recombination coefficient for PDD is calculated from the absorption coefficient
 - Improvements in the tunnel junction and the plotting of wavefunctions
+- The TMM solver has been vectorized and built directly into Solcore.
 
 **New in Solcore 5.0.0**
 - A new SolarCell class has been implemented to create solar cell structures, including not only the junctions but also optical layers.

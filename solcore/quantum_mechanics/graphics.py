@@ -14,6 +14,10 @@ defaults = {
 }
 
 
+def L(x, centre, hwhm):
+    return 1 / pi * (0.5 * hwhm) / ((x - centre) ** 2 + (0.5 * hwhm) ** 2)  # Lorenzian (area normalised to 1)
+
+
 def structure_graph(structure, **kwargs):
     global defaults
     options = copy.copy(defaults)
@@ -175,16 +179,15 @@ def split_schrodinger_graph(schrodinger_result,
 
 
 def split_schrodinger_graph_potentials(schrodinger_result,
-                            trim_levels_beyond=1e-2,
-                            linewidth=1,
-                            scale=0.3,
-                            suppress_invert=False,
-                            probability_density=False,
-                            wfalpha=0.8,
-                            potentialalpha=0.8,
-                            **kwargs):
-
-    defaults = {'step': 0.002, 'margin': 0.05, 'pdf': True, 'show': False, 'dpi': 100, 'fontsize': 12,
+                                       trim_levels_beyond=1e-2,
+                                       linewidth=1,
+                                       scale=0.3,
+                                       suppress_invert=False,
+                                       probability_density=False,
+                                       wfalpha=0.8,
+                                       potentialalpha=0.8,
+                                       **kwargs):
+    defaults = {'step': 0.002, 'margin': 0.02, 'pdf': True, 'show': False, 'dpi': 100, 'fontsize': 12,
                 'figsize': (7, 6)}
     options = copy.copy(defaults)
     options["square"] = False
@@ -216,12 +219,17 @@ def split_schrodinger_graph_potentials(schrodinger_result,
     ax2.tick_params(labelsize=defaults["fontsize"])
     ax2.grid(color='grey', linestyle='--', linewidth=0.5)
 
-    e_data = prepare_wavefunction_data_only(x, energy_levels["Ee"] / q, wavefunctions["psi_e"], trim_levels_beyond, linewidth, "blue",
-                                  0.03/q, suppress_invert, alpha=wfalpha, square=probability_density)
-    hh_data = prepare_wavefunction_data_only(x, energy_levels["Ehh"] / q, wavefunctions["psi_hh"], trim_levels_beyond, linewidth,
-                                  "green", 0.03/q, suppress_invert, alpha=wfalpha, square=probability_density)
-    lh_data = prepare_wavefunction_data_only(x, energy_levels["Elh"] / q, wavefunctions["psi_lh"], trim_levels_beyond, linewidth,
-                                  "red", 0.03/q, suppress_invert, alpha=wfalpha, square=probability_density)
+    e_data = prepare_wavefunction_data_only(x, energy_levels["Ee"] / q, wavefunctions["psi_e"], trim_levels_beyond,
+                                            linewidth, "blue",
+                                            0.03 / q, suppress_invert, alpha=wfalpha, square=probability_density)
+    hh_data = prepare_wavefunction_data_only(x, energy_levels["Ehh"] / q, wavefunctions["psi_hh"], trim_levels_beyond,
+                                             linewidth,
+                                             "green", 0.03 / q, suppress_invert, alpha=wfalpha,
+                                             square=probability_density)
+    lh_data = prepare_wavefunction_data_only(x, energy_levels["Elh"] / q, wavefunctions["psi_lh"], trim_levels_beyond,
+                                             linewidth,
+                                             "red", 0.03 / q, suppress_invert, alpha=wfalpha,
+                                             square=probability_density)
 
     for x, y in e_data:
         ax1.plot(x * 1e9, y, 'blue', linewidth=2, label='e')
@@ -242,7 +250,7 @@ def split_schrodinger_graph_potentials(schrodinger_result,
 
 
 def split_schrodinger_graph_LDOS(schrodinger_result, **kwargs):
-    defaults = {'step': 0.002, 'margin': 0.05, 'pdf': True, 'show': False, 'dpi': 100, 'fontsize': 12,
+    defaults = {'step': 0.001, 'margin': 0.02, 'pdf': True, 'show': False, 'dpi': 100, 'fontsize': 12,
                 'figsize': (7, 6)}
     defaults.update(kwargs)
 
@@ -258,8 +266,8 @@ def split_schrodinger_graph_LDOS(schrodinger_result, **kwargs):
         wavefunctions["psi_hh"] = wavefunctions["psi_g1"]
         wavefunctions["psi_lh"] = wavefunctions["psi_g2"]
 
-    Ee, LDOSe = LDOS_e(x, energy_levels, wavefunctions, effective_masses, defaults['step'], defaults['margin'])
-    Eh, LDOSh = LDOS_h(x, energy_levels, wavefunctions, effective_masses, defaults['step'], defaults['margin'])
+    Ee, LDOSe = LDOS1D_e(x, energy_levels, wavefunctions, effective_masses, defaults['step'], defaults['margin'])
+    Eh, LDOSh = LDOS1D_h(x, energy_levels, wavefunctions, effective_masses, defaults['step'], defaults['margin'])
 
     fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=defaults['figsize'], dpi=defaults['dpi'])
 
@@ -288,7 +296,7 @@ def split_schrodinger_graph_LDOS(schrodinger_result, **kwargs):
     return Ee, LDOSe, Eh, LDOSh
 
 
-def LDOS_e(x, E, psi, m, step=0.002, margin=0.05):
+def LDOS1D_e(x, E, psi, m, step=0.001, margin=0.02, broad=0.005):
     Emax = max(E['Ee']) + margin * q
     Emin = min(E['Ee']) - margin * q
 
@@ -297,13 +305,55 @@ def LDOS_e(x, E, psi, m, step=0.002, margin=0.05):
 
     for i, ee in enumerate(E['Ee']):
         m_plane = calculate_in_plane_masses(x, psi['psi_e'], m['me'])
-        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer((energy >= ee), psi['psi_e'][i] ** 2)
-
-    # plt.contourf(x, energy/q, DOS, 50, cmap='gnuplot2_r', vmin=0, vmax=max(DOS.flatten())*1.2)
-    # plt.clim(0, max(DOS.flatten())*1.2)
-    # plt.show()
+        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer(L(energy, ee, broad * q), psi['psi_e'][i] ** 2)
 
     return energy, LDOS
+
+
+def LDOS1D_h(x, E, psi, m, step=0.001, margin=0.02, broad=0.005):
+    Emax = max(max(E['Ehh']), max(E['Elh'])) + margin * q
+    Emin = min(min(E['Ehh']), min(E['Elh'])) - margin * q
+
+    energy = np.arange(Emin, Emax, step * q)
+    LDOS = np.zeros((len(energy), len(x)))
+
+    for i, ee in enumerate(E['Ehh']):
+        m_plane = calculate_in_plane_masses(x, psi['psi_hh'], m['mhh'])
+        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer(L(energy, ee, broad * q), psi['psi_hh'][i] ** 2)
+
+    for i, ee in enumerate(E['Elh']):
+        m_plane = calculate_in_plane_masses(x, psi['psi_lh'], m['mlh'])
+        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer(L(energy, ee, broad * q), psi['psi_lh'][i] ** 2)
+
+    return energy, LDOS
+
+
+def calculate_in_plane_masses(x, psi, m):
+    """ Calculates the in-plane effective mass for each level, considering that the wavefunction leaks into the barriers."""
+
+    m_out = []
+    for ps in psi:
+        m_out.append(np.trapz(ps ** 2 * m, x))
+
+    return m_out
+
+
+def prepare_wavefunction_data_only(x, E, Psi, trim_levels_beyond, linewidth, color, scale, suppress_invert=False,
+                                   square=False, alpha=1, label="untitled"):
+    data = []
+    for e, psi in zip(E, Psi):
+        norm_psi = normalise_psi(psi if not square else psi ** 2)
+        trim_to = norm_psi ** 2 / q ** 2 > trim_levels_beyond ** 2
+        trimmed_x = x[trim_to]
+        norm_psi = norm_psi[trim_to]
+        invert = -1 if norm_psi[0] < 0 and not suppress_invert and not square else 1
+
+        data.append((trimmed_x, e + norm_psi * scale * invert))
+
+    return data
+
+
+"""
 
 
 def LDOS_h(x, E, psi, m, step=0.002, margin=0.05):
@@ -323,26 +373,23 @@ def LDOS_h(x, E, psi, m, step=0.002, margin=0.05):
 
     return energy, LDOS
 
+def LDOS_e(x, E, psi, m, step=0.002, margin=0.05):
+    Emax = max(E['Ee']) + margin * q
+    Emin = min(E['Ee']) - margin * q
 
-def calculate_in_plane_masses(x, psi, m):
-    """ Calculates the in-plane effective mass for each level, considering that the wavefunction leaks into the barriers."""
+    energy = np.arange(Emin, Emax, step * q)
+    LDOS = np.zeros((len(energy), len(x)))
 
-    m_out = []
-    for ps in psi:
-        m_out.append(np.trapz(ps ** 2 * m, x))
+    for i, ee in enumerate(E['Ee']):
+        m_plane = calculate_in_plane_masses(x, psi['psi_e'], m['me'])
+        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer((energy >= ee), psi['psi_e'][i] ** 2)
 
-    return m_out
+    # plt.contourf(x, energy/q, DOS, 50, cmap='gnuplot2_r', vmin=0, vmax=max(DOS.flatten())*1.2)
+    # plt.clim(0, max(DOS.flatten())*1.2)
+    # plt.show()
 
-def prepare_wavefunction_data_only(x, E, Psi, trim_levels_beyond, linewidth, color, scale, suppress_invert=False,
-                              square=False, alpha=1, label="untitled"):
-    data = []
-    for e, psi in zip(E, Psi):
-        norm_psi = normalise_psi(psi if not square else psi ** 2)
-        trim_to = norm_psi ** 2 / q ** 2 > trim_levels_beyond ** 2
-        trimmed_x = x[trim_to]
-        norm_psi = norm_psi[trim_to]
-        invert = -1 if norm_psi[0] < 0 and not suppress_invert and not square else 1
+    return energy, LDOS
+    
 
-        data.append((trimmed_x, e + norm_psi * scale * invert))
 
-    return data
+"""

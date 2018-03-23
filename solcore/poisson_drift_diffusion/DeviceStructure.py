@@ -226,6 +226,7 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
     :param alpha_params:
     :return: A dictionary with the output of the Schrodinger solver.
     """
+    print('Solving QW properties...')
     T = device['T']
 
     QW = QWunit(ToStructure(device), substrate=ToSolcoreMaterial(device['substrate'], device['T'], execute=True))

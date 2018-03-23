@@ -38,6 +38,8 @@ def solve_tmm(solar_cell, options):
     stack = OptiStack(all_layers, no_back_reflexion=no_back_reflexion)
 
     dist = np.logspace(0, np.log10(solar_cell.width * 1e9), int(300 * np.log10(solar_cell.width * 1e9)))
+    # dist = np.arange(0, solar_cell.width * 1e9, 1)
+    # print(len(dist))
     position = options.position if 'position' in options.keys() else dist
 
     print('Calculating RAT...')
