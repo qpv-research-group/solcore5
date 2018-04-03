@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.absorption_calculator.absorption_QW &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.absorption_calculator.absorption_QW &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -90,7 +87,7 @@
     <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">centre</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">hwhm</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Gaussian (area normalised to 1)</span>
 
 
-<div class="viewcode-block" id="exciton_rydberg_energy_2d"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.exciton_rydberg_energy_2d">[docs]</a><span class="k">def</span> <span class="nf">exciton_rydberg_energy_2d</span><span class="p">(</span><span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">eps_r</span><span class="p">):</span>
+<div class="viewcode-block" id="exciton_rydberg_energy_2d"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.exciton_rydberg_energy_2d">[docs]</a><span class="k">def</span> <span class="nf">exciton_rydberg_energy_2d</span><span class="p">(</span><span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">eps_r</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param me: electron effective mass (units: kg)</span>
 <span class="sd">    :param mh: hole effective mass (units: kg)</span>
@@ -110,7 +107,7 @@
     <span class="k">return</span> <span class="n">Ry_eff</span></div>
 
 
-<div class="viewcode-block" id="exciton_bohr_radius"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.exciton_bohr_radius">[docs]</a><span class="k">def</span> <span class="nf">exciton_bohr_radius</span><span class="p">(</span><span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
+<div class="viewcode-block" id="exciton_bohr_radius"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.exciton_bohr_radius">[docs]</a><span class="k">def</span> <span class="nf">exciton_bohr_radius</span><span class="p">(</span><span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param me: electron effective mass (units: kg)</span>
 <span class="sd">    :param mh: hole effective mass (units: kg)</span>
@@ -124,7 +121,7 @@
     <span class="k">return</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">mr</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">eps</span> <span class="o">/</span> <span class="n">q</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="alpha_c_hh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_c_hh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
+<div class="viewcode-block" id="alpha_c_hh_TE"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.alpha_c_hh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;     Absortion coefficient for incident light forming a transision between hh and c band of a quantum well</span>
 
 <span class="sd">    NB. Assumes that valence band is a zero energy, might need to manually apply an offset.</span>
@@ -153,7 +150,7 @@
     <span class="k">return</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Ieh</span> <span class="o">*</span> <span class="n">Mbsq_2D</span> <span class="o">*</span> <span class="n">DOS_2D</span> <span class="o">*</span> <span class="n">H</span><span class="p">(</span><span class="n">E</span> <span class="o">-</span> <span class="p">(</span><span class="n">E_e</span> <span class="o">-</span> <span class="n">E_hh</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="alpha_c_lh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_c_lh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
+<div class="viewcode-block" id="alpha_c_lh_TE"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.alpha_c_lh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;     Absortion coefficient for incident light forming a transision between hh and c band of a quantum well</span>
 <span class="sd">    </span>
 <span class="sd">    NB. Assumes that valence band is a zero energy, might need to manually apply an offset.</span>
@@ -181,7 +178,7 @@
     <span class="k">return</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Ieh</span> <span class="o">*</span> <span class="n">Mbsq_2D</span> <span class="o">*</span> <span class="n">DOS_2D</span> <span class="o">*</span> <span class="n">H</span><span class="p">(</span><span class="n">E</span> <span class="o">-</span> <span class="p">(</span><span class="n">E_e</span> <span class="o">-</span> <span class="n">E_lh</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="alpha_exciton_ehh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_ehh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_exciton_ehh_TE</span><span class="p">(</span><span class="n">exciton_index</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span>
+<div class="viewcode-block" id="alpha_exciton_ehh_TE"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_ehh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_exciton_ehh_TE</span><span class="p">(</span><span class="n">exciton_index</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mhh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span>
                          <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span> <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
@@ -234,7 +231,7 @@
     <span class="k">return</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Ieh</span> <span class="o">*</span> <span class="n">Mbsq_2D</span> <span class="o">*</span> <span class="n">DOS_2D</span> <span class="o">*</span> <span class="n">oscillator_strength</span> <span class="o">*</span> <span class="n">shape</span></div>
 
 
-<div class="viewcode-block" id="alpha_exciton_elh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_elh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_exciton_elh_TE</span><span class="p">(</span><span class="n">exciton_index</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span>
+<div class="viewcode-block" id="alpha_exciton_elh_TE"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_elh_TE">[docs]</a><span class="k">def</span> <span class="nf">alpha_exciton_elh_TE</span><span class="p">(</span><span class="n">exciton_index</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span>
                          <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span> <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
@@ -286,7 +283,7 @@
     <span class="k">return</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Ieh</span> <span class="o">*</span> <span class="n">Mbsq_2D</span> <span class="o">*</span> <span class="n">DOS_2D</span> <span class="o">*</span> <span class="n">oscillator_strength</span> <span class="o">*</span> <span class="n">shape</span></div>
 
 
-<div class="viewcode-block" id="sum_alpha_c_hh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_hh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
+<div class="viewcode-block" id="sum_alpha_c_hh_TE"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_hh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param E:</span>
@@ -309,7 +306,7 @@
     <span class="k">return</span> <span class="n">alpha</span></div>
 
 
-<div class="viewcode-block" id="sum_alpha_c_lh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_lh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
+<div class="viewcode-block" id="sum_alpha_c_lh_TE"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_lh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param E:</span>
@@ -332,7 +329,7 @@
     <span class="k">return</span> <span class="n">alpha</span></div>
 
 
-<div class="viewcode-block" id="sum_alpha_exciton_c_hh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_hh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_exciton_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span>
+<div class="viewcode-block" id="sum_alpha_exciton_c_hh_TE"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_hh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_exciton_c_hh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_hh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span>
                               <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
@@ -368,7 +365,7 @@
     <span class="k">return</span> <span class="n">alpha</span></div>
 
 
-<div class="viewcode-block" id="sum_alpha_exciton_c_lh_TE"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_lh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_exciton_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span>
+<div class="viewcode-block" id="sum_alpha_exciton_c_lh_TE"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_lh_TE">[docs]</a><span class="k">def</span> <span class="nf">sum_alpha_exciton_c_lh_TE</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">E_e</span><span class="p">,</span> <span class="n">E_lh</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">mlh</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span>
                               <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
@@ -404,7 +401,7 @@
     <span class="k">return</span> <span class="n">alpha</span></div>
 
 
-<div class="viewcode-block" id="calc_alpha"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.calc_alpha">[docs]</a><span class="k">def</span> <span class="nf">calc_alpha</span><span class="p">(</span><span class="n">QM_result</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">kane_parameter</span><span class="o">=</span><span class="mi">28</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span>
+<div class="viewcode-block" id="calc_alpha"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.calc_alpha">[docs]</a><span class="k">def</span> <span class="nf">calc_alpha</span><span class="p">(</span><span class="n">QM_result</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">kane_parameter</span><span class="o">=</span><span class="mi">28</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">hwhm</span><span class="o">=</span><span class="mf">6e-3</span> <span class="o">*</span> <span class="mf">1.6e-19</span><span class="p">,</span>
                <span class="n">dimensionality</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">12.9</span> <span class="o">*</span> <span class="n">vacuum_permittivity</span><span class="p">,</span> <span class="n">espace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_shape</span><span class="o">=</span><span class="s2">&quot;Lorenzian&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the absorption coeficient of a quantum well structure assuming the parabolic approximation for the</span>
 <span class="sd">    effective masses.</span>
@@ -476,7 +473,7 @@
     <span class="k">return</span> <span class="n">espace</span><span class="p">,</span> <span class="n">result_sum</span><span class="p">,</span> <span class="n">result_TE</span><span class="p">,</span> <span class="n">result_TM</span><span class="p">,</span> <span class="n">result_TE_raw</span><span class="p">,</span> <span class="n">result_TM_raw</span></div>
 
 
-<div class="viewcode-block" id="NonBlackBodyEmission"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.NonBlackBodyEmission">[docs]</a><span class="k">def</span> <span class="nf">NonBlackBodyEmission</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">voltage</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<div class="viewcode-block" id="NonBlackBodyEmission"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.NonBlackBodyEmission">[docs]</a><span class="k">def</span> <span class="nf">NonBlackBodyEmission</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">voltage</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param E:</span>
@@ -493,7 +490,7 @@
     <span class="k">return</span> <span class="n">bb</span></div>
 
 
-<div class="viewcode-block" id="calc_emission"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.calc_emission">[docs]</a><span class="k">def</span> <span class="nf">calc_emission</span><span class="p">(</span><span class="n">QM_result</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">voltage</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="calc_emission"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.calc_emission">[docs]</a><span class="k">def</span> <span class="nf">calc_emission</span><span class="p">(</span><span class="n">QM_result</span><span class="p">,</span> <span class="n">well_width</span><span class="p">,</span> <span class="n">voltage</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param QM_result:</span>
@@ -540,7 +537,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

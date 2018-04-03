@@ -1,0 +1,312 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.analytic_solar_cells.tunnel_junctions &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.analytic_solar_cells.tunnel_junctions</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="k">import</span> <span class="n">kb</span><span class="p">,</span> <span class="n">q</span>
+
+
+<div class="viewcode-block" id="resistive_tunnel_junction"><a class="viewcode-back" href="../../../Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.resistive_tunnel_junction">[docs]</a><span class="k">def</span> <span class="nf">resistive_tunnel_junction</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the IV curve of a tunnel junction when it is modelled as a simple resistor. The minimum resistance of the junction is always 1e-16.</span>
+
+<span class="sd">    :param junction: A junction object.</span>
+<span class="sd">    :param options: Solver options.</span>
+<span class="sd">    :return: None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">iv</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">v</span> <span class="o">/</span> <span class="n">junction</span><span class="o">.</span><span class="n">R</span>
+
+    <span class="k">def</span> <span class="nf">vi</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">j</span> <span class="o">*</span> <span class="n">junction</span><span class="o">.</span><span class="n">R</span>
+
+    <span class="n">junction</span><span class="o">.</span><span class="n">voltage</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">internal_voltages</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">iv</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">iv</span> <span class="o">=</span> <span class="n">iv</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">vi</span> <span class="o">=</span> <span class="n">vi</span></div>
+
+
+<div class="viewcode-block" id="parametric_tunnel_junction"><a class="viewcode-back" href="../../../Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.parametric_tunnel_junction">[docs]</a><span class="k">def</span> <span class="nf">parametric_tunnel_junction</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the IV curve of a tunnel junction when it is modelled using a set of empirical parameters, such as peak curent and voltage, valley current and voltage, etc. The total current of the tunnel junction is summ of 3 components: the tunnel current, the excess current and the difussion current.</span>
+
+<span class="sd">    :param junction: A junction object.</span>
+<span class="sd">    :param options: Solver options.</span>
+<span class="sd">    :return: None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">voltage</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">internal_voltages</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># First we calculate the tunnel current</span>
+        <span class="n">jp</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">j_peak</span>
+        <span class="n">vp</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">v_peak</span>
+
+        <span class="k">def</span> <span class="nf">tunnel_current</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">jp</span> <span class="o">*</span> <span class="n">v</span> <span class="o">/</span> <span class="n">vp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">v</span> <span class="o">/</span> <span class="n">vp</span><span class="p">)</span>
+
+        <span class="n">junction</span><span class="o">.</span><span class="n">tunnel_current</span> <span class="o">=</span> <span class="n">tunnel_current</span>
+
+        <span class="c1"># Now we calculate the excess current due to carrier tunnelling by way of states within the forbidden gap</span>
+        <span class="n">jva</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">j_valley</span>
+        <span class="n">vv</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">v_valley</span>
+        <span class="n">pref</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">prefactor</span>
+
+        <span class="k">def</span> <span class="nf">excess_current</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">jva</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">pref</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">vv</span><span class="p">))</span>
+
+        <span class="n">junction</span><span class="o">.</span><span class="n">excess_current</span> <span class="o">=</span> <span class="n">excess_current</span>
+
+        <span class="c1"># Finally we calculate the diffusion current</span>
+        <span class="n">j01</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">j01</span>
+
+        <span class="k">def</span> <span class="nf">diffusion_current</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">j01</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">v</span> <span class="o">/</span> <span class="n">kb</span> <span class="o">/</span> <span class="n">T</span><span class="p">)</span>
+
+        <span class="n">junction</span><span class="o">.</span><span class="n">diffusion_current</span> <span class="o">=</span> <span class="n">diffusion_current</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+    <span class="c1"># And we put everything together in an IV curve function</span>
+    <span class="k">def</span> <span class="nf">iv</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">junction</span><span class="o">.</span><span class="n">tunnel_current</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">junction</span><span class="o">.</span><span class="n">excess_current</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">junction</span><span class="o">.</span><span class="n">diffusion_current</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="n">junction</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">iv</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
+
+    <span class="c1"># Also, we calculate the inverse, needed for the calculation of the IV curve in MJ solar cells</span>
+    <span class="n">MJ_current</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span> <span class="o">&lt;=</span> <span class="n">junction</span><span class="o">.</span><span class="n">v_peak</span><span class="p">,</span> <span class="n">junction</span><span class="o">.</span><span class="n">current</span><span class="p">,</span>
+                          <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">iv</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">v_peak</span><span class="p">),</span> <span class="n">junction</span><span class="o">.</span><span class="n">current</span><span class="p">))</span>
+
+    <span class="c1"># And the corresponding function doing that</span>
+    <span class="k">if</span> <span class="n">junction</span><span class="o">.</span><span class="n">pn</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">vi</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="o">-</span><span class="n">j</span><span class="p">,</span> <span class="n">MJ_current</span><span class="p">,</span> <span class="o">-</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">vi</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">MJ_current</span><span class="p">,</span> <span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
+
+    <span class="n">junction</span><span class="o">.</span><span class="n">iv</span> <span class="o">=</span> <span class="n">iv</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">vi</span> <span class="o">=</span> <span class="n">vi</span></div>
+
+
+<div class="viewcode-block" id="external_tunnel_junction"><a class="viewcode-back" href="../../../Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.external_tunnel_junction">[docs]</a><span class="k">def</span> <span class="nf">external_tunnel_junction</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the IV curve of a tunnel junction when it is modelled with external data. The external voltage and current must be defined with the input parameters external_voltage and external_current, respectively. It assumes that the interesting part of the curve is in the 1st quadrant (V&gt;0 and I&gt;0).</span>
+
+<span class="sd">    :param junction: A junction object.</span>
+<span class="sd">    :param options: Solver options.</span>
+<span class="sd">    :return: None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># We put everything together in an IV curve function using the external data</span>
+        <span class="k">def</span> <span class="nf">iv</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">junction</span><span class="o">.</span><span class="n">external_voltage</span><span class="p">,</span> <span class="n">junction</span><span class="o">.</span><span class="n">external_current</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+    <span class="c1"># Also, we calculate the inverse, needed for the calculation of the IV curve in MJ solar cells</span>
+    <span class="n">MJ_current</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">external_current</span><span class="p">)</span>
+    <span class="n">MJ_current</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">external_current</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">external_current</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">MJ_current</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">MJ_current</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">junction</span><span class="o">.</span><span class="n">current</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># And the corresponding function doing that</span>
+    <span class="k">def</span> <span class="nf">vi</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">MJ_current</span><span class="p">,</span> <span class="n">junction</span><span class="o">.</span><span class="n">external_voltage</span><span class="p">)</span>
+
+    <span class="n">junction</span><span class="o">.</span><span class="n">voltage</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">internal_voltages</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">iv</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">iv</span> <span class="o">=</span> <span class="n">iv</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">vi</span> <span class="o">=</span> <span class="n">vi</span></div>
+
+
+<div class="viewcode-block" id="example_resistive_tunnel_junction"><a class="viewcode-back" href="../../../Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.example_resistive_tunnel_junction">[docs]</a><span class="k">def</span> <span class="nf">example_resistive_tunnel_junction</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">solcore.structure</span> <span class="k">import</span> <span class="n">TunnelJunction</span>
+    <span class="kn">from</span> <span class="nn">solcore.solar_cell_solver</span> <span class="k">import</span> <span class="n">default_options</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+    <span class="c1"># Parametric tunnel example</span>
+    <span class="n">my_tunnel</span> <span class="o">=</span> <span class="n">TunnelJunction</span><span class="p">(</span><span class="n">R</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+    <span class="n">resistive_tunnel_junction</span><span class="p">(</span><span class="n">my_tunnel</span><span class="p">,</span> <span class="n">default_options</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">my_tunnel</span><span class="o">.</span><span class="n">voltage</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">my_tunnel</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Total&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Current Density(A/$m^2$)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Voltage(V)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">my_tunnel</span></div>
+
+
+<div class="viewcode-block" id="example_parametric_tunnel_junction"><a class="viewcode-back" href="../../../Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.example_parametric_tunnel_junction">[docs]</a><span class="k">def</span> <span class="nf">example_parametric_tunnel_junction</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">solcore.structure</span> <span class="k">import</span> <span class="n">TunnelJunction</span>
+    <span class="kn">from</span> <span class="nn">solcore.solar_cell_solver</span> <span class="k">import</span> <span class="n">default_options</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+    <span class="c1"># Parametric tunnel example</span>
+    <span class="n">my_tunnel</span> <span class="o">=</span> <span class="n">TunnelJunction</span><span class="p">(</span><span class="n">v_peak</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">j_peak</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">v_valley</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">j_valley</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">j01</span><span class="o">=</span><span class="mf">1e-11</span><span class="p">)</span>
+    <span class="n">parametric_tunnel_junction</span><span class="p">(</span><span class="n">my_tunnel</span><span class="p">,</span> <span class="n">default_options</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">my_tunnel</span><span class="o">.</span><span class="n">voltage</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">my_tunnel</span><span class="o">.</span><span class="n">tunnel_current</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Tunnel&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">my_tunnel</span><span class="o">.</span><span class="n">excess_current</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="s1">&#39;g--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Excess&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">my_tunnel</span><span class="o">.</span><span class="n">diffusion_current</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="s1">&#39;b--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Diffusion&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">my_tunnel</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Total&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Current Density(A/$m^2$)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Voltage(V)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">my_tunnel</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">from</span> <span class="nn">solcore.structure</span> <span class="k">import</span> <span class="n">TunnelJunction</span>
+    <span class="kn">from</span> <span class="nn">solcore.solar_cell_solver</span> <span class="k">import</span> <span class="n">default_options</span>
+
+    <span class="c1"># tunnel = example_parametric_tunnel_junction(False)</span>
+    <span class="c1"># example_resistive_tunnel_junction()</span>
+
+    <span class="n">tunnel</span> <span class="o">=</span> <span class="n">TunnelJunction</span><span class="p">(</span><span class="n">v_peak</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">j_peak</span><span class="o">=</span><span class="mf">7.5e4</span><span class="p">,</span> <span class="n">v_valley</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">j_valley</span><span class="o">=</span><span class="mi">40000</span><span class="p">,</span> <span class="n">prefactor</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">j01</span><span class="o">=</span><span class="mf">1e-23</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">)</span>
+    <span class="n">parametric_tunnel_junction</span><span class="p">(</span><span class="n">tunnel</span><span class="p">,</span> <span class="n">default_options</span><span class="p">)</span>
+
+    <span class="n">v</span> <span class="o">=</span> <span class="n">tunnel</span><span class="o">.</span><span class="n">voltage</span>
+
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">105000</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tunnel</span><span class="o">.</span><span class="n">tunnel_current</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Tunnel&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tunnel</span><span class="o">.</span><span class="n">excess_current</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="s1">&#39;g--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Excess&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tunnel</span><span class="o">.</span><span class="n">diffusion_current</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="s1">&#39;b--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Diffusion&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tunnel</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;DimGray&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Total&#39;</span><span class="p">)</span>
+    <span class="c1"># plt.plot(v, MJ_current, &#39;k-o&#39;, linewidth=2, label=&#39;MJ current&#39;)</span>
+    <span class="c1"># plt.plot(tunnel.vi(I), I, &#39;--&#39;, color=&#39;grey&#39;, linewidth=2, label=&#39;MJ current&#39;)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="s1">&#39;ko&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s1">&#39;V$_P$, J$_P$&#39;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mi">110</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s1">&#39;V$_V$, J$_V$&#39;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">105000</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Current Density(A/$m^2$)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Voltage(V)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

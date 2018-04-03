@@ -1,3 +1,7 @@
+"""This module gives access to the vast library of optical constant data, made freely available by the SOPRA-SA
+optoelectronics company founded in 1948. For further detail on the data and SOPRA-SA see the legacy website:
+http://www.sspectra.com/sopra.html"""
+
 import numpy as np
 import os, sys
 import re
@@ -11,20 +15,10 @@ compounds_path = os.path.join(SOPRA_PATH, "compounds.txt")
 compounds_info = ConfigParser()
 compounds_info.read(compounds_path)
 
-class SOPRAError(Exception):
-    def __init__(self, message):
-        self.message = message
-
 
 # Defining the SOPRA_DB class variable
 class sopra_database:
-    """ Welcome to the SOPRA DB class for Solcore!
-
-    This module gives access to the vast library of optical constant data, made freely available by the SOPRA-SA
-    optoelectronics company founded in 1948. For further detail on the data and SOPRA-SA see the legacy website:
-    http://www.sspectra.com/sopra.html
-
-    Import the SOPRA_DB module from the solcore.material_system package and get started by selecting a material from
+    """Import the SOPRA_DB module from the solcore.material_system package and get started by selecting a material from
     the extensive list that SOPRA-SA compiled;
 
     >>> GaAs = sopra_database('GaAs')
@@ -67,7 +61,7 @@ class sopra_database:
                     print(fname)
 
             # If the exception is caught, exit the program as nothing else useful can be done...
-            #sys.exit()
+            # sys.exit()
             raise SOPRAError("Material not found in SOPRA database: {}".format(Material))
 
     @staticmethod
@@ -336,3 +330,8 @@ class sopra_database:
 
         # Return the Wavelength vector and the new n and k data...
         return (DATA[0][0], n_interp_data, k_interp_data)
+
+
+class SOPRAError(Exception):
+    def __init__(self, message):
+        self.message = message

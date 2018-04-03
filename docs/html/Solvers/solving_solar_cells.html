@@ -1,0 +1,421 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Solar cell solvers &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Detailed balance" href="detailed_balance.html" />
+    <link rel="prev" title="Other optical methods" href="../Optics/other_methods.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="detailed_balance.html" title="Detailed balance"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../Optics/other_methods.html" title="Other optical methods"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Solar cell solvers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detailed_balance.html">Detailed balance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TwoDiode.html">2 diode equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="depletion.html">Depletion approximation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multijunction_iv.html">Multi-junction electrical solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-solcore.solar_cell_solver">The solar cell solver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solver-options">Solver options</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../Optics/other_methods.html"
+                        title="previous chapter">Other optical methods</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="detailed_balance.html"
+                        title="next chapter">Detailed balance</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Solvers/solving_solar_cells.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="solar-cell-solvers">
+<h1>Solar cell solvers<a class="headerlink" href="#solar-cell-solvers" title="Permalink to this headline">¶</a></h1>
+<p>Solcore includes several methods to solve the properties of a solar cell, including optics and electrical properties. To solve the optics, <code class="docutils literal"><span class="pre">Solcore</span></code> have built in a transfer matrix solver and can be linked to S4, a rigorous couple wave analysis solver. For the electrical proerties, <code class="docutils literal"><span class="pre">Solcore</span></code> includes from the fundamental detailed balance solver to the more rigorous Poisson-drift-diffusion equation solver. The electrical solvers apply to the <em>individual junctions</em> separately, and then their ouput are combined to get the properties of a multi-junction device.</p>
+<p>This section contains the description of the <strong>solar cell solver module</strong> where all calculations start, and links to the specific solvers. Visit the  :doc:<a href="#id1"><span class="problematic" id="id2">`</span></a>optical methods section &lt;../Optics/optics&gt;`for information specific to the optical solvers.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="detailed_balance.html">Detailed balance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TwoDiode.html">2 diode equation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="depletion.html">Depletion approximation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multijunction_iv.html">Multi-junction electrical solver</a></li>
+</ul>
+</div>
+<div class="section" id="module-solcore.solar_cell_solver">
+<span id="the-solar-cell-solver-module"></span><h2>The solar cell solver module<a class="headerlink" href="#module-solcore.solar_cell_solver" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="solcore.solar_cell_solver.merge_dicts">
+<code class="descclassname">solcore.solar_cell_solver.</code><code class="descname">merge_dicts</code><span class="sig-paren">(</span><em>*dict_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell_solver.html#merge_dicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell_solver.merge_dicts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given any number of dicts, shallow copy and merge into a new dict,
+precedence goes to key value pairs in latter dicts.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.solar_cell_solver.solar_cell_solver">
+<code class="descclassname">solcore.solar_cell_solver.</code><code class="descname">solar_cell_solver</code><span class="sig-paren">(</span><em>solar_cell</em>, <em>task</em>, <em>user_options=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell_solver.html#solar_cell_solver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell_solver.solar_cell_solver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the properties of a solar cell object, either calculating its optical properties (R, A and T), its quantum efficiency or its current voltage characteristics in the dark or under illumination. The general options for the solvers are passed as dicionaries.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_cell</strong> – A solar_cell object</li>
+<li><strong>task</strong> – Task to perform. It has to be “optics”, “iv”, “qe”, “equilibrium” or “short_circuit”. The last two only work for PDD junctions</li>
+<li><strong>user_options</strong> – A dictionary containing the options for the solver, which will overwrite the default options.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.solar_cell_solver.solve_optics">
+<code class="descclassname">solcore.solar_cell_solver.</code><code class="descname">solve_optics</code><span class="sig-paren">(</span><em>solar_cell</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell_solver.html#solve_optics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell_solver.solve_optics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the optical properties of the structure, calculating the reflectance, absorptance and transmitance. The “optics_method” option controls which method is used to calculate the optical properties of the solar cell:</p>
+<ul class="simple">
+<li>None: The calculation is skipped. Only useful for solar cells involving just “2-diode” kind of junctions.</li>
+<li>BL: Uses the Beer-Lambert law to calculate the absorption in each layer. Front surface reflexion has to provided externally. It is the default method and the most flexible one.</li>
+<li>TMM: Uses a transfer matrix calculation to obtain the RAT. Not valid for DB or 2D junction</li>
+<li>RCWA: Uses the rigorous wave coupled analysisto obtain the RAT. This allows to include 2D photonic crystals in the structure, for example. Not valid for DB or 2D junctions</li>
+<li>external: The reflection and absorption profiles are provided externally by the user, and therefore no calculation is performed by Solcore.</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_cell</strong> – A solar_cell object</li>
+<li><strong>options</strong> – Options for the optics solver</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.solar_cell_solver.solve_iv">
+<code class="descclassname">solcore.solar_cell_solver.</code><code class="descname">solve_iv</code><span class="sig-paren">(</span><em>solar_cell</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell_solver.html#solve_iv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell_solver.solve_iv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the IV at a given voltage range, providing the IVs of the individual junctions in addition to the total IV</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_cell</strong> – A solar_cell object</li>
+<li><strong>options</strong> – Options for the solvers</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.solar_cell_solver.solve_qe">
+<code class="descclassname">solcore.solar_cell_solver.</code><code class="descname">solve_qe</code><span class="sig-paren">(</span><em>solar_cell</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell_solver.html#solve_qe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell_solver.solve_qe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the QE of all the junctions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_cell</strong> – A solar_cell object</li>
+<li><strong>options</strong> – Options for the solvers</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.solar_cell_solver.solve_equilibrium">
+<code class="descclassname">solcore.solar_cell_solver.</code><code class="descname">solve_equilibrium</code><span class="sig-paren">(</span><em>solar_cell</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell_solver.html#solve_equilibrium"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell_solver.solve_equilibrium" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses the PDD solver to calculate the properties of all the all the junctions under equilibrium</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_cell</strong> – A solar_cell object</li>
+<li><strong>options</strong> – Options for the solvers</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.solar_cell_solver.solve_short_circuit">
+<code class="descclassname">solcore.solar_cell_solver.</code><code class="descname">solve_short_circuit</code><span class="sig-paren">(</span><em>solar_cell</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell_solver.html#solve_short_circuit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell_solver.solve_short_circuit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses the PDD solver to calculate the properties of all the all the junctions under short circuit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_cell</strong> – A solar_cell object</li>
+<li><strong>options</strong> – Options for the solvers</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.solar_cell_solver.prepare_solar_cell">
+<code class="descclassname">solcore.solar_cell_solver.</code><code class="descname">prepare_solar_cell</code><span class="sig-paren">(</span><em>solar_cell</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell_solver.html#prepare_solar_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell_solver.prepare_solar_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function scans all the layers and junctions of the cell, calculating the relative possition of each of them with respect the front surface (offset). This information will later be use by the optical calculators, for example.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>solar_cell</strong> – A solar_cell object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="solver-options">
+<h2>Solver options<a class="headerlink" href="#solver-options" title="Permalink to this headline">¶</a></h2>
+<p>All options that need to be passed to the solvers (either electrical or optical) are passed as a dictionary via de <em>user_options</em> keyword to the <em>solar_cell_solver</em> method described above. If no options are provided, the solver will try to use the default ones, which might or might not be adequate to your specific problem. These options are common for all calculations.</p>
+<p>The options available as well as the default values are:</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>General</dt>
+<dd><ul class="first last">
+<li>T_ambient = 298</li>
+<li>T = 298</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="../spectral/spectral.html"><span class="doc">Illumination spectrum</span></a></dt>
+<dd><ul class="first last">
+<li>wavelength = np.linspace(300, 1800, 251) * 1e-9</li>
+<li><dl class="first docutils">
+<dt>light_source = LightSource(source_type=’standard’, version=’AM1.5g’, x=default_options.wavelength,</dt>
+<dd>output_units=’photon_flux_per_m’)</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>IV control</dt>
+<dd><ul class="first last">
+<li>voltages = np.linspace(0, 1.2, 100)</li>
+<li>mpp = False   # Calculates the maximum power point parameters</li>
+<li>light_iv = False</li>
+<li>internal_voltages = np.linspace(-6, 4, 1000)</li>
+<li>position = np.linspace(0, 4660, 4661)</li>
+<li>radiative_coupling = False</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Optics control</dt>
+<dd><ul class="first last">
+<li>optics_method = ‘BL’</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="../Optics/S4doc.html"><span class="doc">Rigorous couple wave analysis options</span></a></dt>
+<dd><ul class="first last">
+<li>size = [500, 500]</li>
+<li>orders = 4</li>
+<li>theta = 0</li>
+<li>phi = 0</li>
+<li>pol = ‘u’</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="detailed_balance.html"><span class="doc">Detailed balance solver options</span></a></dt>
+<dd><ul class="first last">
+<li>db_mode = ‘boltzmann’</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="DriftDiffusionUtilities.html"><span class="doc">Poisson-drift diffusion solver options</span></a></dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>Mesh control</dt>
+<dd><ul class="first last">
+<li>meshpoints = -400</li>
+<li>growth_rate = 0.7</li>
+<li>coarse = 20e-9</li>
+<li>fine = 1e-9</li>
+<li>ultrafine = 0.2e-9</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Convergence control</dt>
+<dd><ul class="first last">
+<li>clamp = 20</li>
+<li>nitermax = 100</li>
+<li>ATol = 1e-14</li>
+<li>RTol = 1e-6</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Recombination control</dt>
+<dd><ul class="first last">
+<li>srh = 1</li>
+<li>rad = 1</li>
+<li>aug = 0</li>
+<li>sur = 1</li>
+<li>gen = 0</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="detailed_balance.html" title="Detailed balance"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../Optics/other_methods.html" title="Other optical methods"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

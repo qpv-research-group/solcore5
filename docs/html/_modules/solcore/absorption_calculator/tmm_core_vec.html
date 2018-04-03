@@ -1,0 +1,1078 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.absorption_calculator.tmm_core_vec &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.absorption_calculator.tmm_core_vec</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module is a (partly) vectorised version of the code written by Steven Byrnes.</span>
+<span class="sd">All credit of the algorithm, testing, etc. goes to him. For more details, visit:</span>
+
+<span class="sd">- https://arxiv.org/abs/1603.02720</span>
+
+<span class="sd">- http://sjbyrnes.com</span>
+
+<span class="sd">- For information see the docstring of each function, and also see manual.pdf</span>
+
+<span class="sd">The most two important functions are:</span>
+
+<span class="sd">coh_tmm(...) -- the transfer-matrix-method calculation in the coherent</span>
+<span class="sd">case (i.e. thin films)</span>
+
+<span class="sd">inc_tmm(...) -- the transfer-matrix-method calculation in the incoherent</span>
+<span class="sd">case (i.e. films tens or hundreds of wavelengths thick, or whose</span>
+<span class="sd">thickness is not very uniform. --&gt; THIS FUNCTION IS NOT VECTORISED, YET</span>
+
+<span class="sd">These functions are all imported into the main package (tmm) namespace,</span>
+<span class="sd">so you can call them with tmm.coh_tmm(...) etc.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># from __future__ import division, print_function, absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">cos</span><span class="p">,</span> <span class="n">inf</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">conj</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">isnan</span>
+
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">EPSILON</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">epsilon</span>  <span class="c1"># typical floating-point calculation error</span>
+
+
+<div class="viewcode-block" id="make_2x2_array"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.make_2x2_array">[docs]</a><span class="k">def</span> <span class="nf">make_2x2_array</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a 2x2 numpy array of [[a,b],[c,d]]</span>
+<span class="sd">    </span>
+<span class="sd">    Same as &quot;numpy.array([[a,b],[c,d]], dtype=float)&quot;, but ten times faster</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">my_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">my_array</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="n">my_array</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
+    <span class="n">my_array</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
+    <span class="n">my_array</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
+    <span class="k">return</span> <span class="n">my_array</span></div>
+
+
+<div class="viewcode-block" id="snell"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.snell">[docs]</a><span class="k">def</span> <span class="nf">snell</span><span class="p">(</span><span class="n">n_1</span><span class="p">,</span> <span class="n">n_2</span><span class="p">,</span> <span class="n">th_1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return angle theta in layer 2 with refractive index n_2, assuming</span>
+<span class="sd">    it has angle th_1 in layer with refractive index n_1. Use Snell&#39;s law. Note</span>
+<span class="sd">    that &quot;angles&quot; may be complex!!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Important that the arcsin here is scipy.arcsin, not numpy.arcsin!! (They</span>
+    <span class="c1"># give different results e.g. for arcsin(2).)</span>
+    <span class="c1"># Use real_if_close because e.g. arcsin(2 + 1e-17j) is very different from</span>
+    <span class="c1"># arcsin(2) due to branch cut</span>
+    <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real_if_close</span><span class="p">(</span><span class="n">n_1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">th_1</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_2</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="list_snell"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.list_snell">[docs]</a><span class="k">def</span> <span class="nf">list_snell</span><span class="p">(</span><span class="n">n_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return list of angle theta in each layer based on angle th_0 in layer 0,</span>
+<span class="sd">    using Snell&#39;s law. n_list is index of refraction of each layer. Note that</span>
+<span class="sd">    &quot;angles&quot; may be complex!!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Important that the arcsin here is scipy.arcsin, not numpy.arcsin!! (They</span>
+    <span class="c1"># give different results e.g. for arcsin(2).)</span>
+    <span class="c1"># Use real_if_close because e.g. arcsin(2 + 1e-17j) is very different from</span>
+    <span class="c1"># arcsin(2) due to branch cut</span>
+    <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real_if_close</span><span class="p">(</span><span class="n">n_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">th_0</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_list</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="interface_r"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.interface_r">[docs]</a><span class="k">def</span> <span class="nf">interface_r</span><span class="p">(</span><span class="n">polarization</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_f</span><span class="p">,</span> <span class="n">th_i</span><span class="p">,</span> <span class="n">th_f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    reflection amplitude (from Fresnel equations)</span>
+
+<span class="sd">    polarization is either &quot;s&quot; or &quot;p&quot; for polarization</span>
+
+<span class="sd">    n_i, n_f are (complex) refractive index for incident and final</span>
+
+<span class="sd">    th_i, th_f are (complex) propegation angle for incident and final</span>
+<span class="sd">    (in radians, where 0=normal). &quot;th&quot; stands for &quot;theta&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">polarization</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
+        <span class="c1"># return 2 * n_i * cos(th_i) / (n_i * cos(th_i) + n_f * cos(th_f))</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)</span> <span class="o">-</span> <span class="n">n_f</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_f</span><span class="p">))</span> <span class="o">/</span>
+                <span class="p">(</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_f</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_f</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">polarization</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">n_f</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)</span> <span class="o">-</span> <span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_f</span><span class="p">))</span> <span class="o">/</span>
+                <span class="p">(</span><span class="n">n_f</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_f</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Polarization must be &#39;s&#39; or &#39;p&#39;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="interface_t"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.interface_t">[docs]</a><span class="k">def</span> <span class="nf">interface_t</span><span class="p">(</span><span class="n">polarization</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_f</span><span class="p">,</span> <span class="n">th_i</span><span class="p">,</span> <span class="n">th_f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    transmission amplitude (frem Fresnel equations)</span>
+
+<span class="sd">    polarization is either &quot;s&quot; or &quot;p&quot; for polarization</span>
+
+<span class="sd">    n_i, n_f are (complex) refractive index for incident and final</span>
+
+<span class="sd">    th_i, th_f are (complex) propegation angle for incident and final</span>
+<span class="sd">    (in radians, where 0=normal). &quot;th&quot; stands for &quot;theta&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">polarization</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_f</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_f</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">polarization</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_f</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_f</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Polarization must be &#39;s&#39; or &#39;p&#39;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="R_from_r"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.R_from_r">[docs]</a><span class="k">def</span> <span class="nf">R_from_r</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate reflected power R, starting with reflection amplitude r.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="T_from_t"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.T_from_t">[docs]</a><span class="k">def</span> <span class="nf">T_from_t</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_f</span><span class="p">,</span> <span class="n">th_i</span><span class="p">,</span> <span class="n">th_f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate transmitted power T, starting with transmission amplitude t.</span>
+
+<span class="sd">    n_i,n_f are refractive indices of incident and final medium.</span>
+
+<span class="sd">    th_i, th_f are (complex) propegation angles through incident &amp; final medium</span>
+<span class="sd">    (in radians, where 0=normal). &quot;th&quot; stands for &quot;theta&quot;.</span>
+
+<span class="sd">    In the case that n_i,n_f,th_i,th_f are real, formulas simplify to</span>
+<span class="sd">    T=|t|^2 * (n_f cos(th_f)) / (n_i cos(th_i)).</span>
+
+<span class="sd">    See manual for discussion of formulas</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(((</span><span class="n">n_f</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_f</span><span class="p">))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(((</span><span class="n">n_f</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th_f</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">/</span>
+                              <span class="p">(</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Polarization must be &#39;s&#39; or &#39;p&#39;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="power_entering_from_r"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.power_entering_from_r">[docs]</a><span class="k">def</span> <span class="nf">power_entering_from_r</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">th_i</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the power entering the first interface of the stack, starting with</span>
+<span class="sd">    reflection amplitude r. Normally this equals 1-R, but in the unusual case</span>
+<span class="sd">    that n_i is not real, it can be a bit different than 1-R. See manual.</span>
+
+<span class="sd">    n_i is refractive index of incident medium.</span>
+
+<span class="sd">    th_i is (complex) propegation angle through incident medium</span>
+<span class="sd">    (in radians, where 0=normal). &quot;th&quot; stands for &quot;theta&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">conj</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r</span><span class="p">))</span><span class="o">.</span><span class="n">real</span>
+                <span class="o">/</span> <span class="p">(</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">conj</span><span class="p">(</span><span class="n">r</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span>
+                <span class="o">/</span> <span class="p">(</span><span class="n">n_i</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th_i</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Polarization must be &#39;s&#39; or &#39;p&#39;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="interface_R"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.interface_R">[docs]</a><span class="k">def</span> <span class="nf">interface_R</span><span class="p">(</span><span class="n">polarization</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_f</span><span class="p">,</span> <span class="n">th_i</span><span class="p">,</span> <span class="n">th_f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fraction of light intensity reflected at an interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">interface_r</span><span class="p">(</span><span class="n">polarization</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_f</span><span class="p">,</span> <span class="n">th_i</span><span class="p">,</span> <span class="n">th_f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">R_from_r</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="interface_T"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.interface_T">[docs]</a><span class="k">def</span> <span class="nf">interface_T</span><span class="p">(</span><span class="n">polarization</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_f</span><span class="p">,</span> <span class="n">th_i</span><span class="p">,</span> <span class="n">th_f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fraction of light intensity transmitted at an interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">interface_t</span><span class="p">(</span><span class="n">polarization</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_f</span><span class="p">,</span> <span class="n">th_i</span><span class="p">,</span> <span class="n">th_f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">T_from_t</span><span class="p">(</span><span class="n">polarization</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_f</span><span class="p">,</span> <span class="n">th_i</span><span class="p">,</span> <span class="n">th_f</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="coh_tmm"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.coh_tmm">[docs]</a><span class="k">def</span> <span class="nf">coh_tmm</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main &quot;coherent transfer matrix method&quot; calc. Given parameters of a stack,</span>
+<span class="sd">    calculates everything you could ever want to know about how light</span>
+<span class="sd">    propagates in it. (If performance is an issue, you can delete some of the</span>
+<span class="sd">    calculations without affecting the rest.)</span>
+<span class="sd">    </span>
+<span class="sd">    pol is light polarization, &quot;s&quot; or &quot;p&quot;.</span>
+<span class="sd">    </span>
+<span class="sd">    n_list is the list of refractive indices, in the order that the light would</span>
+<span class="sd">    pass through them. The 0&#39;th element of the list should be the semi-infinite</span>
+<span class="sd">    medium from which the light enters, the last element should be the semi-</span>
+<span class="sd">    infinite medium to which the light exits (if any exits).</span>
+<span class="sd">    </span>
+<span class="sd">    th_0 is the angle of incidence: 0 for normal, pi/2 for glancing.</span>
+<span class="sd">    Remember, for a dissipative incoming medium (n_list[0] is not real), th_0</span>
+<span class="sd">    should be complex so that n0 sin(th0) is real (intensity is constant as</span>
+<span class="sd">    a function of lateral position).</span>
+<span class="sd">    </span>
+<span class="sd">    d_list is the list of layer thicknesses (front to back). Should correspond</span>
+<span class="sd">    one-to-one with elements of n_list. First and last elements should be &quot;inf&quot;.</span>
+<span class="sd">    </span>
+<span class="sd">    lam_vac is vacuum wavelength of the light.</span>
+<span class="sd">    </span>
+<span class="sd">    Outputs the following as a dictionary (see manual for details)</span>
+<span class="sd">    </span>
+<span class="sd">    * r--reflection amplitude</span>
+<span class="sd">    * t--transmission amplitude</span>
+<span class="sd">    * R--reflected wave power (as fraction of incident)</span>
+<span class="sd">    * T--transmitted wave power (as fraction of incident)</span>
+<span class="sd">    * power_entering--Power entering the first layer, usually (but not always)</span>
+<span class="sd">      equal to 1-R (see manual).</span>
+<span class="sd">    * vw_list-- n&#39;th element is [v_n,w_n], the forward- and backward-traveling</span>
+<span class="sd">      amplitudes, respectively, in the n&#39;th medium just after interface with</span>
+<span class="sd">      (n-1)st medium.</span>
+<span class="sd">    * kz_list--normal component of complex angular wavenumber for</span>
+<span class="sd">      forward-traveling wave in each layer.</span>
+<span class="sd">    * th_list--(complex) propagation angle (in radians) in each layer</span>
+<span class="sd">    * pol, n_list, d_list, th_0, lam_vac--same as input</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># convert lists to numpy arrays if they&#39;re not already.</span>
+    <span class="n">n_list</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">n_list</span><span class="p">)</span>
+    <span class="n">d_list</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">d_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="c1"># input tests</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">th_0</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">th_0</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">th_0</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">lam_vac</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;This function is not vectorized for angles; you need to run one angle calculation at a time.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_list</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d_list</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Problem with n_list or d_list!&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">d_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">inf</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">d_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">inf</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;d_list must start and end with inf!&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">abs</span><span class="p">((</span><span class="n">n_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">th_0</span><span class="p">))</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">EPSILON</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Error in n0 or th0!&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">th_0</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">):</span>
+        <span class="n">th_0</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">th_0</span><span class="p">)</span>
+    <span class="n">num_layers</span> <span class="o">=</span> <span class="n">n_list</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">num_wl</span> <span class="o">=</span> <span class="n">n_list</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># th_list is a list with, for each layer, the angle that the light travels</span>
+    <span class="c1"># through the layer. Computed with Snell&#39;s law. Note that the &quot;angles&quot; may be</span>
+    <span class="c1"># complex!</span>
+    <span class="n">th_list</span> <span class="o">=</span> <span class="n">list_snell</span><span class="p">(</span><span class="n">n_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">)</span>
+
+    <span class="c1"># kz is the z-component of (complex) angular wavevector for forward-moving</span>
+    <span class="c1"># wave. Positive imaginary part means decaying.</span>
+    <span class="n">kz_list</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n_list</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_list</span><span class="p">)</span> <span class="o">/</span> <span class="n">lam_vac</span>
+
+    <span class="c1"># delta is the total phase accrued by traveling through a given layer.</span>
+    <span class="c1"># ignore warning about inf multiplication</span>
+    <span class="n">olderr</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">kz_list</span> <span class="o">*</span> <span class="n">d_list</span>
+    <span class="n">sp</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="o">**</span><span class="n">olderr</span><span class="p">)</span>
+
+    <span class="c1"># For a very opaque layer, reset delta to avoid divide-by-0 and similar</span>
+    <span class="c1"># errors. The criterion imag(delta) &gt; 35 corresponds to single-pass</span>
+    <span class="c1"># transmission &lt; 1e-30 --- small enough that the exact value doesn&#39;t</span>
+    <span class="c1"># matter.</span>
+    <span class="n">delta</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">num_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">num_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">imag</span> <span class="o">&gt;</span> <span class="mi">35</span><span class="p">,</span> <span class="n">delta</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">num_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">real</span> <span class="o">+</span> <span class="mi">35</span><span class="n">j</span><span class="p">,</span>
+                                          <span class="n">delta</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">num_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+
+    <span class="c1"># t_list[i,j] and r_list[i,j] are transmission and reflection amplitudes,</span>
+    <span class="c1"># respectively, coming from i, going to j. Only need to calculate this when</span>
+    <span class="c1"># j=i+1. (2D array is overkill but helps avoid confusion.)</span>
+    <span class="n">t_list</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">num_wl</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">r_list</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">num_wl</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">t_list</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_t</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">n_list</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                                          <span class="n">th_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">th_list</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">r_list</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_r</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">n_list</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                                          <span class="n">th_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">th_list</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="c1"># At the interface between the (n-1)st and nth material, let v_n be the</span>
+    <span class="c1"># amplitude of the wave on the nth side heading forwards (away from the</span>
+    <span class="c1"># boundary), and let w_n be the amplitude on the nth side heading backwards</span>
+    <span class="c1"># (towards the boundary). Then (v_n,w_n) = M_n (v_{n+1},w_{n+1}). M_n is</span>
+    <span class="c1"># M_list[n]. M_0 and M_{num_layers-1} are not defined.</span>
+    <span class="c1"># My M is a bit different than Sernelius&#39;s, but Mtilde is the same.</span>
+    <span class="n">M_list</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">num_layers</span><span class="p">,</span> <span class="n">num_wl</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">make_2x2_array</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                           <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">make_2x2_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">r_list</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">r_list</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                           <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">t_list</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">M_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)))</span>  <span class="c1"># , (1, 2, 0)), (2, 0, 1))</span>
+
+    <span class="n">Mtilde</span> <span class="o">=</span> <span class="n">make_2x2_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">Mtilde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Mtilde</span><span class="p">,</span> <span class="n">M_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">make_2x2_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">r_list</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">r_list</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                       <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">t_list</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">Mtilde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">Mtilde</span><span class="p">)</span>
+
+    <span class="c1"># Net complex transmission and reflection amplitudes</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Mtilde</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">Mtilde</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">Mtilde</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">Mtilde</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># vw_list[n] = [v_n, w_n]. v_0 and w_0 are undefined because the 0th medium</span>
+    <span class="c1"># has no left interface.</span>
+    <span class="n">vw_list</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">num_layers</span><span class="p">,</span> <span class="n">num_wl</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">vw</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">num_wl</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">vw</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+    <span class="n">vw</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+    <span class="n">vw_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vw</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_layers</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">vw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">M_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">vw</span><span class="p">)</span>
+        <span class="n">vw_list</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vw</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">vw_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Net transmitted and reflected power, as a proportion of the incoming light</span>
+    <span class="c1"># power.</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">R_from_r</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">T_from_t</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">th_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">power_entering</span> <span class="o">=</span> <span class="n">power_entering_from_r</span><span class="p">(</span>
+        <span class="n">pol</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">n_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">th_0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="n">R</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="s1">&#39;power_entering&#39;</span><span class="p">:</span> <span class="n">power_entering</span><span class="p">,</span>
+            <span class="s1">&#39;vw_list&#39;</span><span class="p">:</span> <span class="n">vw_list</span><span class="p">,</span> <span class="s1">&#39;kz_list&#39;</span><span class="p">:</span> <span class="n">kz_list</span><span class="p">,</span> <span class="s1">&#39;th_list&#39;</span><span class="p">:</span> <span class="n">th_list</span><span class="p">,</span>
+            <span class="s1">&#39;pol&#39;</span><span class="p">:</span> <span class="n">pol</span><span class="p">,</span> <span class="s1">&#39;n_list&#39;</span><span class="p">:</span> <span class="n">n_list</span><span class="p">,</span> <span class="s1">&#39;d_list&#39;</span><span class="p">:</span> <span class="n">d_list</span><span class="p">,</span> <span class="s1">&#39;th_0&#39;</span><span class="p">:</span> <span class="n">th_0</span><span class="p">,</span>
+            <span class="s1">&#39;lam_vac&#39;</span><span class="p">:</span> <span class="n">lam_vac</span><span class="p">}</span></div>
+
+
+    <span class="c1"># return {&#39;r&#39;: r, &#39;t&#39;: t, &#39;R&#39;: R, &#39;T&#39;: T, &#39;power_entering&#39;: power_entering,</span>
+    <span class="c1">#         &#39;kz_list&#39;: kz_list, &#39;th_list&#39;: th_list,</span>
+    <span class="c1">#         &#39;pol&#39;: pol, &#39;n_list&#39;: n_list, &#39;d_list&#39;: d_list, &#39;th_0&#39;: th_0,</span>
+    <span class="c1">#         &#39;lam_vac&#39;: lam_vac}</span>
+
+
+<div class="viewcode-block" id="coh_tmm_reverse"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.coh_tmm_reverse">[docs]</a><span class="k">def</span> <span class="nf">coh_tmm_reverse</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reverses the order of the stack then runs coh_tmm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">th_f</span> <span class="o">=</span> <span class="n">snell</span><span class="p">(</span><span class="n">n_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">th_0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">coh_tmm</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">d_list</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">th_f</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ellips"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.ellips">[docs]</a><span class="k">def</span> <span class="nf">ellips</span><span class="p">(</span><span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates ellipsometric parameters, in radians.</span>
+
+<span class="sd">    Warning: Conventions differ. You may need to subtract pi/2 or whatever.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">s_data</span> <span class="o">=</span> <span class="n">coh_tmm</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">)</span>
+    <span class="n">p_data</span> <span class="o">=</span> <span class="n">coh_tmm</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">)</span>
+    <span class="n">rs</span> <span class="o">=</span> <span class="n">s_data</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
+    <span class="n">rp</span> <span class="o">=</span> <span class="n">p_data</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;psi&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">rp</span> <span class="o">/</span> <span class="n">rs</span><span class="p">)),</span> <span class="s1">&#39;Delta&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="o">-</span><span class="n">rp</span> <span class="o">/</span> <span class="n">rs</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="unpolarized_RT"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.unpolarized_RT">[docs]</a><span class="k">def</span> <span class="nf">unpolarized_RT</span><span class="p">(</span><span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates reflected and transmitted power for unpolarized light.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">s_data</span> <span class="o">=</span> <span class="n">coh_tmm</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">)</span>
+    <span class="n">p_data</span> <span class="o">=</span> <span class="n">coh_tmm</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="p">(</span><span class="n">s_data</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">p_data</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="p">(</span><span class="n">s_data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">p_data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="n">R</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="n">T</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="position_resolved"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.position_resolved">[docs]</a><span class="k">def</span> <span class="nf">position_resolved</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">coh_tmm_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Starting with output of coh_tmm(), calculate the Poynting vector</span>
+<span class="sd">    and absorbed energy density a distance &quot;dist&quot; into layer number &quot;layer&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vw</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;vw_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">]</span>
+    <span class="n">kz</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;kz_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">]</span>
+    <span class="n">th</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;th_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;n_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">]</span>
+    <span class="n">n_0</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;n_list&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">th_0</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;th_0&#39;</span><span class="p">]</span>
+    <span class="n">pol</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;pol&#39;</span><span class="p">]</span>
+
+    <span class="c1"># amplitude of forward-moving wave is Ef, backwards is Eb</span>
+    <span class="n">Ef</span> <span class="o">=</span> <span class="p">(</span><span class="n">vw</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kz</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">dist</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">Eb</span> <span class="o">=</span> <span class="p">(</span><span class="n">vw</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">kz</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">dist</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># Poynting vector</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">):</span>
+        <span class="n">poyn</span> <span class="o">=</span> <span class="p">((</span><span class="n">n</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">Ef</span> <span class="o">+</span> <span class="n">Eb</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ef</span> <span class="o">-</span> <span class="n">Eb</span><span class="p">))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_0</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_0</span><span class="p">))</span><span class="o">.</span><span class="n">real</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span><span class="p">):</span>
+        <span class="n">poyn</span> <span class="o">=</span> <span class="p">(((</span><span class="n">n</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ef</span> <span class="o">+</span> <span class="n">Eb</span><span class="p">)</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">Ef</span> <span class="o">-</span> <span class="n">Eb</span><span class="p">))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+                <span class="o">/</span> <span class="p">(</span><span class="n">n_0</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th_0</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+
+    <span class="c1"># absorbed energy density</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">):</span>
+        <span class="n">absor</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">*</span> <span class="n">kz</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Ef</span> <span class="o">+</span> <span class="n">Eb</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_0</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_0</span><span class="p">))</span><span class="o">.</span><span class="n">real</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span><span class="p">):</span>
+        <span class="n">absor</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th</span><span class="p">))</span> <span class="o">*</span>
+                 <span class="p">(</span><span class="n">kz</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Ef</span> <span class="o">-</span> <span class="n">Eb</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">conj</span><span class="p">(</span><span class="n">kz</span><span class="p">)</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Ef</span> <span class="o">+</span> <span class="n">Eb</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+                 <span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_0</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th_0</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span>
+    <span class="k">return</span> <span class="p">({</span><span class="s1">&#39;poyn&#39;</span><span class="p">:</span> <span class="n">poyn</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;absor&#39;</span><span class="p">:</span> <span class="n">absor</span><span class="o">.</span><span class="n">T</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="find_in_structure"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.find_in_structure">[docs]</a><span class="k">def</span> <span class="nf">find_in_structure</span><span class="p">(</span><span class="n">d_list</span><span class="p">,</span> <span class="n">dist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    d_list is list of thicknesses of layers, all of which are finite.</span>
+
+<span class="sd">    dist is the distance from the front of the whole multilayer structure</span>
+<span class="sd">    (i.e., from the start of layer 0.)</span>
+
+<span class="sd">    Function returns [layer,z], where:</span>
+
+<span class="sd">    layer is what number layer you&#39;re at.</span>
+<span class="sd">    (For large enough dist, layer = len(d_list), even though d_list[layer]</span>
+<span class="sd">    doesn&#39;t exist in that case.</span>
+
+<span class="sd">    z is the distance into that layer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">d_list</span><span class="p">)</span> <span class="o">==</span> <span class="n">inf</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;This function expects finite arguments&#39;</span><span class="p">)</span>
+    <span class="c1"># layer = 0</span>
+
+    <span class="n">d_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">d_list</span><span class="p">)</span>
+    <span class="n">cum_sum</span> <span class="o">=</span> <span class="n">d_array</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">cum_sum</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">dist</span> <span class="o">-</span> <span class="n">cum_sum</span><span class="p">[</span><span class="n">layer</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">layer</span><span class="p">,</span> <span class="n">dist</span></div>
+
+
+<div class="viewcode-block" id="find_in_structure_with_inf"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.find_in_structure_with_inf">[docs]</a><span class="k">def</span> <span class="nf">find_in_structure_with_inf</span><span class="p">(</span><span class="n">d_list</span><span class="p">,</span> <span class="n">dist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    d_list is list of thicknesses of layers [inf, blah, blah, ..., blah, inf]</span>
+
+<span class="sd">    dist is the distance from the front of the whole multilayer structure</span>
+<span class="sd">    (i.e., frcom the start of layer 1.)</span>
+
+<span class="sd">    Function returns [layer,z], where:</span>
+
+<span class="sd">    layer is what number layer you&#39;re at,</span>
+
+<span class="sd">    z is the distance into that layer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">layer</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">find_in_structure</span><span class="p">(</span><span class="n">d_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dist</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">layer</span><span class="p">,</span> <span class="n">dist</span></div>
+
+
+<div class="viewcode-block" id="layer_starts"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.layer_starts">[docs]</a><span class="k">def</span> <span class="nf">layer_starts</span><span class="p">(</span><span class="n">d_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gives the location of the start of any given layer, relative to the front</span>
+<span class="sd">    of the whole multilayer structure. (i.e. the start of layer 1)</span>
+
+<span class="sd">    d_list is list of thicknesses of layers [inf, blah, blah, ..., blah, inf]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">final_answer</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d_list</span><span class="p">))</span>
+    <span class="n">final_answer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">inf</span>
+    <span class="n">final_answer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">d_list</span><span class="p">)):</span>
+        <span class="n">final_answer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_answer</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">d_list</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">final_answer</span></div>
+
+
+<div class="viewcode-block" id="absorp_analytic_fn"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn">[docs]</a><span class="k">class</span> <span class="nc">absorp_analytic_fn</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Absorption in a given layer is a pretty simple analytical function:</span>
+<span class="sd">    The sum of four exponentials.</span>
+
+<span class="sd">    a(z) = A1*exp(a1*z) + A2*exp(-a1*z)</span>
+<span class="sd">           + A3*exp(1j*a3*z) + conj(A3)*exp(-1j*a3*z)</span>
+
+<span class="sd">    where a(z) is absorption at depth z, with z=0 being the start of the layer,</span>
+<span class="sd">    and A1,A2,a1,a3 are real numbers, with a1&gt;0, a3&gt;0, and A3 is complex.</span>
+<span class="sd">    The class stores these five parameters, as well as d, the layer thickness.</span>
+<span class="sd">    </span>
+<span class="sd">    This gives absorption as a fraction of intensity coming towards the first</span>
+<span class="sd">    layer of the stack.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="absorp_analytic_fn.fill_in"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.fill_in">[docs]</a>    <span class="k">def</span> <span class="nf">fill_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coh_tmm_data</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        fill in the absorption analytic function starting from coh_tmm_data</span>
+<span class="sd">        (the output of coh_tmm), for absorption in the layer with index</span>
+<span class="sd">        &quot;layer&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pol</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;pol&#39;</span><span class="p">]</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;vw_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;vw_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">kz</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;kz_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;n_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">]</span>
+        <span class="n">n_0</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;n_list&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">th_0</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;th_0&#39;</span><span class="p">]</span>
+        <span class="n">th</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;th_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;d_list&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">kz</span><span class="o">.</span><span class="n">imag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a3</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">kz</span><span class="o">.</span><span class="n">real</span>
+
+        <span class="k">if</span> <span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">*</span> <span class="n">kz</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_0</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_0</span><span class="p">))</span><span class="o">.</span><span class="n">real</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">A1</span> <span class="o">=</span> <span class="n">temp</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">A2</span> <span class="o">=</span> <span class="n">temp</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">A3</span> <span class="o">=</span> <span class="n">temp</span> <span class="o">*</span> <span class="n">v</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pol==&#39;p&#39;</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">kz</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">conj</span><span class="p">(</span><span class="n">th</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span> <span class="o">/</span>
+                    <span class="p">(</span><span class="n">n_0</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th_0</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">A1</span> <span class="o">=</span> <span class="n">temp</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">A2</span> <span class="o">=</span> <span class="n">temp</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">A3</span> <span class="o">=</span> <span class="n">v</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">kz</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">conj</span><span class="p">(</span><span class="n">th</span><span class="p">)))</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span>
+                                     <span class="p">(</span><span class="n">n_0</span> <span class="o">*</span> <span class="n">conj</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">th_0</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="absorp_analytic_fn.copy"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create copy of an absorp_analytic_fn object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">absorp_analytic_fn</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">A1</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">A2</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">A3</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">a1</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">a3</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">A1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span></div>
+
+<div class="viewcode-block" id="absorp_analytic_fn.run"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates absorption at a given depth z, where z=0 is the start of the</span>
+<span class="sd">        layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A1</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">A2</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">A3</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">a3</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A3</span><span class="p">)</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">a3</span> <span class="o">*</span> <span class="n">z</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="absorp_analytic_fn.flip"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.flip">[docs]</a>    <span class="k">def</span> <span class="nf">flip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Flip the function front-to-back, to describe a(d-z) instead of a(z),</span>
+<span class="sd">        where d is layer thickness.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">newA1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A2</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">newA2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A1</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A2</span> <span class="o">=</span> <span class="n">newA1</span><span class="p">,</span> <span class="n">newA2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A3</span> <span class="o">=</span> <span class="n">conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A3</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">a3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="absorp_analytic_fn.scale"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.scale">[docs]</a>    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        multiplies the absorption at each point by &quot;factor&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A1</span> <span class="o">*=</span> <span class="n">factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A2</span> <span class="o">*=</span> <span class="n">factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A3</span> <span class="o">*=</span> <span class="n">factor</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="absorp_analytic_fn.add"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        adds another compatible absorption analytical function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">a1</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">a3</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a3</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Incompatible absorption analytical functions!&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A1</span> <span class="o">+=</span> <span class="n">b</span><span class="o">.</span><span class="n">A1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A2</span> <span class="o">+=</span> <span class="n">b</span><span class="o">.</span><span class="n">A2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A3</span> <span class="o">+=</span> <span class="n">b</span><span class="o">.</span><span class="n">A3</span>
+        <span class="k">return</span> <span class="bp">self</span></div></div>
+
+
+<div class="viewcode-block" id="absorp_in_each_layer"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_in_each_layer">[docs]</a><span class="k">def</span> <span class="nf">absorp_in_each_layer</span><span class="p">(</span><span class="n">coh_tmm_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An array listing what proportion of light is absorbed in each layer.</span>
+
+<span class="sd">    Assumes the final layer eventually absorbs all transmitted light.</span>
+
+<span class="sd">    Assumes the initial layer eventually absorbs all reflected light.</span>
+
+<span class="sd">    Entries of array should sum to 1.</span>
+
+<span class="sd">    coh_tmm_data is output of coh_tmm()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;d_list&#39;</span><span class="p">])</span>
+    <span class="n">power_entering_each_layer</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">num_layers</span><span class="p">)</span>
+    <span class="n">power_entering_each_layer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">power_entering_each_layer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;power_entering&#39;</span><span class="p">]</span>
+    <span class="n">power_entering_each_layer</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">power_entering_each_layer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">position_resolved</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">coh_tmm_data</span><span class="p">)[</span><span class="s1">&#39;poyn&#39;</span><span class="p">]</span>
+    <span class="n">final_answer</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">num_layers</span><span class="p">)</span>
+    <span class="n">final_answer</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">power_entering_each_layer</span><span class="p">)</span>
+    <span class="n">final_answer</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">power_entering_each_layer</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">final_answer</span></div>
+
+
+<div class="viewcode-block" id="inc_group_layers"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.inc_group_layers">[docs]</a><span class="k">def</span> <span class="nf">inc_group_layers</span><span class="p">(</span><span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">c_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function for inc_tmm. Groups and sorts layer information.</span>
+
+<span class="sd">    See coh_tmm for definitions of n_list, d_list.</span>
+
+<span class="sd">    c_list is &quot;coherency list&quot;. Each entry should be &#39;i&#39; for incoherent or &#39;c&#39;</span>
+<span class="sd">    for &#39;coherent&#39;.</span>
+
+<span class="sd">    A &quot;stack&quot; is a group of one or more consecutive coherent layers. A &quot;stack</span>
+<span class="sd">    index&quot; labels the stacks 0,1,2,.... The &quot;within-stack index&quot; counts the</span>
+<span class="sd">    coherent layers within the stack 1,2,3... [index 0 is the incoherent layer</span>
+<span class="sd">    before the stack starts]</span>
+
+<span class="sd">    An &quot;incoherent layer index&quot; labels the incoherent layers 0,1,2,...</span>
+
+<span class="sd">    An &quot;alllayer index&quot; labels all layers (all elements of d_list) 0,1,2,...</span>
+
+<span class="sd">    Returns info about how the layers relate:</span>
+
+<span class="sd">    * stack_d_list[i] = list of thicknesses of each coherent layer in the i&#39;th</span>
+<span class="sd">      stack, plus starting and ending with &quot;inf&quot;</span>
+<span class="sd">    * stack_n_list[i] = list of refractive index of each coherent layer in the</span>
+<span class="sd">      i&#39;th stack, plus the two surrounding incoherent layers</span>
+<span class="sd">    * all_from_inc[i] = j means that the layer with incoherent index i has</span>
+<span class="sd">      alllayer index j</span>
+<span class="sd">    * inc_from_all[i] = j means that the layer with alllayer index i has</span>
+<span class="sd">      incoherent index j. If j = nan then the layer is coherent.</span>
+<span class="sd">    * all_from_stack[i1][i2] = j means that the layer with stack index i1 and</span>
+<span class="sd">      within-stack index i2 has alllayer index j</span>
+<span class="sd">    * stack_from_all[i] = [j1 j2] means that the layer with alllayer index i is</span>
+<span class="sd">      part of stack j1 with withinstack-index j2. If stack_from_all[i] = nan</span>
+<span class="sd">      then the layer is incoherent</span>
+<span class="sd">    * inc_from_stack[i] = j means that the i&#39;th stack comes after the layer</span>
+<span class="sd">      with incoherent index j, and before the layer with incoherent index j+1.</span>
+<span class="sd">    * stack_from_inc[i] = j means that the layer with incoherent index i comes</span>
+<span class="sd">      immediately after the j&#39;th stack. If j=nan, it is not immediately</span>
+<span class="sd">      following a stack.</span>
+<span class="sd">    * num_stacks = number of stacks</span>
+<span class="sd">    * num_inc_layers = number of incoherent layers</span>
+<span class="sd">    * num_layers = number of layers total</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">n_list</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">d_list</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Problem with n_list or d_list!&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">d_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">inf</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">d_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">inf</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;d_list must start and end with inf!&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">c_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;i&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">c_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;i&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;c_list should start and end with &quot;i&quot;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">n_list</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">d_list</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">c_list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;List sizes do not match!&#39;</span><span class="p">)</span>
+    <span class="n">inc_index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">stack_index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">stack_d_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">stack_n_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_from_inc</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">inc_from_all</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_from_stack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">stack_from_all</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">inc_from_stack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">stack_from_inc</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">stack_in_progress</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">alllayer_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_list</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">c_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span>  <span class="c1"># coherent layer</span>
+            <span class="n">inc_from_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nan</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">stack_in_progress</span><span class="p">:</span>  <span class="c1"># this layer is starting new stack</span>
+                <span class="n">stack_in_progress</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">ongoing_stack_d_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">inf</span><span class="p">,</span> <span class="n">d_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">]]</span>
+                <span class="n">ongoing_stack_n_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span>
+                                        <span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">]]</span>
+                <span class="n">stack_from_all</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">stack_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">all_from_stack</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">alllayer_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">alllayer_index</span><span class="p">])</span>
+                <span class="n">inc_from_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inc_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">within_stack_index</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># another coherent layer in the same stack</span>
+                <span class="n">ongoing_stack_d_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">])</span>
+                <span class="n">ongoing_stack_n_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">])</span>
+                <span class="n">within_stack_index</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">stack_from_all</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">stack_index</span><span class="p">,</span> <span class="n">within_stack_index</span><span class="p">])</span>
+                <span class="n">all_from_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alllayer_index</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">c_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span>  <span class="c1"># incoherent layer</span>
+            <span class="n">stack_from_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nan</span><span class="p">)</span>
+            <span class="n">inc_from_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inc_index</span><span class="p">)</span>
+            <span class="n">all_from_inc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alllayer_index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">stack_in_progress</span><span class="p">:</span>  <span class="c1"># previous layer was also incoherent</span>
+                <span class="n">stack_from_inc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nan</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># previous layer was coherent</span>
+                <span class="n">stack_in_progress</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">stack_from_inc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stack_index</span><span class="p">)</span>
+                <span class="n">ongoing_stack_d_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inf</span><span class="p">)</span>
+                <span class="n">stack_d_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ongoing_stack_d_list</span><span class="p">)</span>
+                <span class="n">ongoing_stack_n_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">])</span>
+                <span class="n">stack_n_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ongoing_stack_n_list</span><span class="p">)</span>
+                <span class="n">all_from_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alllayer_index</span><span class="p">)</span>
+                <span class="n">stack_index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">inc_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error: c_list entries must be &#39;i&#39; or &#39;c&#39;!&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;stack_d_list&#39;</span><span class="p">:</span> <span class="n">stack_d_list</span><span class="p">,</span>
+            <span class="s1">&#39;stack_n_list&#39;</span><span class="p">:</span> <span class="n">stack_n_list</span><span class="p">,</span>
+            <span class="s1">&#39;all_from_inc&#39;</span><span class="p">:</span> <span class="n">all_from_inc</span><span class="p">,</span>
+            <span class="s1">&#39;inc_from_all&#39;</span><span class="p">:</span> <span class="n">inc_from_all</span><span class="p">,</span>
+            <span class="s1">&#39;all_from_stack&#39;</span><span class="p">:</span> <span class="n">all_from_stack</span><span class="p">,</span>
+            <span class="s1">&#39;stack_from_all&#39;</span><span class="p">:</span> <span class="n">stack_from_all</span><span class="p">,</span>
+            <span class="s1">&#39;inc_from_stack&#39;</span><span class="p">:</span> <span class="n">inc_from_stack</span><span class="p">,</span>
+            <span class="s1">&#39;stack_from_inc&#39;</span><span class="p">:</span> <span class="n">stack_from_inc</span><span class="p">,</span>
+            <span class="s1">&#39;num_stacks&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_from_stack</span><span class="p">),</span>
+            <span class="s1">&#39;num_inc_layers&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_from_inc</span><span class="p">),</span>
+            <span class="s1">&#39;num_layers&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_list</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="inc_tmm"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.inc_tmm">[docs]</a><span class="k">def</span> <span class="nf">inc_tmm</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">c_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">,</span> <span class="n">lam_vac</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Incoherent, or partly-incoherent-partly-coherent, transfer matrix method.</span>
+
+<span class="sd">    See coh_tmm for definitions of pol, n_list, d_list, th_0, lam_vac.</span>
+
+<span class="sd">    c_list is &quot;coherency list&quot;. Each entry should be &#39;i&#39; for incoherent or &#39;c&#39;</span>
+<span class="sd">    for &#39;coherent&#39;.</span>
+
+<span class="sd">    If an incoherent layer has real refractive index (no absorption), then its</span>
+<span class="sd">    thickness doesn&#39;t affect the calculation results.</span>
+
+<span class="sd">    See https://arxiv.org/abs/1603.02720 for physics background and some</span>
+<span class="sd">    of the definitions.</span>
+
+<span class="sd">    Outputs the following as a dictionary:</span>
+
+<span class="sd">    * R--reflected wave power (as fraction of incident)</span>
+<span class="sd">    * T--transmitted wave power (as fraction of incident)</span>
+<span class="sd">    * VW_list-- n&#39;th element is [V_n,W_n], the forward- and backward-traveling</span>
+<span class="sd">      intensities, respectively, at the beginning of the n&#39;th incoherent medium.</span>
+<span class="sd">    * coh_tmm_data_list--n&#39;th element is coh_tmm_data[n], the output of</span>
+<span class="sd">      the coh_tmm program for the n&#39;th &quot;stack&quot; (group of one or more</span>
+<span class="sd">      consecutive coherent layers).</span>
+<span class="sd">    * coh_tmm_bdata_list--n&#39;th element is coh_tmm_bdata[n], the output of the</span>
+<span class="sd">      coh_tmm program for the n&#39;th stack, but with the layers of the stack</span>
+<span class="sd">      in reverse order.</span>
+<span class="sd">    * stackFB_list--n&#39;th element is [F,B], where F is light traveling forward</span>
+<span class="sd">      towards the n&#39;th stack and B is light traveling backwards towards the n&#39;th</span>
+<span class="sd">      stack.</span>
+<span class="sd">    * num_layers-- total number both coherent and incoherent.</span>
+<span class="sd">    * power_entering_list--n&#39;th element is the normalized Poynting vector</span>
+<span class="sd">      crossing the interface into the n&#39;th incoherent layer from the previous</span>
+<span class="sd">      (coherent or incoherent) layer.</span>
+<span class="sd">    * Plus, all the outputs of inc_group_layers</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert lists to numpy arrays if they&#39;re not already.</span>
+    <span class="n">n_list</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">n_list</span><span class="p">)</span>
+    <span class="n">d_list</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">d_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Input tests</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">n_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;size&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;This function is not vectorized, yet; you need to run one calculation at a time (one wavelength, one angle).&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real_if_close</span><span class="p">(</span><span class="n">n_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">th_0</span><span class="p">)))</span><span class="o">.</span><span class="n">imag</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Error in n0 or th0!&#39;</span><span class="p">)</span>
+
+    <span class="n">group_layers_data</span> <span class="o">=</span> <span class="n">inc_group_layers</span><span class="p">(</span><span class="n">n_list</span><span class="p">,</span> <span class="n">d_list</span><span class="p">,</span> <span class="n">c_list</span><span class="p">)</span>
+    <span class="n">num_inc_layers</span> <span class="o">=</span> <span class="n">group_layers_data</span><span class="p">[</span><span class="s1">&#39;num_inc_layers&#39;</span><span class="p">]</span>
+    <span class="n">num_stacks</span> <span class="o">=</span> <span class="n">group_layers_data</span><span class="p">[</span><span class="s1">&#39;num_stacks&#39;</span><span class="p">]</span>
+    <span class="n">stack_n_list</span> <span class="o">=</span> <span class="n">group_layers_data</span><span class="p">[</span><span class="s1">&#39;stack_n_list&#39;</span><span class="p">]</span>
+    <span class="n">stack_d_list</span> <span class="o">=</span> <span class="n">group_layers_data</span><span class="p">[</span><span class="s1">&#39;stack_d_list&#39;</span><span class="p">]</span>
+    <span class="n">all_from_stack</span> <span class="o">=</span> <span class="n">group_layers_data</span><span class="p">[</span><span class="s1">&#39;all_from_stack&#39;</span><span class="p">]</span>
+    <span class="n">all_from_inc</span> <span class="o">=</span> <span class="n">group_layers_data</span><span class="p">[</span><span class="s1">&#39;all_from_inc&#39;</span><span class="p">]</span>
+    <span class="n">all_from_stack</span> <span class="o">=</span> <span class="n">group_layers_data</span><span class="p">[</span><span class="s1">&#39;all_from_stack&#39;</span><span class="p">]</span>
+    <span class="n">stack_from_inc</span> <span class="o">=</span> <span class="n">group_layers_data</span><span class="p">[</span><span class="s1">&#39;stack_from_inc&#39;</span><span class="p">]</span>
+    <span class="n">inc_from_stack</span> <span class="o">=</span> <span class="n">group_layers_data</span><span class="p">[</span><span class="s1">&#39;inc_from_stack&#39;</span><span class="p">]</span>
+
+    <span class="c1"># th_list is a list with, for each layer, the angle that the light travels</span>
+    <span class="c1"># through the layer. Computed with Snell&#39;s law. Note that the &quot;angles&quot; may be</span>
+    <span class="c1"># complex!</span>
+    <span class="n">th_list</span> <span class="o">=</span> <span class="n">list_snell</span><span class="p">(</span><span class="n">n_list</span><span class="p">,</span> <span class="n">th_0</span><span class="p">)</span>
+
+    <span class="c1"># coh_tmm_data_list[i] is the output of coh_tmm for the i&#39;th stack</span>
+    <span class="n">coh_tmm_data_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># coh_tmm_bdata_list[i] is the same stack as coh_tmm_data_list[i] but</span>
+    <span class="c1"># with order of layers reversed</span>
+    <span class="n">coh_tmm_bdata_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_stacks</span><span class="p">):</span>
+        <span class="c1"># print(th_list[all_from_stack[i][0]])</span>
+
+        <span class="n">coh_tmm_data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coh_tmm</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">stack_n_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                         <span class="n">stack_d_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                         <span class="n">th_list</span><span class="p">[</span><span class="n">all_from_stack</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span>
+                                         <span class="n">lam_vac</span><span class="p">))</span>
+        <span class="n">coh_tmm_bdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coh_tmm_reverse</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">stack_n_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                  <span class="n">stack_d_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                  <span class="n">th_list</span><span class="p">[</span><span class="n">all_from_stack</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span>
+                                                  <span class="n">lam_vac</span><span class="p">))</span>
+
+    <span class="c1"># P_list[i] is fraction not absorbed in a single pass through i&#39;th incoherent</span>
+    <span class="c1"># layer.</span>
+    <span class="n">P_list</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">num_inc_layers</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">inc_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_inc_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># skip 0&#39;th and last (infinite)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">all_from_inc</span><span class="p">[</span><span class="n">inc_index</span><span class="p">]</span>
+        <span class="n">P_list</span><span class="p">[</span><span class="n">inc_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">d_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                <span class="o">*</span> <span class="p">(</span><span class="n">n_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">th_list</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">lam_vac</span><span class="p">)</span>
+        <span class="c1"># For a very opaque layer, reset P to avoid divide-by-0 and similar</span>
+        <span class="c1"># errors.</span>
+        <span class="k">if</span> <span class="n">P_list</span><span class="p">[</span><span class="n">inc_index</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1e-30</span><span class="p">:</span>
+            <span class="n">P_list</span><span class="p">[</span><span class="n">inc_index</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-30</span>
+    <span class="c1"># T_list[i,j] and R_list[i,j] are transmission and reflection powers,</span>
+    <span class="c1"># respectively, coming from the i&#39;th incoherent layer, going to the j&#39;th</span>
+    <span class="c1"># incoherent layer. Only need to calculate this when j=i+1 or j=i-1.</span>
+    <span class="c1"># (2D array is overkill but helps avoid confusion.)</span>
+    <span class="c1"># initialize these arrays</span>
+    <span class="n">T_list</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">num_inc_layers</span><span class="p">,</span> <span class="n">num_inc_layers</span><span class="p">))</span>
+    <span class="n">R_list</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">num_inc_layers</span><span class="p">,</span> <span class="n">num_inc_layers</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">inc_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_inc_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># looking at interface i -&gt; i+1</span>
+        <span class="n">alllayer_index</span> <span class="o">=</span> <span class="n">all_from_inc</span><span class="p">[</span><span class="n">inc_index</span><span class="p">]</span>
+        <span class="n">nextstack_index</span> <span class="o">=</span> <span class="n">stack_from_inc</span><span class="p">[</span><span class="n">inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">nextstack_index</span><span class="p">):</span>  <span class="c1"># next layer is incoherent</span>
+            <span class="n">R_list</span><span class="p">[</span><span class="n">inc_index</span><span class="p">,</span> <span class="n">inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">interface_R</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">],</span>
+                            <span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="n">th_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">],</span>
+                            <span class="n">th_list</span><span class="p">[</span><span class="n">alllayer_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]))</span>
+            <span class="n">T_list</span><span class="p">[</span><span class="n">inc_index</span><span class="p">,</span> <span class="n">inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">interface_T</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">],</span>
+                            <span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="n">th_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">],</span>
+                            <span class="n">th_list</span><span class="p">[</span><span class="n">alllayer_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]))</span>
+            <span class="n">R_list</span><span class="p">[</span><span class="n">inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">inc_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">interface_R</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">],</span>
+                            <span class="n">th_list</span><span class="p">[</span><span class="n">alllayer_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="n">th_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">]))</span>
+            <span class="n">T_list</span><span class="p">[</span><span class="n">inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">inc_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">interface_T</span><span class="p">(</span><span class="n">pol</span><span class="p">,</span> <span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="n">n_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">],</span>
+                            <span class="n">th_list</span><span class="p">[</span><span class="n">alllayer_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="n">th_list</span><span class="p">[</span><span class="n">alllayer_index</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># next layer is coherent</span>
+            <span class="n">R_list</span><span class="p">[</span><span class="n">inc_index</span><span class="p">,</span> <span class="n">inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">coh_tmm_data_list</span><span class="p">[</span><span class="n">nextstack_index</span><span class="p">][</span><span class="s1">&#39;R&#39;</span><span class="p">])</span>
+            <span class="n">T_list</span><span class="p">[</span><span class="n">inc_index</span><span class="p">,</span> <span class="n">inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">coh_tmm_data_list</span><span class="p">[</span><span class="n">nextstack_index</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">])</span>
+            <span class="n">R_list</span><span class="p">[</span><span class="n">inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">inc_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">coh_tmm_bdata_list</span><span class="p">[</span><span class="n">nextstack_index</span><span class="p">][</span><span class="s1">&#39;R&#39;</span><span class="p">])</span>
+            <span class="n">T_list</span><span class="p">[</span><span class="n">inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">inc_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">coh_tmm_bdata_list</span><span class="p">[</span><span class="n">nextstack_index</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">])</span>
+
+    <span class="c1"># L is the transfer matrix from the i&#39;th to (i+1)st incoherent layer, see</span>
+    <span class="c1"># manual</span>
+    <span class="n">L_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">nan</span><span class="p">]</span>  <span class="c1"># L_0 is not defined because 0&#39;th layer has no beginning.</span>
+    <span class="n">Ltilde</span> <span class="o">=</span> <span class="p">(</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">R_list</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                     <span class="p">[</span><span class="n">R_list</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                      <span class="n">T_list</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">T_list</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">R_list</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">R_list</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]])</span>
+              <span class="o">/</span> <span class="n">T_list</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_inc_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span>
+            <span class="n">array</span><span class="p">([[</span><span class="mi">1</span> <span class="o">/</span> <span class="n">P_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">P_list</span><span class="p">[</span><span class="n">i</span><span class="p">]]]),</span>
+            <span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">R_list</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]],</span>
+                   <span class="p">[</span><span class="n">R_list</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                    <span class="n">T_list</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">T_list</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">R_list</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">R_list</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]])</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">T_list</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">L_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+        <span class="n">Ltilde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Ltilde</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Ltilde</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">Ltilde</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">Ltilde</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># VW_list[n] = [V_n, W_n], the forward- and backward-moving intensities</span>
+    <span class="c1"># at the beginning of the n&#39;th incoherent layer. VW_list[0] is undefined</span>
+    <span class="c1"># because 0&#39;th layer has no beginning.</span>
+    <span class="n">VW_list</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">num_inc_layers</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">VW_list</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">]</span>
+    <span class="n">VW</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="n">T</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">VW_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">VW</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_inc_layers</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">VW</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">L_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">VW</span><span class="p">)</span>
+        <span class="n">VW_list</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">VW</span><span class="p">)</span>
+
+    <span class="c1"># stackFB_list[n]=[F,B] means that F is light traveling forward towards n&#39;th</span>
+    <span class="c1"># stack and B is light traveling backwards towards n&#39;th stack.</span>
+    <span class="c1"># Reminder: inc_from_stack[i] = j means that the i&#39;th stack comes after the</span>
+    <span class="c1"># layer with incoherent index j.</span>
+    <span class="n">stackFB_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">stack_index</span><span class="p">,</span> <span class="n">prev_inc_index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">inc_from_stack</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">prev_inc_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># stack starts right after semi-infinite layer.</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="n">VW_list</span><span class="p">[</span><span class="n">prev_inc_index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">P_list</span><span class="p">[</span><span class="n">prev_inc_index</span><span class="p">]</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">VW_list</span><span class="p">[</span><span class="n">prev_inc_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">stackFB_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">F</span><span class="p">,</span> <span class="n">B</span><span class="p">])</span>
+
+    <span class="c1"># power_entering_list[i] is the normalized Poynting vector crossing the</span>
+    <span class="c1"># interface into the i&#39;th incoherent layer from the previous (coherent or</span>
+    <span class="c1"># incoherent) layer. See manual.</span>
+    <span class="n">power_entering_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># &quot;1&quot; by convention for infinite 0th layer.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_inc_layers</span><span class="p">):</span>
+        <span class="n">prev_stack_index</span> <span class="o">=</span> <span class="n">stack_from_inc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">prev_stack_index</span><span class="p">):</span>
+            <span class="c1"># case where this layer directly follows another incoherent layer</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># special case because VW_list[0] &amp; A_list[0] are undefined</span>
+                <span class="n">power_entering_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T_list</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                                           <span class="o">-</span> <span class="n">VW_list</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">T_list</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">power_entering_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">VW_list</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">P_list</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">T_list</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                    <span class="o">-</span> <span class="n">VW_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">T_list</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># case where this layer follows a coherent stack</span>
+            <span class="n">power_entering_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">stackFB_list</span><span class="p">[</span><span class="n">prev_stack_index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
+                <span class="n">coh_tmm_data_list</span><span class="p">[</span><span class="n">prev_stack_index</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">stackFB_list</span><span class="p">[</span><span class="n">prev_stack_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
+                <span class="n">coh_tmm_bdata_list</span><span class="p">[</span><span class="n">prev_stack_index</span><span class="p">][</span><span class="s1">&#39;power_entering&#39;</span><span class="p">])</span>
+    <span class="n">ans</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="n">R</span><span class="p">,</span> <span class="s1">&#39;VW_list&#39;</span><span class="p">:</span> <span class="n">VW_list</span><span class="p">,</span>
+           <span class="s1">&#39;coh_tmm_data_list&#39;</span><span class="p">:</span> <span class="n">coh_tmm_data_list</span><span class="p">,</span>
+           <span class="s1">&#39;coh_tmm_bdata_list&#39;</span><span class="p">:</span> <span class="n">coh_tmm_bdata_list</span><span class="p">,</span>
+           <span class="s1">&#39;stackFB_list&#39;</span><span class="p">:</span> <span class="n">stackFB_list</span><span class="p">,</span>
+           <span class="s1">&#39;power_entering_list&#39;</span><span class="p">:</span> <span class="n">power_entering_list</span><span class="p">}</span>
+    <span class="n">ans</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">group_layers_data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ans</span></div>
+
+
+<div class="viewcode-block" id="inc_absorp_in_each_layer"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.inc_absorp_in_each_layer">[docs]</a><span class="k">def</span> <span class="nf">inc_absorp_in_each_layer</span><span class="p">(</span><span class="n">inc_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A list saying what proportion of light is absorbed in each layer.</span>
+
+<span class="sd">    Assumes all reflected light is eventually absorbed in the 0&#39;th medium, and</span>
+<span class="sd">    all transmitted light is eventually absorbed in the final medium.</span>
+
+<span class="sd">    Returns a list [layer0absorp, layer1absorp, ...]. Entries should sum to 1.</span>
+
+<span class="sd">    inc_data is output of incoherent_main()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Reminder: inc_from_stack[i] = j means that the i&#39;th stack comes after the</span>
+    <span class="c1"># layer with incoherent index j.</span>
+    <span class="c1"># Reminder: stack_from_inc[i] = j means that the layer</span>
+    <span class="c1"># with incoherent index i comes immediately after the j&#39;th stack (or j=nan</span>
+    <span class="c1"># if it&#39;s not immediately following a stack).</span>
+
+    <span class="n">stack_from_inc</span> <span class="o">=</span> <span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;stack_from_inc&#39;</span><span class="p">]</span>
+    <span class="n">power_entering_list</span> <span class="o">=</span> <span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;power_entering_list&#39;</span><span class="p">]</span>
+    <span class="c1"># stackFB_list[n]=[F,B] means that F is light traveling forward towards n&#39;th</span>
+    <span class="c1"># stack and B is light traveling backwards towards n&#39;th stack.</span>
+    <span class="n">stackFB_list</span> <span class="o">=</span> <span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;stackFB_list&#39;</span><span class="p">]</span>
+    <span class="n">absorp_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># loop through incoherent layers, excluding the final layer</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">power_entering</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">power_entering_list</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">stack_from_inc</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]):</span>
+            <span class="c1"># case that incoherent layer i is right before another incoherent layer</span>
+            <span class="n">absorp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">power_entering_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">power_entering_list</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># incoherent layer i is immediately before a coherent stack</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">stack_from_inc</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">coh_tmm_data</span> <span class="o">=</span> <span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;coh_tmm_data_list&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">coh_tmm_bdata</span> <span class="o">=</span> <span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;coh_tmm_bdata_list&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+            <span class="c1"># First, power in the incoherent layer...</span>
+            <span class="n">power_exiting</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">stackFB_list</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">coh_tmm_data</span><span class="p">[</span><span class="s1">&#39;power_entering&#39;</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">stackFB_list</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">coh_tmm_bdata</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">])</span>
+            <span class="n">absorp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">power_entering_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">power_exiting</span><span class="p">)</span>
+            <span class="c1"># Next, power in the coherent stack...</span>
+            <span class="n">stack_absorp</span> <span class="o">=</span> <span class="p">((</span><span class="n">stackFB_list</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
+                             <span class="n">absorp_in_each_layer</span><span class="p">(</span><span class="n">coh_tmm_data</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="p">(</span><span class="n">stackFB_list</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
+                               <span class="n">absorp_in_each_layer</span><span class="p">(</span><span class="n">coh_tmm_bdata</span><span class="p">))[</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">absorp_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">stack_absorp</span><span class="p">)</span>
+    <span class="c1"># final semi-infinite layer</span>
+    <span class="n">absorp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">absorp_list</span></div>
+
+
+<div class="viewcode-block" id="inc_find_absorp_analytic_fn"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.inc_find_absorp_analytic_fn">[docs]</a><span class="k">def</span> <span class="nf">inc_find_absorp_analytic_fn</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">inc_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Outputs an absorp_analytic_fn object for a coherent layer within a</span>
+<span class="sd">    partly-incoherent stack.</span>
+
+<span class="sd">    inc_data is output of incoherent_main()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;stack_from_all&#39;</span><span class="p">][</span><span class="n">layer</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;layer must be coherent for this function!&#39;</span><span class="p">)</span>
+    <span class="p">[</span><span class="n">stackindex</span><span class="p">,</span> <span class="n">withinstackindex</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+    <span class="n">forwardfunc</span> <span class="o">=</span> <span class="n">absorp_analytic_fn</span><span class="p">()</span>
+    <span class="n">forwardfunc</span><span class="o">.</span><span class="n">fill_in</span><span class="p">(</span><span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;coh_tmm_data_list&#39;</span><span class="p">][</span><span class="n">stackindex</span><span class="p">],</span>
+                        <span class="n">withinstackindex</span><span class="p">)</span>
+    <span class="n">forwardfunc</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;stackFB_list&#39;</span><span class="p">][</span><span class="n">stackindex</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">backfunc</span> <span class="o">=</span> <span class="n">absorp_analytic_fn</span><span class="p">()</span>
+    <span class="n">backfunc</span><span class="o">.</span><span class="n">fill_in</span><span class="p">(</span><span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;coh_tmm_bdata_list&#39;</span><span class="p">][</span><span class="n">stackindex</span><span class="p">],</span>
+                     <span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">withinstackindex</span><span class="p">)</span>
+    <span class="n">backfunc</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">inc_data</span><span class="p">[</span><span class="s1">&#39;stackFB_list&#39;</span><span class="p">][</span><span class="n">stackindex</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">backfunc</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">forwardfunc</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">backfunc</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

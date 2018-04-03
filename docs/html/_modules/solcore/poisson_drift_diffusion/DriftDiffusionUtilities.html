@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.poisson_drift_diffusion.DriftDiffusionUtilities &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.poisson_drift_diffusion.DriftDiffusionUtilities &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -124,7 +121,7 @@
 
 
 <span class="c1"># Functions for creating the streucture in the fortran variables and executing the DD solver</span>
-<div class="viewcode-block" id="ProcessStructure"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.ProcessStructure">[docs]</a><span class="k">def</span> <span class="nf">ProcessStructure</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">meshpoints</span><span class="p">,</span> <span class="n">wavelengths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_Adachi</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ProcessStructure"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.ProcessStructure">[docs]</a><span class="k">def</span> <span class="nf">ProcessStructure</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">meshpoints</span><span class="p">,</span> <span class="n">wavelengths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_Adachi</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; This function reads a dictionary containing all the device structure, extract the electrical and optical</span>
 <span class="sd">    properties of the materials, and loads all that information into the Fortran variables. Finally, it initiallise the</span>
 <span class="sd">    device (in fortran) calculating an initial mesh and all the properties as a function of the possition.</span>
@@ -142,96 +139,34 @@
     <span class="k">if</span> <span class="n">wavelengths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">output</span><span class="p">[</span><span class="s1">&#39;Optics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">output</span><span class="p">[</span><span class="s1">&#39;Optics&#39;</span><span class="p">][</span><span class="s1">&#39;wavelengths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavelengths</span>
-        <span class="n">calculate_absorption</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">calculate_absorption</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># We dump the structure information to the Fotran module and initialise the structure</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">first</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">last</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]:</span>
-
-        <span class="k">if</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;optics&#39;</span><span class="p">,</span> <span class="s1">&#39;Optics&#39;</span><span class="p">,</span> <span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">]:</span>
-            <span class="c1"># Optics or metal layers. They are not included in the PDD solver and are just used for optics</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">first</span><span class="p">:</span>
-                <span class="n">first</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span>
-                <span class="k">continue</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">last</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="k">break</span>
-
-        <span class="k">if</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># We have a normal layer</span>
-            <span class="n">layer</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span>
-            <span class="n">args_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
-                         <span class="n">asUnit</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;band_gap&#39;</span><span class="p">],</span> <span class="s1">&#39;eV&#39;</span><span class="p">),</span>
-                         <span class="n">asUnit</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_affinity&#39;</span><span class="p">],</span> <span class="s1">&#39;eV&#39;</span><span class="p">),</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_mobility&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;hole_mobility&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Nc&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Nv&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_minority_lifetime&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;hole_minority_lifetime&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;permittivity&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Epsi0</span><span class="p">,</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;radiative_recombination&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_auger_recombination&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;hole_auger_recombination&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Na&#39;</span><span class="p">],</span>
-                         <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Nd&#39;</span><span class="p">]]</span>
-            <span class="n">dd</span><span class="o">.</span><span class="n">addlayer</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args_list</span><span class="p">)</span>
-
-            <span class="c1"># We load the absorption coeficients if necessary</span>
-            <span class="k">if</span> <span class="n">calculate_absorption</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s1">&#39;absorption&#39;</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-                                                       <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                    <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavelengths</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LoadAbsorption</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">wavelengths</span><span class="p">,</span>
-                                                         <span class="n">use_Adachi</span><span class="o">=</span><span class="n">use_Adachi</span><span class="p">)</span>
-                <span class="n">dd</span><span class="o">.</span><span class="n">addabsorption</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">wavelengths</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># We have a group of several layers, usually a QW with &#39;numlayers&#39; repeated &#39;repeat&#39; times. </span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;repeat&#39;</span><span class="p">]):</span>
-                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]):</span>
-                    <span class="n">layer</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span> <span class="o">+</span> <span class="n">k</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span>
-                    <span class="n">args_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
-                                 <span class="n">asUnit</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;band_gap&#39;</span><span class="p">],</span> <span class="s1">&#39;eV&#39;</span><span class="p">),</span>
-                                 <span class="n">asUnit</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_affinity&#39;</span><span class="p">],</span> <span class="s1">&#39;eV&#39;</span><span class="p">),</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_mobility&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;hole_mobility&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Nc&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Nv&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_minority_lifetime&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;hole_minority_lifetime&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;permittivity&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Epsi0</span><span class="p">,</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;radiative_recombination&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_auger_recombination&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;hole_auger_recombination&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Na&#39;</span><span class="p">],</span>
-                                 <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Nd&#39;</span><span class="p">]]</span>
-                    <span class="n">dd</span><span class="o">.</span><span class="n">addlayer</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args_list</span><span class="p">)</span>
-
-                    <span class="c1"># We load the absorption coeficients if necessary</span>
-                    <span class="k">if</span> <span class="n">calculate_absorption</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="s1">&#39;absorption&#39;</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                            <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-                                                               <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                            <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavelengths</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LoadAbsorption</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span> <span class="o">+</span> <span class="n">k</span><span class="p">],</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">wavelengths</span><span class="p">,</span>
-                                                                 <span class="n">use_Adachi</span><span class="o">=</span><span class="n">use_Adachi</span><span class="p">)</span>
-                        <span class="n">dd</span><span class="o">.</span><span class="n">addabsorption</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">wavelengths</span><span class="p">)</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span>
+        <span class="n">args_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
+                     <span class="n">asUnit</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;band_gap&#39;</span><span class="p">],</span> <span class="s1">&#39;eV&#39;</span><span class="p">),</span>
+                     <span class="n">asUnit</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_affinity&#39;</span><span class="p">],</span> <span class="s1">&#39;eV&#39;</span><span class="p">),</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_mobility&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;hole_mobility&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Nc&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Nv&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_minority_lifetime&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;hole_minority_lifetime&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;permittivity&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">Epsi0</span><span class="p">,</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;radiative_recombination&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;electron_auger_recombination&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;hole_auger_recombination&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Na&#39;</span><span class="p">],</span>
+                     <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;Nd&#39;</span><span class="p">]]</span>
+        <span class="n">dd</span><span class="o">.</span><span class="n">addlayer</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args_list</span><span class="p">)</span>
 
         <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span>
 
-    <span class="c1"># We set the surface recombination velocities. This needs to be improved at some to consider other boundary conditions</span>
-    <span class="n">dd</span><span class="o">.</span><span class="n">frontboundary</span><span class="p">(</span><span class="s2">&quot;ohmic&quot;</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">first</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;sn&#39;</span><span class="p">],</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">first</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;sp&#39;</span><span class="p">],</span>
-                     <span class="mi">0</span><span class="p">)</span>
-    <span class="n">dd</span><span class="o">.</span><span class="n">backboundary</span><span class="p">(</span><span class="s2">&quot;ohmic&quot;</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">last</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;sn&#39;</span><span class="p">],</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">last</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;sp&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># We set the surface recombination velocities. This needs to be improved at some point</span>
+    <span class="c1"># to consider other boundary conditions</span>
+    <span class="n">dd</span><span class="o">.</span><span class="n">frontboundary</span><span class="p">(</span><span class="s2">&quot;ohmic&quot;</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;sn&#39;</span><span class="p">],</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">dd</span><span class="o">.</span><span class="n">backboundary</span><span class="p">(</span><span class="s2">&quot;ohmic&quot;</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;sn&#39;</span><span class="p">],</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">dd</span><span class="o">.</span><span class="n">initdevice</span><span class="p">(</span><span class="n">meshpoints</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;...done!</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -240,7 +175,7 @@
     <span class="k">return</span> <span class="n">output</span></div>
 
 
-<div class="viewcode-block" id="equilibrium_pdd"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.equilibrium_pdd">[docs]</a><span class="k">def</span> <span class="nf">equilibrium_pdd</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="equilibrium_pdd"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.equilibrium_pdd">[docs]</a><span class="k">def</span> <span class="nf">equilibrium_pdd</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Solves the Poisson-DD equations under equilibrium: in the dark with no external current and zero applied voltage. Internally, it calls *ProcessStructure*. Absorption coeficients are not calculated unless *wavelengths* is given as input.</span>
 
 <span class="sd">    :param device: A dictionary containing the device structure. See PDD.DeviceStructure</span>
@@ -269,7 +204,7 @@
     <span class="n">junction</span><span class="o">.</span><span class="n">equilibrium_data</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="o">**</span><span class="n">output</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="short_circuit_pdd"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.short_circuit_pdd">[docs]</a><span class="k">def</span> <span class="nf">short_circuit_pdd</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="short_circuit_pdd"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.short_circuit_pdd">[docs]</a><span class="k">def</span> <span class="nf">short_circuit_pdd</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Solves the devices electronic properties at short circuit. Internally, it calls Equilibrium.</span>
 
 <span class="sd">    :param device: A dictionary containing the device structure. See PDD.DeviceStructure</span>
@@ -298,11 +233,11 @@
     <span class="n">dd</span><span class="o">.</span><span class="n">lightsc</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">output_sc</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;...done!</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="n">output</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Bandstructure&#39;</span> <span class="p">:</span> <span class="n">DumpBandStructure</span><span class="p">()}</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Bandstructure&#39;</span><span class="p">:</span> <span class="n">DumpBandStructure</span><span class="p">()}</span>
     <span class="n">junction</span><span class="o">.</span><span class="n">short_circuit_data</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="o">**</span><span class="n">output</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="iv_pdd"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.iv_pdd">[docs]</a><span class="k">def</span> <span class="nf">iv_pdd</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="iv_pdd"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.iv_pdd">[docs]</a><span class="k">def</span> <span class="nf">iv_pdd</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the IV curve of the device between 0 V and a given voltage. Depending if the &quot;sol&quot; parameter is set</span>
 <span class="sd">    or not, the IV will be calculated in the dark (calling the Equilibrium function) or under illumination (calling</span>
 <span class="sd">    the ShortCircuit function).</span>
@@ -328,16 +263,16 @@
 
     <span class="n">Eg</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">junction</span><span class="p">:</span>
-        <span class="n">Eg</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">Eg</span><span class="p">,</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">band_gap</span><span class="o">/</span><span class="n">q</span><span class="p">])</span>
+        <span class="n">Eg</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">Eg</span><span class="p">,</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">band_gap</span> <span class="o">/</span> <span class="n">q</span><span class="p">])</span>
 
-    <span class="n">s</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">junction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Na</span> <span class="o">&gt;=</span> <span class="n">junction</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nd</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">junction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Na</span> <span class="o">&gt;=</span> <span class="n">junction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nd</span> <span class="k">else</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
-        <span class="n">vmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">Eg</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">kb</span><span class="o">*</span><span class="n">T</span><span class="o">/</span><span class="n">q</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">))</span>
+        <span class="n">vmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">Eg</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">))</span>
         <span class="n">vmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">vmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
-        <span class="n">vmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="n">Eg</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">kb</span><span class="o">*</span><span class="n">T</span><span class="o">/</span><span class="n">q</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">))</span>
+        <span class="n">vmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="n">Eg</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">))</span>
 
     <span class="n">vstep</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -404,7 +339,7 @@
     <span class="n">junction</span><span class="o">.</span><span class="n">recombination_currents</span> <span class="o">=</span> <span class="n">State</span><span class="p">({</span><span class="s2">&quot;Jrad&quot;</span><span class="p">:</span> <span class="n">Jrad</span><span class="p">,</span> <span class="s2">&quot;Jsrh&quot;</span><span class="p">:</span> <span class="n">Jsrh</span><span class="p">,</span> <span class="s2">&quot;Jaug&quot;</span><span class="p">:</span> <span class="n">Jaug</span><span class="p">,</span> <span class="s2">&quot;Jsur&quot;</span><span class="p">:</span> <span class="n">Jsur</span><span class="p">})</span></div>
 
 
-<div class="viewcode-block" id="qe_pdd"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.qe_pdd">[docs]</a><span class="k">def</span> <span class="nf">qe_pdd</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="qe_pdd"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.qe_pdd">[docs]</a><span class="k">def</span> <span class="nf">qe_pdd</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the quantum efficiency of the device at short circuit. Internally it calls ShortCircuit</span>
 
 <span class="sd">    :param device: A dictionary containing the device structure. See PDD.DeviceStructure</span>
@@ -429,12 +364,14 @@
     <span class="n">junction</span><span class="o">.</span><span class="n">qe_data</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="o">**</span><span class="n">output</span><span class="p">)</span>
 
     <span class="c1"># The EQE is actually the IQE inside the fortran solver due to an error in the naming --&gt; to be changed</span>
-    <span class="n">junction</span><span class="o">.</span><span class="n">eqe</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;QE&#39;</span><span class="p">][</span><span class="s1">&#39;IQE&#39;</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assume_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">eqe</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;QE&#39;</span><span class="p">][</span><span class="s1">&#39;IQE&#39;</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">assume_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                             <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s1">&#39;QE&#39;</span><span class="p">][</span><span class="s1">&#39;IQE&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;QE&#39;</span><span class="p">][</span><span class="s1">&#39;IQE&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span></div>
+
 
 <span class="c1"># ----</span>
 <span class="c1"># Functions for dumping data from the fortran variables</span>
-<div class="viewcode-block" id="DumpInputProperties"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpInputProperties">[docs]</a><span class="k">def</span> <span class="nf">DumpInputProperties</span><span class="p">():</span>
+<div class="viewcode-block" id="DumpInputProperties"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpInputProperties">[docs]</a><span class="k">def</span> <span class="nf">DumpInputProperties</span><span class="p">():</span>
     <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">output</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">dd</span><span class="o">.</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
     <span class="n">output</span><span class="p">[</span><span class="s1">&#39;Xi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;xi&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">dd</span><span class="o">.</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
@@ -447,7 +384,7 @@
     <span class="k">return</span> <span class="n">output</span></div>
 
 
-<div class="viewcode-block" id="DumpBandStructure"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpBandStructure">[docs]</a><span class="k">def</span> <span class="nf">DumpBandStructure</span><span class="p">():</span>
+<div class="viewcode-block" id="DumpBandStructure"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpBandStructure">[docs]</a><span class="k">def</span> <span class="nf">DumpBandStructure</span><span class="p">():</span>
     <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">output</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">dd</span><span class="o">.</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
     <span class="n">output</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">dd</span><span class="o">.</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
@@ -468,7 +405,7 @@
     <span class="k">return</span> <span class="n">output</span></div>
 
 
-<div class="viewcode-block" id="DumpIV"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpIV">[docs]</a><span class="k">def</span> <span class="nf">DumpIV</span><span class="p">(</span><span class="n">IV_info</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="DumpIV"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpIV">[docs]</a><span class="k">def</span> <span class="nf">DumpIV</span><span class="p">(</span><span class="n">IV_info</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="c1"># Depending of having PN or NP the calculation of the MPP is a bit different. We move everithing to the 1st quadrant and then send it back to normal</span>
     <span class="n">Nd</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nd&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">dd</span><span class="o">.</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">Na</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;na&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">dd</span><span class="o">.</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -516,7 +453,7 @@
     <span class="k">return</span> <span class="n">output</span></div>
 
 
-<div class="viewcode-block" id="DumpQE"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpQE">[docs]</a><span class="k">def</span> <span class="nf">DumpQE</span><span class="p">():</span>
+<div class="viewcode-block" id="DumpQE"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpQE">[docs]</a><span class="k">def</span> <span class="nf">DumpQE</span><span class="p">():</span>
     <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">numwl</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">numwl</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="n">output</span><span class="p">[</span><span class="s1">&#39;IQE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;iqe&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">numwl</span><span class="p">]</span>
@@ -531,14 +468,14 @@
 
 <span class="c1"># ----</span>
 <span class="c1"># Functions for setting the parameters controling the recombination, meshing and the numerial algorithm</span>
-<div class="viewcode-block" id="SetMeshParameters"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetMeshParameters">[docs]</a><span class="k">def</span> <span class="nf">SetMeshParameters</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="SetMeshParameters"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetMeshParameters">[docs]</a><span class="k">def</span> <span class="nf">SetMeshParameters</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;coarse&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">coarse</span><span class="p">)</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;fine&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">fine</span><span class="p">)</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;ultrafine&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">ultrafine</span><span class="p">)</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;growth&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">growth_rate</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SetRecombinationParameters"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetRecombinationParameters">[docs]</a><span class="k">def</span> <span class="nf">SetRecombinationParameters</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="SetRecombinationParameters"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetRecombinationParameters">[docs]</a><span class="k">def</span> <span class="nf">SetRecombinationParameters</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">srh</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">srh</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">rad</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">rad</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">aug</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">aug</span>
@@ -546,11 +483,127 @@
     <span class="n">dd</span><span class="o">.</span><span class="n">gen</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">gen</span></div>
 
 
-<div class="viewcode-block" id="SetConvergenceParameters"><a class="viewcode-back" href="../../../PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetConvergenceParameters">[docs]</a><span class="k">def</span> <span class="nf">SetConvergenceParameters</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="SetConvergenceParameters"><a class="viewcode-back" href="../../../Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetConvergenceParameters">[docs]</a><span class="k">def</span> <span class="nf">SetConvergenceParameters</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">nitermax</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">nitermax</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;clamp&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">clamp</span><span class="p">)</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;atol&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">ATol</span><span class="p">)</span>
     <span class="n">dd</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;rtol&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">RTol</span><span class="p">)</span></div>
+
+    <span class="c1">#</span>
+    <span class="c1"># def OldProcessStructure(device, meshpoints, wavelengths=None, use_Adachi=False):</span>
+    <span class="c1">#     &quot;&quot;&quot; This function reads a dictionary containing all the device structure, extract the electrical and optical</span>
+    <span class="c1">#     properties of the materials, and loads all that information into the Fortran variables. Finally, it initiallise the</span>
+    <span class="c1">#     device (in fortran) calculating an initial mesh and all the properties as a function of the possition.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param device: A dictionary containing the device structure. See PDD.DeviceStructure</span>
+    <span class="c1">#     :param wavelengths: (Optional) Wavelengths at which to calculate the optical properties.</span>
+    <span class="c1">#     :param use_Adachi: (Optional) If Adachi model should be use to calculate the dielectric constant of the material.</span>
+    <span class="c1">#     :return: Dictionary containing the device structure properties as a function of the position.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     print(&#39;Processing structure...&#39;)</span>
+    <span class="c1">#     # First, we clean any previous data from the Fortran code</span>
+    <span class="c1">#     dd.reset()</span>
+    <span class="c1">#     output = {}</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if wavelengths is not None:</span>
+    <span class="c1">#         output[&#39;Optics&#39;] = {}</span>
+    <span class="c1">#         output[&#39;Optics&#39;][&#39;wavelengths&#39;] = wavelengths</span>
+    <span class="c1">#         calculate_absorption = True</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         calculate_absorption = False</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # We dump the structure information to the Fotran module and initialise the structure</span>
+    <span class="c1">#     i = 0</span>
+    <span class="c1">#     first = 0</span>
+    <span class="c1">#     last = -1</span>
+    <span class="c1">#     while i &lt; device[&#39;numlayers&#39;]:</span>
+    <span class="c1">#</span>
+    <span class="c1">#         if device[&#39;layers&#39;][i][&#39;label&#39;] in [&#39;optics&#39;, &#39;Optics&#39;, &#39;metal&#39;, &#39;Metal&#39;]:</span>
+    <span class="c1">#             # Optics or metal layers. They are not included in the PDD solver and are just used for optics</span>
+    <span class="c1">#             if i == first:</span>
+    <span class="c1">#                 first = i + 1</span>
+    <span class="c1">#                 i = i + device[&#39;layers&#39;][i][&#39;numlayers&#39;]</span>
+    <span class="c1">#                 continue</span>
+    <span class="c1">#             else:</span>
+    <span class="c1">#                 last = i - device[&#39;numlayers&#39;] - 1</span>
+    <span class="c1">#                 break</span>
+    <span class="c1">#</span>
+    <span class="c1">#         if device[&#39;layers&#39;][i][&#39;group&#39;] is None:</span>
+    <span class="c1">#             # We have a normal layer</span>
+    <span class="c1">#             layer = device[&#39;layers&#39;][i][&#39;properties&#39;]</span>
+    <span class="c1">#             args_list = [layer[&#39;width&#39;],</span>
+    <span class="c1">#                          asUnit(layer[&#39;band_gap&#39;], &#39;eV&#39;),</span>
+    <span class="c1">#                          asUnit(layer[&#39;electron_affinity&#39;], &#39;eV&#39;),</span>
+    <span class="c1">#                          layer[&#39;electron_mobility&#39;],</span>
+    <span class="c1">#                          layer[&#39;hole_mobility&#39;],</span>
+    <span class="c1">#                          layer[&#39;Nc&#39;],</span>
+    <span class="c1">#                          layer[&#39;Nv&#39;],</span>
+    <span class="c1">#                          layer[&#39;electron_minority_lifetime&#39;],</span>
+    <span class="c1">#                          layer[&#39;hole_minority_lifetime&#39;],</span>
+    <span class="c1">#                          layer[&#39;permittivity&#39;] * Epsi0,</span>
+    <span class="c1">#                          layer[&#39;radiative_recombination&#39;],</span>
+    <span class="c1">#                          layer[&#39;electron_auger_recombination&#39;],</span>
+    <span class="c1">#                          layer[&#39;hole_auger_recombination&#39;],</span>
+    <span class="c1">#                          layer[&#39;Na&#39;],</span>
+    <span class="c1">#                          layer[&#39;Nd&#39;]]</span>
+    <span class="c1">#             dd.addlayer(args=args_list)</span>
+    <span class="c1">#</span>
+    <span class="c1">#             # We load the absorption coeficients if necessary</span>
+    <span class="c1">#             if calculate_absorption:</span>
+    <span class="c1">#                 if &#39;absorption&#39; in layer.keys():</span>
+    <span class="c1">#                     layer[&#39;absorption&#39;][1] = np.interp(wavelengths, layer[&#39;absorption&#39;][0],</span>
+    <span class="c1">#                                                        layer[&#39;absorption&#39;][1]).tolist()</span>
+    <span class="c1">#                     layer[&#39;absorption&#39;][0] = wavelengths.tolist()</span>
+    <span class="c1">#                 else:</span>
+    <span class="c1">#                     layer[&#39;absorption&#39;] = LoadAbsorption(device[&#39;layers&#39;][i], device[&#39;T&#39;], wavelengths,</span>
+    <span class="c1">#                                                          use_Adachi=use_Adachi)</span>
+    <span class="c1">#                 dd.addabsorption(layer[&#39;absorption&#39;][1], wavelengths)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             # We have a group of several layers, usually a QW with &#39;numlayers&#39; repeated &#39;repeat&#39; times.</span>
+    <span class="c1">#             for j in range(device[&#39;layers&#39;][i][&#39;repeat&#39;]):</span>
+    <span class="c1">#                 for k in range(device[&#39;layers&#39;][i][&#39;numlayers&#39;]):</span>
+    <span class="c1">#                     layer = device[&#39;layers&#39;][i + k][&#39;properties&#39;]</span>
+    <span class="c1">#                     args_list = [layer[&#39;width&#39;],</span>
+    <span class="c1">#                                  asUnit(layer[&#39;band_gap&#39;], &#39;eV&#39;),</span>
+    <span class="c1">#                                  asUnit(layer[&#39;electron_affinity&#39;], &#39;eV&#39;),</span>
+    <span class="c1">#                                  layer[&#39;electron_mobility&#39;],</span>
+    <span class="c1">#                                  layer[&#39;hole_mobility&#39;],</span>
+    <span class="c1">#                                  layer[&#39;Nc&#39;],</span>
+    <span class="c1">#                                  layer[&#39;Nv&#39;],</span>
+    <span class="c1">#                                  layer[&#39;electron_minority_lifetime&#39;],</span>
+    <span class="c1">#                                  layer[&#39;hole_minority_lifetime&#39;],</span>
+    <span class="c1">#                                  layer[&#39;permittivity&#39;] * Epsi0,</span>
+    <span class="c1">#                                  layer[&#39;radiative_recombination&#39;],</span>
+    <span class="c1">#                                  layer[&#39;electron_auger_recombination&#39;],</span>
+    <span class="c1">#                                  layer[&#39;hole_auger_recombination&#39;],</span>
+    <span class="c1">#                                  layer[&#39;Na&#39;],</span>
+    <span class="c1">#                                  layer[&#39;Nd&#39;]]</span>
+    <span class="c1">#                     dd.addlayer(args=args_list)</span>
+    <span class="c1">#</span>
+    <span class="c1">#                     # We load the absorption coeficients if necessary</span>
+    <span class="c1">#                     if calculate_absorption:</span>
+    <span class="c1">#                         if &#39;absorption&#39; in layer.keys():</span>
+    <span class="c1">#                             layer[&#39;absorption&#39;][1] = np.interp(wavelengths, layer[&#39;absorption&#39;][0],</span>
+    <span class="c1">#                                                                layer[&#39;absorption&#39;][1]).tolist()</span>
+    <span class="c1">#                             layer[&#39;absorption&#39;][0] = wavelengths.tolist()</span>
+    <span class="c1">#                         else:</span>
+    <span class="c1">#                             layer[&#39;absorption&#39;] = LoadAbsorption(device[&#39;layers&#39;][i + k], device[&#39;T&#39;], wavelengths,</span>
+    <span class="c1">#                                                                  use_Adachi=use_Adachi)</span>
+    <span class="c1">#                         dd.addabsorption(layer[&#39;absorption&#39;][1], wavelengths)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         i = i + device[&#39;layers&#39;][i][&#39;numlayers&#39;]</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # We set the surface recombination velocities. This needs to be improved at some to consider other boundary conditions</span>
+    <span class="c1">#     dd.frontboundary(&quot;ohmic&quot;, device[&#39;layers&#39;][first][&#39;properties&#39;][&#39;sn&#39;], device[&#39;layers&#39;][first][&#39;properties&#39;][&#39;sp&#39;],</span>
+    <span class="c1">#                      0)</span>
+    <span class="c1">#     dd.backboundary(&quot;ohmic&quot;, device[&#39;layers&#39;][last][&#39;properties&#39;][&#39;sn&#39;], device[&#39;layers&#39;][last][&#39;properties&#39;][&#39;sp&#39;], 0)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     dd.initdevice(meshpoints)</span>
+    <span class="c1">#     print(&#39;...done!\n&#39;)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     output[&#39;Properties&#39;] = DumpInputProperties()</span>
+    <span class="c1">#     return output</span>
 </pre></div>
 
           </div>
@@ -567,7 +620,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

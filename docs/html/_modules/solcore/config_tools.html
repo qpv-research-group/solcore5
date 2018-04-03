@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.config_tools &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.config_tools &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -95,7 +92,7 @@
 <span class="n">default_config_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">solcore</span><span class="o">.</span><span class="n">default_config</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="reset_defaults"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.reset_defaults">[docs]</a><span class="k">def</span> <span class="nf">reset_defaults</span><span class="p">(</span><span class="n">confirm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="reset_defaults"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.reset_defaults">[docs]</a><span class="k">def</span> <span class="nf">reset_defaults</span><span class="p">(</span><span class="n">confirm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Resets the default Solcore configuration in the user home folder.</span>
 
 <span class="sd">    :return: None</span>
@@ -118,7 +115,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Default Solcore configuration has been restored!&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="save_user_config"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.save_user_config">[docs]</a><span class="k">def</span> <span class="nf">save_user_config</span><span class="p">():</span>
+<div class="viewcode-block" id="save_user_config"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.save_user_config">[docs]</a><span class="k">def</span> <span class="nf">save_user_config</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; Saves the current user configuration</span>
 
 <span class="sd">    :return: None</span>
@@ -127,7 +124,7 @@
         <span class="n">user_config_data</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="remove_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.remove_source">[docs]</a><span class="k">def</span> <span class="nf">remove_source</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="remove_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.remove_source">[docs]</a><span class="k">def</span> <span class="nf">remove_source</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; General function to remove sources from the configuration files. It checks if the source exists and, if so, if</span>
 <span class="sd">    it is a default Solcore source. In the later case, it disable the source by setting it to an empty string rather</span>
 <span class="sd">    than removing it.</span>
@@ -151,7 +148,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1"> source removed!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="add_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.add_source">[docs]</a><span class="k">def</span> <span class="nf">add_source</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
+<div class="viewcode-block" id="add_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.add_source">[docs]</a><span class="k">def</span> <span class="nf">add_source</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; General function to add sources to the configuration files. If the source already exists, its value will be</span>
 <span class="sd">    replaced by the new one.</span>
 
@@ -165,7 +162,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1"> source added!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="restore_default_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.restore_default_source">[docs]</a><span class="k">def</span> <span class="nf">restore_default_source</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="restore_default_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.restore_default_source">[docs]</a><span class="k">def</span> <span class="nf">restore_default_source</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Restores the default value of a source, assuming the source has a default value.</span>
 
 <span class="sd">    :param section: The section of the source.</span>
@@ -183,7 +180,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Default Solcore value for </span><span class="si">{}</span><span class="s1"> source </span><span class="si">{}</span><span class="s1"> has been restored!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="add_units_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.add_units_source">[docs]</a><span class="k">def</span> <span class="nf">add_units_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
+<div class="viewcode-block" id="add_units_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.add_units_source">[docs]</a><span class="k">def</span> <span class="nf">add_units_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Adds a Units source to Solcore.</span>
 
 <span class="sd">    :param name: The name of the source.</span>
@@ -193,7 +190,7 @@
     <span class="n">add_source</span><span class="p">(</span><span class="s1">&#39;Units&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_parameters_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.add_parameters_source">[docs]</a><span class="k">def</span> <span class="nf">add_parameters_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
+<div class="viewcode-block" id="add_parameters_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.add_parameters_source">[docs]</a><span class="k">def</span> <span class="nf">add_parameters_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Adds a Parameters source to Solcore.</span>
 
 <span class="sd">    :param name: The name of the source.</span>
@@ -203,7 +200,7 @@
     <span class="n">add_source</span><span class="p">(</span><span class="s1">&#39;Parameters&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_materials_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.add_materials_source">[docs]</a><span class="k">def</span> <span class="nf">add_materials_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
+<div class="viewcode-block" id="add_materials_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.add_materials_source">[docs]</a><span class="k">def</span> <span class="nf">add_materials_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Adds a Materials source to Solcore.</span>
 
 <span class="sd">    :param name: The name of the source.</span>
@@ -214,7 +211,7 @@
     <span class="n">add_source</span><span class="p">(</span><span class="s1">&#39;Materials&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="remove_units_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.remove_units_source">[docs]</a><span class="k">def</span> <span class="nf">remove_units_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="remove_units_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.remove_units_source">[docs]</a><span class="k">def</span> <span class="nf">remove_units_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Removes a Units source from Solcore.</span>
 
 <span class="sd">    :param name: The name of the source.</span>
@@ -223,7 +220,7 @@
     <span class="n">remove_source</span><span class="p">(</span><span class="s1">&#39;Units&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="remove_parameters_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.remove_parameters_source">[docs]</a><span class="k">def</span> <span class="nf">remove_parameters_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="remove_parameters_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.remove_parameters_source">[docs]</a><span class="k">def</span> <span class="nf">remove_parameters_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Removes a Parameters source from Solcore.</span>
 
 <span class="sd">    :param name: The name of the source.</span>
@@ -232,7 +229,7 @@
     <span class="n">remove_source</span><span class="p">(</span><span class="s1">&#39;Parameters&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="remove_materials_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.remove_materials_source">[docs]</a><span class="k">def</span> <span class="nf">remove_materials_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="remove_materials_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.remove_materials_source">[docs]</a><span class="k">def</span> <span class="nf">remove_materials_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Removes a Materials source from Solcore.</span>
 
 <span class="sd">    :param name: The name of the source.</span>
@@ -241,7 +238,7 @@
     <span class="n">remove_source</span><span class="p">(</span><span class="s1">&#39;Materials&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="restore_default_units_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.restore_default_units_source">[docs]</a><span class="k">def</span> <span class="nf">restore_default_units_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="restore_default_units_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.restore_default_units_source">[docs]</a><span class="k">def</span> <span class="nf">restore_default_units_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Restores the default value of a Units source from Solcore.</span>
 
 <span class="sd">    :param name: The name of the source.</span>
@@ -250,7 +247,7 @@
     <span class="n">restore_default_source</span><span class="p">(</span><span class="s1">&#39;Units&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="restore_default_parameters_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.restore_default_parameters_source">[docs]</a><span class="k">def</span> <span class="nf">restore_default_parameters_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="restore_default_parameters_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.restore_default_parameters_source">[docs]</a><span class="k">def</span> <span class="nf">restore_default_parameters_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Restores the default value of a Parameters source from Solcore.</span>
 
 <span class="sd">    :param name: The name of the source.</span>
@@ -259,7 +256,7 @@
     <span class="n">restore_default_source</span><span class="p">(</span><span class="s1">&#39;Parameters&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="restore_default_materials_source"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.restore_default_materials_source">[docs]</a><span class="k">def</span> <span class="nf">restore_default_materials_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="restore_default_materials_source"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.restore_default_materials_source">[docs]</a><span class="k">def</span> <span class="nf">restore_default_materials_source</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Restores the default value of a Materials source from Solcore.</span>
 
 <span class="sd">    :param name: The name of the source.</span>
@@ -268,7 +265,7 @@
     <span class="n">restore_default_source</span><span class="p">(</span><span class="s1">&#39;Materials&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="welcome_message"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.welcome_message">[docs]</a><span class="k">def</span> <span class="nf">welcome_message</span><span class="p">(</span><span class="n">show</span><span class="p">):</span>
+<div class="viewcode-block" id="welcome_message"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.welcome_message">[docs]</a><span class="k">def</span> <span class="nf">welcome_message</span><span class="p">(</span><span class="n">show</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Sets if the welcome message must be shown or not</span>
 
 <span class="sd">    :param show: True/False for showing/hiding the welcome message</span>
@@ -277,7 +274,7 @@
     <span class="n">user_config_data</span><span class="p">[</span><span class="s1">&#39;Configuration&#39;</span><span class="p">][</span><span class="s1">&#39;welcome_message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">show</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="verbose_loading"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.verbose_loading">[docs]</a><span class="k">def</span> <span class="nf">verbose_loading</span><span class="p">(</span><span class="n">show</span><span class="p">):</span>
+<div class="viewcode-block" id="verbose_loading"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.verbose_loading">[docs]</a><span class="k">def</span> <span class="nf">verbose_loading</span><span class="p">(</span><span class="n">show</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Sets if the loading messages (besides the welcome message) must be shown or not</span>
 
 <span class="sd">    :param show: True/False for showing/hiding the loading messages</span>
@@ -317,7 +314,7 @@
 <span class="c1">#     os.chdir(pushdir)</span>
 
 
-<div class="viewcode-block" id="set_location_of_spice"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.set_location_of_spice">[docs]</a><span class="k">def</span> <span class="nf">set_location_of_spice</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
+<div class="viewcode-block" id="set_location_of_spice"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.set_location_of_spice">[docs]</a><span class="k">def</span> <span class="nf">set_location_of_spice</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Sets the location of the spice executable. It does not test if it works.</span>
 
 <span class="sd">    :param location: The location of the spice executable.</span>
@@ -327,7 +324,7 @@
     <span class="n">save_user_config</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="set_location_of_smarts"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.set_location_of_smarts">[docs]</a><span class="k">def</span> <span class="nf">set_location_of_smarts</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
+<div class="viewcode-block" id="set_location_of_smarts"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.set_location_of_smarts">[docs]</a><span class="k">def</span> <span class="nf">set_location_of_smarts</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Sets the location of the SMARTS distribution (the root folder). It does not test if it works.</span>
 
 <span class="sd">    :param location: The location of the SMARTS distribution.</span>
@@ -337,7 +334,7 @@
     <span class="n">save_user_config</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="set_fortran_compiler"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.set_fortran_compiler">[docs]</a><span class="k">def</span> <span class="nf">set_fortran_compiler</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
+<div class="viewcode-block" id="set_fortran_compiler"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.set_fortran_compiler">[docs]</a><span class="k">def</span> <span class="nf">set_fortran_compiler</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Sets the fotran compiler. It does not test if it works.</span>
 
 <span class="sd">    :param location: The fortran compiler or the path to the fortran compiler, if it is not in the system path.</span>
@@ -347,7 +344,7 @@
     <span class="n">save_user_config</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="compile_poisson_drift_diffusion"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.compile_poisson_drift_diffusion">[docs]</a><span class="k">def</span> <span class="nf">compile_poisson_drift_diffusion</span><span class="p">():</span>
+<div class="viewcode-block" id="compile_poisson_drift_diffusion"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.compile_poisson_drift_diffusion">[docs]</a><span class="k">def</span> <span class="nf">compile_poisson_drift_diffusion</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; Compiles the fortran-based poisson-drift-diffusion solver, wrapping the resulting library using F2Py to be accessible from Python.</span>
 
 <span class="sd">    :return: none</span>
@@ -358,7 +355,7 @@
     <span class="n">check_ddModel_library_ok</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_current_config"><a class="viewcode-back" href="../../installation.html#solcore.config_tools.get_current_config">[docs]</a><span class="k">def</span> <span class="nf">get_current_config</span><span class="p">():</span>
+<div class="viewcode-block" id="get_current_config"><a class="viewcode-back" href="../../Installation/installation.html#solcore.config_tools.get_current_config">[docs]</a><span class="k">def</span> <span class="nf">get_current_config</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; Prints the current Solcore configuration</span>
 
 <span class="sd">    :return: None</span>
@@ -406,7 +403,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-This version: Diego Alonso-Alvarez
-2018-3-22 -> This module is a (partly) vectorised version of the code written by Steven Byrnes.
+This module is a (partly) vectorised version of the code written by Steven Byrnes.
 All credit of the algorithm, testing, etc. goes to him. For more details, visit:
 
-https://arxiv.org/abs/1603.02720
-http://sjbyrnes.com
----------
+- https://arxiv.org/abs/1603.02720
 
-For information see the docstring of each function, and also see manual.pdf
+- http://sjbyrnes.com
+
+- For information see the docstring of each function, and also see manual.pdf
 
 The most two important functions are:
 

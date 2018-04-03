@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.quantum_mechanics.high_level_kp_QW &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.quantum_mechanics.high_level_kp_QW &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -91,7 +88,7 @@
 <div class="viewcode-block" id="schrodinger"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.high_level_kp_QW.schrodinger">[docs]</a><span class="k">def</span> <span class="nf">schrodinger</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">plot_bands</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">kpoints</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">krange</span><span class="o">=</span><span class="mf">1e9</span><span class="p">,</span> <span class="n">num_eigenvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">quasiconfined</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">return_qw_boolean_for_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">Efield</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="s2">&quot;even&quot;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;kp8x8_bulk&#39;</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">minimum_step_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">smallest_feature_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">filter_strength</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">graphtype</span><span class="o">=</span><span class="p">[],</span> <span class="n">calculate_absorption</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">graphtype</span><span class="o">=</span><span class="p">[],</span> <span class="n">calculate_absorption</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Solves the Schrodinger equation of a 1 dimensional structure. Depending on the inputs, the method for solving</span>
 <span class="sd">    the problem is more or less sophisticated. In all cases, the output includes the band structure and effective</span>
 <span class="sd">    masses around k=0 as a function of the position, the energy levels of the QW (electrons and holes) and the</span>
@@ -104,7 +101,7 @@
 <span class="sd">    :param krange: (1e-9) The range in the k space</span>
 <span class="sd">    :param num_eigenvalues: (10) Maximum number of eigenvalues to calculate</span>
 <span class="sd">    :param symmetric: (True) If the structure is symmetric, in which case the calculation can be speed up</span>
-<span class="sd">    :param quasiconfined: (0.0) Energy above the band edges that an energy level can have before rejecting it</span>
+<span class="sd">    :param quasiconfined: (0.0 eV) Energy above the band edges that an energy level can have before rejecting it</span>
 <span class="sd">    :param return_qw_boolean_for_layer: (False) Return an boolean array indicating which positions are inside the QW</span>
 <span class="sd">    :param Efield: (0) Electric field.</span>
 <span class="sd">    :param blur: (False) If the potentials and effective masses have to be blurred</span>
@@ -114,7 +111,7 @@
 <span class="sd">    :param minimum_step_size: (0) The minimum step size.</span>
 <span class="sd">    :param smallest_feature_steps: (20) The number of steps in the smallest feature</span>
 <span class="sd">    :param filter_strength: (0) If &gt; 0, defines the fraction of the wavefunction that has to be inside the QW in order to consider it &#39;confined&#39;</span>
-<span class="sd">    :param periodic: (False) If the strucuture is periodic. Affects the boundary conditions.</span>
+<span class="sd">    :param periodic: (False) If the structure is periodic. Affects the boundary conditions.</span>
 <span class="sd">    :param offset: (0) Energy offset used in the calculation of the energy levels in the case of the &#39;bulk&#39; solvers</span>
 <span class="sd">    :param graphtype: [] If &#39;potential&#39;, the band profile and wavefunctions are ploted</span>
 <span class="sd">    :return: A dictionary containing the band structure and wavefunctions as a function of the position and k</span>
@@ -155,9 +152,13 @@
             <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bands</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bands</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s2">&quot;E&quot;</span><span class="p">},</span>
         <span class="p">}</span>
 
-    <span class="k">if</span> <span class="s2">&quot;potentials&quot;</span> <span class="ow">in</span> <span class="n">graphtype</span><span class="p">:</span>
-        <span class="n">schrodinger_plt</span> <span class="o">=</span> <span class="n">graphics</span><span class="o">.</span><span class="n">split_schrodinger_graph</span><span class="p">(</span><span class="n">result_band_edge</span><span class="p">)</span>
-        <span class="n">schrodinger_plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s2">&quot;potentials&quot;</span> <span class="ow">is</span> <span class="n">graphtype</span><span class="p">:</span>
+        <span class="n">schrodinger_plt</span> <span class="o">=</span> <span class="n">graphics</span><span class="o">.</span><span class="n">split_schrodinger_graph_potentials</span><span class="p">(</span><span class="n">result_band_edge</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># schrodinger_plt.draw()</span>
+
+    <span class="k">if</span> <span class="s2">&quot;potentialsLDOS&quot;</span> <span class="ow">is</span> <span class="n">graphtype</span><span class="p">:</span>
+        <span class="n">Ee</span><span class="p">,</span> <span class="n">LDOSe</span><span class="p">,</span> <span class="n">Eh</span><span class="p">,</span> <span class="n">LDOSh</span> <span class="o">=</span> <span class="n">graphics</span><span class="o">.</span><span class="n">split_schrodinger_graph_LDOS</span><span class="p">(</span><span class="n">result_band_edge</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">result_band_edge</span><span class="p">[</span><span class="s2">&quot;LDOS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="s1">&#39;Ee&#39;</span><span class="p">:</span> <span class="n">Ee</span><span class="p">,</span> <span class="s1">&#39;LDOSe&#39;</span><span class="p">:</span> <span class="n">LDOSe</span><span class="p">,</span> <span class="s1">&#39;Eh&#39;</span><span class="p">:</span> <span class="n">Eh</span><span class="p">,</span> <span class="s1">&#39;LDOSh&#39;</span><span class="p">:</span> <span class="n">LDOSh</span><span class="p">}</span>
 
     <span class="k">if</span> <span class="n">calculate_absorption</span><span class="p">:</span>
         <span class="n">result_band_edge</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calc_alpha</span><span class="p">(</span><span class="n">result_band_edge</span><span class="p">,</span> <span class="o">**</span><span class="n">alpha_params</span><span class="p">)</span>
@@ -186,7 +187,7 @@
     <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.15</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span> <span class="o">*</span> <span class="n">q</span>
     <span class="n">alfas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="mi">6</span><span class="p">))</span>
 
-    <span class="n">alfas</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">E</span><span class="o">/</span><span class="n">q</span>
+    <span class="n">alfas</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="n">q</span>
 
     <span class="n">alpha_params</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;well_width&quot;</span><span class="p">:</span> <span class="n">si</span><span class="p">(</span><span class="s2">&quot;7.2nm&quot;</span><span class="p">),</span>
@@ -218,13 +219,12 @@
 
         <span class="n">test_structure</span><span class="o">.</span><span class="n">substrate</span> <span class="o">=</span> <span class="n">bulk</span>
 
-
-        <span class="n">output</span> <span class="o">=</span> <span class="n">schrodinger</span><span class="p">(</span><span class="n">test_structure</span><span class="p">,</span> <span class="n">quasiconfined</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="c1">#mode=&#39;kp4x4&#39;, plot_bands=True,</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">schrodinger</span><span class="p">(</span><span class="n">test_structure</span><span class="p">,</span> <span class="n">quasiconfined</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># mode=&#39;kp4x4&#39;, plot_bands=True,</span>
                              <span class="n">num_eigenvalues</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">alpha_params</span><span class="o">=</span><span class="n">alpha_params</span><span class="p">,</span> <span class="n">calculate_absorption</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">alfa</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;alphaE&#39;</span><span class="p">](</span><span class="n">E</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1240</span><span class="o">/</span><span class="p">(</span><span class="n">E</span><span class="o">/</span><span class="n">q</span><span class="p">),</span> <span class="n">alfa</span><span class="o">/</span><span class="mi">100</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">%&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="mi">100</span><span class="p">)))</span>
-        <span class="n">alfas</span><span class="p">[:,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">alfa</span><span class="o">/</span><span class="mi">100</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1240</span> <span class="o">/</span> <span class="p">(</span><span class="n">E</span> <span class="o">/</span> <span class="n">q</span><span class="p">),</span> <span class="n">alfa</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">%&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)))</span>
+        <span class="n">alfas</span><span class="p">[:,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">alfa</span> <span class="o">/</span> <span class="mi">100</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">826</span><span class="p">,</span> <span class="mi">1100</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">23000</span><span class="p">)</span>
@@ -234,8 +234,9 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
     <span class="kn">import</span> <span class="nn">os</span>
+
     <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">root</span><span class="o">+</span><span class="s1">&#39;/Desktop/abs.pdf&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;/Desktop/abs.pdf&#39;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 
@@ -253,7 +254,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

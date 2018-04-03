@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.analytic_solar_cells.IV &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.analytic_solar_cells.IV &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -85,7 +82,7 @@
 <span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="k">import</span> <span class="n">kb</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span>
 
 
-<div class="viewcode-block" id="iv_multijunction"><a class="viewcode-back" href="../../../ASC/ASC.html#solcore.analytic_solar_cells.IV.iv_multijunction">[docs]</a><span class="k">def</span> <span class="nf">iv_multijunction</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="iv_multijunction"><a class="viewcode-back" href="../../../Solvers/multijunction_iv.html#solcore.analytic_solar_cells.IV.iv_multijunction">[docs]</a><span class="k">def</span> <span class="nf">iv_multijunction</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the overall IV characteristics of any number of junctions numerically at the requested voltage</span>
 <span class="sd">    points. If photocurrent is not provided, the resultant IV characteristics are purely recombination currents,</span>
 <span class="sd">    otherwise light IVs are returned.</span>
@@ -118,6 +115,7 @@
 
     <span class="c1"># The current and junction voltage arrays</span>
     <span class="n">num_jun</span> <span class="o">=</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">junctions</span>
+    <span class="n">tunnel_jun</span> <span class="o">=</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">tunnel_indices</span>
     <span class="n">V_junction_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">output_V</span><span class="p">),</span> <span class="n">num_jun</span><span class="p">))</span>
 
     <span class="c1"># The following assumes that all junctions have the currents defined at the same voltages</span>
@@ -133,8 +131,15 @@
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_jun</span><span class="p">):</span>
         <span class="n">temp_V_junction_array</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">minimum_J</span><span class="p">,</span> <span class="n">solar_cell</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">solar_cell</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
 
-    <span class="c1"># We calculate the total voltage</span>
+    <span class="c1"># We calculate the total voltage related to the...</span>
+    <span class="c1"># ... series resistance</span>
     <span class="n">temp_V_total</span> <span class="o">=</span> <span class="n">Rs</span> <span class="o">*</span> <span class="n">minimum_J</span>
+
+    <span class="c1"># ... tunnel junctions</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">tunnel_jun</span><span class="p">:</span>
+        <span class="n">temp_V_total</span> <span class="o">-=</span> <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">vi</span><span class="p">(</span><span class="o">-</span><span class="n">minimum_J</span><span class="p">)</span>
+
+    <span class="c1"># ... and the normal junctions</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_jun</span><span class="p">):</span>
         <span class="n">temp_V_total</span> <span class="o">+=</span> <span class="n">temp_V_junction_array</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span>
 
@@ -199,14 +204,18 @@
     <span class="p">})</span></div>
 
 
-<div class="viewcode-block" id="solve_radiative_coupling"><a class="viewcode-back" href="../../../ASC/ASC.html#solcore.analytic_solar_cells.IV.solve_radiative_coupling">[docs]</a><span class="k">def</span> <span class="nf">solve_radiative_coupling</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">V_junction_array</span><span class="p">):</span>
+<div class="viewcode-block" id="solve_radiative_coupling"><a class="viewcode-back" href="../../../Solvers/multijunction_iv.html#solcore.analytic_solar_cells.IV.solve_radiative_coupling">[docs]</a><span class="k">def</span> <span class="nf">solve_radiative_coupling</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">V_junction_array</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the radiative IV curve of a MJ solar cell in the presence of radiative coupling between subcells.</span>
+
+<span class="sd">    WARNING: Tunnel junctions are not implemented in the radiative coupling mode, yet.</span>
 
 <span class="sd">    :param solar_cell: The MJ solar cell structure</span>
 <span class="sd">    :param options: General options of the solver</span>
 <span class="sd">    :param V_junction_array: Array with all the junction voltages without coupling. Only the first element is used, actually.</span>
 <span class="sd">    :return: A tupple with J, V_junction_array in the presence of coupling and the coupled current</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating IV curve with radiative coupling...&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: Tunnel junctions are not implemented in the radiative coupling calculator, yet.&#39;</span><span class="p">)</span>
 
     <span class="n">output_V</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">voltages</span>
     <span class="n">wl</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">wavelength</span>
@@ -348,7 +357,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

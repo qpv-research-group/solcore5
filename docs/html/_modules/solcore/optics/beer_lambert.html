@@ -1,0 +1,312 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.optics.beer_lambert &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.optics.beer_lambert</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">solcore.structure</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">Junction</span><span class="p">,</span> <span class="n">TunnelJunction</span>
+<span class="kn">import</span> <span class="nn">solcore.analytic_solar_cells</span> <span class="k">as</span> <span class="nn">ASC</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<div class="viewcode-block" id="solve_beer_lambert"><a class="viewcode-back" href="../../../Optics/other_methods.html#solcore.optics.beer_lambert.solve_beer_lambert">[docs]</a><span class="k">def</span> <span class="nf">solve_beer_lambert</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the reflection, transmission and absorption of a solar cell object using the Beer-Lambert law. Reflection is not really calculated and needs to be provided externally, otherwise it is assumed to be zero.</span>
+
+<span class="sd">    :param solar_cell:</span>
+<span class="sd">    :param options:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wl_m</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">wavelength</span>
+    <span class="c1"># wl_m = wl * 1e-9</span>
+    <span class="n">fraction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">wl_m</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1"># absorbed = np.zeros(wl.shape)</span>
+
+    <span class="c1"># We include the shadowing losses</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">,</span> <span class="s1">&#39;shading&#39;</span><span class="p">):</span>
+        <span class="n">fraction</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">shading</span><span class="p">)</span>
+
+    <span class="c1"># And the reflexion losses</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">,</span> <span class="s1">&#39;reflectivity&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">reflectivity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">solar_cell</span><span class="o">.</span><span class="n">reflected</span> <span class="o">=</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">reflectivity</span><span class="p">(</span><span class="n">wl_m</span><span class="p">)</span>
+        <span class="n">fraction</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">reflected</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">solar_cell</span><span class="o">.</span><span class="n">reflected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">fraction</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="c1"># Now we calculate the absorbed and transmitted light. We first get all the relevant parameters from the objects</span>
+    <span class="n">widths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">alphas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">layer_object</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">):</span>
+
+        <span class="c1"># Attenuation due to absorption in the AR coatings or any layer in the front that is not part of the junction</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer_object</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Layer</span><span class="p">:</span>
+            <span class="n">widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_object</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+            <span class="n">alphas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_object</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">wl_m</span><span class="p">))</span>
+
+        <span class="c1"># For each Tunnel junctions will have, at most, a resistance an some layers absorbing light.</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer_object</span><span class="p">)</span> <span class="ow">is</span> <span class="n">TunnelJunction</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">layer_object</span><span class="p">):</span>
+                <span class="n">widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+                <span class="n">alphas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">wl_m</span><span class="p">))</span>
+
+        <span class="c1"># For each junction, and layer within the junction, we get the absorption coeficient and the layer width.</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer_object</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Junction</span><span class="p">:</span>
+
+            <span class="n">kind</span> <span class="o">=</span> <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">kind</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;kind&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;2D&#39;</span><span class="p">:</span>
+                <span class="c1"># If the junction has a Jsc or EQE already defined, we ignore that junction in the optical calculation</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;jsc&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;eqe&#39;</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: A junction of kind &quot;2D&quot; found. Junction ignored in the optics calculation!&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Otherwise, we try to treat is as a DB junction from the optical point of view</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ASC</span><span class="o">.</span><span class="n">absorptance_detailed_balance</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                    <span class="n">w</span> <span class="o">=</span> <span class="n">layer_object</span><span class="o">.</span><span class="n">width</span>
+
+                    <span class="k">def</span> <span class="nf">alf</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">w</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">layer_object</span><span class="o">.</span><span class="n">absorptance</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mf">1e-3</span><span class="p">))</span>
+
+                    <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alf</span>
+                    <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reflected</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">wl_m</span><span class="p">,</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">reflected</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                       <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+                    <span class="n">widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+                    <span class="n">alphas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alf</span><span class="p">(</span><span class="n">wl_m</span><span class="p">))</span>
+
+            <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;DB&#39;</span><span class="p">:</span>
+                <span class="n">ASC</span><span class="o">.</span><span class="n">absorptance_detailed_balance</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">layer_object</span><span class="o">.</span><span class="n">width</span>
+
+                <span class="k">def</span> <span class="nf">alf</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">w</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">layer_object</span><span class="o">.</span><span class="n">absorptance</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mf">1e-3</span><span class="p">))</span>
+
+                <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alf</span>
+                <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reflected</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">wl_m</span><span class="p">,</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">reflected</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+                <span class="n">widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+                <span class="n">alphas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alf</span><span class="p">(</span><span class="n">wl_m</span><span class="p">))</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">layer_object</span><span class="p">):</span>
+                    <span class="n">widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+                    <span class="n">alphas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">wl_m</span><span class="p">))</span>
+
+    <span class="c1"># With all this information, we are ready to calculate the absorbed light</span>
+    <span class="n">diff_absorption</span><span class="p">,</span> <span class="n">transmitted</span><span class="p">,</span> <span class="n">all_absorbed</span> <span class="o">=</span> <span class="n">calculate_absorption_beer_lambert</span><span class="p">(</span><span class="n">widths</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">fraction</span><span class="p">)</span>
+
+    <span class="c1"># Each building block (layer or junction) needs to have access to the absorbed light in its region.</span>
+    <span class="c1"># We update each object with that information.</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">)):</span>
+        <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">diff_absorption</span> <span class="o">=</span> <span class="n">diff_absorption</span>
+        <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">absorbed</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">absorbed</span><span class="p">,</span> <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+    <span class="n">solar_cell</span><span class="o">.</span><span class="n">transmitted</span> <span class="o">=</span> <span class="n">transmitted</span>
+    <span class="n">solar_cell</span><span class="o">.</span><span class="n">absorbed</span> <span class="o">=</span> <span class="n">all_absorbed</span></div>
+
+
+<div class="viewcode-block" id="absorbed"><a class="viewcode-back" href="../../../Optics/other_methods.html#solcore.optics.beer_lambert.absorbed">[docs]</a><span class="k">def</span> <span class="nf">absorbed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff_absorption</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="calculate_absorption_beer_lambert"><a class="viewcode-back" href="../../../Optics/other_methods.html#solcore.optics.beer_lambert.calculate_absorption_beer_lambert">[docs]</a><span class="k">def</span> <span class="nf">calculate_absorption_beer_lambert</span><span class="p">(</span><span class="n">widths</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">fraction</span><span class="p">):</span>
+    <span class="c1"># Number of spectral elements</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alphas</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">cum_widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">widths</span><span class="p">)</span>
+    <span class="n">widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">widths</span><span class="p">)</span>
+
+    <span class="c1"># At any given position, the absorption per unit length is alpha * exp(-alpha*z) but we have to remove all light</span>
+    <span class="c1"># absorbed above it:</span>
+    <span class="n">OD</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">widths</span><span class="p">)):</span>
+        <span class="n">OD</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OD</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">alphas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">widths</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># After getting al the alphas and widths, we need to create a function that takes as arguments the depth z and</span>
+    <span class="c1"># returns the differential fraction of absorbed light at that position.</span>
+    <span class="k">def</span> <span class="nf">diff_absorption</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+        <span class="c1"># First we find to which layer a given z belong</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Now the distance to the begining of that layer</span>
+        <span class="n">z_local</span> <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="c1"># And finally, we calculate a 2D array of the absorption per unit length vs position and wavelength</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="n">N</span><span class="p">))</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">z</span> <span class="o">&lt;</span> <span class="n">cum_widths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">inside</span><span class="p">):</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">alphas</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">OD</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span> <span class="o">-</span> <span class="n">alphas</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_local</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">output</span> <span class="o">*</span> <span class="n">fraction</span>
+
+    <span class="n">all_absorbed</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">OD</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="o">*</span> <span class="n">fraction</span>
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">OD</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">fraction</span>
+
+    <span class="k">return</span> <span class="n">diff_absorption</span><span class="p">,</span> <span class="n">trans</span><span class="p">,</span> <span class="n">all_absorbed</span></div>
+
+
+<div class="viewcode-block" id="calculate_absorptance_PDD_and_DA"><a class="viewcode-back" href="../../../Optics/other_methods.html#solcore.optics.beer_lambert.calculate_absorptance_PDD_and_DA">[docs]</a><span class="k">def</span> <span class="nf">calculate_absorptance_PDD_and_DA</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">fraction</span><span class="p">):</span>
+    <span class="n">widths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">alphas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">junction</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+            <span class="n">alphas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">wl</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="c1"># We are, most likely, in the presence of a QW structure. It needs to be already processed,</span>
+            <span class="c1"># otherwise the calculation will fail.</span>
+            <span class="c1"># We skip this part, for now.</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="n">cum_widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">widths</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">widths</span><span class="p">)</span>
+
+    <span class="c1"># At any given position, the absorption per unit length is alpha * exp(alpha*z) but we have to remove all light</span>
+    <span class="c1"># absorbed above it:</span>
+    <span class="n">OD</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">alphas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">widths</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">OD</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OD</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">alphas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">widths</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># After getting al the alphas and widths, we need to create a function that takes as arguments the depth z and</span>
+    <span class="c1"># returns the differential fraction of absorbed light at that position.</span>
+    <span class="k">def</span> <span class="nf">diff_absorption</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+
+        <span class="c1"># First we find to which layer a given z belong</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Now the distance to the begining of that layer</span>
+        <span class="n">z_local</span> <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="c1"># If we go beyond the limit of the function, the absorption must be zero, so:</span>
+        <span class="n">too_far</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">cum_widths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">widths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="c1"># And finally, we calculate a 2D array of the absorption per unit lenght vs position and wavelength</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">wl</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">alphas</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">OD</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span> <span class="o">-</span> <span class="n">alphas</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_local</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">too_far</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">output</span> <span class="o">*</span> <span class="n">fraction</span>
+
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">OD</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">alphas</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">widths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">diff_absorption</span><span class="p">,</span> <span class="n">trans</span></div>
+
+
+<div class="viewcode-block" id="calculate_absorptance_DB"><a class="viewcode-back" href="../../../Optics/other_methods.html#solcore.optics.beer_lambert.calculate_absorptance_DB">[docs]</a><span class="k">def</span> <span class="nf">calculate_absorptance_DB</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">fraction</span><span class="p">):</span>
+    <span class="c1"># First, we calculate the absorptance of the cell</span>
+    <span class="n">ASC</span><span class="o">.</span><span class="n">absorptance_detailed_balance</span><span class="p">(</span><span class="n">junction</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">absorption</span><span class="p">(</span><span class="n">new_wl</span><span class="p">):</span>
+        <span class="c1"># The fraction of light absorbed in the junction</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">new_wl</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">fraction</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">fraction</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">fraction</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">junction</span><span class="o">.</span><span class="n">absorptance</span><span class="p">(</span><span class="n">new_wl</span><span class="p">)</span> <span class="o">*</span> <span class="n">f</span>
+
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">absorption</span><span class="p">(</span><span class="n">wl</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">absorption</span><span class="p">,</span> <span class="n">trans</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

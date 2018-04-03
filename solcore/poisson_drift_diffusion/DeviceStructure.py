@@ -242,7 +242,8 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
         device['layers'][i]['properties']['eff_mass_lh_z'] = QW[i].material.eff_mass_lh_z
         device['layers'][i]['properties']['Nc'] = QW[i].material.Nc
         device['layers'][i]['properties']['Nv'] = QW[i].material.Nv
-        device['layers'][i]['properties']['ni'] = np.sqrt(QW[i].material.Nc * QW[i].material.Nv * np.exp(-QW[i].eff_band_gap / (kb * T)))
+        device['layers'][i]['properties']['ni'] = np.sqrt(
+            QW[i].material.Nc * QW[i].material.Nv * np.exp(-QW[i].eff_band_gap / (kb * T)))
 
         if calculate_absorption:
             device['layers'][i]['properties']['absorption'] = [QW.wl.tolist(), QW[i].material.absorption.tolist()]
@@ -268,7 +269,7 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
         # In the end, we convert the absorption coeficient in extinction coefficient
         kk = QW[i].material.absorption * QW.wl / 4 / np.pi
         layer_mat.k = interp1d(QW.wl, kk, bounds_error=False, fill_value=(0, 0))
-        #layer_mat.alpha = interp1d(QW.wl, QW[i].material.absorption, bounds_error=False, fill_value=(0, 0))
+        # layer_mat.alpha = interp1d(QW.wl, QW[i].material.absorption, bounds_error=False, fill_value=(0, 0))
 
         # And the radiative recombination parameter
         inter = lambda E: layer_mat.n(E) ** 2 * layer_mat.alphaE(E) * np.exp(-E / (kb * T)) * E ** 2
@@ -285,83 +286,84 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
     return new_QW
 
 
-def calculate_reflection(device, wavelengths):
-    """ Calculates the reflexion of a device structure
-
-    :param device: The device structure
-    :param wavelengths: The wavelengths
-    :return: The reflexion at the given wavelengths
-    """
-    if device['reflection'] is not None:
-        try:
-            # We asumme that we have a file with the reflection
-            print('Loading reflection from file %s ...' % (device['reflection']))
-            data = np.loadtxt(device['reflection'])
-            R = np.interp(wavelengths, data[:, 0], data[:, 1])
-            print('...Sucess!!')
-        except:
-            # If it fails, we calculate it based on the refractive index of the first layer
-            comp = device['layers'][0]['properties']['composition']
-            n = ToSolcoreMaterial(comp, device['T'], execute=True).n(wavelengths)
-            R = ((1 - n) / (1 + n)) ** 2
-            print(
-                '... Error!! Device surface reflection calculated from the refractive index of the first layer, instead. ')
-    else:
-        # Otherwise, we calculate it based on the refractive index of the first layer
-        comp = device['layers'][0]['properties']['composition']
-        n = ToSolcoreMaterial(comp, device['T'], execute=True).n(wavelengths)
-        k = ToSolcoreMaterial(comp, device['T'], execute=True).k(wavelengths)
-        nc = n + k * 1.0j
-        R = np.abs((1 - nc) / (1 + nc)) ** 2
-        print('Device surface reflection calculated from the refractive index of the first layer. ')
-
-    return R
-
-
-def calculate_optics(device, wavelengths, dist=None):
-    """ Uses the transfer matrix solver to calculate the optical properties of the structure: that is, the reflection
-    and the absorption as a function of the position.
-
-    :param device: A device structure
-    :param wavelengths: The wavelengths at which to calculate the optical information (in m)
-    :param dist: The positions at which to calculate the absorption (in m). If None, it is calculated internally.
-    :return: A dictionary with the reflection, the position, the wavelengths and the absorption as a function of
-    the wavelength and position.
-    """
-
-    output = {}
-    output['wavelengths'] = wavelengths
-    wl = wavelengths * 1e9  # Input is in meters but the calculators use nm
-    if dist is None:
-        d = dist
-    else:
-        d = dist * 1e9  # Input is in meters but the calculators use nm
-
-    rat = calculate_rat(device, wl)
-    output['R'] = rat['R']
-
-    absorption = calculate_absorption_profile(device, wl, dist=d)
-
-    output['absorption'] = absorption['absorption'] * 1e9
-    output['position'] = absorption['position'] * 1e-9
-
-    optics_thickness = 0
-    for layer in device['layers']:
-        if layer['label'] in ['optics', 'Optics']:
-            optics_thickness += layer['properties']['width']
-        else:
-            break
-
-    output['position'] -= optics_thickness
-
-    return output
-
-
 def CalculateAbsorptionProfile(z, wl, absorption):
     out = np.array(wl)
     out = np.vstack((out, absorption(z)))
 
     return out
+
+    #
+    # def calculate_reflection(device, wavelengths):
+    #     """ Calculates the reflexion of a device structure
+    #
+    #     :param device: The device structure
+    #     :param wavelengths: The wavelengths
+    #     :return: The reflexion at the given wavelengths
+    #     """
+    #     if device['reflection'] is not None:
+    #         try:
+    #             # We asumme that we have a file with the reflection
+    #             print('Loading reflection from file %s ...' % (device['reflection']))
+    #             data = np.loadtxt(device['reflection'])
+    #             R = np.interp(wavelengths, data[:, 0], data[:, 1])
+    #             print('...Sucess!!')
+    #         except:
+    #             # If it fails, we calculate it based on the refractive index of the first layer
+    #             comp = device['layers'][0]['properties']['composition']
+    #             n = ToSolcoreMaterial(comp, device['T'], execute=True).n(wavelengths)
+    #             R = ((1 - n) / (1 + n)) ** 2
+    #             print(
+    #                 '... Error!! Device surface reflection calculated from the refractive index of the first layer, instead. ')
+    #     else:
+    #         # Otherwise, we calculate it based on the refractive index of the first layer
+    #         comp = device['layers'][0]['properties']['composition']
+    #         n = ToSolcoreMaterial(comp, device['T'], execute=True).n(wavelengths)
+    #         k = ToSolcoreMaterial(comp, device['T'], execute=True).k(wavelengths)
+    #         nc = n + k * 1.0j
+    #         R = np.abs((1 - nc) / (1 + nc)) ** 2
+    #         print('Device surface reflection calculated from the refractive index of the first layer. ')
+    #
+    #     return R
+    #
+    # def calculate_optics(device, wavelengths, dist=None):
+    #     """ Uses the transfer matrix solver to calculate the optical properties of the structure: that is, the reflection
+    #     and the absorption as a function of the position.
+    #
+    #     :param device: A device structure
+    #     :param wavelengths: The wavelengths at which to calculate the optical information (in m)
+    #     :param dist: The positions at which to calculate the absorption (in m). If None, it is calculated internally.
+    #     :return: A dictionary with the reflection, the position, the wavelengths and the absorption as a function of
+    #     the wavelength and position.
+    #     """
+    #
+    #     output = {}
+    #     output['wavelengths'] = wavelengths
+    #     wl = wavelengths * 1e9  # Input is in meters but the calculators use nm
+    #     if dist is None:
+    #         d = dist
+    #     else:
+    #         d = dist * 1e9  # Input is in meters but the calculators use nm
+    #
+    #     rat = calculate_rat(device, wl)
+    #     output['R'] = rat['R']
+    #
+    #     absorption = calculate_absorption_profile(device, wl, dist=d)
+    #
+    #     output['absorption'] = absorption['absorption'] * 1e9
+    #     output['position'] = absorption['position'] * 1e-9
+    #
+    #     optics_thickness = 0
+    #     for layer in device['layers']:
+    #         if layer['label'] in ['optics', 'Optics']:
+    #             optics_thickness += layer['properties']['width']
+    #         else:
+    #             break
+    #
+    #     output['position'] -= optics_thickness
+    #
+    #     return output
+
+
     #
     #
     # def Load(filename, yaml=False):

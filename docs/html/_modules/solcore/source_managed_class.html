@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.source_managed_class &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.source_managed_class &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -85,7 +82,7 @@
 <span class="kn">from</span> <span class="nn">solcore.singleton</span> <span class="k">import</span> <span class="n">Singleton</span>
 
 
-<div class="viewcode-block" id="wrapped"><a class="viewcode-back" href="../../structure.html#solcore.source_managed_class.wrapped">[docs]</a><span class="k">class</span> <span class="nc">wrapped</span><span class="p">:</span>
+<div class="viewcode-block" id="wrapped"><a class="viewcode-back" href="../../Structures/structure.html#solcore.source_managed_class.wrapped">[docs]</a><span class="k">class</span> <span class="nc">wrapped</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Class that wraps the method that has been defined as &#39;breakout&#39; with its own class, so it can be called as a</span>
 <span class="sd">    standalone function. &quot;&quot;&quot;</span>
 
@@ -97,7 +94,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">singleton_class</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="breakoutClass"><a class="viewcode-back" href="../../structure.html#solcore.source_managed_class.breakoutClass">[docs]</a><span class="k">def</span> <span class="nf">breakoutClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<div class="viewcode-block" id="breakoutClass"><a class="viewcode-back" href="../../Structures/structure.html#solcore.source_managed_class.breakoutClass">[docs]</a><span class="k">def</span> <span class="nf">breakoutClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Decorator definition that indicates the a class contains functions that should be available in the global scope.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">breakout_candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -115,14 +112,14 @@
     <span class="k">return</span> <span class="bp">cls</span></div>
 
 
-<div class="viewcode-block" id="breakout"><a class="viewcode-back" href="../../structure.html#solcore.source_managed_class.breakout">[docs]</a><span class="k">def</span> <span class="nf">breakout</span><span class="p">(</span><span class="n">plainFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="breakout"><a class="viewcode-back" href="../../Structures/structure.html#solcore.source_managed_class.breakout">[docs]</a><span class="k">def</span> <span class="nf">breakout</span><span class="p">(</span><span class="n">plainFunction</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Decorator definition that indicates that a given method of a class should be available in the global scope</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">plainFunction</span><span class="o">.</span><span class="n">break_me_out</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="n">plainFunction</span></div>
 
 
-<div class="viewcode-block" id="SourceManagedClass"><a class="viewcode-back" href="../../structure.html#solcore.source_managed_class.SourceManagedClass">[docs]</a><span class="k">class</span> <span class="nc">SourceManagedClass</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">Singleton</span><span class="p">):</span>
+<div class="viewcode-block" id="SourceManagedClass"><a class="viewcode-back" href="../../Structures/structure.html#solcore.source_managed_class.SourceManagedClass">[docs]</a><span class="k">class</span> <span class="nc">SourceManagedClass</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">Singleton</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Base class that manages the sources of Solcore, from the materials to the unit conversion system.</span>
 <span class="sd">    It must be defined as a derived class from Singleton so only one instance of this class containing all sources</span>
 <span class="sd">    exists at any time.</span>
@@ -133,18 +130,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initialise_cache</span><span class="p">()</span>
 
-<div class="viewcode-block" id="SourceManagedClass.add_source"><a class="viewcode-back" href="../../structure.html#solcore.source_managed_class.SourceManagedClass.add_source">[docs]</a>    <span class="k">def</span> <span class="nf">add_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="SourceManagedClass.add_source"><a class="viewcode-back" href="../../Structures/structure.html#solcore.source_managed_class.SourceManagedClass.add_source">[docs]</a>    <span class="k">def</span> <span class="nf">add_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Read a materials database file in ConfigParser format with case-sensitive options. &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SourceManagedClass.remove_source"><a class="viewcode-back" href="../../structure.html#solcore.source_managed_class.SourceManagedClass.remove_source">[docs]</a>    <span class="k">def</span> <span class="nf">remove_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">reread</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="SourceManagedClass.remove_source"><a class="viewcode-back" href="../../Structures/structure.html#solcore.source_managed_class.SourceManagedClass.remove_source">[docs]</a>    <span class="k">def</span> <span class="nf">remove_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">reread</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Removes a source from the database. &quot;&quot;&quot;</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">reread</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SourceManagedClass.read"><a class="viewcode-back" href="../../structure.html#solcore.source_managed_class.SourceManagedClass.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SourceManagedClass.read"><a class="viewcode-back" href="../../Structures/structure.html#solcore.source_managed_class.SourceManagedClass.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reads the sources and add its contents to the database. &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">initialise_cache</span><span class="p">()</span>
@@ -153,7 +150,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SourceManagedClass.initialise_cache"><a class="viewcode-back" href="../../structure.html#solcore.source_managed_class.SourceManagedClass.initialise_cache">[docs]</a>    <span class="k">def</span> <span class="nf">initialise_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SourceManagedClass.initialise_cache"><a class="viewcode-back" href="../../Structures/structure.html#solcore.source_managed_class.SourceManagedClass.initialise_cache">[docs]</a>    <span class="k">def</span> <span class="nf">initialise_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Initialises th database, kept in a ConfigParser format. Quite convenient if you think about it. &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
 
@@ -192,7 +189,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.material_system.material_system &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.material_system.material_system &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -84,12 +81,13 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">lru_cache</span>  <span class="c1"># cache function calls to stop things taking forever / recalculating smae things</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="k">import</span> <span class="n">quad</span>
 <span class="kn">import</span> <span class="nn">configparser</span>
 
 <span class="kn">import</span> <span class="nn">solcore</span>
 <span class="kn">from</span> <span class="nn">solcore.material_system</span> <span class="k">import</span> <span class="n">critical_point_interpolate</span>
 <span class="kn">from</span> <span class="nn">solcore.parameter_system</span> <span class="k">import</span> <span class="n">ParameterSystem</span>
-<span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="k">import</span> <span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">q</span>
+<span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="k">import</span> <span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">kb</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">electron_mass</span> <span class="k">as</span> <span class="n">m0</span>
 <span class="kn">from</span> <span class="nn">solcore.singleton</span> <span class="k">import</span> <span class="n">Singleton</span>
 <span class="kn">from</span> <span class="nn">solcore.source_managed_class</span> <span class="k">import</span> <span class="n">SourceManagedClass</span>
 <span class="kn">from</span> <span class="nn">solcore.absorption_calculator.sopra_db</span> <span class="k">import</span> <span class="n">sopra_database</span><span class="p">,</span> <span class="n">compounds_info</span>
@@ -99,6 +97,7 @@
 <div class="viewcode-block" id="MaterialSystem"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_system.material_system.MaterialSystem">[docs]</a><span class="k">class</span> <span class="nc">MaterialSystem</span><span class="p">(</span><span class="n">SourceManagedClass</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">Singleton</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; The core class that manage the materials in solcore.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">SourceManagedClass</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">known_materials</span> <span class="o">=</span> <span class="p">{}</span>
@@ -150,15 +149,18 @@
                 <span class="n">valid_materials</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ParameterSystem</span><span class="p">()</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">sections</span><span class="p">())</span>
                 <span class="n">valid_materials</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;Immediate Calculables&#39;</span><span class="p">)</span>
                 <span class="n">valid_materials</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;Final Calculables&#39;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Material ERROR: &quot;</span><span class="si">{}</span><span class="s1">&quot; is not in the semiconductors database or in the SOPRA database. Valid semiconductor materials are: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Material ERROR: &quot;</span><span class="si">{}</span><span class="s1">&quot; is not in the semiconductors database or in the SOPRA database. Valid semiconductor materials are: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">name</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">valid_materials</span><span class="p">:</span>
                     <span class="k">if</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">ParameterSystem</span><span class="p">()</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
                         <span class="n">x</span> <span class="o">=</span> <span class="n">ParameterSystem</span><span class="p">()</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1"> </span><span class="si">{}</span><span class="s1">  </span><span class="se">\t</span><span class="s1">x = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">In compounds, check that the order of the elements is the correct one (eg. GaInSb is OK but InGaSb&#39;</span>
-                      <span class="s1">&#39; is not).&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">In compounds, check that the order of the elements is the correct one (eg. GaInSb is OK but InGaSb&#39;</span>
+                    <span class="s1">&#39; is not).&#39;</span><span class="p">)</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Do you want to see the list of available SOPRA materials (y/n)?&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="s1">&#39;Yy&#39;</span><span class="p">:</span>
                     <span class="n">sopra_database</span><span class="o">.</span><span class="n">material_list</span><span class="p">()</span>
@@ -226,19 +228,20 @@
                 <span class="k">if</span> <span class="n">attrname</span> <span class="o">==</span> <span class="s2">&quot;k&quot;</span><span class="p">:</span>
                     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_interpolated</span>
 
-                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Parameter &quot;</span><span class="si">{}</span><span class="s1">&quot; not available for this SOPRA material &quot;</span><span class="si">{}</span><span class="s1">&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attrname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">material_string</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                    <span class="s1">&#39;Parameter &quot;</span><span class="si">{}</span><span class="s1">&quot; not available for this SOPRA material &quot;</span><span class="si">{}</span><span class="s1">&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attrname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">material_string</span><span class="p">))</span>
 
             <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">def</span> <span class="nf">load_n_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">wl</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">load_n</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">n_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">wl</span><span class="o">*</span><span class="mf">1e-9</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">n_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">wl</span> <span class="o">*</span> <span class="mf">1e-9</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
 
             <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">def</span> <span class="nf">load_k_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">wl</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">load_k</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">k_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">wl</span><span class="o">*</span><span class="mf">1e-9</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">k_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">wl</span> <span class="o">*</span> <span class="mf">1e-9</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
 
             <span class="k">def</span> <span class="nf">n_interpolated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
                 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Can&#39;t interpolate 2d spectra yet&quot;</span>
@@ -252,7 +255,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">wl</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">trash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">load_composition</span><span class="p">(</span><span class="n">Lambda</span><span class="o">=</span><span class="n">x</span><span class="o">*</span><span class="mf">1e9</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_fraction</span><span class="o">*</span><span class="mi">100</span><span class="p">})</span>
+                    <span class="n">wl</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">trash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">load_composition</span><span class="p">(</span><span class="n">Lambda</span><span class="o">=</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span>
+                                                              <span class="o">**</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_fraction</span> <span class="o">*</span> <span class="mi">100</span><span class="p">})</span>
 
                 <span class="k">return</span> <span class="n">y</span>
 
@@ -268,10 +272,10 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">wl</span><span class="p">,</span> <span class="n">trash</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">load_composition</span><span class="p">(</span><span class="n">Lambda</span><span class="o">=</span><span class="n">x</span><span class="o">*</span><span class="mf">1e9</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_fraction</span><span class="o">*</span><span class="mi">100</span><span class="p">})</span>
+                    <span class="n">wl</span><span class="p">,</span> <span class="n">trash</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">load_composition</span><span class="p">(</span><span class="n">Lambda</span><span class="o">=</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span>
+                                                              <span class="o">**</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_fraction</span> <span class="o">*</span> <span class="mi">100</span><span class="p">})</span>
 
                 <span class="k">return</span> <span class="n">y</span>
-
 
         <span class="n">SpecificMaterial</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_sopra&#39;</span>
 
@@ -304,7 +308,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">key_parameters</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
-    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrname</span><span class="p">):</span>  <span class="c1"># only used for unknown attributes</span>
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrname</span><span class="p">):</span>  <span class="c1"># only used for unknown attributes.</span>
         <span class="k">if</span> <span class="n">attrname</span> <span class="o">==</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
@@ -331,6 +335,21 @@
                 <span class="k">return</span> <span class="n">ParameterSystem</span><span class="p">()</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">material_string</span><span class="p">,</span> <span class="n">attrname</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">calculate_mobility</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">material_string</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Na</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_fraction</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">attrname</span> <span class="o">==</span> <span class="s2">&quot;Nc&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">eff_mass_electron_Gamma</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">1.5</span>
+        <span class="k">if</span> <span class="n">attrname</span> <span class="o">==</span> <span class="s2">&quot;Nv&quot;</span><span class="p">:</span>
+            <span class="c1"># Strictly speaking, this is valid only for III-V, zinc-blend semiconductors</span>
+            <span class="n">mhh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eff_mass_hh_z</span>
+            <span class="n">mlh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eff_mass_lh_z</span>
+            <span class="n">Nvhh</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">mhh</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">1.5</span>
+            <span class="n">Nvlh</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">mlh</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">1.5</span>
+            <span class="k">return</span> <span class="n">Nvhh</span> <span class="o">+</span> <span class="n">Nvlh</span>
+        <span class="k">if</span> <span class="n">attrname</span> <span class="o">==</span> <span class="s2">&quot;ni&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nv</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">band_gap</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">attrname</span> <span class="o">==</span> <span class="s2">&quot;radiative_recombination&quot;</span><span class="p">:</span>
+            <span class="n">inter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">E</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphaE</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">*</span> <span class="n">E</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_gap</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">ni</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">c</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">quad</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upper</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">}</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
@@ -449,7 +468,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

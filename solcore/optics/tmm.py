@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 def solve_tmm(solar_cell, options):
-    """ Calculates the reflection, transmission and absorption of a solar cell object using the transfer matrix method
+    """ Calculates the reflection, transmission and absorption of a solar cell object using the transfer matrix method. Internally, it creates an OptiStack and then it calculates the optical properties of the whole structure.
 
     :param solar_cell: A solar_cell object
     :param options: Options for the solver

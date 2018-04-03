@@ -1,0 +1,497 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.quantum_mechanics.graphics &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.quantum_mechanics.graphics</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">solcore.graphing</span> <span class="k">import</span> <span class="n">Graph</span><span class="p">,</span> <span class="n">GraphData</span><span class="p">,</span> <span class="n">graph_defaults</span>
+<span class="kn">from</span> <span class="nn">solcore.graphing.graph_support</span> <span class="k">import</span> <span class="n">open_with_os</span>
+<span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_pdf</span> <span class="k">import</span> <span class="n">FigureCanvasPdf</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;edit&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">y</span> <span class="o">/</span> <span class="n">q</span><span class="p">),</span>
+    <span class="s2">&quot;xlabel&quot;</span><span class="p">:</span> <span class="s2">&quot;Depth (nm)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ylabel&quot;</span><span class="p">:</span> <span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="L"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.L">[docs]</a><span class="k">def</span> <span class="nf">L</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">centre</span><span class="p">,</span> <span class="n">hwhm</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">hwhm</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">centre</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">hwhm</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Lorenzian (area normalised to 1)</span></div>
+
+
+<div class="viewcode-block" id="structure_graph"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.structure_graph">[docs]</a><span class="k">def</span> <span class="nf">structure_graph</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">defaults</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">current_x</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">conduction</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">valence</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">:</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_x</span><span class="p">)</span>
+        <span class="n">conduction</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">Ec</span><span class="p">)</span>
+        <span class="n">conduction</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">Ec</span><span class="p">)</span>
+        <span class="n">valence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">Ev</span><span class="p">)</span>
+        <span class="n">valence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">Ev</span><span class="p">)</span>
+        <span class="n">current_x</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_x</span><span class="p">)</span>
+
+    <span class="c1"># x = np.array(x)</span>
+    <span class="c1"># conduction = np.array(conduction)</span>
+    <span class="c1"># valence = np.array(valence)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span>
+        <span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">conduction</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Conduction Band&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">),</span>
+        <span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">valence</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Valence Band&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">),</span>
+        <span class="o">**</span><span class="n">options</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="normalise_psi"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.normalise_psi">[docs]</a><span class="k">def</span> <span class="nf">normalise_psi</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">p</span> <span class="o">/</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="o">*</span> <span class="n">q</span></div>
+
+
+<div class="viewcode-block" id="prepare_wavefunction_data"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.prepare_wavefunction_data">[docs]</a><span class="k">def</span> <span class="nf">prepare_wavefunction_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Psi</span><span class="p">,</span> <span class="n">trim_levels_beyond</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">suppress_invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">square</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;untitled&quot;</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">psi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Psi</span><span class="p">):</span>
+        <span class="n">norm_psi</span> <span class="o">=</span> <span class="n">normalise_psi</span><span class="p">(</span><span class="n">psi</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">square</span> <span class="k">else</span> <span class="n">psi</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">trim_to</span> <span class="o">=</span> <span class="n">norm_psi</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">q</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">trim_levels_beyond</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">trimmed_x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">trim_to</span><span class="p">]</span>
+        <span class="n">norm_psi</span> <span class="o">=</span> <span class="n">norm_psi</span><span class="p">[</span><span class="n">trim_to</span><span class="p">]</span>
+        <span class="n">invert</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">norm_psi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">suppress_invert</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">square</span> <span class="k">else</span> <span class="mi">1</span>
+
+        <span class="n">linekwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="n">linewidth</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">alpha</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">label</span><span class="p">}</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphData</span><span class="p">(</span><span class="n">trimmed_x</span><span class="p">,</span> <span class="n">e</span> <span class="o">+</span> <span class="n">norm_psi</span> <span class="o">*</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">invert</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">linekwargs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="wavefunctions_graph"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.wavefunctions_graph">[docs]</a><span class="k">def</span> <span class="nf">wavefunctions_graph</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">Ee</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">psi_e</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">Ehh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">psi_hh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">Elh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">psi_lh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">trim_levels_beyond</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">scale</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
+        <span class="n">colour_by_band</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">defaults</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># normalise_psi = lambda p:p/numpy.sqrt(numpy.trapz(x=x*1e9,y=p**2))*q</span>
+
+    <span class="k">if</span> <span class="n">Ee</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">prepare_wavefunction_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ee</span><span class="p">,</span> <span class="n">psi_e</span><span class="p">,</span> <span class="n">trim_levels_beyond</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;e&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">Ehh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">prepare_wavefunction_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ehh</span><span class="p">,</span> <span class="n">psi_hh</span><span class="p">,</span> <span class="n">trim_levels_beyond</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;hh&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">Elh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">prepare_wavefunction_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Elh</span><span class="p">,</span> <span class="n">psi_lh</span><span class="p">,</span> <span class="n">trim_levels_beyond</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;lh&quot;</span><span class="p">))</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="potentials_graph"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.potentials_graph">[docs]</a><span class="k">def</span> <span class="nf">potentials_graph</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ve</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vhh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vlh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">defaults</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">normalise_psi</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="mf">5e-6</span>
+
+    <span class="k">if</span> <span class="n">Ve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ve</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Ve&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">Vlh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Vlh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dashes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Vlh&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">Vhh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Vhh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Vhh&quot;</span><span class="p">))</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="schrodinger_graph"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.schrodinger_graph">[docs]</a><span class="k">def</span> <span class="nf">schrodinger_graph</span><span class="p">(</span><span class="n">schrodinger_result</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">potentials_kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;potentials&quot;</span><span class="p">])</span>
+    <span class="n">potentials_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">potential_graph</span> <span class="o">=</span> <span class="n">potentials_graph</span><span class="p">(</span><span class="o">**</span><span class="n">potentials_kwargs</span><span class="p">)</span>
+
+    <span class="n">wavefunctions_kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">])</span>
+    <span class="n">wavefunctions_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">wavefunctions_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">])</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">wavefunctions_graph</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="n">potential_graph</span><span class="o">.</span><span class="n">figure</span><span class="p">,</span> <span class="n">trim_levels_beyond</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="o">**</span><span class="n">wavefunctions_kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">w</span></div>
+
+
+<div class="viewcode-block" id="split_schrodinger_graph"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.split_schrodinger_graph">[docs]</a><span class="k">def</span> <span class="nf">split_schrodinger_graph</span><span class="p">(</span><span class="n">schrodinger_result</span><span class="p">,</span>
+                            <span class="n">trim_levels_beyond</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+                            <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                            <span class="n">scale</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span>
+                            <span class="n">suppress_invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">probability_density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">wfalpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                            <span class="n">potentialalpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="n">options</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">potentials</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;potentials&quot;</span><span class="p">]</span>
+    <span class="n">wavefunctions</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">]</span>
+    <span class="n">energy_levels</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+
+    <span class="c1"># This is used when doing the 4x4 kp calculation rather than the single band calculation</span>
+    <span class="k">if</span> <span class="s1">&#39;EU&#39;</span> <span class="ow">in</span> <span class="n">energy_levels</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;Ehh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;EU&#39;</span><span class="p">]</span>
+        <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;Elh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;EU&#39;</span><span class="p">]</span>
+        <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_hh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_g1&quot;</span><span class="p">]</span>
+        <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_lh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_g2&quot;</span><span class="p">]</span>
+
+    <span class="n">conduction_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">potentials</span><span class="p">[</span><span class="s2">&quot;Ve&quot;</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">potentialalpha</span><span class="p">)]</span>
+    <span class="n">valence_data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">potentials</span><span class="p">[</span><span class="s2">&quot;Vlh&quot;</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">potentialalpha</span><span class="p">,</span> <span class="n">dashes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Vlh&quot;</span><span class="p">),</span>
+        <span class="n">GraphData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">potentials</span><span class="p">[</span><span class="s2">&quot;Vhh&quot;</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">potentialalpha</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Vhh&quot;</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="c1"># normalise_psi = lambda p:p/numpy.sqrt(numpy.trapz(x=x*1e9,y=p**2))*q</span>
+
+    <span class="n">conduction_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">prepare_wavefunction_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s2">&quot;Ee&quot;</span><span class="p">],</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_e&quot;</span><span class="p">],</span> <span class="n">trim_levels_beyond</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+                                  <span class="n">scale</span><span class="p">,</span> <span class="n">suppress_invert</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">wfalpha</span><span class="p">,</span> <span class="n">square</span><span class="o">=</span><span class="n">probability_density</span><span class="p">))</span>
+    <span class="n">valence_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">prepare_wavefunction_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s2">&quot;Ehh&quot;</span><span class="p">],</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_hh&quot;</span><span class="p">],</span> <span class="n">trim_levels_beyond</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span>
+                                  <span class="s2">&quot;green&quot;</span><span class="p">,</span>
+                                  <span class="n">scale</span><span class="p">,</span> <span class="n">suppress_invert</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">wfalpha</span><span class="p">,</span> <span class="n">square</span><span class="o">=</span><span class="n">probability_density</span><span class="p">))</span>
+    <span class="n">valence_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">prepare_wavefunction_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s2">&quot;Elh&quot;</span><span class="p">],</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_lh&quot;</span><span class="p">],</span> <span class="n">trim_levels_beyond</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span>
+                                  <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                                  <span class="n">scale</span><span class="p">,</span> <span class="n">suppress_invert</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">wfalpha</span><span class="p">,</span> <span class="n">square</span><span class="o">=</span><span class="n">probability_density</span><span class="p">))</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">valence_data</span><span class="p">,</span> <span class="n">subplot</span><span class="o">=</span><span class="mi">212</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">options</span><span class="p">[</span><span class="s2">&quot;xlabel&quot;</span><span class="p">]</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">conduction_data</span><span class="p">,</span> <span class="n">subplot</span><span class="o">=</span><span class="mi">211</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="c1"># g.axis.get_xaxis().set_ticklabels([])</span>
+    <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="split_schrodinger_graph_potentials"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.split_schrodinger_graph_potentials">[docs]</a><span class="k">def</span> <span class="nf">split_schrodinger_graph_potentials</span><span class="p">(</span><span class="n">schrodinger_result</span><span class="p">,</span>
+                                       <span class="n">trim_levels_beyond</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+                                       <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                       <span class="n">scale</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                                       <span class="n">suppress_invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                       <span class="n">probability_density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                       <span class="n">wfalpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                                       <span class="n">potentialalpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                                       <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="mf">0.002</span><span class="p">,</span> <span class="s1">&#39;margin&#39;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s1">&#39;pdf&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;show&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;dpi&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;fontsize&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="s1">&#39;figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">)}</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="n">options</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">potentials</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;potentials&quot;</span><span class="p">]</span>
+    <span class="n">wavefunctions</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">]</span>
+    <span class="n">energy_levels</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+
+    <span class="c1"># This is used when doing the 4x4 kp calculation rather than the single band calculation</span>
+    <span class="k">if</span> <span class="s1">&#39;EU&#39;</span> <span class="ow">in</span> <span class="n">energy_levels</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;Ehh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;EU&#39;</span><span class="p">]</span>
+        <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;Elh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;EU&#39;</span><span class="p">]</span>
+        <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_hh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_g1&quot;</span><span class="p">]</span>
+        <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_lh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_g2&quot;</span><span class="p">]</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;figsize&#39;</span><span class="p">],</span> <span class="n">dpi</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;dpi&#39;</span><span class="p">])</span>
+
+    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">potentials</span><span class="p">[</span><span class="s2">&quot;Ve&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Ve&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">potentials</span><span class="p">[</span><span class="s2">&quot;Vlh&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Vlh&quot;</span><span class="p">),</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">potentials</span><span class="p">[</span><span class="s2">&quot;Vhh&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Vhh&quot;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Possition (nm)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="n">e_data</span> <span class="o">=</span> <span class="n">prepare_wavefunction_data_only</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s2">&quot;Ee&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_e&quot;</span><span class="p">],</span> <span class="n">trim_levels_beyond</span><span class="p">,</span>
+                                            <span class="n">linewidth</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+                                            <span class="mf">0.03</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="n">suppress_invert</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">wfalpha</span><span class="p">,</span> <span class="n">square</span><span class="o">=</span><span class="n">probability_density</span><span class="p">)</span>
+    <span class="n">hh_data</span> <span class="o">=</span> <span class="n">prepare_wavefunction_data_only</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s2">&quot;Ehh&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_hh&quot;</span><span class="p">],</span> <span class="n">trim_levels_beyond</span><span class="p">,</span>
+                                             <span class="n">linewidth</span><span class="p">,</span>
+                                             <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="mf">0.03</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="n">suppress_invert</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">wfalpha</span><span class="p">,</span>
+                                             <span class="n">square</span><span class="o">=</span><span class="n">probability_density</span><span class="p">)</span>
+    <span class="n">lh_data</span> <span class="o">=</span> <span class="n">prepare_wavefunction_data_only</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s2">&quot;Elh&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_lh&quot;</span><span class="p">],</span> <span class="n">trim_levels_beyond</span><span class="p">,</span>
+                                             <span class="n">linewidth</span><span class="p">,</span>
+                                             <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="mf">0.03</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="n">suppress_invert</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">wfalpha</span><span class="p">,</span>
+                                             <span class="n">square</span><span class="o">=</span><span class="n">probability_density</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">e_data</span><span class="p">:</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;e&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">hh_data</span><span class="p">:</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;hh&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">lh_data</span><span class="p">:</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;lh&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;show&quot;</span><span class="p">]:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;pdf&quot;</span><span class="p">]:</span>
+        <span class="n">handle</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;tmp_solcore_&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">graph_defaults</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">])</span>
+        <span class="n">canvas</span> <span class="o">=</span> <span class="n">FigureCanvasPdf</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+        <span class="n">canvas</span><span class="o">.</span><span class="n">print_figure</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;dpi&quot;</span><span class="p">],</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+        <span class="n">open_with_os</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="split_schrodinger_graph_LDOS"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.split_schrodinger_graph_LDOS">[docs]</a><span class="k">def</span> <span class="nf">split_schrodinger_graph_LDOS</span><span class="p">(</span><span class="n">schrodinger_result</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span> <span class="s1">&#39;margin&#39;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s1">&#39;pdf&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;show&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;dpi&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;fontsize&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="s1">&#39;figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">)}</span>
+    <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">effective_masses</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;effective_masses&quot;</span><span class="p">]</span>
+    <span class="n">potentials</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;potentials&quot;</span><span class="p">]</span>
+    <span class="n">wavefunctions</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;wavefunctions&quot;</span><span class="p">]</span>
+    <span class="n">energy_levels</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">schrodinger_result</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="s1">&#39;EU&#39;</span> <span class="ow">in</span> <span class="n">energy_levels</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;Ehh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;EU&#39;</span><span class="p">]</span>
+        <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;Elh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_levels</span><span class="p">[</span><span class="s1">&#39;EU&#39;</span><span class="p">]</span>
+        <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_hh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_g1&quot;</span><span class="p">]</span>
+        <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_lh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefunctions</span><span class="p">[</span><span class="s2">&quot;psi_g2&quot;</span><span class="p">]</span>
+
+    <span class="n">Ee</span><span class="p">,</span> <span class="n">LDOSe</span> <span class="o">=</span> <span class="n">LDOS1D_e</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">energy_levels</span><span class="p">,</span> <span class="n">wavefunctions</span><span class="p">,</span> <span class="n">effective_masses</span><span class="p">,</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">],</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;margin&#39;</span><span class="p">])</span>
+    <span class="n">Eh</span><span class="p">,</span> <span class="n">LDOSh</span> <span class="o">=</span> <span class="n">LDOS1D_h</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">energy_levels</span><span class="p">,</span> <span class="n">wavefunctions</span><span class="p">,</span> <span class="n">effective_masses</span><span class="p">,</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">],</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;margin&#39;</span><span class="p">])</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;figsize&#39;</span><span class="p">],</span> <span class="n">dpi</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;dpi&#39;</span><span class="p">])</span>
+
+    <span class="n">ax1</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">Ee</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="n">LDOSe</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gnuplot2_r&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">LDOSe</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1.2</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">potentials</span><span class="p">[</span><span class="s2">&quot;Ve&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Ve&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+
+    <span class="n">ax2</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">Eh</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="n">LDOSh</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gnuplot2_r&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">LDOSh</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1.2</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">potentials</span><span class="p">[</span><span class="s2">&quot;Vlh&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Vlh&quot;</span><span class="p">),</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">potentials</span><span class="p">[</span><span class="s2">&quot;Vhh&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Vhh&quot;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Possition (nm)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;fontsize&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;show&quot;</span><span class="p">]:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;pdf&quot;</span><span class="p">]:</span>
+        <span class="n">handle</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;tmp_solcore_&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">graph_defaults</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">])</span>
+        <span class="n">canvas</span> <span class="o">=</span> <span class="n">FigureCanvasPdf</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+        <span class="n">canvas</span><span class="o">.</span><span class="n">print_figure</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;dpi&quot;</span><span class="p">],</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+        <span class="n">open_with_os</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Ee</span><span class="p">,</span> <span class="n">LDOSe</span><span class="p">,</span> <span class="n">Eh</span><span class="p">,</span> <span class="n">LDOSh</span></div>
+
+
+<div class="viewcode-block" id="LDOS1D_e"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.LDOS1D_e">[docs]</a><span class="k">def</span> <span class="nf">LDOS1D_e</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">psi</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">broad</span><span class="o">=</span><span class="mf">0.005</span><span class="p">):</span>
+    <span class="n">Emax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;Ee&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="n">margin</span> <span class="o">*</span> <span class="n">q</span>
+    <span class="n">Emin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;Ee&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="n">margin</span> <span class="o">*</span> <span class="n">q</span>
+
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Emin</span><span class="p">,</span> <span class="n">Emax</span><span class="p">,</span> <span class="n">step</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span>
+    <span class="n">LDOS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">energy</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ee</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;Ee&#39;</span><span class="p">]):</span>
+        <span class="n">m_plane</span> <span class="o">=</span> <span class="n">calculate_in_plane_masses</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">psi</span><span class="p">[</span><span class="s1">&#39;psi_e&#39;</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;me&#39;</span><span class="p">])</span>
+        <span class="n">LDOS</span> <span class="o">=</span> <span class="n">LDOS</span> <span class="o">+</span> <span class="n">m_plane</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">ee</span><span class="p">,</span> <span class="n">broad</span> <span class="o">*</span> <span class="n">q</span><span class="p">),</span> <span class="n">psi</span><span class="p">[</span><span class="s1">&#39;psi_e&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">energy</span><span class="p">,</span> <span class="n">LDOS</span></div>
+
+
+<div class="viewcode-block" id="LDOS1D_h"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.LDOS1D_h">[docs]</a><span class="k">def</span> <span class="nf">LDOS1D_h</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">psi</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">broad</span><span class="o">=</span><span class="mf">0.005</span><span class="p">):</span>
+    <span class="n">Emax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;Ehh&#39;</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;Elh&#39;</span><span class="p">]))</span> <span class="o">+</span> <span class="n">margin</span> <span class="o">*</span> <span class="n">q</span>
+    <span class="n">Emin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;Ehh&#39;</span><span class="p">]),</span> <span class="nb">min</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;Elh&#39;</span><span class="p">]))</span> <span class="o">-</span> <span class="n">margin</span> <span class="o">*</span> <span class="n">q</span>
+
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Emin</span><span class="p">,</span> <span class="n">Emax</span><span class="p">,</span> <span class="n">step</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span>
+    <span class="n">LDOS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">energy</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ee</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;Ehh&#39;</span><span class="p">]):</span>
+        <span class="n">m_plane</span> <span class="o">=</span> <span class="n">calculate_in_plane_masses</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">psi</span><span class="p">[</span><span class="s1">&#39;psi_hh&#39;</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;mhh&#39;</span><span class="p">])</span>
+        <span class="n">LDOS</span> <span class="o">=</span> <span class="n">LDOS</span> <span class="o">+</span> <span class="n">m_plane</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">ee</span><span class="p">,</span> <span class="n">broad</span> <span class="o">*</span> <span class="n">q</span><span class="p">),</span> <span class="n">psi</span><span class="p">[</span><span class="s1">&#39;psi_hh&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ee</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;Elh&#39;</span><span class="p">]):</span>
+        <span class="n">m_plane</span> <span class="o">=</span> <span class="n">calculate_in_plane_masses</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">psi</span><span class="p">[</span><span class="s1">&#39;psi_lh&#39;</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;mlh&#39;</span><span class="p">])</span>
+        <span class="n">LDOS</span> <span class="o">=</span> <span class="n">LDOS</span> <span class="o">+</span> <span class="n">m_plane</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">ee</span><span class="p">,</span> <span class="n">broad</span> <span class="o">*</span> <span class="n">q</span><span class="p">),</span> <span class="n">psi</span><span class="p">[</span><span class="s1">&#39;psi_lh&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">energy</span><span class="p">,</span> <span class="n">LDOS</span></div>
+
+
+<div class="viewcode-block" id="calculate_in_plane_masses"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.calculate_in_plane_masses">[docs]</a><span class="k">def</span> <span class="nf">calculate_in_plane_masses</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">psi</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the in-plane effective mass for each level, considering that the wavefunction leaks into the barriers.&quot;&quot;&quot;</span>
+
+    <span class="n">m_out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ps</span> <span class="ow">in</span> <span class="n">psi</span><span class="p">:</span>
+        <span class="n">m_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">ps</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">m</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">m_out</span></div>
+
+
+<div class="viewcode-block" id="prepare_wavefunction_data_only"><a class="viewcode-back" href="../../../QM/Schrodinger.html#solcore.quantum_mechanics.graphics.prepare_wavefunction_data_only">[docs]</a><span class="k">def</span> <span class="nf">prepare_wavefunction_data_only</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Psi</span><span class="p">,</span> <span class="n">trim_levels_beyond</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">suppress_invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">square</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;untitled&quot;</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">psi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Psi</span><span class="p">):</span>
+        <span class="n">norm_psi</span> <span class="o">=</span> <span class="n">normalise_psi</span><span class="p">(</span><span class="n">psi</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">square</span> <span class="k">else</span> <span class="n">psi</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">trim_to</span> <span class="o">=</span> <span class="n">norm_psi</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">q</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">trim_levels_beyond</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">trimmed_x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">trim_to</span><span class="p">]</span>
+        <span class="n">norm_psi</span> <span class="o">=</span> <span class="n">norm_psi</span><span class="p">[</span><span class="n">trim_to</span><span class="p">]</span>
+        <span class="n">invert</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">norm_psi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">suppress_invert</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">square</span> <span class="k">else</span> <span class="mi">1</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">trimmed_x</span><span class="p">,</span> <span class="n">e</span> <span class="o">+</span> <span class="n">norm_psi</span> <span class="o">*</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">invert</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="sd">def LDOS_h(x, E, psi, m, step=0.002, margin=0.05):</span>
+<span class="sd">    Emax = max(max(E[&#39;Ehh&#39;]), max(E[&#39;Elh&#39;])) + margin * q</span>
+<span class="sd">    Emin = min(min(E[&#39;Ehh&#39;]), min(E[&#39;Elh&#39;])) - margin * q</span>
+
+<span class="sd">    energy = np.arange(Emin, Emax, step * q)</span>
+<span class="sd">    LDOS = np.zeros((len(energy), len(x)))</span>
+
+<span class="sd">    for i, ee in enumerate(E[&#39;Ehh&#39;]):</span>
+<span class="sd">        m_plane = calculate_in_plane_masses(x, psi[&#39;psi_hh&#39;], m[&#39;mhh&#39;])</span>
+<span class="sd">        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer((energy &lt;= ee), psi[&#39;psi_hh&#39;][i] ** 2)</span>
+
+<span class="sd">    for i, ee in enumerate(E[&#39;Elh&#39;]):</span>
+<span class="sd">        m_plane = calculate_in_plane_masses(x, psi[&#39;psi_lh&#39;], m[&#39;mlh&#39;])</span>
+<span class="sd">        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer((energy &lt;= ee), psi[&#39;psi_lh&#39;][i] ** 2)</span>
+
+<span class="sd">    return energy, LDOS</span>
+
+<span class="sd">def LDOS_e(x, E, psi, m, step=0.002, margin=0.05):</span>
+<span class="sd">    Emax = max(E[&#39;Ee&#39;]) + margin * q</span>
+<span class="sd">    Emin = min(E[&#39;Ee&#39;]) - margin * q</span>
+
+<span class="sd">    energy = np.arange(Emin, Emax, step * q)</span>
+<span class="sd">    LDOS = np.zeros((len(energy), len(x)))</span>
+
+<span class="sd">    for i, ee in enumerate(E[&#39;Ee&#39;]):</span>
+<span class="sd">        m_plane = calculate_in_plane_masses(x, psi[&#39;psi_e&#39;], m[&#39;me&#39;])</span>
+<span class="sd">        LDOS = LDOS + m_plane[i] / pi / hbar ** 2 * np.outer((energy &gt;= ee), psi[&#39;psi_e&#39;][i] ** 2)</span>
+
+<span class="sd">    # plt.contourf(x, energy/q, DOS, 50, cmap=&#39;gnuplot2_r&#39;, vmin=0, vmax=max(DOS.flatten())*1.2)</span>
+<span class="sd">    # plt.clim(0, max(DOS.flatten())*1.2)</span>
+<span class="sd">    # plt.show()</span>
+
+<span class="sd">    return energy, LDOS</span>
+<span class="sd">    </span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

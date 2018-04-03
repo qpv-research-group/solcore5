@@ -88,6 +88,7 @@ def solve_optics(solar_cell, options):
     - BL: Uses the Beer-Lambert law to calculate the absorption in each layer. Front surface reflexion has to provided externally. It is the default method and the most flexible one.
     - TMM: Uses a transfer matrix calculation to obtain the RAT. Not valid for DB or 2D junction
     - RCWA: Uses the rigorous wave coupled analysisto obtain the RAT. This allows to include 2D photonic crystals in the structure, for example. Not valid for DB or 2D junctions
+    - external: The reflection and absorption profiles are provided externally by the user, and therefore no calculation is performed by Solcore.
 
     :param solar_cell: A solar_cell object
     :param options: Options for the optics solver

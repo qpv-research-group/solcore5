@@ -1,0 +1,194 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.optics.tmm &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.optics.tmm</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">solcore.structure</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">Junction</span><span class="p">,</span> <span class="n">TunnelJunction</span>
+<span class="kn">import</span> <span class="nn">solcore.analytic_solar_cells</span> <span class="k">as</span> <span class="nn">ASC</span>
+<span class="kn">from</span> <span class="nn">solcore.absorption_calculator</span> <span class="k">import</span> <span class="n">calculate_rat</span><span class="p">,</span> <span class="n">OptiStack</span><span class="p">,</span> <span class="n">calculate_absorption_profile</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<div class="viewcode-block" id="solve_tmm"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.optics.tmm.solve_tmm">[docs]</a><span class="k">def</span> <span class="nf">solve_tmm</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the reflection, transmission and absorption of a solar cell object using the transfer matrix method. Internally, it creates an OptiStack and then it calculates the optical properties of the whole structure.</span>
+
+<span class="sd">    :param solar_cell: A solar_cell object</span>
+<span class="sd">    :param options: Options for the solver</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">wavelength</span>
+
+    <span class="c1"># We include the shadowing losses</span>
+    <span class="n">initial</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">shading</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">,</span> <span class="s1">&#39;shading&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">1</span>
+
+    <span class="c1"># Now we calculate the absorbed and transmitted light. We first get all the relevant parameters from the objects</span>
+    <span class="n">all_layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">layer_object</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">):</span>
+
+        <span class="c1"># Attenuation due to absorption in the AR coatings or any layer in the front that is not part of the junction</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer_object</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Layer</span><span class="p">:</span>
+            <span class="n">all_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_object</span><span class="p">)</span>
+
+        <span class="c1"># For each junction, and layer within the junction, we get the absorption coefficient and the layer width.</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer_object</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">TunnelJunction</span><span class="p">,</span> <span class="n">Junction</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">layer_object</span><span class="p">):</span>
+                <span class="n">all_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+
+    <span class="c1"># With all the information, we create the optical stack</span>
+    <span class="n">no_back_reflexion</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">no_back_reflexion</span> <span class="k">if</span> <span class="s1">&#39;no_back_reflexion&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="kc">True</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="n">OptiStack</span><span class="p">(</span><span class="n">all_layers</span><span class="p">,</span> <span class="n">no_back_reflexion</span><span class="o">=</span><span class="n">no_back_reflexion</span><span class="p">)</span>
+
+    <span class="c1">#dist = np.logspace(-1, np.log10(solar_cell.width * 1e9), int(1000 * np.log10(solar_cell.width * 1e9)))</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">solar_cell</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># print(len(dist))</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">position</span> <span class="k">if</span> <span class="s1">&#39;position&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">dist</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating RAT...&#39;</span><span class="p">)</span>
+    <span class="n">RAT</span> <span class="o">=</span> <span class="n">calculate_rat</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">wl</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">coherent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating absorption profile...&#39;</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">calculate_absorption_profile</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">wl</span> <span class="o">*</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
+
+    <span class="c1"># With all this information, we are ready to calculate the differential absorption function</span>
+    <span class="n">diff_absorption</span><span class="p">,</span> <span class="n">all_absorbed</span> <span class="o">=</span> <span class="n">calculate_absorption_tmm</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="c1"># Each building block (layer or junction) needs to have access to the absorbed light in its region.</span>
+    <span class="c1"># We update each object with that information.</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">solar_cell</span><span class="p">)):</span>
+        <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">diff_absorption</span> <span class="o">=</span> <span class="n">diff_absorption</span>
+        <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">absorbed</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">absorbed</span><span class="p">,</span> <span class="n">solar_cell</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+    <span class="n">solar_cell</span><span class="o">.</span><span class="n">reflected</span> <span class="o">=</span> <span class="n">RAT</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">initial</span>
+    <span class="n">solar_cell</span><span class="o">.</span><span class="n">transmitted</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">RAT</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">all_absorbed</span><span class="p">)</span> <span class="o">*</span> <span class="n">initial</span>
+    <span class="n">solar_cell</span><span class="o">.</span><span class="n">absorbed</span> <span class="o">=</span> <span class="n">all_absorbed</span> <span class="o">*</span> <span class="n">initial</span></div>
+
+
+<div class="viewcode-block" id="absorbed"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.optics.tmm.absorbed">[docs]</a><span class="k">def</span> <span class="nf">absorbed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff_absorption</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="calculate_absorption_tmm"><a class="viewcode-back" href="../../../Optics/tmm.html#solcore.optics.tmm.calculate_absorption_tmm">[docs]</a><span class="k">def</span> <span class="nf">calculate_absorption_tmm</span><span class="p">(</span><span class="n">tmm_out</span><span class="p">):</span>
+    <span class="n">all_z</span> <span class="o">=</span> <span class="n">tmm_out</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-9</span>
+    <span class="n">all_abs</span> <span class="o">=</span> <span class="n">tmm_out</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e-9</span>
+
+    <span class="k">def</span> <span class="nf">diff_absorption</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">all_z</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">idx</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_z</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_z</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">z1</span> <span class="o">=</span> <span class="n">all_z</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">z2</span> <span class="o">=</span> <span class="n">all_z</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">f</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">z1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">z2</span> <span class="o">-</span> <span class="n">z1</span><span class="p">)</span>
+
+            <span class="n">out</span> <span class="o">=</span> <span class="n">f</span> <span class="o">*</span> <span class="n">all_abs</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="o">*</span> <span class="n">all_abs</span><span class="p">[:,</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">all_abs</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="n">all_absorbed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">diff_absorption</span><span class="p">(</span><span class="n">all_z</span><span class="p">),</span> <span class="n">all_z</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">diff_absorption</span><span class="p">,</span> <span class="n">all_absorbed</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

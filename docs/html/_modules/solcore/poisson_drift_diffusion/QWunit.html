@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.poisson_drift_diffusion.QWunit &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.poisson_drift_diffusion.QWunit &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -95,7 +92,7 @@
 <span class="n">vacuum_permittivity</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">vacuum_permittivity</span>
 
 
-<div class="viewcode-block" id="QWunit"><a class="viewcode-back" href="../../../PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit">[docs]</a><span class="k">class</span> <span class="nc">QWunit</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
+<div class="viewcode-block" id="QWunit"><a class="viewcode-back" href="../../../Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit">[docs]</a><span class="k">class</span> <span class="nc">QWunit</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Asembles a group of layers as a quantum well, calculating its properties as a whole</span>
 <span class="sd">    </span>
 <span class="sd">    - It needs a minimum of 3 layers</span>
@@ -150,7 +147,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">role</span>
 
     <span class="c1"># ------</span>
-<div class="viewcode-block" id="QWunit.RecalculateKP"><a class="viewcode-back" href="../../../PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateKP">[docs]</a>    <span class="k">def</span> <span class="nf">RecalculateKP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+<div class="viewcode-block" id="QWunit.RecalculateKP"><a class="viewcode-back" href="../../../Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateKP">[docs]</a>    <span class="k">def</span> <span class="nf">RecalculateKP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Recalculates the band structure of the QW unit to account for modifications due to strain. </span>
 <span class="sd">        </span>
 <span class="sd">        This is already done in the Schrodinger solver, but it does not produce that information as output. We do it so here.</span>
@@ -185,7 +182,7 @@
 
         <span class="c1"># ------</span>
 
-<div class="viewcode-block" id="QWunit.RecalculateBandEdges"><a class="viewcode-back" href="../../../PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateBandEdges">[docs]</a>    <span class="k">def</span> <span class="nf">RecalculateBandEdges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">SR</span><span class="p">):</span>
+<div class="viewcode-block" id="QWunit.RecalculateBandEdges"><a class="viewcode-back" href="../../../Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateBandEdges">[docs]</a>    <span class="k">def</span> <span class="nf">RecalculateBandEdges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">SR</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The effective bandgap and effective affinity of each layer depends on the energy level, e.g.: the minimum energy for electrons is not the band edge of the conduction band, but the ground level. In this function we modify that creating an effective electron afinity and band gaps for all layers in the QW.</span>
 <span class="sd">        # </span>
 <span class="sd">        # For the barriers, the electron afinity and band gap is the same than in bulk, modified by the kp calculation, if necesary.&quot;&quot;&quot;</span>
@@ -231,7 +228,7 @@
                     <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">eff_band_gap</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">eff_band_gap</span> <span class="o">+</span> <span class="n">gap_offset</span></div>
 
     <span class="c1"># ------</span>
-<div class="viewcode-block" id="QWunit.RecalculateDensityOfStates"><a class="viewcode-back" href="../../../PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateDensityOfStates">[docs]</a>    <span class="k">def</span> <span class="nf">RecalculateDensityOfStates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="QWunit.RecalculateDensityOfStates"><a class="viewcode-back" href="../../../Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateDensityOfStates">[docs]</a>    <span class="k">def</span> <span class="nf">RecalculateDensityOfStates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Calculates the effective density of states for each layer in the QW. The general rule is:</span>
 <span class="sd">        #   1- Barriers have the bulk density of states</span>
 <span class="sd">        #   2- QW have ALL the density of states asociated with the confined states + bulk density of states above the barrier</span>
@@ -299,7 +296,7 @@
                 <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nv</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nv</span> <span class="o">+</span> <span class="n">Nqw</span></div>
 
     <span class="c1"># ------</span>
-<div class="viewcode-block" id="QWunit.CalculateAbsorption"><a class="viewcode-back" href="../../../PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.CalculateAbsorption">[docs]</a>    <span class="k">def</span> <span class="nf">CalculateAbsorption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_Adachi</span><span class="p">,</span> <span class="n">SR</span><span class="p">):</span>
+<div class="viewcode-block" id="QWunit.CalculateAbsorption"><a class="viewcode-back" href="../../../Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.CalculateAbsorption">[docs]</a>    <span class="k">def</span> <span class="nf">CalculateAbsorption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_Adachi</span><span class="p">,</span> <span class="n">SR</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; If required, this function calculates the absorption of the QW, putting together the absorption of the confined levels and the absorption of the bulk. As with the density of states, the rules are:</span>
 <span class="sd">        # </span>
 <span class="sd">        #   1- Barriers have the bulk absorption</span>
@@ -353,7 +350,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">absorption</span> <span class="o">+=</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">absorption</span></div>
 
     <span class="c1"># ------</span>
-<div class="viewcode-block" id="QWunit.solve"><a class="viewcode-back" href="../../../PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.solve">[docs]</a>    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Efield</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">WLsteps</span><span class="o">=</span><span class="p">(</span><span class="mf">300e-9</span><span class="p">,</span> <span class="mf">1100e-9</span><span class="p">,</span> <span class="mi">201</span><span class="p">),</span> <span class="n">wavelengths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filter_strength</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<div class="viewcode-block" id="QWunit.solve"><a class="viewcode-back" href="../../../Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.solve">[docs]</a>    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Efield</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">WLsteps</span><span class="o">=</span><span class="p">(</span><span class="mf">300e-9</span><span class="p">,</span> <span class="mf">1100e-9</span><span class="p">,</span> <span class="mi">201</span><span class="p">),</span> <span class="n">wavelengths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filter_strength</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
               <span class="n">blur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;kp8x8_bulk&#39;</span><span class="p">,</span> <span class="n">use_Adachi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">calculate_absorption</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
               <span class="n">alpha_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Solves the structure, calculating the energy levels, the absorption, etc. &quot;&quot;&quot;</span>
@@ -377,14 +374,14 @@
                     <span class="s2">&quot;espace&quot;</span><span class="p">:</span> <span class="n">E</span><span class="p">,</span>
                     <span class="s2">&quot;hwhm&quot;</span><span class="p">:</span> <span class="n">si</span><span class="p">(</span><span class="s2">&quot;4meV&quot;</span><span class="p">),</span>
                     <span class="s2">&quot;dimensionality&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
-                    <span class="c1"># &quot;line_shape&quot;: &quot;Gauss&quot;</span>
+                    <span class="s2">&quot;line_shape&quot;</span><span class="p">:</span> <span class="s2">&quot;Gauss&quot;</span>
                 <span class="p">}</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">wl</span> <span class="o">=</span> <span class="mi">1240</span> <span class="o">/</span> <span class="p">(</span><span class="n">alpha_params</span><span class="p">[</span><span class="s2">&quot;espace&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-9</span><span class="p">)</span> <span class="o">*</span> <span class="n">q</span>
 
         <span class="n">SR</span><span class="p">,</span> <span class="n">bands</span> <span class="o">=</span> <span class="n">schrodinger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">calculate_absorption</span><span class="o">=</span><span class="n">calculate_absorption</span><span class="p">,</span>
                                 <span class="n">Efield</span><span class="o">=</span><span class="n">Efield</span><span class="p">,</span>
-                                <span class="n">blur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">alpha_params</span><span class="o">=</span><span class="n">alpha_params</span><span class="p">,</span> <span class="n">filter_strength</span><span class="o">=</span><span class="n">filter_strength</span><span class="p">)</span>
+                                <span class="n">blur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">,</span> <span class="n">alpha_params</span><span class="o">=</span><span class="n">alpha_params</span><span class="p">,</span> <span class="n">filter_strength</span><span class="o">=</span><span class="n">filter_strength</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;elevels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">SR</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">][</span><span class="s2">&quot;Ee&quot;</span><span class="p">][:]</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">SR</span><span class="p">[</span><span class="s2">&quot;potentials&quot;</span><span class="p">][</span><span class="s2">&quot;Ve&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="n">q</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;hhlevels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">SR</span><span class="p">[</span><span class="s2">&quot;potentials&quot;</span><span class="p">][</span><span class="s2">&quot;Vhh&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">SR</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">][</span><span class="s2">&quot;Ehh&quot;</span><span class="p">][:])</span> <span class="o">/</span> <span class="n">q</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;lhlevels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">SR</span><span class="p">[</span><span class="s2">&quot;potentials&quot;</span><span class="p">][</span><span class="s2">&quot;Vlh&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">SR</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">][</span><span class="s2">&quot;Elh&quot;</span><span class="p">][:])</span> <span class="o">/</span> <span class="n">q</span>
@@ -399,7 +396,7 @@
 
 
 <span class="c1"># ------</span>
-<div class="viewcode-block" id="SolcoreMaterialToStr"><a class="viewcode-back" href="../../../PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.SolcoreMaterialToStr">[docs]</a><span class="k">def</span> <span class="nf">SolcoreMaterialToStr</span><span class="p">(</span><span class="n">material_input</span><span class="p">):</span>
+<div class="viewcode-block" id="SolcoreMaterialToStr"><a class="viewcode-back" href="../../../Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.SolcoreMaterialToStr">[docs]</a><span class="k">def</span> <span class="nf">SolcoreMaterialToStr</span><span class="p">(</span><span class="n">material_input</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Translate a solcore material composition into a string that is what the Adachi calculator needs.&quot;&quot;&quot;</span>
 
     <span class="n">material_string</span> <span class="o">=</span> <span class="n">material_input</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&lt;&gt;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
@@ -431,7 +428,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

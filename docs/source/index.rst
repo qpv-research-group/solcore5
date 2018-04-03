@@ -13,18 +13,14 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
-    installation
-    structure
-    Systems/Units
-    Systems/Parameters
-    Systems/Materials
-    Systems/Mobility
+    Installation/installation
+    tutorial
+    Structures/structure
+    Systems/systems
     QM/Schrodinger
-    Absorption/Absorption
     spectral/spectral
-    ASC/ASC
-    PDD/DDsolver
-
+    Optics/optics
+    Solvers/solving_solar_cells
 
 .. Indices and tables
 .. ==================

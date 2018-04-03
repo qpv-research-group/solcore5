@@ -1,0 +1,629 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.analytic_solar_cells.diode_equation &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.analytic_solar_cells.diode_equation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="k">import</span> <span class="n">kb</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">hbar</span><span class="p">,</span> <span class="n">c</span>
+<span class="kn">from</span> <span class="nn">solcore.structure</span> <span class="k">import</span> <span class="n">Junction</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">root</span>
+
+<span class="kn">from</span> <span class="nn">.detailed_balance</span> <span class="k">import</span> <span class="n">iv_detailed_balance</span>
+
+
+<div class="viewcode-block" id="iv_2diode"><a class="viewcode-back" href="../../../Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.iv_2diode">[docs]</a><span class="k">def</span> <span class="nf">iv_2diode</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the IV curve of a junction object using the 2-diode equation. All parameters needed for the calculation need to be included in the junction object. Series resistance is included at solar cell level, not at junction level. The junction is then updated with an &quot;iv&quot; function that calculates the IV curve at any voltage.</span>
+
+<span class="sd">    :param junction: A junction object.</span>
+<span class="sd">    :param options: Solver options.</span>
+<span class="sd">    :return: None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">light</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">light_iv</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">voltage</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">internal_voltages</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">wavelength</span>
+
+    <span class="c1"># We get some of the minimum parameters</span>
+    <span class="n">R_shunt</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">R_shunt</span><span class="p">,</span> <span class="mf">1e14</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;R_shunt&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mf">1e14</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">n1</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;n1&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">n2</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;n2&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">2</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># We check if we are using a radiative recombination and reference current</span>
+        <span class="c1"># If that is the case, we solve the properties first using the DB model with the Boltzmann aproximation</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;reff&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;jref&#39;</span><span class="p">):</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">db_mode</span> <span class="o">=</span> <span class="s1">&#39;boltzmann&#39;</span>
+            <span class="n">iv_detailed_balance</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+            <span class="n">reff</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">reff</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">)</span>
+            <span class="n">jref</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">jref</span>
+            <span class="n">j01</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">j01</span>
+
+            <span class="c1"># The reference voltage becomes</span>
+            <span class="n">Vref</span> <span class="o">=</span> <span class="n">n1</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">q</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">reff</span> <span class="o">*</span> <span class="n">jref</span> <span class="o">/</span> <span class="n">j01</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Now we can calculate the j02</span>
+            <span class="n">junction</span><span class="o">.</span><span class="n">j02</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">reff</span><span class="p">)</span> <span class="o">*</span> <span class="n">jref</span> <span class="o">-</span> <span class="n">Vref</span> <span class="o">/</span> <span class="n">R_shunt</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">Vref</span> <span class="o">/</span> <span class="p">(</span><span class="n">n2</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">j02</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">j02</span>
+
+        <span class="c1"># If not, we are in the normal 2D equation case</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">j01</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">j01</span>
+            <span class="n">j02</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">j02</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;j02&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+
+            <span class="c1"># If the saturation currents correspond to a different temperature, we update them for the current temperature.</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;Tref&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">T</span> <span class="o">!=</span> <span class="n">junction</span><span class="o">.</span><span class="n">Tref</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span>
+                               <span class="s1">&#39;Eg&#39;</span><span class="p">),</span> <span class="s1">&#39;ERROR: The bandgap for each junction (Eg) must be provided if the working &#39;</span> \
+                                      <span class="s1">&#39;temperature (T) is different that the reference temperature (Tref). &#39;</span>
+
+                <span class="n">Eg</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">Eg</span>
+                <span class="n">Tref</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">Tref</span>
+                <span class="n">kB</span> <span class="o">=</span> <span class="n">kb</span> <span class="o">/</span> <span class="n">q</span>
+                <span class="n">j01</span> <span class="o">=</span> <span class="n">j01</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="n">Tref</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Eg</span> <span class="o">/</span> <span class="p">(</span><span class="n">n1</span> <span class="o">*</span> <span class="n">kB</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">T</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Tref</span><span class="p">))</span>
+                <span class="n">j02</span> <span class="o">=</span> <span class="n">j02</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="n">Tref</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">5.</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Eg</span> <span class="o">/</span> <span class="p">(</span><span class="n">n2</span> <span class="o">*</span> <span class="n">kB</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">T</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Tref</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">light</span><span class="p">:</span>
+            <span class="n">jsc</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;jsc&#39;</span><span class="p">):</span>
+                <span class="n">jsc</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">jsc</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;eqe&#39;</span><span class="p">):</span>
+                <span class="n">eqe</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">eqe</span>
+                <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">light_source</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span> <span class="n">output_units</span><span class="o">=</span><span class="s1">&#39;photon_flux_per_m&#39;</span><span class="p">)</span>
+                <span class="n">jsc</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">eqe</span><span class="p">(</span><span class="n">wl</span><span class="p">)</span> <span class="o">*</span> <span class="n">ph</span><span class="p">,</span> <span class="n">wl</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">jsc</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;ERROR in 2-diode equation. Junction is missing one essential argument. </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">iv</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">j01</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">v</span> <span class="o">/</span> <span class="p">(</span><span class="n">n1</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">j02</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">v</span> <span class="o">/</span> <span class="p">(</span><span class="n">n2</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">v</span> <span class="o">/</span> <span class="n">R_shunt</span> <span class="o">-</span> <span class="n">jsc</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mf">1e8</span><span class="p">)</span>
+
+    <span class="n">junction</span><span class="o">.</span><span class="n">jsc</span> <span class="o">=</span> <span class="n">jsc</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">iv</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">iv</span> <span class="o">=</span> <span class="n">iv</span></div>
+
+
+<span class="c1">##########################</span>
+<span class="c1">## Old (v4) MJ calculator.</span>
+<span class="c1">#</span>
+<span class="c1"># def multijunctionIV(solar_cell, V=None, photon_recycling=False, n1=1, n2=2, fraction_coupled=None,</span>
+<span class="c1">#                     coupling_iterations=10):</span>
+<span class="c1">#     &quot;&quot;&quot; Calculates the overall IV characteristics of any number of junctions numerically at the requested voltage</span>
+<span class="c1">#     points using the 2-diodes model. If photocurrent_np is not provided, the resultant IV characteristics are purely</span>
+<span class="c1">#     recombination currents, otherwise light IVs are returned.</span>
+<span class="c1">#</span>
+<span class="c1">#     If the state_object includes a reference temperature &quot;Tref&quot;, then the reverse saturation currents are assumed to be</span>
+<span class="c1">#     at that temperature and are therefore re-calculated at the target &quot;T&quot;. This is only valid for small temperature</span>
+<span class="c1">#     differences.</span>
+<span class="c1">#</span>
+<span class="c1">#     Conventions followed:</span>
+<span class="c1">#         - SI Units</span>
+<span class="c1">#         - Photocurrents: Positive.</span>
+<span class="c1">#         - Dark Currents: Negative</span>
+<span class="c1">#</span>
+<span class="c1">#     :param solar_cell: Structure object containing</span>
+<span class="c1">#</span>
+<span class="c1">#         - T: overall temperature</span>
+<span class="c1">#         - Tref: (optional, in case the j01 and j02 correspond to a different temperature that the target temperature)</span>
+<span class="c1">#         - One or more Junction objects, each with (at least) the following</span>
+<span class="c1">#         parameters in SI units:</span>
+<span class="c1">#</span>
+<span class="c1">#             - j01</span>
+<span class="c1">#             - j02</span>
+<span class="c1">#             - n1</span>
+<span class="c1">#             - n2</span>
+<span class="c1">#             - R_series</span>
+<span class="c1">#             - R_shunt</span>
+<span class="c1">#             - photocurrent (optional, is assumed = 0 if not present)</span>
+<span class="c1">#             - Eg (optional, bandgap, only used if Tref is given)</span>
+<span class="c1">#</span>
+<span class="c1">#     :param photon_recycling: If photon recycling calculation must be included (NOT IMPLEMENTED YET)</span>
+<span class="c1">#     :param V: Voltages at which to have the resulting IV curve</span>
+<span class="c1">#     :param n1: Default n1 ideality factor (=1) if not included in the Junction objects</span>
+<span class="c1">#     :param n2: Default n2 ideality factor (=2) if not included in the Junction objects</span>
+<span class="c1">#     :param fraction_coupled: fraction of the emitted light coupled from one junction to the next (NOT IMPLEMENTED YET)</span>
+<span class="c1">#     :param coupling_iterations: the maximum number of iterations during the coupling calculation (NOT IMPLEMENTED YET)</span>
+<span class="c1">#     :return: Dictionary including:</span>
+<span class="c1">#</span>
+<span class="c1">#         - &quot;IV&quot;: (V, I) Calculated IV characteristics</span>
+<span class="c1">#         - &quot;junction IV&quot;: [(V junc 1, I junc 1), (V junc 2, I junc 2), ...]</span>
+<span class="c1">#         - &quot;Rseries IV&quot;: (V, I) Calculated IV characteristics of the series resistance</span>
+<span class="c1">#         - &quot;V&quot;: Device voltages</span>
+<span class="c1">#         - &quot;I&quot;: Device currents (the same for all junctions).</span>
+<span class="c1">#         - &quot;Isc&quot;, Voc&quot;, &quot;P&quot; and &quot;FF&quot;: In case of calculation under illumination.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#     # First we have to prepare the arrays necessary for the calculation</span>
+<span class="c1">#     junctions = [obj for obj in solar_cell if type(obj) == Junction]</span>
+<span class="c1">#</span>
+<span class="c1">#     if hasattr(solar_cell, &#39;T&#39;):</span>
+<span class="c1">#         T = solar_cell.T</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         T = 298</span>
+<span class="c1">#</span>
+<span class="c1">#     # If the saturation currents correspond to a different temperature, we update them for the current temperature.</span>
+<span class="c1">#     if hasattr(solar_cell, &#39;Tref&#39;):</span>
+<span class="c1">#         junctions = update_j0(junctions, T, solar_cell.Tref)</span>
+<span class="c1">#</span>
+<span class="c1">#     J01_array = [junc.j01 for junc in junctions]</span>
+<span class="c1">#     J02_array = [junc.j02 for junc in junctions]</span>
+<span class="c1">#     n1_array = [junc.n1 if &quot;n1&quot; in junc.__dict__.keys() else n1 for junc in junctions]</span>
+<span class="c1">#     n2_array = [junc.n2 if &quot;n2&quot; in junc.__dict__.keys() else n2 for junc in junctions]</span>
+<span class="c1">#     R_shunt_array = [junc.R_shunt for junc in junctions]</span>
+<span class="c1">#     R_series = sum([junc.R_series for junc in junctions])</span>
+<span class="c1">#</span>
+<span class="c1">#     # Preparation in case there is photon recycling</span>
+<span class="c1">#     try:</span>
+<span class="c1">#         assert photon_recycling</span>
+<span class="c1">#         materials = [junc.material for junc in junctions]</span>
+<span class="c1">#         qes = [junc.qe for junc in junctions]</span>
+<span class="c1">#         e = solar_cell.energies</span>
+<span class="c1">#     except AssertionError:</span>
+<span class="c1">#         materials = None</span>
+<span class="c1">#         qes = None</span>
+<span class="c1">#         e = None</span>
+<span class="c1">#         if photon_recycling:</span>
+<span class="c1">#             print(&#39;WARNING: The material and QE for each junction must be provided in order to include photon &#39;</span>
+<span class="c1">#                   &#39;recycling effects. Switching-off the photon recycling calculation.&#39;)</span>
+<span class="c1">#             photon_recycling = False</span>
+<span class="c1">#</span>
+<span class="c1">#     # Preparation of the photocurrent of each junctions, if pressent</span>
+<span class="c1">#     try:</span>
+<span class="c1">#         photocurrent_array = [junc.photocurrent for junc in junctions]</span>
+<span class="c1">#     except:</span>
+<span class="c1">#         photocurrent_array = np.zeros_like(J01_array)  # photocurrent=0, ie dark current</span>
+<span class="c1">#</span>
+<span class="c1">#     # If there is no input voltage, we create a sensible set of voltages</span>
+<span class="c1">#     if V is None:</span>
+<span class="c1">#         output_V = np.linspace(-2, 5, 1000)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         output_V = V</span>
+<span class="c1">#</span>
+<span class="c1">#     # And now we perform the actual calculation</span>
+<span class="c1">#     result = _multijunctionIV(J01_array, J02_array, R_shunt_array, R_series, n1_array, n2_array, T,</span>
+<span class="c1">#                               photocurrent_array, output_V, photon_recycling, materials, qes, e, fraction_coupled,</span>
+<span class="c1">#                               coupling_iterations)</span>
+<span class="c1">#</span>
+<span class="c1">#     return result</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># def _multijunctionIV(J01_array, J02_array, R_shunt_array, R_series, n1_array, n2_array, T, photocurrent_array,</span>
+<span class="c1">#                      output_V, photon_recycling=False, materials=None, qes=None, energ=None, fraction_coupled=None,</span>
+<span class="c1">#                      coupling_iterations=10):</span>
+<span class="c1">#     &quot;&quot;&quot; Calculates the overall IV characteristics of any number of junctions numerically at the requested voltage</span>
+<span class="c1">#     points. If photocurrent is not provided, the resultant IV characteristics are purely recombination currents,</span>
+<span class="c1">#     otherwise light IVs are returned.</span>
+<span class="c1">#</span>
+<span class="c1">#     Conventions followed:</span>
+<span class="c1">#         - SI Units</span>
+<span class="c1">#         - Photocurrents: Positive.</span>
+<span class="c1">#         - Dark Currents: Negative</span>
+<span class="c1">#</span>
+<span class="c1">#     :param J01_array: Array of J01 saturation currents</span>
+<span class="c1">#     :param J02_array: Array of J02 saturation currents</span>
+<span class="c1">#     :param R_shunt_array: Array of shunt resistances</span>
+<span class="c1">#     :param R_series: Combined series resistance of all juncitons</span>
+<span class="c1">#     :param n1_array: Array of n1 ideality factors</span>
+<span class="c1">#     :param n2_array: Array of n2 ideality factors</span>
+<span class="c1">#     :param T: Cell temperature</span>
+<span class="c1">#     :param photocurrent_array: Array of photocurents</span>
+<span class="c1">#     :param photon_recycling: (False) if calculation should include photon recycling</span>
+<span class="c1">#     :param output_V: Array of voltages in which to calculate the data</span>
+<span class="c1">#     :param materials: Array of materials of all the junctions</span>
+<span class="c1">#     :param qes: Array of the quantum efficiencies of all the junctions</span>
+<span class="c1">#     :param energ: Energies of the qes</span>
+<span class="c1">#     :param fraction_coupled: Array with the fraction of the emitted light coupled from one junction to the next.</span>
+<span class="c1">#     :param coupling_iterations: the maximum number of iterations during the coupling calculation</span>
+<span class="c1">#     :return: dictionary with several entries:</span>
+<span class="c1">#         &quot;IV&quot;: (V, I) Calculated IV characteristics</span>
+<span class="c1">#         &quot;junction IV&quot;: [(V junc 1, I junc 1), (V junc 2, I junc 2), ...]</span>
+<span class="c1">#         &quot;Rseries IV&quot;: (V, I) Calculated IV characteristics of the series resistance</span>
+<span class="c1">#         &quot;V&quot;: Device voltages</span>
+<span class="c1">#         &quot;I&quot;: Device currents (the same for all junctions).</span>
+<span class="c1">#         &quot;Isc&quot;, Voc&quot;, &quot;P&quot; and &quot;FF&quot;: In case of calculation under illumination.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#     # If there is no series resistance, we make it a really small number, rather than zero, for simplicity.</span>
+<span class="c1">#     Rs = max(np.sqrt(np.finfo(float).eps), R_series)</span>
+<span class="c1">#</span>
+<span class="c1">#     # The current and junction voltage arrays</span>
+<span class="c1">#     num_jun = len(J01_array)</span>
+<span class="c1">#     V_junction_array = np.zeros((len(output_V), len(J01_array)))</span>
+<span class="c1">#     output_J = np.zeros_like(output_V)</span>
+<span class="c1">#</span>
+<span class="c1">#     # The initial guess for the numerical calculation</span>
+<span class="c1">#     vals = np.arange(num_jun, 0.5, -1)</span>
+<span class="c1">#     total = np.sum(vals)</span>
+<span class="c1">#     guess = output_V[0] * vals / total</span>
+<span class="c1">#</span>
+<span class="c1">#     # This is the function we want to minimize: the node equations</span>
+<span class="c1">#     def F(Vext, voltages):</span>
+<span class="c1">#</span>
+<span class="c1">#         # Create the output</span>
+<span class="c1">#         output = np.zeros_like(voltages)</span>
+<span class="c1">#</span>
+<span class="c1">#         # First equation</span>
+<span class="c1">#         I1 = _current(voltages[0], J01_array[0], J02_array[0], R_shunt_array[0], n1_array[0], n2_array[0],</span>
+<span class="c1">#                       photocurrent_array[0], T)</span>
+<span class="c1">#         output[0] = (Vext - np.sum(voltages)) / Rs - I1</span>
+<span class="c1">#</span>
+<span class="c1">#         # The rest of the equations</span>
+<span class="c1">#         for j in range(1, num_jun):</span>
+<span class="c1">#             I2 = _current(voltages[j], J01_array[j], J02_array[j], R_shunt_array[j], n1_array[j], n2_array[j],</span>
+<span class="c1">#                           photocurrent_array[j], T)</span>
+<span class="c1">#             output[j] = I1 - I2</span>
+<span class="c1">#</span>
+<span class="c1">#             I1 = I2</span>
+<span class="c1">#</span>
+<span class="c1">#         return output</span>
+<span class="c1">#</span>
+<span class="c1">#     # Now we loop over all the voltages</span>
+<span class="c1">#     for i, VV in enumerate(output_V):</span>
+<span class="c1">#         # We particularise the function to minimize for the current output voltage</span>
+<span class="c1">#         def FF(voltages):</span>
+<span class="c1">#             return F(VV, voltages)</span>
+<span class="c1">#</span>
+<span class="c1">#         # Solve the problem</span>
+<span class="c1">#         result = root(FF, guess, method=&#39;lm&#39;, tol=1e-10)</span>
+<span class="c1">#         V_junction_array[i] = result[&#39;x&#39;]</span>
+<span class="c1">#</span>
+<span class="c1">#         # Calculate the current and create the next initial guess</span>
+<span class="c1">#         output_J[i] = _current(V_junction_array[i, 0], J01_array[0], J02_array[0], R_shunt_array[0], n1_array[0],</span>
+<span class="c1">#                                n2_array[0], photocurrent_array[0], T)</span>
+<span class="c1">#         guess = V_junction_array[i]</span>
+<span class="c1">#</span>
+<span class="c1">#     # Finally, we calculate the solar cell parameters</span>
+<span class="c1">#     Isc = None</span>
+<span class="c1">#     Voc = None</span>
+<span class="c1">#     Pmpp = None</span>
+<span class="c1">#     Vmpp = None</span>
+<span class="c1">#     Impp = None</span>
+<span class="c1">#     FF = None</span>
+<span class="c1">#</span>
+<span class="c1">#     # If we are calculating the light IV, we also calculate the main parameters: Jsc, Voc, FF, MPP...</span>
+<span class="c1">#     if min(photocurrent_array) &gt; 0:</span>
+<span class="c1">#         Isc = -np.interp([0], output_V, output_J)[0]</span>
+<span class="c1">#         Voc = np.interp([0], output_J, output_V)[0]</span>
+<span class="c1">#         Power = abs(output_J[output_V &lt; Voc] * output_V[output_V &lt; Voc])</span>
+<span class="c1">#         Pmpp = np.max(Power)</span>
+<span class="c1">#         idx = np.where(Power == Pmpp)</span>
+<span class="c1">#         Vmpp = output_V[output_V &lt; Voc][idx]</span>
+<span class="c1">#         Impp = output_J[output_V &lt; Voc][idx]</span>
+<span class="c1">#         FF = Pmpp / (Isc * Voc)</span>
+<span class="c1">#</span>
+<span class="c1">#     return {</span>
+<span class="c1">#         &quot;IV&quot;: (output_V, -output_J),</span>
+<span class="c1">#         &quot;V&quot;: output_V,</span>
+<span class="c1">#         &quot;I&quot;: -output_J,</span>
+<span class="c1">#         &quot;junction IV&quot;: [(V_junction_array[:, i], -output_J) for i in range(num_jun)],</span>
+<span class="c1">#         &quot;Rseries IV&quot;: (output_J * R_series, -output_J),</span>
+<span class="c1">#         &quot;Isc&quot;: Isc,</span>
+<span class="c1">#         &quot;Voc&quot;: Voc,</span>
+<span class="c1">#         &quot;FF&quot;: FF,</span>
+<span class="c1">#         &quot;Pmpp&quot;: Pmpp,</span>
+<span class="c1">#         &quot;Vmpp&quot;: Vmpp,</span>
+<span class="c1">#         &quot;Impp&quot;: Impp</span>
+<span class="c1">#     }</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># def MJ_IV_calculator(solar_cell, output_V, mpp_parameters=False, photon_recycling=False, materials=None, qes=None,</span>
+<span class="c1">#                      energy=None, fraction_coupled=None, coupling_iterations=10):</span>
+<span class="c1">#     &quot;&quot;&quot; Calculates the overall IV characteristics of any number of junctions numerically at the requested voltage</span>
+<span class="c1">#     points. If photocurrent is not provided, the resultant IV characteristics are purely recombination currents,</span>
+<span class="c1">#     otherwise light IVs are returned.</span>
+<span class="c1">#</span>
+<span class="c1">#     Conventions followed:</span>
+<span class="c1">#         - SI Units</span>
+<span class="c1">#         - Photocurrents: Positive.</span>
+<span class="c1">#         - Dark Currents: Negative</span>
+<span class="c1">#</span>
+<span class="c1">#     :param solar_cell: A solar cell object with one or more junctions. The IV of the individual junctions must have been calculated.</span>
+<span class="c1">#     :param mpp_parameters: If Isc, Voc, FF, Vmpp, Impp and Pmpp must be calculated.</span>
+<span class="c1">#     :param photon_recycling: (False) if calculation should include photon recycling</span>
+<span class="c1">#     :param output_V: Array of voltages in which to calculate the data</span>
+<span class="c1">#     :param materials: Array of materials of all the junctions</span>
+<span class="c1">#     :param qes: Array of the quantum efficiencies of all the junctions</span>
+<span class="c1">#     :param energy: Energies of the qes</span>
+<span class="c1">#     :param fraction_coupled: Array with the fraction of the emitted light coupled from one junction to the next.</span>
+<span class="c1">#     :param coupling_iterations: the maximum number of iterations during the coupling calculation</span>
+<span class="c1">#     :return: dictionary with several entries:</span>
+<span class="c1">#         &quot;IV&quot;: (V, I) Calculated IV characteristics</span>
+<span class="c1">#         &quot;junction IV&quot;: [(V junc 1, I junc 1), (V junc 2, I junc 2), ...]</span>
+<span class="c1">#         &quot;Rseries IV&quot;: (V, I) Calculated IV characteristics of the series resistance</span>
+<span class="c1">#         &quot;V&quot;: Device voltages</span>
+<span class="c1">#         &quot;I&quot;: Device currents (the same for all junctions).</span>
+<span class="c1">#         &quot;Isc&quot;, Voc&quot;, &quot;P&quot; and &quot;FF&quot;: In case of calculation under illumination.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#     # If there is no series resistance, we make it a really small number, rather than zero, for simplicity.</span>
+<span class="c1">#     Rs = max(np.sqrt(np.finfo(float).eps), solar_cell.R_series)</span>
+<span class="c1">#</span>
+<span class="c1">#     # The current and junction voltage arrays</span>
+<span class="c1">#     num_jun = solar_cell.junctions</span>
+<span class="c1">#     V_junction_array = np.zeros((len(output_V), num_jun))</span>
+<span class="c1">#     output_J = np.zeros_like(output_V)</span>
+<span class="c1">#</span>
+<span class="c1">#     # The initial guess for the numerical calculation</span>
+<span class="c1">#     vals = np.arange(num_jun, 0.5, -1)</span>
+<span class="c1">#     total = np.sum(vals)</span>
+<span class="c1">#     guess = output_V[0] * vals / total</span>
+<span class="c1">#</span>
+<span class="c1">#     # This is the function we want to minimize: the node equations</span>
+<span class="c1">#     def F(voltages, Vext):</span>
+<span class="c1">#</span>
+<span class="c1">#         # Create the output</span>
+<span class="c1">#         output = np.zeros_like(voltages)</span>
+<span class="c1">#</span>
+<span class="c1">#         # First equation</span>
+<span class="c1">#         I1 = solar_cell(0).iv(voltages[0])</span>
+<span class="c1">#         output[0] = (Vext - np.sum(voltages)) / Rs - I1</span>
+<span class="c1">#</span>
+<span class="c1">#         # The rest of the equations</span>
+<span class="c1">#         for j in range(1, num_jun):</span>
+<span class="c1">#             I2 = solar_cell(j).iv(voltages[j])</span>
+<span class="c1">#             output[j] = I1 - I2</span>
+<span class="c1">#</span>
+<span class="c1">#             I1 = I2</span>
+<span class="c1">#</span>
+<span class="c1">#         return output</span>
+<span class="c1">#</span>
+<span class="c1">#     # Now we loop over all the voltages</span>
+<span class="c1">#     for i, VV in enumerate(output_V):</span>
+<span class="c1">#         # Solve the problem</span>
+<span class="c1">#         result = root(F, guess, args=(VV), method=&#39;lm&#39;, tol=1e-10)</span>
+<span class="c1">#         V_junction_array[i] = result[&#39;x&#39;]</span>
+<span class="c1">#</span>
+<span class="c1">#         # Calculate the current and create the next initial guess</span>
+<span class="c1">#         output_J[i] = solar_cell(0).iv(V_junction_array[i, 0])</span>
+<span class="c1">#         guess = V_junction_array[i]</span>
+<span class="c1">#</span>
+<span class="c1">#     # Finally, we calculate the solar cell parameters</span>
+<span class="c1">#     Isc = None</span>
+<span class="c1">#     Voc = None</span>
+<span class="c1">#     Pmpp = None</span>
+<span class="c1">#     Vmpp = None</span>
+<span class="c1">#     Impp = None</span>
+<span class="c1">#     FF = None</span>
+<span class="c1">#</span>
+<span class="c1">#     # If we are calculating the light IV, we also calculate the main parameters: Jsc, Voc, FF, MPP...</span>
+<span class="c1">#     if mpp_parameters:</span>
+<span class="c1">#         try:</span>
+<span class="c1">#             Isc = -np.interp([0], output_V, output_J)[0]</span>
+<span class="c1">#             Voc = np.interp([0], output_J, output_V)[0]</span>
+<span class="c1">#             Power = abs(output_J[output_V &lt; Voc] * output_V[output_V &lt; Voc])</span>
+<span class="c1">#             Pmpp = np.max(Power)</span>
+<span class="c1">#             idx = np.where(Power == Pmpp)</span>
+<span class="c1">#             Vmpp = output_V[output_V &lt; Voc][idx]</span>
+<span class="c1">#             Impp = output_J[output_V &lt; Voc][idx]</span>
+<span class="c1">#             FF = Pmpp / (Isc * Voc)</span>
+<span class="c1">#         except Exception as err:</span>
+<span class="c1">#             print(&#39;Error calculating the MPP parameters: {}&#39;.format(err))</span>
+<span class="c1">#</span>
+<span class="c1">#     return {</span>
+<span class="c1">#         &quot;IV&quot;: (output_V, -output_J),</span>
+<span class="c1">#         &quot;V&quot;: output_V,</span>
+<span class="c1">#         &quot;I&quot;: -output_J,</span>
+<span class="c1">#         &quot;junction IV&quot;: [(V_junction_array[:, i], -output_J) for i in range(num_jun)],</span>
+<span class="c1">#         &quot;Rseries IV&quot;: (output_J * Rs, -output_J),</span>
+<span class="c1">#         &quot;Isc&quot;: Isc,</span>
+<span class="c1">#         &quot;Voc&quot;: Voc,</span>
+<span class="c1">#         &quot;FF&quot;: FF,</span>
+<span class="c1">#         &quot;Pmpp&quot;: Pmpp,</span>
+<span class="c1">#         &quot;Vmpp&quot;: Vmpp,</span>
+<span class="c1">#         &quot;Impp&quot;: Impp</span>
+<span class="c1">#     }</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># def simple_gp(e, n, T, V, absorption):</span>
+<span class="c1">#     result = n ** 2 * absorption * e ** 2 / (c ** 2 * np.exp((e - q * V) / (kb * T)) - 1) / hbar ** 2</span>
+<span class="c1">#     return result</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># def _current(V_junction, J01, J02, Rshunt, n1, n2, junction_photocurrent, Temp):</span>
+<span class="c1">#     &quot;&quot;&quot; Calculates the current flowing through the solar cell using the 2-diode equation. Series resistance is included</span>
+<span class="c1">#     externally, in the nodes equation.</span>
+<span class="c1">#</span>
+<span class="c1">#     :param V_junction: The voltage at which to calculate the current</span>
+<span class="c1">#     :param J01: Reverse saturation current J01, typically the radiative component</span>
+<span class="c1">#     :param J02: Reverse saturation current J02, tipically the non-radiative component</span>
+<span class="c1">#     :param Rshunt: Shunt resistance</span>
+<span class="c1">#     :param n1: Ideallity factor associated to J01, typically ~1</span>
+<span class="c1">#     :param n2: Ideallity factor associated to J02, typically ~2</span>
+<span class="c1">#     :param junction_photocurrent: Photocurrent</span>
+<span class="c1">#     :param Temp: Junction temperature</span>
+<span class="c1">#     :return: The current in the above conditions</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     output = J01 * (np.exp(q * V_junction / (n1 * kb * Temp)) - 1) + \</span>
+<span class="c1">#              J02 * (np.exp(q * V_junction / (n2 * kb * Temp)) - 1) + \</span>
+<span class="c1">#              V_junction / Rshunt - junction_photocurrent</span>
+<span class="c1">#     return output</span>
+<span class="c1">#</span>
+
+<div class="viewcode-block" id="calculate_J01"><a class="viewcode-back" href="../../../Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.calculate_J01">[docs]</a><span class="k">def</span> <span class="nf">calculate_J01</span><span class="p">(</span><span class="n">Eg_in_eV</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the reverse saturation current J01, assumed radiative, considering an absorption equal to 1 above the</span>
+<span class="sd">    bandgap. Light trapping is included by considering the refractive index of the material:</span>
+
+<span class="sd">    .. math:: J_{01} = \\frac {q n^2 k_b T} {2 \\pi ^2 c^2 \\hbar ^3} e^{\\frac{-E_g}{k_b T}} (E_g^2 + 2 k_b T E_g + 2 k_b^2 T^2)</span>
+
+
+<span class="sd">    :param Eg_in_eV: Bandgap  in eV</span>
+<span class="sd">    :param T: Cell temperature</span>
+<span class="sd">    :param n: Refractive index of the material</span>
+<span class="sd">    :return: The reverse saturation current J01</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Eg</span> <span class="o">=</span> <span class="n">Eg_in_eV</span> <span class="o">*</span> <span class="n">q</span>
+    <span class="n">Term1</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">n</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">q</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">c</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Term2</span> <span class="o">=</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Eg</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span>
+    <span class="n">Term3</span> <span class="o">=</span> <span class="n">Eg</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Eg</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">J01</span> <span class="o">=</span> <span class="n">Term1</span> <span class="o">*</span> <span class="n">Term2</span> <span class="o">*</span> <span class="n">Term3</span>
+    <span class="k">return</span> <span class="n">J01</span></div>
+
+
+<div class="viewcode-block" id="calculate_J02_from_Voc"><a class="viewcode-back" href="../../../Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.calculate_J02_from_Voc">[docs]</a><span class="k">def</span> <span class="nf">calculate_J02_from_Voc</span><span class="p">(</span><span class="n">J01</span><span class="p">,</span> <span class="n">Jsc</span><span class="p">,</span> <span class="n">Voc</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">R_shunt</span><span class="o">=</span><span class="mf">1e15</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates J02 based on the J01, Jsc and the Voc. It is just the result of solving the 2-diode equation for J02.</span>
+<span class="sd">    Ideality factors n1 and n2 are assumed to be equal to 1 and 2, respectively.</span>
+
+<span class="sd">    :param J01: Reverse saturation current J01, typically the radiative component</span>
+<span class="sd">    :param Jsc: Short circuit current (=photocurrent)</span>
+<span class="sd">    :param Voc: Open circuit voltage</span>
+<span class="sd">    :param T: Temperature</span>
+<span class="sd">    :param R_shunt: Shunt resistance (default = 1e15)</span>
+<span class="sd">    :return: The reverse saturation current J02</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Term1</span> <span class="o">=</span> <span class="n">Jsc</span> <span class="o">-</span> <span class="n">J01</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">Voc</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">Voc</span> <span class="o">/</span> <span class="n">R_shunt</span>
+    <span class="n">Term2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">Voc</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="n">J02</span> <span class="o">=</span> <span class="n">Term1</span> <span class="o">/</span> <span class="n">Term2</span>
+    <span class="k">return</span> <span class="n">J02</span></div>
+
+
+<div class="viewcode-block" id="calculate_J02_from_rad_eff"><a class="viewcode-back" href="../../../Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.calculate_J02_from_rad_eff">[docs]</a><span class="k">def</span> <span class="nf">calculate_J02_from_rad_eff</span><span class="p">(</span><span class="n">J01</span><span class="p">,</span> <span class="n">radiative_efficiency</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">R_shunt</span><span class="o">=</span><span class="mf">1e15</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates J02 based on J01 and a radiative efficiency at a given voltage and temperature. Ideality factors n1</span>
+<span class="sd">    and n2 are assumed to be equal to 1 and 2, respectively.</span>
+
+<span class="sd">    :param J01: Reverse saturation current J01, typically the radiative component</span>
+<span class="sd">    :param radiative_efficiency: Fraction of the dark current that is radiative</span>
+<span class="sd">    :param V: Operating voltage</span>
+<span class="sd">    :param T: Temperature</span>
+<span class="sd">    :param R_shunt: Shunt resistance (default = 1e15)</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Term1</span> <span class="o">=</span> <span class="n">J01</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">V</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">Term2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">radiative_efficiency</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">Term3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">V</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="n">J02</span> <span class="o">=</span> <span class="p">(</span><span class="n">Term1</span> <span class="o">*</span> <span class="n">Term2</span> <span class="o">+</span> <span class="n">V</span> <span class="o">/</span> <span class="n">R_shunt</span><span class="p">)</span> <span class="o">/</span> <span class="n">Term3</span>
+
+    <span class="k">return</span> <span class="n">J02</span></div>
+
+
+<div class="viewcode-block" id="calculate_j02_from_J01_Jsc_reference_radiative_efficiency"><a class="viewcode-back" href="../../../Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.calculate_j02_from_J01_Jsc_reference_radiative_efficiency">[docs]</a><span class="k">def</span> <span class="nf">calculate_j02_from_J01_Jsc_reference_radiative_efficiency</span><span class="p">(</span><span class="n">J01</span><span class="p">,</span> <span class="n">Jsc_ref</span><span class="p">,</span> <span class="n">radiative_efficiency</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">Voc_reference</span> <span class="o">=</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">Jsc_ref</span> <span class="o">*</span> <span class="n">radiative_efficiency</span> <span class="o">/</span> <span class="n">J01</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">J02</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jsc_ref</span> <span class="o">-</span> <span class="p">(</span><span class="n">radiative_efficiency</span> <span class="o">*</span> <span class="n">Jsc_ref</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">Voc_reference</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">J02</span></div>
+
+
+<div class="viewcode-block" id="update_j0"><a class="viewcode-back" href="../../../Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.update_j0">[docs]</a><span class="k">def</span> <span class="nf">update_j0</span><span class="p">(</span><span class="n">junctions</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Tref</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Updates the reverse saturation currents for the target temperature knowing their values at a reference</span>
+<span class="sd">    temperature.</span>
+
+<span class="sd">    :param junctions: List of junctions</span>
+<span class="sd">    :param T: Target temperature</span>
+<span class="sd">    :param Tref: Working temperature</span>
+<span class="sd">    :return: List of junctions with their saturation currents updated for the new temperatures</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kB</span> <span class="o">=</span> <span class="n">kb</span> <span class="o">/</span> <span class="n">q</span>
+
+    <span class="k">for</span> <span class="n">junc</span> <span class="ow">in</span> <span class="n">junctions</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junc</span><span class="p">,</span> <span class="s1">&#39;Eg&#39;</span><span class="p">),</span> <span class="s1">&#39;ERROR: The bandgap for each junction (Eg) must be provided if the working &#39;</span> \
+                                    <span class="s1">&#39;temperature (T) is different that the reference temperature (Tref). &#39;</span>
+        <span class="n">junc</span><span class="o">.</span><span class="n">j01</span> <span class="o">=</span> <span class="n">junc</span><span class="o">.</span><span class="n">j01</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="n">Tref</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">junc</span><span class="o">.</span><span class="n">Eg</span> <span class="o">/</span> <span class="n">kB</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">T</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Tref</span><span class="p">))</span>
+        <span class="n">junc</span><span class="o">.</span><span class="n">j02</span> <span class="o">=</span> <span class="n">junc</span><span class="o">.</span><span class="n">j02</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="n">Tref</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">5.</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">junc</span><span class="o">.</span><span class="n">Eg</span> <span class="o">/</span> <span class="n">kB</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">T</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Tref</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">junctions</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

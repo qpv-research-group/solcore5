@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Overview: module code &#8212; Solcore 5.0.2 documentation</title>
+    <title>Overview: module code &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -44,17 +44,14 @@
             </a></p>
 <h3><a href="../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -80,9 +77,14 @@
 <li><a href="solcore/absorption_calculator/adachi_alpha.html">solcore.absorption_calculator.adachi_alpha</a></li>
 <li><a href="solcore/absorption_calculator/dielectric_constant_models.html">solcore.absorption_calculator.dielectric_constant_models</a></li>
 <li><a href="solcore/absorption_calculator/sopra_db.html">solcore.absorption_calculator.sopra_db</a></li>
+<li><a href="solcore/absorption_calculator/tmm_core_vec.html">solcore.absorption_calculator.tmm_core_vec</a></li>
 <li><a href="solcore/absorption_calculator/transfer_matrix.html">solcore.absorption_calculator.transfer_matrix</a></li>
 <li><a href="solcore/analytic_solar_cells/IV.html">solcore.analytic_solar_cells.IV</a></li>
 <li><a href="solcore/analytic_solar_cells/QE.html">solcore.analytic_solar_cells.QE</a></li>
+<li><a href="solcore/analytic_solar_cells/depletion_approximation.html">solcore.analytic_solar_cells.depletion_approximation</a></li>
+<li><a href="solcore/analytic_solar_cells/detailed_balance.html">solcore.analytic_solar_cells.detailed_balance</a></li>
+<li><a href="solcore/analytic_solar_cells/diode_equation.html">solcore.analytic_solar_cells.diode_equation</a></li>
+<li><a href="solcore/analytic_solar_cells/tunnel_junctions.html">solcore.analytic_solar_cells.tunnel_junctions</a></li>
 <li><a href="solcore/config_tools.html">solcore.config_tools</a></li>
 <li><a href="solcore/crystals.html">solcore.crystals</a></li>
 <li><a href="solcore/interpolate.html">solcore.interpolate</a></li>
@@ -92,10 +94,14 @@
 <li><a href="solcore/material_data/mobility.html">solcore.material_data.mobility</a></li>
 <li><a href="solcore/material_system/critical_point_picker.html">solcore.material_system.critical_point_picker</a></li>
 <li><a href="solcore/material_system/material_system.html">solcore.material_system.material_system</a></li>
+<li><a href="solcore/optics/beer_lambert.html">solcore.optics.beer_lambert</a></li>
+<li><a href="solcore/optics/external_optics.html">solcore.optics.external_optics</a></li>
+<li><a href="solcore/optics/tmm.html">solcore.optics.tmm</a></li>
 <li><a href="solcore/parameter_system/parameter_system.html">solcore.parameter_system.parameter_system</a></li>
 <li><a href="solcore/poisson_drift_diffusion/DeviceStructure.html">solcore.poisson_drift_diffusion.DeviceStructure</a></li>
 <li><a href="solcore/poisson_drift_diffusion/DriftDiffusionUtilities.html">solcore.poisson_drift_diffusion.DriftDiffusionUtilities</a></li>
 <li><a href="solcore/poisson_drift_diffusion/QWunit.html">solcore.poisson_drift_diffusion.QWunit</a></li>
+<li><a href="solcore/quantum_mechanics/graphics.html">solcore.quantum_mechanics.graphics</a></li>
 <li><a href="solcore/quantum_mechanics/high_level_kp_QW.html">solcore.quantum_mechanics.high_level_kp_QW</a></li>
 <li><a href="solcore/quantum_mechanics/kp_QW.html">solcore.quantum_mechanics.kp_QW</a></li>
 <li><a href="solcore/quantum_mechanics/kp_bulk.html">solcore.quantum_mechanics.kp_bulk</a></li>
@@ -105,6 +111,7 @@
 <li><a href="solcore/singleton.html">solcore.singleton</a></li>
 <li><a href="solcore/smooth.html">solcore.smooth</a></li>
 <li><a href="solcore/solar_cell.html">solcore.solar_cell</a></li>
+<li><a href="solcore/solar_cell_solver.html">solcore.solar_cell_solver</a></li>
 <li><a href="solcore/source_managed_class.html">solcore.source_managed_class</a></li>
 <li><a href="solcore/state.html">solcore.state</a></li>
 <li><a href="solcore/structure.html">solcore.structure</a></li>
@@ -125,7 +132,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

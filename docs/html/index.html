@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Contents: &#8212; Solcore 5.0.2 documentation</title>
+    <title>Contents: &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation and configuration" href="installation.html" /> 
+    <link rel="next" title="Installation and configuration" href="Installation/installation.html" /> 
   </head>
   <body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -36,9 +36,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="installation.html" title="Installation and configuration"
+          <a href="Installation/installation.html" title="Installation and configuration"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -48,21 +48,18 @@
             </a></p>
 <h3><a href="#">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="installation.html"
+  <p class="topless"><a href="Installation/installation.html"
                         title="next chapter">Installation and configuration</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -96,52 +93,56 @@
 <h1>Contents:<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and configuration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-solcore">Installing Solcore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#getting-started">Getting started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#the-config-tools">The config_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation/installation.html">Installation and configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Installation/installation.html#installing-solcore">Installing Solcore</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Installation/installation.html#getting-started">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Installation/installation.html#the-config-tools">The config_tools</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="structure.html">Structures and support classes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="structure.html#structure">Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="structure.html#science-tracker">Science tracker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="structure.html#other-classes">Other classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#defining-the-structure">Defining the structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#calculating-the-external-quantum-efficiency">Calculating the external quantum efficiency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#calculating-the-iv-characteristics">Calculating the IV characteristics</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Mobility.html">The mobility module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Systems/Mobility.html#supported-materials">Supported materials</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Systems/Mobility.html#functions">Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Systems/Mobility.html#module-solcore.material_data.mobility">All functions description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Systems/Mobility.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Structures/structure.html">Structures and support classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Structures/structure.html#structure">Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Structures/structure.html#solar-cells">Solar Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Structures/structure.html#science-tracker">Science tracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Structures/structure.html#other-classes">Other classes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="QM/Schrodinger.html#module-solcore.quantum_mechanics.high_level_kp_QW">Description of functions and modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Systems/systems.html">Materials and units</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Systems/Materials.html">The Material System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Systems/Parameters.html">The Parameters System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Systems/Units.html">The Units System</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Absorption/Absorption.html">Absorption calculator</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Absorption/Absorption.html#module-solcore.absorption_calculator.adachi_alpha">Absorption of bulk materials using Adachi’s formulation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Absorption/Absorption.html#module-solcore.absorption_calculator.sopra_db">Absorption of bulk materials from the SOPRA database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Absorption/Absorption.html#module-solcore.absorption_calculator.absorption_QW">Absorption of quantum wells</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Absorption/Absorption.html#module-solcore.absorption_calculator.transfer_matrix">Optical properties of a stack of materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="QM/Schrodinger.html">Quantum Solvers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="QM/Schrodinger.html#module-solcore.quantum_mechanics.kp_bulk">Bulk 8-band kp solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QM/Schrodinger.html#module-solcore.quantum_mechanics.high_level_kp_QW">Quantum well 1D-Schrodinger calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QM/Schrodinger.html#module-solcore.quantum_mechanics.kp_QW">4-bands kp QW solver (experimental)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="spectral/spectral.html">Light Sources</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="spectral/spectral.html#module-solcore.light_source.light_source">Description of functions and modules</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ASC/ASC.html">Analytic solar cells calculator</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ASC/ASC.html#quantum-efficiency-calculator">Quantum efficiency calculator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ASC/ASC.html#multi-junction-current-voltage-calculator">Multi-junction current voltage calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Optics/optics.html">Optical methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Optics/material_optics.html">Optical properties of materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Optics/tmm.html">Transfer matrix method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Optics/S4doc.html">S4 - Rigorous Coupled Wave Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Optics/other_methods.html">Other optical methods</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="PDD/DeviceStructure.html">Device Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="PDD/DriftDiffusionUtilities.html">Drift Diffusion Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="PDD/QWunit.html">QW unit creator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/solving_solar_cells.html">Solar cell solvers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Solvers/detailed_balance.html">Detailed balance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solvers/TwoDiode.html">2 diode equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solvers/depletion.html">Depletion approximation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solvers/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solvers/multijunction_iv.html">Multi-junction electrical solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solvers/solving_solar_cells.html#module-solcore.solar_cell_solver">The solar cell solver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Solvers/solving_solar_cells.html#solver-options">Solver options</a></li>
 </ul>
 </li>
 </ul>
@@ -164,9 +165,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="installation.html" title="Installation and configuration"
+          <a href="Installation/installation.html" title="Installation and configuration"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

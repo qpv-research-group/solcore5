@@ -6,13 +6,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Index &#8212; Solcore 5.0.2 documentation</title>
+    <title>Index &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -108,54 +105,70 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.transfer_matrix.OptiStack.add_layers">add_layers() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
-</li>
-      <li><a href="installation.html#solcore.config_tools.add_materials_source">add_materials_source() (in module solcore.config_tools)</a>
-</li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel.add_oscillator">add_oscillator() (solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel method)</a>
-</li>
-      <li><a href="installation.html#solcore.config_tools.add_parameters_source">add_parameters_source() (in module solcore.config_tools)</a>
-</li>
-      <li><a href="installation.html#solcore.config_tools.add_source">add_source() (in module solcore.config_tools)</a>
+      <li><a href="Optics/other_methods.html#solcore.optics.beer_lambert.absorbed">absorbed() (in module solcore.optics.beer_lambert)</a>
 
       <ul>
-        <li><a href="structure.html#solcore.source_managed_class.SourceManagedClass.add_source">(solcore.source_managed_class.SourceManagedClass method)</a>
+        <li><a href="Optics/other_methods.html#solcore.optics.external_optics.absorbed">(in module solcore.optics.external_optics)</a>
+</li>
+        <li><a href="Optics/tmm.html#solcore.optics.tmm.absorbed">(in module solcore.optics.tmm)</a>
 </li>
       </ul></li>
-      <li><a href="installation.html#solcore.config_tools.add_units_source">add_units_source() (in module solcore.config_tools)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn">absorp_analytic_fn (class in solcore.absorption_calculator.tmm_core_vec)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#AddLayers">AddLayers() (built-in function)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_in_each_layer">absorp_in_each_layer() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
+      <li><a href="Solvers/detailed_balance.html#solcore.analytic_solar_cells.detailed_balance.absorptance_detailed_balance">absorptance_detailed_balance() (in module solcore.analytic_solar_cells.detailed_balance)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.add">add() (solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn method)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.transfer_matrix.OptiStack.add_layers">add_layers() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
+</li>
+      <li><a href="Installation/installation.html#solcore.config_tools.add_materials_source">add_materials_source() (in module solcore.config_tools)</a>
+</li>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel.add_oscillator">add_oscillator() (solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel method)</a>
+</li>
+      <li><a href="Installation/installation.html#solcore.config_tools.add_parameters_source">add_parameters_source() (in module solcore.config_tools)</a>
+</li>
+      <li><a href="Installation/installation.html#solcore.config_tools.add_source">add_source() (in module solcore.config_tools)</a>
 
       <ul>
-        <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.AddLayers">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+        <li><a href="Structures/structure.html#solcore.source_managed_class.SourceManagedClass.add_source">(solcore.source_managed_class.SourceManagedClass method)</a>
 </li>
       </ul></li>
+      <li><a href="Installation/installation.html#solcore.config_tools.add_units_source">add_units_source() (in module solcore.config_tools)</a>
+</li>
+      <li><a href="Solvers/DeviceStructure.html#AddLayers">AddLayers() (built-in function)</a>
+
+      <ul>
+        <li><a href="Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.AddLayers">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_QW.alfa">alfa() (in module solcore.quantum_mechanics.kp_QW)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.alpha">alpha() (solcore.material_system.material_system.BaseMaterial method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_c_hh_TE">alpha_c_hh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.alpha_c_hh_TE">alpha_c_hh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_c_lh_TE">alpha_c_lh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.alpha_c_lh_TE">alpha_c_lh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_ehh_TE">alpha_exciton_ehh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_ehh_TE">alpha_exciton_ehh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_elh_TE">alpha_exciton_elh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.alpha_exciton_elh_TE">alpha_exciton_elh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.alphaE">alphaE() (solcore.material_system.material_system.BaseMaterial method)</a>
 </li>
-      <li><a href="structure.html#solcore.solar_cell.SolarCell.append">append() (solcore.solar_cell.SolarCell method)</a>
+      <li><a href="Structures/structure.html#solcore.solar_cell.SolarCell.append">append() (solcore.solar_cell.SolarCell method)</a>
 
       <ul>
-        <li><a href="structure.html#solcore.structure.Structure.append">(solcore.structure.Structure method)</a>
+        <li><a href="Structures/structure.html#solcore.structure.Structure.append">(solcore.structure.Structure method)</a>
 </li>
       </ul></li>
-      <li><a href="structure.html#solcore.solar_cell.SolarCell.append_multiple">append_multiple() (solcore.solar_cell.SolarCell method)</a>
+      <li><a href="Structures/structure.html#solcore.solar_cell.SolarCell.append_multiple">append_multiple() (solcore.solar_cell.SolarCell method)</a>
 
       <ul>
-        <li><a href="structure.html#solcore.structure.Structure.append_multiple">(solcore.structure.Structure method)</a>
+        <li><a href="Structures/structure.html#solcore.structure.Structure.append_multiple">(solcore.structure.Structure method)</a>
 </li>
       </ul></li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.assemble_qw_structure">assemble_qw_structure() (in module solcore.quantum_mechanics.structure_utilities)</a>
@@ -174,21 +187,21 @@
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial">BaseMaterial (class in solcore.material_system.material_system)</a>
 </li>
-      <li><a href="structure.html#solcore.interpolate.BilinearInterpolation">BilinearInterpolation (class in solcore.interpolate)</a>
+      <li><a href="Structures/structure.html#solcore.interpolate.BilinearInterpolation">BilinearInterpolation (class in solcore.interpolate)</a>
 </li>
       <li><a href="Systems/Parameters.html#solcore.parameter_system.parameter_system.bow">bow() (in module solcore.parameter_system.parameter_system)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="structure.html#solcore.source_managed_class.breakout">breakout() (in module solcore.source_managed_class)</a>
+      <li><a href="Structures/structure.html#solcore.source_managed_class.breakout">breakout() (in module solcore.source_managed_class)</a>
 
       <ul>
-        <li><a href="structure.html#solcore.singleton.Singleton.breakout">(solcore.singleton.Singleton method)</a>
+        <li><a href="Structures/structure.html#solcore.singleton.Singleton.breakout">(solcore.singleton.Singleton method)</a>
 </li>
       </ul></li>
-      <li><a href="structure.html#solcore.source_managed_class.breakoutClass">breakoutClass() (in module solcore.source_managed_class)</a>
+      <li><a href="Structures/structure.html#solcore.source_managed_class.breakoutClass">breakoutClass() (in module solcore.source_managed_class)</a>
 </li>
-      <li><a href="structure.html#solcore.crystals.brillouin_critical_points">brillouin_critical_points() (in module solcore.crystals)</a>
+      <li><a href="Structures/structure.html#solcore.crystals.brillouin_critical_points">brillouin_critical_points() (in module solcore.crystals)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.smarts.build_smarts_file">build_smarts_file() (in module solcore.light_source.smarts)</a>
 </li>
@@ -198,62 +211,84 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.calc_alpha">calc_alpha() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.calc_alpha">calc_alpha() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.calc_emission">calc_emission() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.calc_emission">calc_emission() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.transfer_matrix.calculate_absorption_profile">calculate_absorption_profile() (in module solcore.absorption_calculator.transfer_matrix)</a>
+      <li><a href="Optics/other_methods.html#solcore.optics.beer_lambert.calculate_absorptance_DB">calculate_absorptance_DB() (in module solcore.optics.beer_lambert)</a>
 </li>
-      <li><a href="Systems/Mobility.html#solcore.material_data.mobility.calculate_AlGaAs">calculate_AlGaAs() (in module solcore.material_data.mobility)</a>
+      <li><a href="Optics/other_methods.html#solcore.optics.beer_lambert.calculate_absorptance_PDD_and_DA">calculate_absorptance_PDD_and_DA() (in module solcore.optics.beer_lambert)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.transfer_matrix.calculate_ellipsometry">calculate_ellipsometry() (in module solcore.absorption_calculator.transfer_matrix)</a>
+      <li><a href="Optics/other_methods.html#solcore.optics.beer_lambert.calculate_absorption_beer_lambert">calculate_absorption_beer_lambert() (in module solcore.optics.beer_lambert)</a>
 </li>
-      <li><a href="Systems/Mobility.html#solcore.material_data.mobility.calculate_General">calculate_General() (in module solcore.material_data.mobility)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.transfer_matrix.calculate_absorption_profile">calculate_absorption_profile() (in module solcore.absorption_calculator.transfer_matrix)</a>
 </li>
-      <li><a href="Systems/Mobility.html#solcore.material_data.mobility.calculate_InAlAs">calculate_InAlAs() (in module solcore.material_data.mobility)</a>
+      <li><a href="Optics/tmm.html#solcore.optics.tmm.calculate_absorption_tmm">calculate_absorption_tmm() (in module solcore.optics.tmm)</a>
 </li>
-      <li><a href="Systems/Mobility.html#solcore.material_data.mobility.calculate_InGaAs">calculate_InGaAs() (in module solcore.material_data.mobility)</a>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.calculate_AlGaAs">calculate_AlGaAs() (in module solcore.material_data.mobility)</a>
 </li>
-      <li><a href="Systems/Mobility.html#solcore.material_data.mobility.calculate_InGaAsP">calculate_InGaAsP() (in module solcore.material_data.mobility)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.transfer_matrix.calculate_ellipsometry">calculate_ellipsometry() (in module solcore.absorption_calculator.transfer_matrix)</a>
 </li>
-      <li><a href="Systems/Mobility.html#solcore.material_data.mobility.calculate_InGaP">calculate_InGaP() (in module solcore.material_data.mobility)</a>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.calculate_General">calculate_General() (in module solcore.material_data.mobility)</a>
 </li>
-      <li><a href="ASC/ASC.html#solcore.analytic_solar_cells.QE.calculate_junction_sr">calculate_junction_sr() (in module solcore.analytic_solar_cells.QE)</a>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.calculate_in_plane_masses">calculate_in_plane_masses() (in module solcore.quantum_mechanics.graphics)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.calculate_optics">calculate_optics() (in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.calculate_InAlAs">calculate_InAlAs() (in module solcore.material_data.mobility)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.transfer_matrix.calculate_rat">calculate_rat() (in module solcore.absorption_calculator.transfer_matrix)</a>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.calculate_InGaAs">calculate_InGaAs() (in module solcore.material_data.mobility)</a>
+</li>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.calculate_InGaAsP">calculate_InGaAsP() (in module solcore.material_data.mobility)</a>
+</li>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.calculate_InGaP">calculate_InGaP() (in module solcore.material_data.mobility)</a>
+</li>
+      <li><a href="Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.calculate_J01">calculate_J01() (in module solcore.analytic_solar_cells.diode_equation)</a>
+</li>
+      <li><a href="Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.calculate_j02_from_J01_Jsc_reference_radiative_efficiency">calculate_j02_from_J01_Jsc_reference_radiative_efficiency() (in module solcore.analytic_solar_cells.diode_equation)</a>
+</li>
+      <li><a href="Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.calculate_J02_from_rad_eff">calculate_J02_from_rad_eff() (in module solcore.analytic_solar_cells.diode_equation)</a>
+</li>
+      <li><a href="Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.calculate_J02_from_Voc">calculate_J02_from_Voc() (in module solcore.analytic_solar_cells.diode_equation)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.calculate_reflection">calculate_reflection() (in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+      <li><a href="Solvers/ASC.html#solcore.analytic_solar_cells.QE.calculate_junction_sr">calculate_junction_sr() (in module solcore.analytic_solar_cells.QE)</a>
+</li>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.calculate_mobility">calculate_mobility() (in module solcore.material_data.mobility)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.transfer_matrix.calculate_rat">calculate_rat() (in module solcore.absorption_calculator.transfer_matrix)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.smarts.calculate_spectrum_smarts">calculate_spectrum_smarts() (in module solcore.light_source.smarts)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.spectral2.calculate_spectrum_spectral2">calculate_spectrum_spectral2() (in module solcore.light_source.spectral2)</a>
 </li>
-      <li><a href="PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.CalculateAbsorption">CalculateAbsorption() (solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
+      <li><a href="Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.CalculateAbsorption">CalculateAbsorption() (solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.CalculateAbsorptionProfile">CalculateAbsorptionProfile() (in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+      <li><a href="Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.CalculateAbsorptionProfile">CalculateAbsorptionProfile() (in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Cauchy">Cauchy (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Cauchy">Cauchy (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.coh_tmm">coh_tmm() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.coh_tmm_reverse">coh_tmm_reverse() (in module solcore.absorption_calculator.tmm_core_vec)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.compare_floats">compare_floats() (in module solcore.units_system.units_system)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.compile_poisson_drift_diffusion">compile_poisson_drift_diffusion() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.compile_poisson_drift_diffusion">compile_poisson_drift_diffusion() (in module solcore.config_tools)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.composition">composition (solcore.material_system.material_system.BaseMaterial attribute)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.convert">convert() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.copy">copy() (solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn method)</a>
+</li>
       <li><a href="Systems/Materials.html#solcore.material_system.critical_point_picker.CPPicker">CPPicker (class in solcore.material_system.critical_point_picker)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.adachi_alpha.create_adachi_alpha">create_adachi_alpha() (in module solcore.absorption_calculator.adachi_alpha)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.adachi_alpha.create_adachi_alpha">create_adachi_alpha() (in module solcore.absorption_calculator.adachi_alpha)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#CreateDeviceStructure">CreateDeviceStructure() (built-in function)</a>
+      <li><a href="Solvers/DeviceStructure.html#CreateDeviceStructure">CreateDeviceStructure() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.CreateDeviceStructure">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+        <li><a href="Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.CreateDeviceStructure">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -262,58 +297,56 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.D">D() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Structures/structure.html#solcore.solar_cell.default_GaAs">default_GaAs() (in module solcore.solar_cell)</a>
 </li>
-      <li><a href="structure.html#solcore.solar_cell.default_GaAs">default_GaAs() (in module solcore.solar_cell)</a>
-</li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Cauchy.dielectric">dielectric() (solcore.absorption_calculator.dielectric_constant_models.Cauchy method)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Cauchy.dielectric">dielectric() (solcore.absorption_calculator.dielectric_constant_models.Cauchy method)</a>
 
       <ul>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Drude.dielectric">(solcore.absorption_calculator.dielectric_constant_models.Drude method)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Drude.dielectric">(solcore.absorption_calculator.dielectric_constant_models.Drude method)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Gauss.dielectric">(solcore.absorption_calculator.dielectric_constant_models.Gauss method)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Gauss.dielectric">(solcore.absorption_calculator.dielectric_constant_models.Gauss method)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Lorentz.dielectric">(solcore.absorption_calculator.dielectric_constant_models.Lorentz method)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Lorentz.dielectric">(solcore.absorption_calculator.dielectric_constant_models.Lorentz method)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Poles.dielectric">(solcore.absorption_calculator.dielectric_constant_models.Poles method)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Poles.dielectric">(solcore.absorption_calculator.dielectric_constant_models.Poles method)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.PolySegment.dielectric">(solcore.absorption_calculator.dielectric_constant_models.PolySegment method)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.PolySegment.dielectric">(solcore.absorption_calculator.dielectric_constant_models.PolySegment method)</a>
 </li>
       </ul></li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel.dielectric_constants">dielectric_constants() (solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel method)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel.dielectric_constants">dielectric_constants() (solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel method)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel">DielectricConstantModel (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel">DielectricConstantModel (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.discard_unconfined">discard_unconfined() (in module solcore.quantum_mechanics.potential_utilities)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.discard_unconfined">discard_unconfined() (in module solcore.quantum_mechanics.potential_utilities)</a>
-</li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.discard_unconfined_energy">discard_unconfined_energy() (in module solcore.quantum_mechanics.potential_utilities)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Drude">Drude (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Drude">Drude (class in solcore.absorption_calculator.dielectric_constant_models)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#DumpBandStructure">DumpBandStructure() (built-in function)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#DumpBandStructure">DumpBandStructure() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpBandStructure">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
-</li>
-      </ul></li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#DumpInputProperties">DumpInputProperties() (built-in function)</a>
-
-      <ul>
-        <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpInputProperties">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+        <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpBandStructure">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
       </ul></li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#DumpIV">DumpIV() (built-in function)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#DumpInputProperties">DumpInputProperties() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpIV">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+        <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpInputProperties">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
       </ul></li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#DumpQE">DumpQE() (built-in function)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#DumpIV">DumpIV() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpQE">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+        <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpIV">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+</li>
+      </ul></li>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#DumpQE">DumpQE() (built-in function)</a>
+
+      <ul>
+        <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.DumpQE">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -326,21 +359,29 @@
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.eight_band_strain_hamiltonian">eight_band_strain_hamiltonian (in module solcore.quantum_mechanics.kp_bulk)</a>
 </li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.ellips">ellips() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
       <li><a href="spectral/spectral.html#solcore.light_source.spectral2.equation_of_time">equation_of_time() (in module solcore.light_source.spectral2)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#Equilibrium">Equilibrium() (built-in function)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#Equilibrium">Equilibrium() (built-in function)</a>
+</li>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.equilibrium_pdd">equilibrium_pdd() (in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.equilibrium_pdd">equilibrium_pdd() (in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
-</li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.eV">eV() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.eVnm">eVnm() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.exciton_bohr_radius">exciton_bohr_radius() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.example_parametric_tunnel_junction">example_parametric_tunnel_junction() (in module solcore.analytic_solar_cells.tunnel_junctions)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.exciton_rydberg_energy_2d">exciton_rydberg_energy_2d() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.example_resistive_tunnel_junction">example_resistive_tunnel_junction() (in module solcore.analytic_solar_cells.tunnel_junctions)</a>
+</li>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.exciton_bohr_radius">exciton_bohr_radius() (in module solcore.absorption_calculator.absorption_QW)</a>
+</li>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.exciton_rydberg_energy_2d">exciton_rydberg_energy_2d() (in module solcore.absorption_calculator.absorption_QW)</a>
+</li>
+      <li><a href="Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.external_tunnel_junction">external_tunnel_junction() (in module solcore.analytic_solar_cells.tunnel_junctions)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -348,13 +389,25 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.factor">factor() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
+</li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_QW.fill_hamiltonian_holes_4x4">fill_hamiltonian_holes_4x4() (in module solcore.quantum_mechanics.kp_QW)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_QW.fill_hamiltonian_holes_6x6">fill_hamiltonian_holes_6x6() (in module solcore.quantum_mechanics.kp_QW)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.fill_in">fill_in() (solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_QW.fill_hamiltonian_holes_6x6">fill_hamiltonian_holes_6x6() (in module solcore.quantum_mechanics.kp_QW)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.find_in_structure">find_in_structure() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.find_in_structure_with_inf">find_in_structure_with_inf() (in module solcore.absorption_calculator.tmm_core_vec)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.fit_effective_masses">fit_effective_masses() (in module solcore.quantum_mechanics.kp_bulk)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.flip">flip() (solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn method)</a>
+</li>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.forward">forward() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -364,36 +417,52 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Systems/Materials.html#solcore.material_system.critical_point_picker.CPPicker.gather_files">gather_files() (solcore.material_system.critical_point_picker.CPPicker method)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Gauss">Gauss (class in solcore.absorption_calculator.dielectric_constant_models)</a>
-</li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.Gauss">Gauss() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Gauss">Gauss (class in solcore.absorption_calculator.dielectric_constant_models)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.generateConversionDictForSISuffix">generateConversionDictForSISuffix() (in module solcore.units_system.units_system)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.get">get() (solcore.material_system.material_system.BaseMaterial method)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.get_current_config">get_current_config() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.get_current_config">get_current_config() (in module solcore.config_tools)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.smarts.get_default_smarts_object">get_default_smarts_object() (in module solcore.light_source.smarts)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.spectral2.get_default_spectral2_object">get_default_spectral2_object() (in module solcore.light_source.spectral2)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.transfer_matrix.OptiStack.get_indices">get_indices() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.transfer_matrix.OptiStack.get_indices">get_indices() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
+</li>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_j_bot">get_j_bot() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
+
+      <ul>
+        <li><a href="Solvers/ASC.html#solcore.analytic_solar_cells.QE.get_j_bot">(in module solcore.analytic_solar_cells.QE)</a>
+</li>
+      </ul></li>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_J_sc_diffusion">get_J_sc_diffusion() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
+</li>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_J_sc_diffusion_vs_WL">get_J_sc_diffusion_vs_WL() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ASC/ASC.html#solcore.analytic_solar_cells.QE.get_j_bot">get_j_bot() (in module solcore.analytic_solar_cells.QE)</a>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_J_sc_SCR">get_J_sc_SCR() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
 </li>
-      <li><a href="ASC/ASC.html#solcore.analytic_solar_cells.QE.get_j_top">get_j_top() (in module solcore.analytic_solar_cells.QE)</a>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_J_sc_SCR_vs_WL">get_J_sc_SCR_vs_WL() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
+</li>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_j_top">get_j_top() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
+
+      <ul>
+        <li><a href="Solvers/ASC.html#solcore.analytic_solar_cells.QE.get_j_top">(in module solcore.analytic_solar_cells.QE)</a>
+</li>
+      </ul></li>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_Jsrh">get_Jsrh() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
 </li>
       <li><a href="Systems/Parameters.html#solcore.parameter_system.parameter_system.ParameterSystem.get_parameter">get_parameter() (solcore.parameter_system.parameter_system.ParameterSystem method)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.transfer_matrix.OptiStack.get_widths">get_widths() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.transfer_matrix.OptiStack.get_widths">get_widths() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#GetLayerProperties">GetLayerProperties() (built-in function)</a>
+      <li><a href="Solvers/DeviceStructure.html#GetLayerProperties">GetLayerProperties() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.GetLayerProperties">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+        <li><a href="Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.GetLayerProperties">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
 </li>
       </ul></li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.graph">graph() (in module solcore.quantum_mechanics.potential_utilities)</a>
@@ -410,12 +479,10 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.H">H() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Structures/structure.html#solcore.science_tracker.hexID">hexID() (in module solcore.science_tracker)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="structure.html#solcore.science_tracker.hexID">hexID() (in module solcore.science_tracker)</a>
-</li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.html_string">html_string() (solcore.material_system.material_system.BaseMaterial method)</a>
 </li>
   </ul></td>
@@ -424,6 +491,14 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.inc_absorp_in_each_layer">inc_absorp_in_each_layer() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.inc_find_absorp_analytic_fn">inc_find_absorp_analytic_fn() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.inc_group_layers">inc_group_layers() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.inc_tmm">inc_tmm() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.independent_m_J">independent_m_J() (in module solcore.units_system.units_system)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.independent_nm_ev">independent_nm_ev() (in module solcore.units_system.units_system)</a>
@@ -433,24 +508,40 @@
       <li><a href="Systems/Parameters.html#solcore.parameter_system.parameter_system.ParameterSystem.initialise_cache">initialise_cache() (solcore.parameter_system.parameter_system.ParameterSystem method)</a>
 
       <ul>
-        <li><a href="structure.html#solcore.source_managed_class.SourceManagedClass.initialise_cache">(solcore.source_managed_class.SourceManagedClass method)</a>
+        <li><a href="Structures/structure.html#solcore.source_managed_class.SourceManagedClass.initialise_cache">(solcore.source_managed_class.SourceManagedClass method)</a>
 </li>
       </ul></li>
+      <li><a href="Structures/structure.html#solcore.structure.InLineComposition">InLineComposition() (in module solcore.structure)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.interface_R">interface_R() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.interface_r">interface_r() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="PDD/DeviceStructure.html#InLineComposition">InLineComposition() (built-in function)</a>
-
-      <ul>
-        <li><a href="structure.html#solcore.structure.InLineComposition">(in module solcore.structure)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.interface_T">interface_T() (in module solcore.absorption_calculator.tmm_core_vec)</a>
 </li>
-      </ul></li>
-      <li><a href="structure.html#solcore.interpolate.interp1d">interp1d (class in solcore.interpolate)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.interface_t">interface_t() (in module solcore.absorption_calculator.tmm_core_vec)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#IV">IV() (built-in function)</a>
+      <li><a href="Structures/structure.html#solcore.interpolate.interp1d">interp1d (class in solcore.interpolate)</a>
 </li>
-      <li><a href="ASC/ASC.html#solcore.analytic_solar_cells.IV.iv_multijunction">iv_multijunction() (in module solcore.analytic_solar_cells.IV)</a>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.interpolate_epsilon">interpolate_epsilon() (in module solcore.material_data.mobility)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.iv_pdd">iv_pdd() (in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.interpolate_parameter_linear">interpolate_parameter_linear() (in module solcore.material_data.mobility)</a>
+</li>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.interpolate_parameter_quad">interpolate_parameter_quad() (in module solcore.material_data.mobility)</a>
+</li>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#IV">IV() (built-in function)</a>
+</li>
+      <li><a href="Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.iv_2diode">iv_2diode() (in module solcore.analytic_solar_cells.diode_equation)</a>
+</li>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.iv_depletion">iv_depletion() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
+</li>
+      <li><a href="Solvers/detailed_balance.html#solcore.analytic_solar_cells.detailed_balance.iv_detailed_balance">iv_detailed_balance() (in module solcore.analytic_solar_cells.detailed_balance)</a>
+</li>
+      <li><a href="Solvers/ASC.html#solcore.analytic_solar_cells.IV.iv_multijunction">iv_multijunction() (in module solcore.analytic_solar_cells.IV)</a>, <a href="Solvers/multijunction_iv.html#solcore.analytic_solar_cells.IV.iv_multijunction">[1]</a>
+</li>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.iv_pdd">iv_pdd() (in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -458,7 +549,7 @@
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="structure.html#solcore.structure.Junction">Junction (class in solcore.structure)</a>
+      <li><a href="Structures/structure.html#solcore.structure.Junction">Junction (class in solcore.structure)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -482,7 +573,7 @@
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_bulk.KPbands">KPbands() (in module solcore.quantum_mechanics.kp_bulk)</a>
 </li>
-      <li><a href="structure.html#solcore.crystals.kvector">kvector() (in module solcore.crystals)</a>
+      <li><a href="Structures/structure.html#solcore.crystals.kvector">kvector() (in module solcore.crystals)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -490,51 +581,55 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.L">L() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.L">L() (in module solcore.quantum_mechanics.graphics)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.latex_string">latex_string() (solcore.material_system.material_system.BaseMaterial method)</a>
 </li>
-      <li><a href="structure.html#solcore.structure.Layer">Layer (class in solcore.structure)</a>
+      <li><a href="Structures/structure.html#solcore.structure.Layer">Layer (class in solcore.structure)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.layer_starts">layer_starts() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.LDOS1D_e">LDOS1D_e() (in module solcore.quantum_mechanics.graphics)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.LDOS1D_h">LDOS1D_h() (in module solcore.quantum_mechanics.graphics)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.light_source.LightSource">LightSource (class in solcore.light_source.light_source)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.list_dimensions">list_dimensions() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#Load">Load() (built-in function)</a>
-
-      <ul>
-        <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.Load">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.list_snell">list_snell() (in module solcore.absorption_calculator.tmm_core_vec)</a>
 </li>
-      </ul></li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_alpha">load_alpha() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_alpha">load_alpha() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_composition">load_composition() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
-</li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_k">load_k() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_composition">load_composition() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_k">load_k() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
+</li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.load_k_data">load_k_data (solcore.material_system.material_system.BaseMaterial attribute)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_n">load_n() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_n">load_n() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.load_n_data">load_n_data (solcore.material_system.material_system.BaseMaterial attribute)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_temperature">load_temperature() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_temperature">load_temperature() (solcore.absorption_calculator.sopra_db.sopra_database method)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#LoadAbsorption">LoadAbsorption() (built-in function)</a>
+      <li><a href="Solvers/DeviceStructure.html#LoadAbsorption">LoadAbsorption() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.LoadAbsorption">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+        <li><a href="Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.LoadAbsorption">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
 </li>
       </ul></li>
       <li><a href="spectral/spectral.html#solcore.light_source.spectral2.loadUtilitySpectra">loadUtilitySpectra() (in module solcore.light_source.spectral2)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.locate_regions">locate_regions() (in module solcore.quantum_mechanics.structure_utilities)</a>
 </li>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.Log">Log() (in module solcore.material_data.mobility)</a>
+</li>
       <li><a href="Systems/Materials.html#solcore.material_system.critical_point_picker.CPPicker.loop">loop() (solcore.material_system.critical_point_picker.CPPicker method)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Lorentz">Lorentz (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Lorentz">Lorentz (class in solcore.absorption_calculator.dielectric_constant_models)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -544,19 +639,27 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.main_fraction">main_fraction (solcore.material_system.material_system.BaseMaterial attribute)</a>
 </li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.make_2x2_array">make_2x2_array() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.MaterialSystem.material">material() (solcore.material_system.material_system.MaterialSystem method)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.material_directory">material_directory (solcore.material_system.material_system.BaseMaterial attribute)</a>
 </li>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.material_list">material_list() (solcore.absorption_calculator.sopra_db.sopra_database static method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.material_list">material_list() (solcore.absorption_calculator.sopra_db.sopra_database static method)</a>
-</li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.material_string">material_string (solcore.material_system.material_system.BaseMaterial attribute)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.MaterialSystem">MaterialSystem (class in solcore.material_system.material_system)</a>
 </li>
+      <li><a href="Solvers/solving_solar_cells.html#solcore.solar_cell_solver.merge_dicts">merge_dicts() (in module solcore.solar_cell_solver)</a>
+</li>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.mind">mind() (in module solcore.material_data.mobility)</a>
+</li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.mJ">mJ() (solcore.units_system.units_system.UnitsSystem method)</a>
+</li>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.mobility_low_field">mobility_low_field() (in module solcore.material_data.mobility)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -564,24 +667,24 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel.n_and_k">n_and_k() (solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel method)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel.n_and_k">n_and_k() (solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel method)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.n_interpolated">n_interpolated() (solcore.material_system.material_system.BaseMaterial method)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.n_path">n_path (solcore.material_system.material_system.BaseMaterial attribute)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Cauchy.name">name (solcore.absorption_calculator.dielectric_constant_models.Cauchy attribute)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Cauchy.name">name (solcore.absorption_calculator.dielectric_constant_models.Cauchy attribute)</a>
 
       <ul>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Drude.name">(solcore.absorption_calculator.dielectric_constant_models.Drude attribute)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Drude.name">(solcore.absorption_calculator.dielectric_constant_models.Drude attribute)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Gauss.name">(solcore.absorption_calculator.dielectric_constant_models.Gauss attribute)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Gauss.name">(solcore.absorption_calculator.dielectric_constant_models.Gauss attribute)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Lorentz.name">(solcore.absorption_calculator.dielectric_constant_models.Lorentz attribute)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Lorentz.name">(solcore.absorption_calculator.dielectric_constant_models.Lorentz attribute)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Poles.name">(solcore.absorption_calculator.dielectric_constant_models.Poles attribute)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Poles.name">(solcore.absorption_calculator.dielectric_constant_models.Poles attribute)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.PolySegment.name">(solcore.absorption_calculator.dielectric_constant_models.PolySegment attribute)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.PolySegment.name">(solcore.absorption_calculator.dielectric_constant_models.PolySegment attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -590,7 +693,9 @@
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.nmJ">nmJ() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.NonBlackBodyEmission">NonBlackBodyEmission() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.NonBlackBodyEmission">NonBlackBodyEmission() (in module solcore.absorption_calculator.absorption_QW)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.normalise_psi">normalise_psi() (in module solcore.quantum_mechanics.graphics)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -604,9 +709,9 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.transfer_matrix.OptiStack">OptiStack (class in solcore.absorption_calculator.transfer_matrix)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.transfer_matrix.OptiStack">OptiStack (class in solcore.absorption_calculator.transfer_matrix)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Oscillator">Oscillator (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Oscillator">Oscillator (class in solcore.absorption_calculator.dielectric_constant_models)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.light_source.LightSource.output_units">output_units (solcore.light_source.light_source.LightSource attribute)</a>
 </li>
@@ -622,26 +727,40 @@
 </li>
       <li><a href="Systems/Parameters.html#solcore.parameter_system.parameter_system.ParameterSystem">ParameterSystem (class in solcore.parameter_system.parameter_system)</a>
 </li>
+      <li><a href="Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.parametric_tunnel_junction">parametric_tunnel_junction() (in module solcore.analytic_solar_cells.tunnel_junctions)</a>
+</li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.plain_string">plain_string() (solcore.material_system.material_system.BaseMaterial method)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.critical_point_picker.CPPicker.plot_a_curve">plot_a_curve() (solcore.material_system.critical_point_picker.CPPicker method)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.critical_point_picker.CPPicker.plot_all">plot_all() (solcore.material_system.critical_point_picker.CPPicker method)</a>
 </li>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Poles">Poles (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+</li>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.PolySegment">PolySegment (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Poles">Poles (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.position_resolved">position_resolved() (in module solcore.absorption_calculator.tmm_core_vec)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.PolySegment">PolySegment (class in solcore.absorption_calculator.dielectric_constant_models)</a>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.potentials_graph">potentials_graph() (in module solcore.quantum_mechanics.graphics)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.potentials_to_wavefunctions_energies">potentials_to_wavefunctions_energies() (in module solcore.quantum_mechanics.potential_utilities)</a>
 </li>
-      <li><a href="structure.html#solcore.science_tracker.print_references">print_references() (in module solcore.science_tracker)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.power_entering_from_r">power_entering_from_r() (in module solcore.absorption_calculator.tmm_core_vec)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#ProcessStructure">ProcessStructure() (built-in function)</a>
+      <li><a href="Solvers/solving_solar_cells.html#solcore.solar_cell_solver.prepare_solar_cell">prepare_solar_cell() (in module solcore.solar_cell_solver)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.prepare_wavefunction_data">prepare_wavefunction_data() (in module solcore.quantum_mechanics.graphics)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.prepare_wavefunction_data_only">prepare_wavefunction_data_only() (in module solcore.quantum_mechanics.graphics)</a>
+</li>
+      <li><a href="Structures/structure.html#solcore.science_tracker.print_references">print_references() (in module solcore.science_tracker)</a>
+</li>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#ProcessStructure">ProcessStructure() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.ProcessStructure">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+        <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.ProcessStructure">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -650,16 +769,20 @@
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="PDD/DriftDiffusionUtilities.html#QE">QE() (built-in function)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#QE">QE() (built-in function)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.qe_pdd">qe_pdd() (in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+      <li><a href="Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.qe_depletion">qe_depletion() (in module solcore.analytic_solar_cells.depletion_approximation)</a>
+</li>
+      <li><a href="Solvers/detailed_balance.html#solcore.analytic_solar_cells.detailed_balance.qe_detailed_balance">qe_detailed_balance() (in module solcore.analytic_solar_cells.detailed_balance)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="PDD/QWunit.html#QWunit">QWunit (built-in class)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.qe_pdd">qe_pdd() (in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+</li>
+      <li><a href="Solvers/QWunit.html#QWunit">QWunit (built-in class)</a>
 
       <ul>
-        <li><a href="PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit">(class in solcore.poisson_drift_diffusion.QWunit)</a>
+        <li><a href="Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit">(class in solcore.poisson_drift_diffusion.QWunit)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -668,69 +791,75 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.R_from_r">R_from_r() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.random">random() (in module solcore.quantum_mechanics.structure_utilities)</a>
 </li>
-      <li><a href="Systems/Mobility.html#solcore.material_data.mobility.Rd">Rd() (in module solcore.material_data.mobility)</a>
+      <li><a href="Systems/Materials.html#solcore.material_data.mobility.Rd">Rd() (in module solcore.material_data.mobility)</a>
 </li>
-      <li><a href="structure.html#solcore.source_managed_class.SourceManagedClass.read">read() (solcore.source_managed_class.SourceManagedClass method)</a>
+      <li><a href="Structures/structure.html#solcore.source_managed_class.SourceManagedClass.read">read() (solcore.source_managed_class.SourceManagedClass method)</a>
 
       <ul>
         <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.read">(solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
       </ul></li>
-      <li><a href="PDD/QWunit.html#QWunit.RecalculateBandEdges">RecalculateBandEdges() (QWunit method)</a>
+      <li><a href="Solvers/QWunit.html#QWunit.RecalculateBandEdges">RecalculateBandEdges() (QWunit method)</a>
 
       <ul>
-        <li><a href="PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateBandEdges">(solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
+        <li><a href="Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateBandEdges">(solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
 </li>
       </ul></li>
-      <li><a href="PDD/QWunit.html#QWunit.RecalculateDensityOfStates">RecalculateDensityOfStates() (QWunit method)</a>
+      <li><a href="Solvers/QWunit.html#QWunit.RecalculateDensityOfStates">RecalculateDensityOfStates() (QWunit method)</a>
 
       <ul>
-        <li><a href="PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateDensityOfStates">(solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
+        <li><a href="Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateDensityOfStates">(solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
 </li>
       </ul></li>
-      <li><a href="PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateKP">RecalculateKP() (solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
+      <li><a href="Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.RecalculateKP">RecalculateKP() (solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.light_source.reference_spectra">reference_spectra() (in module solcore.light_source.light_source)</a>
 </li>
-      <li><a href="structure.html#solcore.structure.Structure.relative_widths">relative_widths() (solcore.structure.Structure method)</a>
+      <li><a href="Structures/structure.html#solcore.structure.Structure.relative_widths">relative_widths() (solcore.structure.Structure method)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.transfer_matrix.OptiStack.remove_layer">remove_layer() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.transfer_matrix.OptiStack.remove_layer">remove_layer() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.remove_materials_source">remove_materials_source() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.remove_materials_source">remove_materials_source() (in module solcore.config_tools)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel.remove_oscillator">remove_oscillator() (solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel method)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel.remove_oscillator">remove_oscillator() (solcore.absorption_calculator.dielectric_constant_models.DielectricConstantModel method)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.remove_parameters_source">remove_parameters_source() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.remove_parameters_source">remove_parameters_source() (in module solcore.config_tools)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.remove_source">remove_source() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.remove_source">remove_source() (in module solcore.config_tools)</a>
 
       <ul>
-        <li><a href="structure.html#solcore.source_managed_class.SourceManagedClass.remove_source">(solcore.source_managed_class.SourceManagedClass method)</a>
+        <li><a href="Structures/structure.html#solcore.source_managed_class.SourceManagedClass.remove_source">(solcore.source_managed_class.SourceManagedClass method)</a>
 </li>
       </ul></li>
-      <li><a href="installation.html#solcore.config_tools.remove_units_source">remove_units_source() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.remove_units_source">remove_units_source() (in module solcore.config_tools)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#RemoveLayer">RemoveLayer() (built-in function)</a>
+      <li><a href="Solvers/DeviceStructure.html#RemoveLayer">RemoveLayer() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.RemoveLayer">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+        <li><a href="Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.RemoveLayer">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
 </li>
       </ul></li>
-      <li><a href="installation.html#solcore.config_tools.reset_defaults">reset_defaults() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.reset_defaults">reset_defaults() (in module solcore.config_tools)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.restore_default_materials_source">restore_default_materials_source() (in module solcore.config_tools)</a>
+      <li><a href="Solvers/multijunction_iv.html#solcore.analytic_solar_cells.tunnel_junctions.resistive_tunnel_junction">resistive_tunnel_junction() (in module solcore.analytic_solar_cells.tunnel_junctions)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.restore_default_parameters_source">restore_default_parameters_source() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.restore_default_materials_source">restore_default_materials_source() (in module solcore.config_tools)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.restore_default_source">restore_default_source() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.restore_default_parameters_source">restore_default_parameters_source() (in module solcore.config_tools)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.restore_default_units_source">restore_default_units_source() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.restore_default_source">restore_default_source() (in module solcore.config_tools)</a>
+</li>
+      <li><a href="Installation/installation.html#solcore.config_tools.restore_default_units_source">restore_default_units_source() (in module solcore.config_tools)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.reverse">reverse() (in module solcore.units_system.units_system)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.run">run() (solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -742,61 +871,59 @@
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.safe_eval">safe_eval() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#Save">Save() (built-in function)</a>
-
-      <ul>
-        <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.Save">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
-</li>
-      </ul></li>
       <li><a href="Systems/Materials.html#solcore.material_system.critical_point_picker.CPPicker.save">save() (solcore.material_system.critical_point_picker.CPPicker method)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.save_user_config">save_user_config() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.save_user_config">save_user_config() (in module solcore.config_tools)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.scale">scale() (solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn method)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.high_level_kp_QW.schrodinger">schrodinger() (in module solcore.quantum_mechanics.high_level_kp_QW)</a>
 </li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.schrodinger_graph">schrodinger_graph() (in module solcore.quantum_mechanics.graphics)</a>
+</li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.schroedinger_solve">schroedinger_solve() (in module solcore.quantum_mechanics.potential_utilities)</a>
 </li>
-      <li><a href="structure.html#solcore.science_tracker.science_reference">science_reference() (in module solcore.science_tracker)</a>
+      <li><a href="Structures/structure.html#solcore.science_tracker.science_reference">science_reference() (in module solcore.science_tracker)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.sensibleUnits">sensibleUnits() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.set_fortran_compiler">set_fortran_compiler() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.set_fortran_compiler">set_fortran_compiler() (in module solcore.config_tools)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.set_location_of_smarts">set_location_of_smarts() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.set_location_of_smarts">set_location_of_smarts() (in module solcore.config_tools)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.set_location_of_spice">set_location_of_spice() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.set_location_of_spice">set_location_of_spice() (in module solcore.config_tools)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#SetConvergenceParameters">SetConvergenceParameters() (built-in function)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#SetConvergenceParameters">SetConvergenceParameters() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetConvergenceParameters">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+        <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetConvergenceParameters">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
       </ul></li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#SetMeshParameters">SetMeshParameters() (built-in function)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#SetMeshParameters">SetMeshParameters() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetMeshParameters">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+        <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetMeshParameters">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
       </ul></li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#SetRecombinationParameters">SetRecombinationParameters() (built-in function)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#SetRecombinationParameters">SetRecombinationParameters() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetRecombinationParameters">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+        <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.SetRecombinationParameters">(in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
       </ul></li>
       <li><a href="Systems/Materials.html#solcore.material_system.critical_point_picker.CPPicker.setup_plot">setup_plot() (solcore.material_system.critical_point_picker.CPPicker method)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.short_circuit_pdd">short_circuit_pdd() (in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#solcore.poisson_drift_diffusion.DriftDiffusionUtilities.short_circuit_pdd">short_circuit_pdd() (in module solcore.poisson_drift_diffusion.DriftDiffusionUtilities)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#ShortCircuit">ShortCircuit() (built-in function)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#ShortCircuit">ShortCircuit() (built-in function)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.si">si() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
-      <li><a href="structure.html#solcore.singleton.Singleton">Singleton (class in solcore.singleton)</a>
+      <li><a href="Structures/structure.html#solcore.singleton.Singleton">Singleton (class in solcore.singleton)</a>
 </li>
-      <li><a href="structure.html#solcore.singleton.Singleton.breakoutFunctions">Singleton.breakoutFunctions (class in solcore.singleton)</a>
+      <li><a href="Structures/structure.html#solcore.singleton.Singleton.breakoutFunctions">Singleton.breakoutFunctions (class in solcore.singleton)</a>
 </li>
-      <li><a href="structure.html#solcore.singleton.Singleton.Redirect_to_singleton_method">Singleton.Redirect_to_singleton_method (class in solcore.singleton)</a>
+      <li><a href="Structures/structure.html#solcore.singleton.Singleton.Redirect_to_singleton_method">Singleton.Redirect_to_singleton_method (class in solcore.singleton)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.siUnitFromString">siUnitFromString() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
@@ -804,29 +931,43 @@
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.smarts.skipper">skipper() (in module solcore.light_source.smarts)</a>
 </li>
-      <li><a href="structure.html#solcore.smooth.smooth">smooth() (in module solcore.smooth)</a>
+      <li><a href="Structures/structure.html#solcore.smooth.smooth">smooth() (in module solcore.smooth)</a>
 </li>
-      <li><a href="structure.html#solcore.solar_cell.SolarCell">SolarCell (class in solcore.solar_cell)</a>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.snell">snell() (in module solcore.absorption_calculator.tmm_core_vec)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#module-solcore.absorption_calculator.absorption_QW">solcore.absorption_calculator.absorption_QW (module)</a>
+      <li><a href="Solvers/solving_solar_cells.html#solcore.solar_cell_solver.solar_cell_solver">solar_cell_solver() (in module solcore.solar_cell_solver)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#module-solcore.absorption_calculator.adachi_alpha">solcore.absorption_calculator.adachi_alpha (module)</a>
+      <li><a href="Structures/structure.html#solcore.solar_cell.SolarCell">SolarCell (class in solcore.solar_cell)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#module-solcore.absorption_calculator.dielectric_constant_models">solcore.absorption_calculator.dielectric_constant_models (module)</a>
+      <li><a href="Optics/material_optics.html#module-solcore.absorption_calculator.absorption_QW">solcore.absorption_calculator.absorption_QW (module)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#module-solcore.absorption_calculator.sopra_db">solcore.absorption_calculator.sopra_db (module)</a>
+      <li><a href="Optics/material_optics.html#module-solcore.absorption_calculator.adachi_alpha">solcore.absorption_calculator.adachi_alpha (module)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#module-solcore.absorption_calculator.transfer_matrix">solcore.absorption_calculator.transfer_matrix (module)</a>
+      <li><a href="Optics/material_optics.html#module-solcore.absorption_calculator.dielectric_constant_models">solcore.absorption_calculator.dielectric_constant_models (module)</a>
 </li>
-      <li><a href="ASC/ASC.html#module-solcore.analytic_solar_cells.IV">solcore.analytic_solar_cells.IV (module)</a>
+      <li><a href="Optics/material_optics.html#module-solcore.absorption_calculator.sopra_db">solcore.absorption_calculator.sopra_db (module)</a>
 </li>
-      <li><a href="ASC/ASC.html#module-solcore.analytic_solar_cells.QE">solcore.analytic_solar_cells.QE (module)</a>
+      <li><a href="Optics/tmm.html#module-solcore.absorption_calculator.tmm_core_vec">solcore.absorption_calculator.tmm_core_vec (module)</a>
 </li>
-      <li><a href="installation.html#module-solcore.config_tools">solcore.config_tools (module)</a>
+      <li><a href="Optics/tmm.html#module-solcore.absorption_calculator.transfer_matrix">solcore.absorption_calculator.transfer_matrix (module)</a>
 </li>
-      <li><a href="structure.html#module-solcore.crystals">solcore.crystals (module)</a>
+      <li><a href="Solvers/depletion.html#module-solcore.analytic_solar_cells.depletion_approximation">solcore.analytic_solar_cells.depletion_approximation (module)</a>
 </li>
-      <li><a href="structure.html#module-solcore.interpolate">solcore.interpolate (module)</a>
+      <li><a href="Solvers/detailed_balance.html#module-solcore.analytic_solar_cells.detailed_balance">solcore.analytic_solar_cells.detailed_balance (module)</a>
+</li>
+      <li><a href="Solvers/TwoDiode.html#module-solcore.analytic_solar_cells.diode_equation">solcore.analytic_solar_cells.diode_equation (module)</a>
+</li>
+      <li><a href="Solvers/ASC.html#module-solcore.analytic_solar_cells.IV">solcore.analytic_solar_cells.IV (module)</a>, <a href="Solvers/multijunction_iv.html#module-solcore.analytic_solar_cells.IV">[1]</a>
+</li>
+      <li><a href="Solvers/ASC.html#module-solcore.analytic_solar_cells.QE">solcore.analytic_solar_cells.QE (module)</a>
+</li>
+      <li><a href="Solvers/multijunction_iv.html#module-solcore.analytic_solar_cells.tunnel_junctions">solcore.analytic_solar_cells.tunnel_junctions (module)</a>
+</li>
+      <li><a href="Installation/installation.html#module-solcore.config_tools">solcore.config_tools (module)</a>
+</li>
+      <li><a href="Structures/structure.html#module-solcore.crystals">solcore.crystals (module)</a>
+</li>
+      <li><a href="Structures/structure.html#module-solcore.interpolate">solcore.interpolate (module)</a>
 </li>
       <li><a href="spectral/spectral.html#module-solcore.light_source.light_source">solcore.light_source.light_source (module)</a>
 </li>
@@ -834,21 +975,29 @@
 </li>
       <li><a href="spectral/spectral.html#module-solcore.light_source.spectral2">solcore.light_source.spectral2 (module)</a>
 </li>
-      <li><a href="Systems/Mobility.html#module-solcore.material_data.mobility">solcore.material_data.mobility (module)</a>
+      <li><a href="Systems/Materials.html#module-solcore.material_data.mobility">solcore.material_data.mobility (module)</a>
 </li>
       <li><a href="Systems/Materials.html#module-solcore.material_system.critical_point_picker">solcore.material_system.critical_point_picker (module)</a>
 </li>
       <li><a href="Systems/Materials.html#module-solcore.material_system.material_system">solcore.material_system.material_system (module)</a>
 </li>
+      <li><a href="Optics/other_methods.html#module-solcore.optics.beer_lambert">solcore.optics.beer_lambert (module)</a>
+</li>
+      <li><a href="Optics/other_methods.html#module-solcore.optics.external_optics">solcore.optics.external_optics (module)</a>
+</li>
+      <li><a href="Optics/tmm.html#module-solcore.optics.tmm">solcore.optics.tmm (module)</a>
+</li>
       <li><a href="Systems/Parameters.html#module-solcore.parameter_system.parameter_system">solcore.parameter_system.parameter_system (module)</a>
+</li>
+      <li><a href="Solvers/DeviceStructure.html#module-solcore.poisson_drift_diffusion.DeviceStructure">solcore.poisson_drift_diffusion.DeviceStructure (module)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="PDD/DeviceStructure.html#module-solcore.poisson_drift_diffusion.DeviceStructure">solcore.poisson_drift_diffusion.DeviceStructure (module)</a>
+      <li><a href="Solvers/DriftDiffusionUtilities.html#module-solcore.poisson_drift_diffusion.DriftDiffusionUtilities">solcore.poisson_drift_diffusion.DriftDiffusionUtilities (module)</a>
 </li>
-      <li><a href="PDD/DriftDiffusionUtilities.html#module-solcore.poisson_drift_diffusion.DriftDiffusionUtilities">solcore.poisson_drift_diffusion.DriftDiffusionUtilities (module)</a>
+      <li><a href="Solvers/QWunit.html#module-solcore.poisson_drift_diffusion.QWunit">solcore.poisson_drift_diffusion.QWunit (module)</a>
 </li>
-      <li><a href="PDD/QWunit.html#module-solcore.poisson_drift_diffusion.QWunit">solcore.poisson_drift_diffusion.QWunit (module)</a>
+      <li><a href="QM/Schrodinger.html#module-solcore.quantum_mechanics.graphics">solcore.quantum_mechanics.graphics (module)</a>
 </li>
       <li><a href="QM/Schrodinger.html#module-solcore.quantum_mechanics.high_level_kp_QW">solcore.quantum_mechanics.high_level_kp_QW (module)</a>
 </li>
@@ -860,59 +1009,73 @@
 </li>
       <li><a href="QM/Schrodinger.html#module-solcore.quantum_mechanics.structure_utilities">solcore.quantum_mechanics.structure_utilities (module)</a>
 </li>
-      <li><a href="structure.html#module-solcore.science_tracker">solcore.science_tracker (module)</a>
+      <li><a href="Structures/structure.html#module-solcore.science_tracker">solcore.science_tracker (module)</a>
 </li>
-      <li><a href="structure.html#module-solcore.singleton">solcore.singleton (module)</a>
+      <li><a href="Structures/structure.html#module-solcore.singleton">solcore.singleton (module)</a>
 </li>
-      <li><a href="structure.html#module-solcore.smooth">solcore.smooth (module)</a>
+      <li><a href="Structures/structure.html#module-solcore.smooth">solcore.smooth (module)</a>
 </li>
-      <li><a href="structure.html#module-solcore.solar_cell">solcore.solar_cell (module)</a>
+      <li><a href="Structures/structure.html#module-solcore.solar_cell">solcore.solar_cell (module)</a>
 </li>
-      <li><a href="structure.html#module-solcore.source_managed_class">solcore.source_managed_class (module)</a>
+      <li><a href="Solvers/solving_solar_cells.html#module-solcore.solar_cell_solver">solcore.solar_cell_solver (module)</a>
 </li>
-      <li><a href="structure.html#module-solcore.state">solcore.state (module)</a>
+      <li><a href="Structures/structure.html#module-solcore.source_managed_class">solcore.source_managed_class (module)</a>
 </li>
-      <li><a href="structure.html#module-solcore.structure">solcore.structure (module)</a>
+      <li><a href="Structures/structure.html#module-solcore.state">solcore.state (module)</a>
+</li>
+      <li><a href="Structures/structure.html#module-solcore.structure">solcore.structure (module)</a>
 </li>
       <li><a href="Systems/Units.html#module-solcore.units_system.units_system">solcore.units_system.units_system (module)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#SolcoreMaterialToStr">SolcoreMaterialToStr() (built-in function)</a>
+      <li><a href="Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.SolcoreMaterialToStr">SolcoreMaterialToStr() (in module solcore.poisson_drift_diffusion.QWunit)</a>
 
       <ul>
-        <li><a href="PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.SolcoreMaterialToStr">(in module solcore.poisson_drift_diffusion.QWunit)</a>
-</li>
-        <li><a href="structure.html#solcore.structure.SolcoreMaterialToStr">(in module solcore.structure)</a>
+        <li><a href="Structures/structure.html#solcore.structure.SolcoreMaterialToStr">(in module solcore.structure)</a>
 </li>
       </ul></li>
-      <li><a href="PDD/QWunit.html#QWunit.solve">solve() (QWunit method)</a>
+      <li><a href="Solvers/QWunit.html#QWunit.solve">solve() (QWunit method)</a>
 
       <ul>
-        <li><a href="PDD/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.solve">(solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
+        <li><a href="Solvers/QWunit.html#solcore.poisson_drift_diffusion.QWunit.QWunit.solve">(solcore.poisson_drift_diffusion.QWunit.QWunit method)</a>
 </li>
       </ul></li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_QW.solve_bandstructure_QW">solve_bandstructure_QW() (in module solcore.quantum_mechanics.kp_QW)</a>
 </li>
+      <li><a href="Optics/other_methods.html#solcore.optics.beer_lambert.solve_beer_lambert">solve_beer_lambert() (in module solcore.optics.beer_lambert)</a>
+</li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_QW.solve_electrons_QW_at_kt_parabolic">solve_electrons_QW_at_kt_parabolic() (in module solcore.quantum_mechanics.kp_QW)</a>
+</li>
+      <li><a href="Solvers/solving_solar_cells.html#solcore.solar_cell_solver.solve_equilibrium">solve_equilibrium() (in module solcore.solar_cell_solver)</a>
+</li>
+      <li><a href="Optics/other_methods.html#solcore.optics.external_optics.solve_external_optics">solve_external_optics() (in module solcore.optics.external_optics)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_QW.solve_holes_QW_at_kt_4x4">solve_holes_QW_at_kt_4x4() (in module solcore.quantum_mechanics.kp_QW)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_QW.solve_holes_QW_at_kt_6x6">solve_holes_QW_at_kt_6x6() (in module solcore.quantum_mechanics.kp_QW)</a>
 </li>
-      <li><a href="ASC/ASC.html#solcore.analytic_solar_cells.IV.solve_radiative_coupling">solve_radiative_coupling() (in module solcore.analytic_solar_cells.IV)</a>
+      <li><a href="Solvers/solving_solar_cells.html#solcore.solar_cell_solver.solve_iv">solve_iv() (in module solcore.solar_cell_solver)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#SolveQWproperties">SolveQWproperties() (built-in function)</a>
+      <li><a href="Solvers/solving_solar_cells.html#solcore.solar_cell_solver.solve_optics">solve_optics() (in module solcore.solar_cell_solver)</a>
+</li>
+      <li><a href="Solvers/solving_solar_cells.html#solcore.solar_cell_solver.solve_qe">solve_qe() (in module solcore.solar_cell_solver)</a>
+</li>
+      <li><a href="Solvers/ASC.html#solcore.analytic_solar_cells.IV.solve_radiative_coupling">solve_radiative_coupling() (in module solcore.analytic_solar_cells.IV)</a>, <a href="Solvers/multijunction_iv.html#solcore.analytic_solar_cells.IV.solve_radiative_coupling">[1]</a>
+</li>
+      <li><a href="Solvers/solving_solar_cells.html#solcore.solar_cell_solver.solve_short_circuit">solve_short_circuit() (in module solcore.solar_cell_solver)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.optics.tmm.solve_tmm">solve_tmm() (in module solcore.optics.tmm)</a>
+</li>
+      <li><a href="Solvers/DeviceStructure.html#SolveQWproperties">SolveQWproperties() (built-in function)</a>
 
       <ul>
-        <li><a href="PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.SolveQWproperties">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
+        <li><a href="Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.SolveQWproperties">(in module solcore.poisson_drift_diffusion.DeviceStructure)</a>
 </li>
       </ul></li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database">sopra_database (class in solcore.absorption_calculator.sopra_db)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database">sopra_database (class in solcore.absorption_calculator.sopra_db)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.MaterialSystem.sopra_material">sopra_material() (solcore.material_system.material_system.MaterialSystem method)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.SOPRAError">SOPRAError</a>
-</li>
-      <li><a href="structure.html#solcore.solar_cell.SolarCell.sort_layer_type">sort_layer_type() (solcore.solar_cell.SolarCell method)</a>
+      <li><a href="Structures/structure.html#solcore.solar_cell.SolarCell.sort_layer_type">sort_layer_type() (solcore.solar_cell.SolarCell method)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.kp_QW.sort_simultaneous">sort_simultaneous() (in module solcore.quantum_mechanics.kp_QW)</a>
 
@@ -920,33 +1083,43 @@
         <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.sort_simultaneous">(in module solcore.quantum_mechanics.potential_utilities)</a>
 </li>
       </ul></li>
-      <li><a href="structure.html#solcore.source_managed_class.SourceManagedClass">SourceManagedClass (class in solcore.source_managed_class)</a>
+      <li><a href="Structures/structure.html#solcore.source_managed_class.SourceManagedClass">SourceManagedClass (class in solcore.source_managed_class)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.spectral_conversion_nm_ev">spectral_conversion_nm_ev() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem.spectral_conversion_nm_hz">spectral_conversion_nm_hz() (solcore.units_system.units_system.UnitsSystem method)</a>
 </li>
-      <li><a href="ASC/ASC.html#solcore.analytic_solar_cells.QE.spectral_response_all_junctions">spectral_response_all_junctions() (in module solcore.analytic_solar_cells.QE)</a>
+      <li><a href="Solvers/ASC.html#solcore.analytic_solar_cells.QE.spectral_response_all_junctions">spectral_response_all_junctions() (in module solcore.analytic_solar_cells.QE)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.light_source.LightSource.spectrum">spectrum() (solcore.light_source.light_source.LightSource method)</a>
 </li>
-      <li><a href="structure.html#solcore.state.State">State (class in solcore.state)</a>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.split_schrodinger_graph">split_schrodinger_graph() (in module solcore.quantum_mechanics.graphics)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.split_schrodinger_graph_LDOS">split_schrodinger_graph_LDOS() (in module solcore.quantum_mechanics.graphics)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.split_schrodinger_graph_potentials">split_schrodinger_graph_potentials() (in module solcore.quantum_mechanics.graphics)</a>
+</li>
+      <li><a href="Structures/structure.html#solcore.state.State">State (class in solcore.state)</a>
 </li>
       <li><a href="Systems/Materials.html#solcore.material_system.material_system.BaseMaterial.strained">strained (solcore.material_system.material_system.BaseMaterial attribute)</a>
 </li>
-      <li><a href="structure.html#solcore.structure.Structure">Structure (class in solcore.structure)</a>
+      <li><a href="Structures/structure.html#solcore.structure.Structure">Structure (class in solcore.structure)</a>
+</li>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.structure_graph">structure_graph() (in module solcore.quantum_mechanics.graphics)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.structure_to_potentials">structure_to_potentials() (in module solcore.quantum_mechanics.structure_utilities)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_hh_TE">sum_alpha_c_hh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_hh_TE">sum_alpha_c_hh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_lh_TE">sum_alpha_c_lh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.sum_alpha_c_lh_TE">sum_alpha_c_lh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_hh_TE">sum_alpha_exciton_c_hh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_hh_TE">sum_alpha_exciton_c_hh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_lh_TE">sum_alpha_exciton_c_lh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.absorption_QW.sum_alpha_exciton_c_lh_TE">sum_alpha_exciton_c_lh_TE() (in module solcore.absorption_calculator.absorption_QW)</a>
 </li>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.transfer_matrix.OptiStack.swap_layers">swap_layers() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
+      <li><a href="Solvers/detailed_balance.html#solcore.analytic_solar_cells.detailed_balance.surface_integral">surface_integral() (in module solcore.analytic_solar_cells.detailed_balance)</a>
+</li>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.transfer_matrix.OptiStack.swap_layers">swap_layers() (solcore.absorption_calculator.transfer_matrix.OptiStack method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -954,35 +1127,25 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.T_from_t">T_from_t() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.text_render">text_render() (in module solcore.quantum_mechanics.structure_utilities)</a>
 </li>
-      <li><a href="PDD/DeviceStructure.html#ToLayer">ToLayer() (built-in function)</a>
-
-      <ul>
-        <li><a href="structure.html#solcore.structure.ToLayer">(in module solcore.structure)</a>
+      <li><a href="Structures/structure.html#solcore.structure.ToLayer">ToLayer() (in module solcore.structure)</a>
 </li>
-      </ul></li>
-      <li><a href="PDD/DeviceStructure.html#ToSolcoreMaterial">ToSolcoreMaterial() (built-in function)</a>
-
-      <ul>
-        <li><a href="structure.html#solcore.structure.ToSolcoreMaterial">(in module solcore.structure)</a>
+      <li><a href="Structures/structure.html#solcore.structure.ToSolcoreMaterial">ToSolcoreMaterial() (in module solcore.structure)</a>
 </li>
-      </ul></li>
-      <li><a href="PDD/DeviceStructure.html#ToStructure">ToStructure() (built-in function)</a>
-
-      <ul>
-        <li><a href="structure.html#solcore.structure.ToStructure">(in module solcore.structure)</a>
+      <li><a href="Structures/structure.html#solcore.structure.ToStructure">ToStructure() (in module solcore.structure)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="structure.html#solcore.science_tracker.track_science">track_science() (in module solcore.science_tracker)</a>
+      <li><a href="Structures/structure.html#solcore.science_tracker.track_science">track_science() (in module solcore.science_tracker)</a>
 </li>
-      <li><a href="structure.html#solcore.crystals.traverse_brillouin">traverse_brillouin() (in module solcore.crystals)</a>
+      <li><a href="Structures/structure.html#solcore.crystals.traverse_brillouin">traverse_brillouin() (in module solcore.crystals)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.potential_utilities.tridiag_euler">tridiag_euler() (in module solcore.quantum_mechanics.potential_utilities)</a>
 </li>
-      <li><a href="structure.html#solcore.structure.TunnelJunction">TunnelJunction (class in solcore.structure)</a>
+      <li><a href="Structures/structure.html#solcore.structure.TunnelJunction">TunnelJunction (class in solcore.structure)</a>
 </li>
       <li><a href="spectral/spectral.html#solcore.light_source.light_source.LightSource.type_of_source">type_of_source (solcore.light_source.light_source.LightSource attribute)</a>
 </li>
@@ -994,11 +1157,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitError">UnitError</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.UnitsSystem">UnitsSystem (class in solcore.units_system.units_system)</a>
 </li>
-      <li><a href="structure.html#solcore.solar_cell.SolarCell.update_junction">update_junction() (solcore.solar_cell.SolarCell method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Optics/tmm.html#solcore.absorption_calculator.tmm_core_vec.unpolarized_RT">unpolarized_RT() (in module solcore.absorption_calculator.tmm_core_vec)</a>
+</li>
+      <li><a href="Solvers/TwoDiode.html#solcore.analytic_solar_cells.diode_equation.update_j0">update_j0() (in module solcore.analytic_solar_cells.diode_equation)</a>
+</li>
+      <li><a href="Structures/structure.html#solcore.solar_cell.SolarCell.update_junction">update_junction() (solcore.solar_cell.SolarCell method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1006,23 +1173,23 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Cauchy.var">var (solcore.absorption_calculator.dielectric_constant_models.Cauchy attribute)</a>
+      <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Cauchy.var">var (solcore.absorption_calculator.dielectric_constant_models.Cauchy attribute)</a>
 
       <ul>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Drude.var">(solcore.absorption_calculator.dielectric_constant_models.Drude attribute)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Drude.var">(solcore.absorption_calculator.dielectric_constant_models.Drude attribute)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Gauss.var">(solcore.absorption_calculator.dielectric_constant_models.Gauss attribute)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Gauss.var">(solcore.absorption_calculator.dielectric_constant_models.Gauss attribute)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Lorentz.var">(solcore.absorption_calculator.dielectric_constant_models.Lorentz attribute)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Lorentz.var">(solcore.absorption_calculator.dielectric_constant_models.Lorentz attribute)</a>
 </li>
-        <li><a href="Absorption/Absorption.html#solcore.absorption_calculator.dielectric_constant_models.Poles.var">(solcore.absorption_calculator.dielectric_constant_models.Poles attribute)</a>
+        <li><a href="Optics/material_optics.html#solcore.absorption_calculator.dielectric_constant_models.Poles.var">(solcore.absorption_calculator.dielectric_constant_models.Poles attribute)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.vary_well_widths">vary_well_widths() (in module solcore.quantum_mechanics.structure_utilities)</a>
 </li>
-      <li><a href="installation.html#solcore.config_tools.verbose_loading">verbose_loading() (in module solcore.config_tools)</a>
+      <li><a href="Installation/installation.html#solcore.config_tools.verbose_loading">verbose_loading() (in module solcore.config_tools)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1030,15 +1197,17 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="installation.html#solcore.config_tools.welcome_message">welcome_message() (in module solcore.config_tools)</a>
+      <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.graphics.wavefunctions_graph">wavefunctions_graph() (in module solcore.quantum_mechanics.graphics)</a>
+</li>
+      <li><a href="Installation/installation.html#solcore.config_tools.welcome_message">welcome_message() (in module solcore.config_tools)</a>
 </li>
       <li><a href="QM/Schrodinger.html#solcore.quantum_mechanics.structure_utilities.well_regions">well_regions() (in module solcore.quantum_mechanics.structure_utilities)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="structure.html#solcore.structure.Structure.width">width() (solcore.structure.Structure method)</a>
+      <li><a href="Structures/structure.html#solcore.structure.Structure.width">width() (solcore.structure.Structure method)</a>
 </li>
-      <li><a href="structure.html#solcore.source_managed_class.wrapped">wrapped (class in solcore.source_managed_class)</a>
+      <li><a href="Structures/structure.html#solcore.source_managed_class.wrapped">wrapped (class in solcore.source_managed_class)</a>
 </li>
       <li><a href="Systems/Units.html#solcore.units_system.units_system.WrongDimensionError">WrongDimensionError</a>
 </li>
@@ -1061,7 +1230,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

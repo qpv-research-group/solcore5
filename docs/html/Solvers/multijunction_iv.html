@@ -1,0 +1,273 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Multi-junction electrical solver &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="QW unit creator" href="QWunit.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="QWunit.html" title="QW unit creator"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="solving_solar_cells.html" accesskey="U">Solar cell solvers</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="solving_solar_cells.html">Solar cell solvers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="detailed_balance.html">Detailed balance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TwoDiode.html">2 diode equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="depletion.html">Depletion approximation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Multi-junction electrical solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solving_solar_cells.html#module-solcore.solar_cell_solver">The solar cell solver module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solving_solar_cells.html#solver-options">Solver options</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="QWunit.html"
+                        title="previous chapter">QW unit creator</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Solvers/multijunction_iv.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="multi-junction-electrical-solver">
+<h1>Multi-junction electrical solver<a class="headerlink" href="#multi-junction-electrical-solver" title="Permalink to this headline">¶</a></h1>
+<p>﻿A complete photovoltaic solar cell can include one or more junctions, metal contacts, optical layers (including anti-reflective coatings and nano-photonic structures) and tunnel junctions. The junctions, in turn, might range from simple PN homojunctions to complex heterojunctions, including multi-quantum well structures. The solvers described so far only calculate the properties of single junction devices. To combine them into a multi-junction device, it is necessary to consider that the individual junctions are electrically connected in series and the potential coupling of light emitted by the wider bandgap junctions into those with smaller bandgap.</p>
+<div class="section" id="module-solcore.analytic_solar_cells.tunnel_junctions">
+<span id="tunnel-junctions"></span><h2>Tunnel junctions<a class="headerlink" href="#module-solcore.analytic_solar_cells.tunnel_junctions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="solcore.analytic_solar_cells.tunnel_junctions.resistive_tunnel_junction">
+<code class="descclassname">solcore.analytic_solar_cells.tunnel_junctions.</code><code class="descname">resistive_tunnel_junction</code><span class="sig-paren">(</span><em>junction</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/analytic_solar_cells/tunnel_junctions.html#resistive_tunnel_junction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.analytic_solar_cells.tunnel_junctions.resistive_tunnel_junction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the IV curve of a tunnel junction when it is modelled as a simple resistor. The minimum resistance of the junction is always 1e-16.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>junction</strong> – A junction object.</li>
+<li><strong>options</strong> – Solver options.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.analytic_solar_cells.tunnel_junctions.parametric_tunnel_junction">
+<code class="descclassname">solcore.analytic_solar_cells.tunnel_junctions.</code><code class="descname">parametric_tunnel_junction</code><span class="sig-paren">(</span><em>junction</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/analytic_solar_cells/tunnel_junctions.html#parametric_tunnel_junction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.analytic_solar_cells.tunnel_junctions.parametric_tunnel_junction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the IV curve of a tunnel junction when it is modelled using a set of empirical parameters, such as peak curent and voltage, valley current and voltage, etc. The total current of the tunnel junction is summ of 3 components: the tunnel current, the excess current and the difussion current.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>junction</strong> – A junction object.</li>
+<li><strong>options</strong> – Solver options.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.analytic_solar_cells.tunnel_junctions.external_tunnel_junction">
+<code class="descclassname">solcore.analytic_solar_cells.tunnel_junctions.</code><code class="descname">external_tunnel_junction</code><span class="sig-paren">(</span><em>junction</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/analytic_solar_cells/tunnel_junctions.html#external_tunnel_junction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.analytic_solar_cells.tunnel_junctions.external_tunnel_junction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the IV curve of a tunnel junction when it is modelled with external data. The external voltage and current must be defined with the input parameters external_voltage and external_current, respectively. It assumes that the interesting part of the curve is in the 1st quadrant (V&gt;0 and I&gt;0).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>junction</strong> – A junction object.</li>
+<li><strong>options</strong> – Solver options.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.analytic_solar_cells.tunnel_junctions.example_resistive_tunnel_junction">
+<code class="descclassname">solcore.analytic_solar_cells.tunnel_junctions.</code><code class="descname">example_resistive_tunnel_junction</code><span class="sig-paren">(</span><em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/analytic_solar_cells/tunnel_junctions.html#example_resistive_tunnel_junction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.analytic_solar_cells.tunnel_junctions.example_resistive_tunnel_junction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.analytic_solar_cells.tunnel_junctions.example_parametric_tunnel_junction">
+<code class="descclassname">solcore.analytic_solar_cells.tunnel_junctions.</code><code class="descname">example_parametric_tunnel_junction</code><span class="sig-paren">(</span><em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/analytic_solar_cells/tunnel_junctions.html#example_parametric_tunnel_junction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.analytic_solar_cells.tunnel_junctions.example_parametric_tunnel_junction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-solcore.analytic_solar_cells.IV">
+<span id="multi-junction-iv-calculator"></span><h2>Multi-junction IV calculator<a class="headerlink" href="#module-solcore.analytic_solar_cells.IV" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="solcore.analytic_solar_cells.IV.iv_multijunction">
+<code class="descclassname">solcore.analytic_solar_cells.IV.</code><code class="descname">iv_multijunction</code><span class="sig-paren">(</span><em>solar_cell</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/analytic_solar_cells/IV.html#iv_multijunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.analytic_solar_cells.IV.iv_multijunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the overall IV characteristics of any number of junctions numerically at the requested voltage
+points. If photocurrent is not provided, the resultant IV characteristics are purely recombination currents,
+otherwise light IVs are returned.</p>
+<dl class="docutils">
+<dt>In the end, the soalr_cell object is updated with an “iv” attribute containing a dictionary with:</dt>
+<dd>“IV”: (V, I) Calculated IV characteristics
+“junction IV”: [(V junc 1, I junc 1), (V junc 2, I junc 2), …]
+“Rseries IV”: (V, I) Calculated IV characteristics of the series resistance
+“coupled IV”: For each junction but for the first one, a list with the coupled current coming form the upper junctions.
+“Isc”, Voc”, “P”, “FF” and “Eta”: In case of mpp = True and light IV.</dd>
+<dt>The sign convention is:</dt>
+<dd><ul class="first last simple">
+<li>Photocurrents: Positive.</li>
+<li>Dark Currents: Negative</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_cell</strong> – A solar cell object with one or more junctions. The IV of the individual junctions must have been calculated already.</li>
+<li><strong>kwargs</strong> – A dictionary containing, at least, the following elements:
+- mpp: (Boolean) If Isc, Voc, FF, Vmpp, Impp and Pmpp must be calculated.
+- voltages: Array of voltages in which to calculate the data
+- light_iv: (Boolean) if light IV is being calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.analytic_solar_cells.IV.solve_radiative_coupling">
+<code class="descclassname">solcore.analytic_solar_cells.IV.</code><code class="descname">solve_radiative_coupling</code><span class="sig-paren">(</span><em>solar_cell</em>, <em>options</em>, <em>V_junction_array</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/analytic_solar_cells/IV.html#solve_radiative_coupling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.analytic_solar_cells.IV.solve_radiative_coupling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the radiative IV curve of a MJ solar cell in the presence of radiative coupling between subcells.</p>
+<p>WARNING: Tunnel junctions are not implemented in the radiative coupling mode, yet.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_cell</strong> – The MJ solar cell structure</li>
+<li><strong>options</strong> – General options of the solver</li>
+<li><strong>V_junction_array</strong> – Array with all the junction voltages without coupling. Only the first element is used, actually.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tupple with J, V_junction_array in the presence of coupling and the coupled current</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="QWunit.html" title="QW unit creator"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="solving_solar_cells.html" >Solar cell solvers</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

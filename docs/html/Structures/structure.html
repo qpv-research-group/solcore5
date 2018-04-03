@@ -1,0 +1,581 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Structures and support classes &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Materials and units" href="../Systems/systems.html" />
+    <link rel="prev" title="Tutorial" href="../tutorial.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../Systems/systems.html" title="Materials and units"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../tutorial.html" title="Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Structures and support classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#structure">Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solar-cells">Solar Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#science-tracker">Science tracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-classes">Other classes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../tutorial.html"
+                        title="previous chapter">Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../Systems/systems.html"
+                        title="next chapter">Materials and units</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Structures/structure.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="structures-and-support-classes">
+<h1>Structures and support classes<a class="headerlink" href="#structures-and-support-classes" title="Permalink to this headline">¶</a></h1>
+<p>While Solcore is mostly about physics, it also needs a lot of tools that keep everiting working together properly or that support the creation and management of solar cell structure. Here you can find (some) information about all those extra bits and pieces Solcore is made of.</p>
+<div class="toctree-wrapper compound">
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Structures and support classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#structure">Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solar-cells">Solar Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#science-tracker">Science tracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-classes">Other classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="structure">
+<h2>Structure<a class="headerlink" href="#structure" title="Permalink to this headline">¶</a></h2>
+<p>Solcore calculates optical and electrical properties of solar cells or, in other words, of a certain combination of layers made of different materials and serving to specific purposes. The <em>structure</em> module contains tha basic building blocks that allow you to make a solar cell structure and calculate their properties. Their use will be explained with examples in other packages - such as in the quantum efficiency calculator or the Poisson-drift-diffusion solver.</p>
+<span class="target" id="module-solcore.structure"></span><dl class="class">
+<dt id="solcore.structure.Structure">
+<em class="property">class </em><code class="descclassname">solcore.structure.</code><code class="descname">Structure</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#Structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.Structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subclass of lists that stores information of a ‘sample’ consisting of several ‘layers’.</p>
+<dl class="method">
+<dt id="solcore.structure.Structure.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>new_layer</em>, <em>layer_label=None</em>, <em>repeats=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#Structure.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.Structure.append" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.structure.Structure.append_multiple">
+<code class="descname">append_multiple</code><span class="sig-paren">(</span><em>layers</em>, <em>layer_labels=None</em>, <em>repeats=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#Structure.append_multiple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.Structure.append_multiple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.structure.Structure.width">
+<code class="descname">width</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#Structure.width"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.Structure.width" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="solcore.structure.Structure.relative_widths">
+<code class="descname">relative_widths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#Structure.relative_widths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.Structure.relative_widths" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="solcore.structure.Layer">
+<em class="property">class </em><code class="descclassname">solcore.structure.</code><code class="descname">Layer</code><span class="sig-paren">(</span><em>width</em>, <em>material</em>, <em>role=None</em>, <em>geometry=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#Layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.Layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that stores the information about layers of materials, such as thickness and composition.
+It is the building block of the ‘Structures’</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="solcore.structure.Junction">
+<em class="property">class </em><code class="descclassname">solcore.structure.</code><code class="descname">Junction</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#Junction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.Junction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that groups together the layers that make a junction. Esentially, it is just a list with attributes you can update.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="solcore.structure.TunnelJunction">
+<em class="property">class </em><code class="descclassname">solcore.structure.</code><code class="descname">TunnelJunction</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#TunnelJunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.TunnelJunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that contains the minimum definitions for a tunnel junction, ie. a series resistance in our case.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.structure.InLineComposition">
+<code class="descclassname">solcore.structure.</code><code class="descname">InLineComposition</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#InLineComposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.InLineComposition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hack to use the Adachi-alfa calculator, provinding the composition as a single string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layer</strong> – A layer as defined in the Device structures of the PDD solver</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A mterial string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.structure.SolcoreMaterialToStr">
+<code class="descclassname">solcore.structure.</code><code class="descname">SolcoreMaterialToStr</code><span class="sig-paren">(</span><em>material_input</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#SolcoreMaterialToStr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.SolcoreMaterialToStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate a solcore material into something than can be easily stored in a file and read</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>material_input</strong> – A solcore material</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary with the name, consituents and composition of the material</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.structure.ToSolcoreMaterial">
+<code class="descclassname">solcore.structure.</code><code class="descname">ToSolcoreMaterial</code><span class="sig-paren">(</span><em>comp</em>, <em>T</em>, <em>execute=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#ToSolcoreMaterial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.ToSolcoreMaterial" title="Permalink to this definition">¶</a></dt>
+<dd><p>It provides a solcore material out of its string composition. The output can be a string with the command or
+a solcore material itself.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>comp</strong> – A Solcore material as a string</li>
+<li><strong>T</strong> – The temperature</li>
+<li><strong>execute</strong> – If a Solcore material must be provided or just a string that would do that.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A Solcore material or a string with the command to calculate the solcore material</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.structure.ToLayer">
+<code class="descclassname">solcore.structure.</code><code class="descname">ToLayer</code><span class="sig-paren">(</span><em>width</em>, <em>material</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#ToLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.ToLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a Layer based on strings containing the width, the material and the role</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>width</strong> – Width of the layer</li>
+<li><strong>material</strong> – Material of the layer, as a string</li>
+<li><strong>role</strong> – The role of the layer</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A Solcore Layer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.structure.ToStructure">
+<code class="descclassname">solcore.structure.</code><code class="descname">ToStructure</code><span class="sig-paren">(</span><em>device</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/structure.html#ToStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.structure.ToStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate the device object (as used by the PDD solver) into a list of solcore Structure that can be used in
+other plugings. Only translate the composition, for now. It works only on non-nested device structures
+(QW, for example, but not in devices with QW)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>device</strong> – A solcore device structure as used by the PDD solver</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Solcore Structure</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Another, very useful class is the <em>state_object</em> which makes the use of dictionaries very easy.</p>
+<span class="target" id="module-solcore.state"></span><dl class="class">
+<dt id="solcore.state.State">
+<em class="property">class </em><code class="descclassname">solcore.state.</code><code class="descname">State</code><a class="reference internal" href="../_modules/solcore/state.html#State"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.state.State" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class defines a convent way of expanding the attributes of an object, usually fixed during the definition of
+the class. In this case, the class is just a dictionary - a special type of it - and attributes are expanded by
+adding new keys to it.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="solar-cells">
+<h2>Solar Cells<a class="headerlink" href="#solar-cells" title="Permalink to this headline">¶</a></h2>
+<p>Finally, the higher level building block of solar cells is contained in the <em>solar_cell</em> module.</p>
+<span class="target" id="module-solcore.solar_cell"></span><dl class="function">
+<dt id="solcore.solar_cell.default_GaAs">
+<code class="descclassname">solcore.solar_cell.</code><code class="descname">default_GaAs</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell.html#default_GaAs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell.default_GaAs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="solcore.solar_cell.SolarCell">
+<em class="property">class </em><code class="descclassname">solcore.solar_cell.</code><code class="descname">SolarCell</code><span class="sig-paren">(</span><em>layers=None</em>, <em>T=298</em>, <em>cell_area=1</em>, <em>reflectivity=None</em>, <em>shading=0</em>, <em>substrate=None</em>, <em>R_series=0</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell.html#SolarCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell.SolarCell" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is almost identical to the basic Structure class in Solcore (it is a subclass of it, actually) but implementing some default parameter values and control about the types of layers. It should work anywhere where a Structure object works.</p>
+<dl class="method">
+<dt id="solcore.solar_cell.SolarCell.sort_layer_type">
+<code class="descname">sort_layer_type</code><span class="sig-paren">(</span><em>layer</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell.html#SolarCell.sort_layer_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell.SolarCell.sort_layer_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the layer in different categories, depending on its type, and keeps record on the indices of that type of layer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>layer</strong> – The layer to check</li>
+<li><strong>i</strong> – The index of that layer</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.solar_cell.SolarCell.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>new_layer</em>, <em>layer_label=None</em>, <em>repeats=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell.html#SolarCell.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell.SolarCell.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends a layer to the structure a certain number of times to the structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>new_layer</strong> – The layer to append.</li>
+<li><strong>layer_label</strong> – An optional label for that layer.</li>
+<li><strong>repeats</strong> – Number of times to repeat add the layer.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.solar_cell.SolarCell.append_multiple">
+<code class="descname">append_multiple</code><span class="sig-paren">(</span><em>layers</em>, <em>layer_labels=None</em>, <em>repeats=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell.html#SolarCell.append_multiple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell.SolarCell.append_multiple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends multiple layers a certain umber of times to the structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>layers</strong> – A list with the layers to append.</li>
+<li><strong>layer_labels</strong> – An optional list with the labels. If present, it must have the same length that the layers list.</li>
+<li><strong>repeats</strong> – Number of times to add this set of layers.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.solar_cell.SolarCell.update_junction">
+<code class="descname">update_junction</code><span class="sig-paren">(</span><em>junction</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/solar_cell.html#SolarCell.update_junction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.solar_cell.SolarCell.update_junction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds or updates the attributes - not the layers - of a junction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>junction</strong> – The junction to update.</li>
+<li><strong>kwargs</strong> – The attributes to update.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="science-tracker">
+<h2>Science tracker<a class="headerlink" href="#science-tracker" title="Permalink to this headline">¶</a></h2>
+<p>Solcore is an original work, but the equations it implements and the data it uses have been often published elsewere. The Science tracker allows you to keep track of those references and check yourself their origin and assumpions.</p>
+<span class="target" id="module-solcore.science_tracker"></span><dl class="function">
+<dt id="solcore.science_tracker.hexID">
+<code class="descclassname">solcore.science_tracker.</code><code class="descname">hexID</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/science_tracker.html#hexID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.science_tracker.hexID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.science_tracker.science_reference">
+<code class="descclassname">solcore.science_tracker.</code><code class="descname">science_reference</code><span class="sig-paren">(</span><em>short_purpose</em>, <em>reference</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/science_tracker.html#science_reference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.science_tracker.science_reference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Marker acting as a reference for the origin of specific information</p>
+<p>Acts as a marker in code where particular alogrithms/data/… originates. General execution of code silently passes
+these markers, but remembers how and where they were called. Which markers were passed in a particular program run
+can be recalled with print_references().</p>
+<p>Arguments:
+short_purpose: Identify the thing being referenced (string)
+reference: The reference itself, in any sensible format.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.science_tracker.print_references">
+<code class="descclassname">solcore.science_tracker.</code><code class="descname">print_references</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/science_tracker.html#print_references"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.science_tracker.print_references" title="Permalink to this definition">¶</a></dt>
+<dd><p>recall the science_reference markers passed, print out the referenes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.science_tracker.track_science">
+<code class="descclassname">solcore.science_tracker.</code><code class="descname">track_science</code><span class="sig-paren">(</span><em>track_each_call=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/science_tracker.html#track_science"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.science_tracker.track_science" title="Permalink to this definition">¶</a></dt>
+<dd><p>configure science references – determine whether or not each call separately or only the first for each
+reference.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="other-classes">
+<h2>Other classes<a class="headerlink" href="#other-classes" title="Permalink to this headline">¶</a></h2>
+<p>Solcore depends on many other classes and functions that work in the background and keep everything together. Some of them are used directly, others are completely transparent but make Solcore work they way it does. Unfortunately, their documentation is not very extensive or explicit, so feel free to explore the source code to understand what they are doing and how.</p>
+<span class="target" id="module-solcore.interpolate"></span><dl class="class">
+<dt id="solcore.interpolate.interp1d">
+<em class="property">class </em><code class="descclassname">solcore.interpolate.</code><code class="descname">interp1d</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>kind='linear'</em>, <em>axis=-1</em>, <em>copy=True</em>, <em>bounds_error=False</em>, <em>fill_value=nan</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/interpolate.html#interp1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.interpolate.interp1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate a 1D function.</p>
+<p>splrep, splev - spline interpolation based on FITPACK
+UnivariateSpline - a more recent wrapper of the FITPACK routines</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="solcore.interpolate.BilinearInterpolation">
+<em class="property">class </em><code class="descclassname">solcore.interpolate.</code><code class="descname">BilinearInterpolation</code><span class="sig-paren">(</span><em>x=None</em>, <em>y=None</em>, <em>z=None</em>, <em>fill_value=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/interpolate.html#BilinearInterpolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.interpolate.BilinearInterpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>docstring for BilinearInterpolation</p>
+</dd></dl>
+
+<span class="target" id="module-solcore.crystals"></span><p>Calculates the k-points of the Brillouin zone in a given direction</p>
+<dl class="function">
+<dt id="solcore.crystals.brillouin_critical_points">
+<code class="descclassname">solcore.crystals.</code><code class="descname">brillouin_critical_points</code><span class="sig-paren">(</span><em>a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/crystals.html#brillouin_critical_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.crystals.brillouin_critical_points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.crystals.traverse_brillouin">
+<code class="descclassname">solcore.crystals.</code><code class="descname">traverse_brillouin</code><span class="sig-paren">(</span><em>a</em>, <em>traverse_order=('L'</em>, <em>'Gamma'</em>, <em>'X'</em>, <em>'W'</em>, <em>'K'</em>, <em>'Gamma')</em>, <em>steps=30</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/crystals.html#traverse_brillouin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.crystals.traverse_brillouin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.crystals.kvector">
+<code class="descclassname">solcore.crystals.</code><code class="descname">kvector</code><span class="sig-paren">(</span><em>a</em>, <em>t=0</em>, <em>p=3.141592653589793</em>, <em>fraction=0.2</em>, <em>points=50</em>, <em>vin=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/crystals.html#kvector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.crystals.kvector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the k.txt points in a direction given by the spheric angles theta (t) and phi (p).</p>
+<p>The fraction of the Brilluin zone calculated is given by “fraction” and the number of points by “points”.
+If “vin” is given, the direction of interest is taken from this vector.</p>
+</dd></dl>
+
+<span class="target" id="module-solcore.smooth"></span><dl class="function">
+<dt id="solcore.smooth.smooth">
+<code class="descclassname">solcore.smooth.</code><code class="descname">smooth</code><span class="sig-paren">(</span><em>x</em>, <em>window_len</em>, <em>window='hanning'</em>, <em>blurmode='even'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/smooth.html#smooth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.smooth.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>smooth the data using a window with requested size.</p>
+<p>This method is based on the convolution of a scaled window with the signal.
+The signal is prepared by introducing reflected copies of the signal 
+(with the window size) in both ends so that transient parts are minimized
+in the begining and end part of the output signal.</p>
+<dl class="docutils">
+<dt>input:</dt>
+<dd><p class="first">x: the input signal 
+window_len: the dimension of the smoothing window; should be an odd integer
+window: the type of window from ‘flat’, ‘hanning’, ‘hamming’, ‘bartlett’, ‘blackman’</p>
+<blockquote class="last">
+<div>flat window will produce a moving average smoothing.</div></blockquote>
+</dd>
+<dt>output:</dt>
+<dd>the smoothed signal</dd>
+</dl>
+<p>example:</p>
+<p>t=linspace(-2,2,0.1)
+x=sin(t)+randn(len(t))*0.1
+y=smooth(x)</p>
+<p>see also:</p>
+<p>numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+scipy.signal.lfilter</p>
+<p>TODO: the window parameter could be the window itself if an array instead of a string</p>
+</dd></dl>
+
+<span class="target" id="module-solcore.singleton"></span><dl class="class">
+<dt id="solcore.singleton.Singleton">
+<em class="property">class </em><code class="descclassname">solcore.singleton.</code><code class="descname">Singleton</code><a class="reference internal" href="../_modules/solcore/singleton.html#Singleton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.singleton.Singleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>A metaclass that restricts children to one instance.
+Attempting to create a second instance simply returns the first instance.</p>
+<dl class="method">
+<dt id="solcore.singleton.Singleton.breakout">
+<code class="descname">breakout</code><span class="sig-paren">(</span><em>method</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/singleton.html#Singleton.breakout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.singleton.Singleton.breakout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for singleton methods that should be available in global scope</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="solcore.singleton.Singleton.Redirect_to_singleton_method">
+<em class="property">class </em><code class="descname">Redirect_to_singleton_method</code><span class="sig-paren">(</span><em>cls</em>, <em>function</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/singleton.html#Singleton.Redirect_to_singleton_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.singleton.Singleton.Redirect_to_singleton_method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that wraps the method that has been defined as ‘breakout’ with its own class, so it can be called as a
+standalone function.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="solcore.singleton.Singleton.breakoutFunctions">
+<em class="property">class </em><code class="descname">breakoutFunctions</code><span class="sig-paren">(</span><em>namespace</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/singleton.html#Singleton.breakoutFunctions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.singleton.Singleton.breakoutFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for singletons which should make some of their methods available in a certain namespace.
+This is identical to the ‘breakoutClass’ function defined in ‘source_managed_class’, but has the option of
+making the function available not in the global scope but somewhere else.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-solcore.source_managed_class"></span><p>Another short python 3.4 travesty by Markus.</p>
+<dl class="class">
+<dt id="solcore.source_managed_class.wrapped">
+<em class="property">class </em><code class="descclassname">solcore.source_managed_class.</code><code class="descname">wrapped</code><span class="sig-paren">(</span><em>cls</em>, <em>function</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/source_managed_class.html#wrapped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.source_managed_class.wrapped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that wraps the method that has been defined as ‘breakout’ with its own class, so it can be called as a
+standalone function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.source_managed_class.breakoutClass">
+<code class="descclassname">solcore.source_managed_class.</code><code class="descname">breakoutClass</code><span class="sig-paren">(</span><em>cls</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/source_managed_class.html#breakoutClass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.source_managed_class.breakoutClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator definition that indicates the a class contains functions that should be available in the global scope.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.source_managed_class.breakout">
+<code class="descclassname">solcore.source_managed_class.</code><code class="descname">breakout</code><span class="sig-paren">(</span><em>plainFunction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/source_managed_class.html#breakout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.source_managed_class.breakout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator definition that indicates that a given method of a class should be available in the global scope</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="solcore.source_managed_class.SourceManagedClass">
+<em class="property">class </em><code class="descclassname">solcore.source_managed_class.</code><code class="descname">SourceManagedClass</code><a class="reference internal" href="../_modules/solcore/source_managed_class.html#SourceManagedClass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.source_managed_class.SourceManagedClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class that manages the sources of Solcore, from the materials to the unit conversion system.
+It must be defined as a derived class from Singleton so only one instance of this class containing all sources
+exists at any time.</p>
+<dl class="method">
+<dt id="solcore.source_managed_class.SourceManagedClass.add_source">
+<code class="descname">add_source</code><span class="sig-paren">(</span><em>name</em>, <em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/source_managed_class.html#SourceManagedClass.add_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.source_managed_class.SourceManagedClass.add_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a materials database file in ConfigParser format with case-sensitive options.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.source_managed_class.SourceManagedClass.remove_source">
+<code class="descname">remove_source</code><span class="sig-paren">(</span><em>name</em>, <em>reread=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/source_managed_class.html#SourceManagedClass.remove_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.source_managed_class.SourceManagedClass.remove_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a source from the database.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.source_managed_class.SourceManagedClass.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/source_managed_class.html#SourceManagedClass.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.source_managed_class.SourceManagedClass.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the sources and add its contents to the database.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.source_managed_class.SourceManagedClass.initialise_cache">
+<code class="descname">initialise_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/source_managed_class.html#SourceManagedClass.initialise_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.source_managed_class.SourceManagedClass.initialise_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialises th database, kept in a ConfigParser format. Quite convenient if you think about it.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../Systems/systems.html" title="Materials and units"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../tutorial.html" title="Tutorial"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

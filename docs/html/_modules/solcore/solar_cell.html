@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.solar_cell &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.solar_cell &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -83,7 +80,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="default_GaAs"><a class="viewcode-back" href="../../structure.html#solcore.solar_cell.default_GaAs">[docs]</a><span class="k">def</span> <span class="nf">default_GaAs</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+<div class="viewcode-block" id="default_GaAs"><a class="viewcode-back" href="../../Structures/structure.html#solcore.solar_cell.default_GaAs">[docs]</a><span class="k">def</span> <span class="nf">default_GaAs</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
     <span class="c1"># We create the other materials we need for the device</span>
     <span class="n">window</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s1">&#39;AlGaAs&#39;</span><span class="p">)(</span><span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">Na</span><span class="o">=</span><span class="mf">5e24</span><span class="p">,</span> <span class="n">Al</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
     <span class="n">p_GaAs</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s1">&#39;GaAs&#39;</span><span class="p">)(</span><span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">Na</span><span class="o">=</span><span class="mf">1e24</span><span class="p">)</span>
@@ -98,7 +95,7 @@
     <span class="k">return</span> <span class="n">output</span></div>
 
 
-<div class="viewcode-block" id="SolarCell"><a class="viewcode-back" href="../../structure.html#solcore.solar_cell.SolarCell">[docs]</a><span class="k">class</span> <span class="nc">SolarCell</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
+<div class="viewcode-block" id="SolarCell"><a class="viewcode-back" href="../../Structures/structure.html#solcore.solar_cell.SolarCell">[docs]</a><span class="k">class</span> <span class="nc">SolarCell</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; This class is almost identical to the basic Structure class in Solcore (it is a subclass of it, actually) but implementing some default parameter values and control about the types of layers. It should work anywhere where a Structure object works.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -116,10 +113,7 @@
 <span class="sd">        :param kwargs: Other possible attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">default_GaAs</span><span class="p">(</span><span class="n">T</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s2">&quot;Layers must be provided inside a list, even if it is just one layer.&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s2">&quot;Layers must be provided inside a list, even if it is just one layer.&quot;</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">SolarCell</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
@@ -130,7 +124,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reflectivity</span> <span class="o">=</span> <span class="n">reflectivity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">junctions</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">junction_indices</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tunel_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tunnel_indices</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">substrate</span> <span class="o">=</span> <span class="n">substrate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">R_series</span> <span class="o">=</span> <span class="n">R_series</span>
 
@@ -138,7 +132,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">sort_layer_type</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">R_series</span> <span class="o">+=</span> <span class="n">element</span><span class="o">.</span><span class="n">R_series</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="s1">&#39;R_series&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="SolarCell.sort_layer_type"><a class="viewcode-back" href="../../structure.html#solcore.solar_cell.SolarCell.sort_layer_type">[docs]</a>    <span class="k">def</span> <span class="nf">sort_layer_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="SolarCell.sort_layer_type"><a class="viewcode-back" href="../../Structures/structure.html#solcore.solar_cell.SolarCell.sort_layer_type">[docs]</a>    <span class="k">def</span> <span class="nf">sort_layer_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Sorts the layer in different categories, depending on its type, and keeps record on the indices of that type of layer.</span>
 
 <span class="sd">        :param layer: The layer to check</span>
@@ -150,9 +144,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">junction_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">junctions</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span> <span class="o">==</span> <span class="n">TunnelJunction</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tunel_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tunnel_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SolarCell.append"><a class="viewcode-back" href="../../structure.html#solcore.solar_cell.SolarCell.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_layer</span><span class="p">,</span> <span class="n">layer_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="SolarCell.append"><a class="viewcode-back" href="../../Structures/structure.html#solcore.solar_cell.SolarCell.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_layer</span><span class="p">,</span> <span class="n">layer_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Appends a layer to the structure a certain number of times to the structure.</span>
 
 <span class="sd">        :param new_layer: The layer to append.</span>
@@ -165,7 +159,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">sort_layer_type</span><span class="p">(</span><span class="n">new_layer</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">SolarCell</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_layer</span><span class="p">,</span> <span class="n">layer_label</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SolarCell.append_multiple"><a class="viewcode-back" href="../../structure.html#solcore.solar_cell.SolarCell.append_multiple">[docs]</a>    <span class="k">def</span> <span class="nf">append_multiple</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">layer_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="SolarCell.append_multiple"><a class="viewcode-back" href="../../Structures/structure.html#solcore.solar_cell.SolarCell.append_multiple">[docs]</a>    <span class="k">def</span> <span class="nf">append_multiple</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">layer_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Appends multiple layers a certain umber of times to the structure.</span>
 
 <span class="sd">        :param layers: A list with the layers to append.</span>
@@ -188,7 +182,7 @@
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">layer_labels</span><span class="p">[</span><span class="n">j</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="SolarCell.update_junction"><a class="viewcode-back" href="../../structure.html#solcore.solar_cell.SolarCell.update_junction">[docs]</a>    <span class="k">def</span> <span class="nf">update_junction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">junction</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SolarCell.update_junction"><a class="viewcode-back" href="../../Structures/structure.html#solcore.solar_cell.SolarCell.update_junction">[docs]</a>    <span class="k">def</span> <span class="nf">update_junction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">junction</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Adds or updates the attributes - not the layers - of a junction.</span>
 
 <span class="sd">        :param junction: The junction to update.</span>
@@ -251,7 +245,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

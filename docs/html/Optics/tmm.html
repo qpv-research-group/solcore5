@@ -1,0 +1,750 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Transfer matrix method &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="S4 - Rigorous Coupled Wave Analysis" href="S4doc.html" />
+    <link rel="prev" title="Optical properties of materials" href="material_optics.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="S4doc.html" title="S4 - Rigorous Coupled Wave Analysis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="material_optics.html" title="Optical properties of materials"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="optics.html" accesskey="U">Optical methods</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="material_optics.html"
+                        title="previous chapter">Optical properties of materials</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="S4doc.html"
+                        title="next chapter">S4 - Rigorous Coupled Wave Analysis</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Optics/tmm.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="transfer-matrix-method">
+<h1>Transfer matrix method<a class="headerlink" href="#transfer-matrix-method" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Transfer matrix method</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-solcore.absorption_calculator.transfer_matrix">The OpticStack and the high level TMM optical methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-tmm-interface-for-the-solar-cell-solver">The TMM interface for the solar cell solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-solcore.absorption_calculator.tmm_core_vec">Transfer matrix engine</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="module-solcore.absorption_calculator.transfer_matrix">
+<span id="the-opticstack-and-the-high-level-tmm-optical-methods"></span><h2>The OpticStack and the high level TMM optical methods<a class="headerlink" href="#module-solcore.absorption_calculator.transfer_matrix" title="Permalink to this headline">¶</a></h2>
+<p>This module serves as interface between solcore structures (junctions, layers, materials…) and the
+transfer matrix package developed by Steven Byrnes and included in the PyPi repository.</p>
+<dl class="class">
+<dt id="solcore.absorption_calculator.transfer_matrix.OptiStack">
+<em class="property">class </em><code class="descclassname">solcore.absorption_calculator.transfer_matrix.</code><code class="descname">OptiStack</code><span class="sig-paren">(</span><em>structure=()</em>, <em>no_back_reflexion=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/transfer_matrix.html#OptiStack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.transfer_matrix.OptiStack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that contains an optical structure: a sequence of layers with a thickness and a complex refractive index.</p>
+<p>It serves as an intermediate step between solcore layers and materials and the stack of thicknesses and
+and n and k.txt values necessary to run calculations involving TMM. When creating an OptiStack object, the thicknesses
+of all the layers forming the Solcore structure and the optical data of the materials of the layers are extracted
+and arranged in such a way they can be easily and fastly read by the TMM functions.</p>
+<p>In addition to a solcore structure with Layers, it can also take a list where each element represent a layer
+written as a list and contains the layer thickness and the dielectrical model, the raw n and k data as a function
+of wavelengths, or a whole Device structure as the type used in the PDD model.</p>
+<p>In summary, this class acepts:</p>
+<blockquote>
+<div><ul class="simple">
+<li>A solcore structure with layers</li>
+<li>A list where each element is [thickness, DielectricModel]</li>
+<li>A list where each element is [thickness, wavelength, n, k]</li>
+<li><dl class="first docutils">
+<dt>A list mixing the above:</dt>
+<dd><dl class="first last docutils">
+<dt>[ [thickness, DielectricModel],</dt>
+<dd>[thickness, wavelength, n, k],
+solcore.Layer,
+solcore.Layer ]</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>This allows for maximum flexibility when creating the optical model, allowing to construct the stack with
+experimental data, modelled data and known material properties from the database.</p>
+<p>Yet anther way of defining the layers mixes experimental data with a DielectricModel within the same layer but in
+spectrally distinct regions. The syntaxis for the layer is:</p>
+<p>layer = [thickness, wavelength, n, k, DielectricModel, mixing]</p>
+<p>where mixing is a list containing three elements: [the mixing point (nm), the mixing width (nm),  zero or one]
+depending if the mixing function should be increasing with the wavelength or decreasing. If increasing (zero), the
+Dielectric model will be used at long wavelengths and the experimental data at short wavelengths. If decreasing
+(one) the oposite is done. The mixing point and mixing width control how smooth is the transition between one and
+the other type of data.</p>
+<p>Extra layers such as he semi-infinite, air-like first and last medium, and a back highly absorbing layer are
+included at runtime to fulfill the requirements of the TMM solver or to solve some of its limitations.</p>
+<dl class="method">
+<dt id="solcore.absorption_calculator.transfer_matrix.OptiStack.get_indices">
+<code class="descname">get_indices</code><span class="sig-paren">(</span><em>wl</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/transfer_matrix.html#OptiStack.get_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.transfer_matrix.OptiStack.get_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the complex refractive index of the stack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wl</strong> – Wavelength of the light in nm.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list with the complex refractive index of each layer, including the semi-infinite front and back</td>
+</tr>
+</tbody>
+</table>
+<p>layers and, opionally, the back absorbing layer used to suppress back surface relfexion.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.absorption_calculator.transfer_matrix.OptiStack.get_widths">
+<code class="descname">get_widths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/transfer_matrix.html#OptiStack.get_widths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.transfer_matrix.OptiStack.get_widths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the widths of the layers of the stack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list with the widths each layer, including the semi-infinite front and back layers and, opionally,</td>
+</tr>
+</tbody>
+</table>
+<p>the back absorbing layer used to suppress back surface relfexion, defined as 1 mm thick.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.absorption_calculator.transfer_matrix.OptiStack.add_layers">
+<code class="descname">add_layers</code><span class="sig-paren">(</span><em>layers</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/transfer_matrix.html#OptiStack.add_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.transfer_matrix.OptiStack.add_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic function to add layers to the OptiStack. Internally, it calls add_solcore_layer,
+add_modelled_layer or add_raw_nk_layer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layers</strong> – A list with the layers to add (even if it is just one layer) It can be one or more and it can</td>
+</tr>
+</tbody>
+</table>
+<p>mixed, Solcore-based and modelled layers.
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.absorption_calculator.transfer_matrix.OptiStack.remove_layer">
+<code class="descname">remove_layer</code><span class="sig-paren">(</span><em>idx</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/transfer_matrix.html#OptiStack.remove_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.transfer_matrix.OptiStack.remove_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes layer with index idx from the OptiStack</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>idx</strong> – Index of the layer to remove</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.absorption_calculator.transfer_matrix.OptiStack.swap_layers">
+<code class="descname">swap_layers</code><span class="sig-paren">(</span><em>idx1</em>, <em>idx2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/transfer_matrix.html#OptiStack.swap_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.transfer_matrix.OptiStack.swap_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps two layers in the OptiStack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>idx1</strong> – The index of one of the layers.</li>
+<li><strong>idx2</strong> – The index of the other.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.transfer_matrix.calculate_rat">
+<code class="descclassname">solcore.absorption_calculator.transfer_matrix.</code><code class="descname">calculate_rat</code><span class="sig-paren">(</span><em>structure</em>, <em>wavelength</em>, <em>angle=0</em>, <em>pol='u'</em>, <em>coherent=True</em>, <em>coherency_list=None</em>, <em>no_back_reflexion=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/transfer_matrix.html#calculate_rat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.transfer_matrix.calculate_rat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the reflected, absorbed and transmitted intensity of the structure for the wavelengths and angles
+defined.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>structure</strong> – A solcore Structure object with layers and materials or a OptiStack object.</li>
+<li><strong>wavelength</strong> – Wavelengths (in nm) in which calculate the data.</li>
+<li><strong>angle</strong> – Angle (in degrees) of the incident light. Default: 0 (normal incidence).</li>
+<li><strong>pol</strong> – Polarisation of the light: ‘s’, ‘p’ or ‘u’. Default: ‘u’ (unpolarised).</li>
+<li><strong>coherent</strong> – If the light is coeherent or not. If not, a coherency list must be added.</li>
+<li><strong>coherency_list</strong> – A list indicating in which layers light should be treated as coeherent (‘c’) and in which</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>incoherent (‘i’). It needs as many elements as layers in the structure.
+:param no_back_reflexion: If reflexion from the back must be supressed. Default=True.
+:return: A dictionary with the R, A and T at the specified wavelengths and angle.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.transfer_matrix.calculate_ellipsometry">
+<code class="descclassname">solcore.absorption_calculator.transfer_matrix.</code><code class="descname">calculate_ellipsometry</code><span class="sig-paren">(</span><em>structure</em>, <em>wavelength</em>, <em>angle</em>, <em>no_back_reflexion=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/transfer_matrix.html#calculate_ellipsometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.transfer_matrix.calculate_ellipsometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the ellipsometric parameters psi and delta. It can only deal with coherent light and the whole stack
+(including back surface) is considered, so caution must be taken when comparing the simulated results with
+experiments where the back surface is rough or layers are thick and coherent light propagation makes no sense.</p>
+<p>The optional argument no_back_reflexion can be included to add an extra layer on the back absorbing all light that
+reaches that position without any reflexion, to remove the reflexion from the back surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>structure</strong> – A solcore structure with layers and materials.</li>
+<li><strong>wavelength</strong> – Wavelengths (in nm) in which calculate the data.</li>
+<li><strong>angle</strong> – A tupple or list with the angles (in degrees) in which to calculate the data.</li>
+<li><strong>no_back_reflexion</strong> – If reflexion from the back must be supressed. Default=True.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A dictionary with psi and delta at the specified wavelengths and angles (2D arrays).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.transfer_matrix.calculate_absorption_profile">
+<code class="descclassname">solcore.absorption_calculator.transfer_matrix.</code><code class="descname">calculate_absorption_profile</code><span class="sig-paren">(</span><em>structure</em>, <em>wavelength</em>, <em>z_limit=None</em>, <em>steps_size=2</em>, <em>dist=None</em>, <em>no_back_reflexion=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/transfer_matrix.html#calculate_absorption_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.transfer_matrix.calculate_absorption_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>It calculates the absorbed energy density within the material. From the documentation:</p>
+<p>‘In principle this has units of [power]/[volume], but we can express it as a multiple of incoming light power
+density on the material, which has units [power]/[area], so that absorbed energy density has units of 1/[length].’</p>
+<p>Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
+calculate_rat as long as the spacial mesh (controlled by steps_thinest_layer) is fine enough. If the structure is
+very thick and the mesh not thin enough, the calculation might diverege at short wavelengths.</p>
+<p>For now, it only works for normal incident, coherent light.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>structure</strong> – A solcore structure with layers and materials.</li>
+<li><strong>wavelength</strong> – Wavelengths in which calculate the data (in nm). An array-like object.</li>
+<li><strong>z_limit</strong> – Maximum value in the z direction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>function of the position and the wavelength.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="the-tmm-interface-for-the-solar-cell-solver">
+<h2>The TMM interface for the solar cell solver<a class="headerlink" href="#the-tmm-interface-for-the-solar-cell-solver" title="Permalink to this headline">¶</a></h2>
+<p>This is the method actually called from the solar cell solver, serving as interface between the solar cell and the lower level TMM formalism. The <a class="reference internal" href="other_methods.html"><span class="doc">Beer-Lambert calculator</span></a>, the <a class="reference internal" href="S4doc.html"><span class="doc">RCWA calculator</span></a> and the <a class="reference internal" href="other_methods.html"><span class="doc">external optics calculator</span></a> (where the user simply adds the reflection and the absorption profile manually) have similar interfaces.</p>
+<span class="target" id="module-solcore.optics.tmm"></span><dl class="function">
+<dt id="solcore.optics.tmm.solve_tmm">
+<code class="descclassname">solcore.optics.tmm.</code><code class="descname">solve_tmm</code><span class="sig-paren">(</span><em>solar_cell</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/optics/tmm.html#solve_tmm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.optics.tmm.solve_tmm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the reflection, transmission and absorption of a solar cell object using the transfer matrix method. Internally, it creates an OptiStack and then it calculates the optical properties of the whole structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solar_cell</strong> – A solar_cell object</li>
+<li><strong>options</strong> – Options for the solver</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.optics.tmm.absorbed">
+<code class="descclassname">solcore.optics.tmm.</code><code class="descname">absorbed</code><span class="sig-paren">(</span><em>self</em>, <em>z</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/optics/tmm.html#absorbed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.optics.tmm.absorbed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.optics.tmm.calculate_absorption_tmm">
+<code class="descclassname">solcore.optics.tmm.</code><code class="descname">calculate_absorption_tmm</code><span class="sig-paren">(</span><em>tmm_out</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/optics/tmm.html#calculate_absorption_tmm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.optics.tmm.calculate_absorption_tmm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-solcore.absorption_calculator.tmm_core_vec">
+<span id="transfer-matrix-engine"></span><h2>Transfer matrix engine<a class="headerlink" href="#module-solcore.absorption_calculator.tmm_core_vec" title="Permalink to this headline">¶</a></h2>
+<p>This module is a (partly) vectorised version of the code written by Steven Byrnes.
+All credit of the algorithm, testing, etc. goes to him. For more details, visit:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://arxiv.org/abs/1603.02720">https://arxiv.org/abs/1603.02720</a></li>
+<li><a class="reference external" href="http://sjbyrnes.com">http://sjbyrnes.com</a></li>
+<li>For information see the docstring of each function, and also see manual.pdf</li>
+</ul>
+<p>The most two important functions are:</p>
+<p>coh_tmm(…) – the transfer-matrix-method calculation in the coherent
+case (i.e. thin films)</p>
+<p>inc_tmm(…) – the transfer-matrix-method calculation in the incoherent
+case (i.e. films tens or hundreds of wavelengths thick, or whose
+thickness is not very uniform. –&gt; THIS FUNCTION IS NOT VECTORISED, YET</p>
+<p>These functions are all imported into the main package (tmm) namespace,
+so you can call them with tmm.coh_tmm(…) etc.</p>
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.make_2x2_array">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">make_2x2_array</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>d</em>, <em>dtype=&lt;class 'float'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#make_2x2_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.make_2x2_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a 2x2 numpy array of [[a,b],[c,d]]</p>
+<p>Same as “numpy.array([[a,b],[c,d]], dtype=float)”, but ten times faster</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.snell">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">snell</code><span class="sig-paren">(</span><em>n_1</em>, <em>n_2</em>, <em>th_1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#snell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.snell" title="Permalink to this definition">¶</a></dt>
+<dd><p>return angle theta in layer 2 with refractive index n_2, assuming
+it has angle th_1 in layer with refractive index n_1. Use Snell’s law. Note
+that “angles” may be complex!!</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.list_snell">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">list_snell</code><span class="sig-paren">(</span><em>n_list</em>, <em>th_0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#list_snell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.list_snell" title="Permalink to this definition">¶</a></dt>
+<dd><p>return list of angle theta in each layer based on angle th_0 in layer 0,
+using Snell’s law. n_list is index of refraction of each layer. Note that
+“angles” may be complex!!</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.interface_r">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">interface_r</code><span class="sig-paren">(</span><em>polarization</em>, <em>n_i</em>, <em>n_f</em>, <em>th_i</em>, <em>th_f</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#interface_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.interface_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>reflection amplitude (from Fresnel equations)</p>
+<p>polarization is either “s” or “p” for polarization</p>
+<p>n_i, n_f are (complex) refractive index for incident and final</p>
+<p>th_i, th_f are (complex) propegation angle for incident and final
+(in radians, where 0=normal). “th” stands for “theta”.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.interface_t">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">interface_t</code><span class="sig-paren">(</span><em>polarization</em>, <em>n_i</em>, <em>n_f</em>, <em>th_i</em>, <em>th_f</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#interface_t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.interface_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>transmission amplitude (frem Fresnel equations)</p>
+<p>polarization is either “s” or “p” for polarization</p>
+<p>n_i, n_f are (complex) refractive index for incident and final</p>
+<p>th_i, th_f are (complex) propegation angle for incident and final
+(in radians, where 0=normal). “th” stands for “theta”.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.R_from_r">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">R_from_r</code><span class="sig-paren">(</span><em>r</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#R_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.R_from_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate reflected power R, starting with reflection amplitude r.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.T_from_t">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">T_from_t</code><span class="sig-paren">(</span><em>pol</em>, <em>t</em>, <em>n_i</em>, <em>n_f</em>, <em>th_i</em>, <em>th_f</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#T_from_t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.T_from_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate transmitted power T, starting with transmission amplitude t.</p>
+<p>n_i,n_f are refractive indices of incident and final medium.</p>
+<p>th_i, th_f are (complex) propegation angles through incident &amp; final medium
+(in radians, where 0=normal). “th” stands for “theta”.</p>
+<p>In the case that n_i,n_f,th_i,th_f are real, formulas simplify to
+T=|t|^2 * (n_f cos(th_f)) / (n_i cos(th_i)).</p>
+<p>See manual for discussion of formulas</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.power_entering_from_r">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">power_entering_from_r</code><span class="sig-paren">(</span><em>pol</em>, <em>r</em>, <em>n_i</em>, <em>th_i</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#power_entering_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.power_entering_from_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the power entering the first interface of the stack, starting with
+reflection amplitude r. Normally this equals 1-R, but in the unusual case
+that n_i is not real, it can be a bit different than 1-R. See manual.</p>
+<p>n_i is refractive index of incident medium.</p>
+<p>th_i is (complex) propegation angle through incident medium
+(in radians, where 0=normal). “th” stands for “theta”.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.interface_R">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">interface_R</code><span class="sig-paren">(</span><em>polarization</em>, <em>n_i</em>, <em>n_f</em>, <em>th_i</em>, <em>th_f</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#interface_R"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.interface_R" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fraction of light intensity reflected at an interface.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.interface_T">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">interface_T</code><span class="sig-paren">(</span><em>polarization</em>, <em>n_i</em>, <em>n_f</em>, <em>th_i</em>, <em>th_f</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#interface_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.interface_T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fraction of light intensity transmitted at an interface.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.coh_tmm">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">coh_tmm</code><span class="sig-paren">(</span><em>pol</em>, <em>n_list</em>, <em>d_list</em>, <em>th_0</em>, <em>lam_vac</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#coh_tmm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.coh_tmm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main “coherent transfer matrix method” calc. Given parameters of a stack,
+calculates everything you could ever want to know about how light
+propagates in it. (If performance is an issue, you can delete some of the
+calculations without affecting the rest.)</p>
+<p>pol is light polarization, “s” or “p”.</p>
+<p>n_list is the list of refractive indices, in the order that the light would
+pass through them. The 0’th element of the list should be the semi-infinite
+medium from which the light enters, the last element should be the semi-
+infinite medium to which the light exits (if any exits).</p>
+<p>th_0 is the angle of incidence: 0 for normal, pi/2 for glancing.
+Remember, for a dissipative incoming medium (n_list[0] is not real), th_0
+should be complex so that n0 sin(th0) is real (intensity is constant as
+a function of lateral position).</p>
+<p>d_list is the list of layer thicknesses (front to back). Should correspond
+one-to-one with elements of n_list. First and last elements should be “inf”.</p>
+<p>lam_vac is vacuum wavelength of the light.</p>
+<p>Outputs the following as a dictionary (see manual for details)</p>
+<ul class="simple">
+<li>r–reflection amplitude</li>
+<li>t–transmission amplitude</li>
+<li>R–reflected wave power (as fraction of incident)</li>
+<li>T–transmitted wave power (as fraction of incident)</li>
+<li>power_entering–Power entering the first layer, usually (but not always)
+equal to 1-R (see manual).</li>
+<li>vw_list– n’th element is [v_n,w_n], the forward- and backward-traveling
+amplitudes, respectively, in the n’th medium just after interface with
+(n-1)st medium.</li>
+<li>kz_list–normal component of complex angular wavenumber for
+forward-traveling wave in each layer.</li>
+<li>th_list–(complex) propagation angle (in radians) in each layer</li>
+<li>pol, n_list, d_list, th_0, lam_vac–same as input</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.coh_tmm_reverse">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">coh_tmm_reverse</code><span class="sig-paren">(</span><em>pol</em>, <em>n_list</em>, <em>d_list</em>, <em>th_0</em>, <em>lam_vac</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#coh_tmm_reverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.coh_tmm_reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverses the order of the stack then runs coh_tmm.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.ellips">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">ellips</code><span class="sig-paren">(</span><em>n_list</em>, <em>d_list</em>, <em>th_0</em>, <em>lam_vac</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#ellips"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.ellips" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates ellipsometric parameters, in radians.</p>
+<p>Warning: Conventions differ. You may need to subtract pi/2 or whatever.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.unpolarized_RT">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">unpolarized_RT</code><span class="sig-paren">(</span><em>n_list</em>, <em>d_list</em>, <em>th_0</em>, <em>lam_vac</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#unpolarized_RT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.unpolarized_RT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates reflected and transmitted power for unpolarized light.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.position_resolved">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">position_resolved</code><span class="sig-paren">(</span><em>layer</em>, <em>dist</em>, <em>coh_tmm_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#position_resolved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.position_resolved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starting with output of coh_tmm(), calculate the Poynting vector
+and absorbed energy density a distance “dist” into layer number “layer”</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.find_in_structure">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">find_in_structure</code><span class="sig-paren">(</span><em>d_list</em>, <em>dist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#find_in_structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.find_in_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>d_list is list of thicknesses of layers, all of which are finite.</p>
+<p>dist is the distance from the front of the whole multilayer structure
+(i.e., from the start of layer 0.)</p>
+<p>Function returns [layer,z], where:</p>
+<p>layer is what number layer you’re at.
+(For large enough dist, layer = len(d_list), even though d_list[layer]
+doesn’t exist in that case.</p>
+<p>z is the distance into that layer.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.find_in_structure_with_inf">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">find_in_structure_with_inf</code><span class="sig-paren">(</span><em>d_list</em>, <em>dist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#find_in_structure_with_inf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.find_in_structure_with_inf" title="Permalink to this definition">¶</a></dt>
+<dd><p>d_list is list of thicknesses of layers [inf, blah, blah, …, blah, inf]</p>
+<p>dist is the distance from the front of the whole multilayer structure
+(i.e., frcom the start of layer 1.)</p>
+<p>Function returns [layer,z], where:</p>
+<p>layer is what number layer you’re at,</p>
+<p>z is the distance into that layer.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.layer_starts">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">layer_starts</code><span class="sig-paren">(</span><em>d_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#layer_starts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.layer_starts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives the location of the start of any given layer, relative to the front
+of the whole multilayer structure. (i.e. the start of layer 1)</p>
+<p>d_list is list of thicknesses of layers [inf, blah, blah, …, blah, inf]</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn">
+<em class="property">class </em><code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">absorp_analytic_fn</code><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#absorp_analytic_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absorption in a given layer is a pretty simple analytical function:
+The sum of four exponentials.</p>
+<dl class="docutils">
+<dt>a(z) = A1*exp(a1*z) + A2*exp(-a1*z)</dt>
+<dd><ul class="first last simple">
+<li>A3*exp(1j*a3*z) + conj(A3)*exp(-1j*a3*z)</li>
+</ul>
+</dd>
+</dl>
+<p>where a(z) is absorption at depth z, with z=0 being the start of the layer,
+and A1,A2,a1,a3 are real numbers, with a1&gt;0, a3&gt;0, and A3 is complex.
+The class stores these five parameters, as well as d, the layer thickness.</p>
+<p>This gives absorption as a fraction of intensity coming towards the first
+layer of the stack.</p>
+<dl class="method">
+<dt id="solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.fill_in">
+<code class="descname">fill_in</code><span class="sig-paren">(</span><em>coh_tmm_data</em>, <em>layer</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#absorp_analytic_fn.fill_in"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.fill_in" title="Permalink to this definition">¶</a></dt>
+<dd><p>fill in the absorption analytic function starting from coh_tmm_data
+(the output of coh_tmm), for absorption in the layer with index
+“layer”.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#absorp_analytic_fn.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create copy of an absorp_analytic_fn object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>z</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#absorp_analytic_fn.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates absorption at a given depth z, where z=0 is the start of the
+layer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.flip">
+<code class="descname">flip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#absorp_analytic_fn.flip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.flip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flip the function front-to-back, to describe a(d-z) instead of a(z),
+where d is layer thickness.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.scale">
+<code class="descname">scale</code><span class="sig-paren">(</span><em>factor</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#absorp_analytic_fn.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>multiplies the absorption at each point by “factor”.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#absorp_analytic_fn.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.absorp_analytic_fn.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds another compatible absorption analytical function</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.absorp_in_each_layer">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">absorp_in_each_layer</code><span class="sig-paren">(</span><em>coh_tmm_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#absorp_in_each_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.absorp_in_each_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>An array listing what proportion of light is absorbed in each layer.</p>
+<p>Assumes the final layer eventually absorbs all transmitted light.</p>
+<p>Assumes the initial layer eventually absorbs all reflected light.</p>
+<p>Entries of array should sum to 1.</p>
+<p>coh_tmm_data is output of coh_tmm()</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.inc_group_layers">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">inc_group_layers</code><span class="sig-paren">(</span><em>n_list</em>, <em>d_list</em>, <em>c_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#inc_group_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.inc_group_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function for inc_tmm. Groups and sorts layer information.</p>
+<p>See coh_tmm for definitions of n_list, d_list.</p>
+<p>c_list is “coherency list”. Each entry should be ‘i’ for incoherent or ‘c’
+for ‘coherent’.</p>
+<p>A “stack” is a group of one or more consecutive coherent layers. A “stack
+index” labels the stacks 0,1,2,…. The “within-stack index” counts the
+coherent layers within the stack 1,2,3… [index 0 is the incoherent layer
+before the stack starts]</p>
+<p>An “incoherent layer index” labels the incoherent layers 0,1,2,…</p>
+<p>An “alllayer index” labels all layers (all elements of d_list) 0,1,2,…</p>
+<p>Returns info about how the layers relate:</p>
+<ul class="simple">
+<li>stack_d_list[i] = list of thicknesses of each coherent layer in the i’th
+stack, plus starting and ending with “inf”</li>
+<li>stack_n_list[i] = list of refractive index of each coherent layer in the
+i’th stack, plus the two surrounding incoherent layers</li>
+<li>all_from_inc[i] = j means that the layer with incoherent index i has
+alllayer index j</li>
+<li>inc_from_all[i] = j means that the layer with alllayer index i has
+incoherent index j. If j = nan then the layer is coherent.</li>
+<li>all_from_stack[i1][i2] = j means that the layer with stack index i1 and
+within-stack index i2 has alllayer index j</li>
+<li>stack_from_all[i] = [j1 j2] means that the layer with alllayer index i is
+part of stack j1 with withinstack-index j2. If stack_from_all[i] = nan
+then the layer is incoherent</li>
+<li>inc_from_stack[i] = j means that the i’th stack comes after the layer
+with incoherent index j, and before the layer with incoherent index j+1.</li>
+<li>stack_from_inc[i] = j means that the layer with incoherent index i comes
+immediately after the j’th stack. If j=nan, it is not immediately
+following a stack.</li>
+<li>num_stacks = number of stacks</li>
+<li>num_inc_layers = number of incoherent layers</li>
+<li>num_layers = number of layers total</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.inc_tmm">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">inc_tmm</code><span class="sig-paren">(</span><em>pol</em>, <em>n_list</em>, <em>d_list</em>, <em>c_list</em>, <em>th_0</em>, <em>lam_vac</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#inc_tmm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.inc_tmm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Incoherent, or partly-incoherent-partly-coherent, transfer matrix method.</p>
+<p>See coh_tmm for definitions of pol, n_list, d_list, th_0, lam_vac.</p>
+<p>c_list is “coherency list”. Each entry should be ‘i’ for incoherent or ‘c’
+for ‘coherent’.</p>
+<p>If an incoherent layer has real refractive index (no absorption), then its
+thickness doesn’t affect the calculation results.</p>
+<p>See <a class="reference external" href="https://arxiv.org/abs/1603.02720">https://arxiv.org/abs/1603.02720</a> for physics background and some
+of the definitions.</p>
+<p>Outputs the following as a dictionary:</p>
+<ul class="simple">
+<li>R–reflected wave power (as fraction of incident)</li>
+<li>T–transmitted wave power (as fraction of incident)</li>
+<li>VW_list– n’th element is [V_n,W_n], the forward- and backward-traveling
+intensities, respectively, at the beginning of the n’th incoherent medium.</li>
+<li>coh_tmm_data_list–n’th element is coh_tmm_data[n], the output of
+the coh_tmm program for the n’th “stack” (group of one or more
+consecutive coherent layers).</li>
+<li>coh_tmm_bdata_list–n’th element is coh_tmm_bdata[n], the output of the
+coh_tmm program for the n’th stack, but with the layers of the stack
+in reverse order.</li>
+<li>stackFB_list–n’th element is [F,B], where F is light traveling forward
+towards the n’th stack and B is light traveling backwards towards the n’th
+stack.</li>
+<li>num_layers– total number both coherent and incoherent.</li>
+<li>power_entering_list–n’th element is the normalized Poynting vector
+crossing the interface into the n’th incoherent layer from the previous
+(coherent or incoherent) layer.</li>
+<li>Plus, all the outputs of inc_group_layers</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.inc_absorp_in_each_layer">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">inc_absorp_in_each_layer</code><span class="sig-paren">(</span><em>inc_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#inc_absorp_in_each_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.inc_absorp_in_each_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list saying what proportion of light is absorbed in each layer.</p>
+<p>Assumes all reflected light is eventually absorbed in the 0’th medium, and
+all transmitted light is eventually absorbed in the final medium.</p>
+<p>Returns a list [layer0absorp, layer1absorp, …]. Entries should sum to 1.</p>
+<p>inc_data is output of incoherent_main()</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.absorption_calculator.tmm_core_vec.inc_find_absorp_analytic_fn">
+<code class="descclassname">solcore.absorption_calculator.tmm_core_vec.</code><code class="descname">inc_find_absorp_analytic_fn</code><span class="sig-paren">(</span><em>layer</em>, <em>inc_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/absorption_calculator/tmm_core_vec.html#inc_find_absorp_analytic_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.absorption_calculator.tmm_core_vec.inc_find_absorp_analytic_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs an absorp_analytic_fn object for a coherent layer within a
+partly-incoherent stack.</p>
+<p>inc_data is output of incoherent_main()</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="S4doc.html" title="S4 - Rigorous Coupled Wave Analysis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="material_optics.html" title="Optical properties of materials"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="optics.html" >Optical methods</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

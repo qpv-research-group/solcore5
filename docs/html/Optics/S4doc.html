@@ -1,0 +1,316 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>S4 - Rigorous Coupled Wave Analysis &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Other optical methods" href="other_methods.html" />
+    <link rel="prev" title="Transfer matrix method" href="tmm.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="other_methods.html" title="Other optical methods"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tmm.html" title="Transfer matrix method"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="optics.html" accesskey="U">Optical methods</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="optics.html">Optical methods</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="material_optics.html">Optical properties of materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tmm.html">Transfer matrix method</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">S4 - Rigorous Coupled Wave Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="other_methods.html">Other optical methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tmm.html"
+                        title="previous chapter">Transfer matrix method</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="other_methods.html"
+                        title="next chapter">Other optical methods</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/Optics/S4doc.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="s4-rigorous-coupled-wave-analysis">
+<span id="s4-rigorous-coupled-wave-analysis"></span><h1>S4 - Rigorous Coupled Wave Analysis<a class="headerlink" href="#s4-rigorous-coupled-wave-analysis" title="Permalink to this headline">¶</a></h1>
+<p>Solcore’s capacity for modelling periodic nanophotonic structures is provided through an interface with the S4 Python extension, an implementation of RCWA (Rigorous Coupled Wave Analysis) developed in the Fan Group in the Stanford Electrical Engineering Department. The documentation for S4 can be found <a class="reference external" href="http://web.stanford.edu/group/fan/S4/">here</a>. The basic mechanics of the RCWA module are:</p>
+<ul class="simple">
+<li>Solcore translates the relevant inputs (list) into the appropriate notation for S4</li>
+<li>Solcore calls S4 and feeds in the relevant inputs</li>
+<li>Solcore translates the outputs from S4 into the relevant outputs, which match the outputs from Solcore’s other optics methods (absorption, reflection, transmission, absorption profile with depth).</li>
+</ul>
+<p>To use S4 from within Solcore, first <a class="reference external" href="https://dalonsoa.github.io/solcore5/html/installation.html#installing-solcore">make sure S4 is installed from the custom branch compatible with Python3</a>. <code class="docutils literal"><span class="pre">Layers</span></code> in the <code class="docutils literal"><span class="pre">SolarCell</span></code> object are defined in the usual Solcore way, but now have an additional <code class="docutils literal"><span class="pre">geometry</span></code> attribute, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># define materials</span>
+<span class="n">Air</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s1">&#39;Air&#39;</span><span class="p">)(</span><span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">)</span>
+<span class="n">TiO2</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s1">&#39;TiO2&#39;</span><span class="p">,</span> <span class="n">sopra</span><span class="o">=</span><span class="bp">True</span><span class="p">)(</span><span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">)</span>  <span class="c1"># for the nanoparticles</span>
+<span class="c1"># define a layer with circular discs</span>
+<span class="n">NP_layer</span> <span class="o">=</span> <span class="p">[</span><span class="n">Layer</span><span class="p">(</span><span class="n">si</span><span class="p">(</span><span class="s1">&#39;50nm&#39;</span><span class="p">),</span> <span class="n">Air</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;circle&#39;</span><span class="p">,</span> <span class="s1">&#39;mat&#39;</span><span class="p">:</span> <span class="n">TiO2</span><span class="p">,</span> <span class="s1">&#39;center&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="s1">&#39;radius&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">}])]</span>
+</pre></div>
+</div>
+<p>The geometry attribute is a <strong>list of dictionaries</strong> containing relevant entries. You can add more than one shape per layer by simply adding more dictionaries to the list; each dictionary defines one shape, which is assumed to be periodic in two directions. The necessary information to define shapes is:</p>
+<p>For all shapes:</p>
+<ul class="simple">
+<li>‘type’: 'circle', 'ellipse', 'rectangle' or 'polygon'</li>
+<li>‘mat’: the material the shape is made of; a Solcore material object.</li>
+<li>‘center’: a tuple giving x and y coordinates (in nm) of the centre of the shape: <code class="docutils literal"><span class="pre">(x,</span> <span class="pre">y)</span></code></li>
+</ul>
+<p>Shape-dependent:</p>
+<ul class="simple">
+<li>Circle:<ul>
+<li>'radius': a number in nm</li>
+</ul>
+</li>
+</ul>
+<ul class="simple">
+<li>Ellipse:<ul>
+<li>‘angle’: a number in degrees, defining the angle by which the x-axis of the shape should be rotated (counter-clockwise).</li>
+<li>‘halfwidths’: a tuple of halfwidths in the <em>x</em> and <em>y</em> directions: <code class="docutils literal"><span class="pre">(hw_x,</span> <span class="pre">hw_y)</span></code></li>
+</ul>
+</li>
+<li>Rectangle: ‘angle’ and ‘halfwidths’, as before</li>
+<li>Polygon:<ul>
+<li>‘angle’ as before</li>
+<li>‘vertices’: a tuple of tuples; each entry in the outer tuple are the x- and y-coordinates of the vertices of the (unrotated) polygon, one after another, in counter-clockwise order, e.g. <code class="docutils literal"><span class="pre">((x1,</span> <span class="pre">y1),</span> <span class="pre">(x2,</span> <span class="pre">y2),</span> <span class="pre">(x3,</span> <span class="pre">y3))</span></code>. Coordinates are in nm.</li>
+</ul>
+</li>
+</ul>
+<p>Additionally, you should set:</p>
+<ul class="simple">
+<li>the size (periodicity) of the unit cell in the <em>x</em> and <em>y</em> directions (i.e. the in-plane directions) in the options:</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">opts</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">400</span><span class="p">,</span> <span class="mi">600</span><span class="p">]</span> <span class="c1"># [x-periodicity, y-periodicity]</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>the number of Fourier orders to keep in the calculations in <code class="docutils literal"><span class="pre">opts.orders</span></code>. The calculation should converge for a higher number of orders, but computational time increases dramatically with the number of orders.</li>
+</ul>
+<p>where <code class="docutils literal"><span class="pre">opts</span></code> is the Options object you will pass to e.g. <code class="docutils literal"><span class="pre">solar_cell_solver</span></code>. Note that <strong>all dimensional information for the size and geometries should be in nm</strong>!</p>
+<div class="section" id="description-of-functions">
+<span id="description-of-functions"></span><h2>Description of functions<a class="headerlink" href="#description-of-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="optics-rcwa-py">
+<span id="optics-rcwa-py"></span><h3>optics/rcwa.py<a class="headerlink" href="#optics-rcwa-py" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">solve_rcwa(solar_cell,</span> <span class="pre">options)</span></code></p>
+<ul class="simple">
+<li>very similar to solve_tmm, but calls relevant RCWA functions instead. Note that the RAT variable calculated using calculate_rat_rcwa is an input into calculate_absorption_profile (which, obviously, calculates the depth-dependent absorption profile).</li>
+<li>Parameters:<ul>
+<li>solar_cell - a SolarCell object</li>
+<li>options - options for the solver, e.g. wavelengths, number of Fourier orders, unit cell size.</li>
+</ul>
+</li>
+<li>Returns: none - the function will modify the solar_cell object passed to it, updating each layer with the attributes diff_absorption (fraction of photons absorbed per unit length as a function of the position and the wavelength) and absorbed (total absorption in the layer). The total reflected, transmitted and absorbed intensity of the whole solar cell are also added to the solar_cell object.</li>
+</ul>
+<p><code class="docutils literal"><span class="pre">absorbed(self,</span> <span class="pre">z)</span></code></p>
+<ul class="simple">
+<li>same as TMM</li>
+</ul>
+<p><code class="docutils literal"><span class="pre">calculate_absorption_tmm(tmm_out)</span></code></p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">diff_absorption(z)</span></code></li>
+<li>same as TMM</li>
+</ul>
+</div>
+<div class="section" id="absorption-calculator-rigorous-coupled-wave-py">
+<span id="absorption-calculator-rigorous-coupled-wave-py"></span><h3>absorption_calculator/rigorous_coupled_wave.py:<a class="headerlink" href="#absorption-calculator-rigorous-coupled-wave-py" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">calculate_rat_rcwa(structure,</span> <span class="pre">size,</span> <span class="pre">orders,</span> <span class="pre">wavelength,</span> <span class="pre">theta,</span> <span class="pre">phi,</span> <span class="pre">pol)</span></code></p>
+<ul class="simple">
+<li>Calculates the total reflected, absorbed and transmitted intensity of the whole solar cell structure for the wavelengths and angles defined using an RCWA method implemented using the S4 package. It can handle different incident angles theta and phi and polarizations ('s', 'p' or 'u', the latter meaning unpolarised). It first creates an S4 simulation object using <code class="docutils literal"><span class="pre">initialise_S</span></code> and sets the incident angle and polarization using S4's SetExcitationPlaneWave, then loops through the wavelengths (updated in S4 using SetFrequency), using update_epsilon to update the optical constants of all the materials. It calls <code class="docutils literal"><span class="pre">rcwa_rat</span></code> to actually calculate R, A and T at each wavelength.</li>
+<li>Parameters:<ul>
+<li>structure: A solcore SolarCell object with layers and materials or a OptiStack object.</li>
+<li>options: options for the calculation</li>
+<li>wavelength: Wavelengths (in nm) in which calculate the data.</li>
+<li>angle: Angle (in degrees) of the incident light. Default: 0 (normal incidence).</li>
+<li>pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).</li>
+</ul>
+</li>
+<li>Returns:<ul>
+<li>output: A dictionary with the R, A and T at the specified wavelengths and angle.</li>
+</ul>
+</li>
+</ul>
+<p><code class="docutils literal"><span class="pre">rcwa_rat(S,</span> <span class="pre">n_layers)</span></code></p>
+<ul class="simple">
+<li>This is called from <code class="docutils literal"><span class="pre">calculate_rat_rcwa</span></code> and calculates R and T using S4's <code class="docutils literal"><span class="pre">GetPowerFlux</span></code> function which gives the forward and backward Poynting vector; the sum gives the effective real &amp; imaginary power flux. T is given by the power flux entering the transmission medium, while R is given by 1 - (power flux entering top of solar cell).</li>
+<li>Parameters:<ul>
+<li>S: an S4 Simulation object</li>
+<li>n_layers: number of layers in the stack, including incidence and transmission medium.</li>
+</ul>
+</li>
+<li>Returns: a dictionary with R and T at a specific wavelength (A can be calculated from this since R + A + T = 1)</li>
+</ul>
+<p><code class="docutils literal"><span class="pre">initialise_S(stack,</span> <span class="pre">size,</span> <span class="pre">orders)</span></code></p>
+<ul class="simple">
+<li>This is called from <code class="docutils literal"><span class="pre">calculate_rat_rcwa</span></code> and <code class="docutils literal"><span class="pre">calculate_absorption_profile_rcwa</span></code> and creates the S4 simulation object (class S4.Simulation) from the Solcore information, as well as OptiStack objects which are used to get the optical constants and thicknesses of the base layers, and the optical constants of the shapes defined in the geometry attribute of the layers. It does the following:<ul>
+<li>Initialises the S4 simulation object with basis vectors of the correct length and the desired number of Fourier orders using S4.New.</li>
+<li>Makes a list of all the geometry objects contained in the Layers of the SolarCell object stack, and passes that to <code class="docutils literal"><span class="pre">necessary_materials</span></code> to identify the materials used in the shapes for which we need optical constant information. The OptiStack function ignores the geometry attribute, so if we ignored this step we would not have optical constant data for materials which are only used in the geometry attribute and not in a base layer.</li>
+<li>Makes an OptiStack object called stack_OS from the SolarCell stack itself.</li>
+<li>S4 uses named materials, so Solcore creates the required number of materials (S.SetMaterial) and creates the base layers (S.AddLayer), then loops through each Layer's geometry list to add the shapes to the layer.</li>
+</ul>
+</li>
+<li>Parameters:<ul>
+<li>stack: a Solcore SolarCell object</li>
+<li>size: a list of length 2 with the periodicity of the structure in the x and y directions</li>
+<li>orders: the number of Fourier orders to retain in the RCWA calculation.</li>
+</ul>
+</li>
+<li>Returns:<ul>
+<li>S: a new S4 simulation object</li>
+<li>stack_OS: an OptiStack object (of the Solcore stack)</li>
+<li>shape_mats_OS: an OptiStack object, containing only the materials used in geometry objects. This is just a workaround to easily get the optical constants for those materials – the order of the layers doesn’t represent an actual physical structure.</li>
+</ul>
+</li>
+</ul>
+<p><code class="docutils literal"><span class="pre">necessary_materials(geom_list)</span></code></p>
+<ul class="simple">
+<li>Called from initialise_S; this simply extracts all the materials used in the geometries so that they can be turned into an OptiStack object, allowing the optical constants to be accessed easily.</li>
+<li>Parameters:<ul>
+<li>geom_list: a list of all the geometry attributes for all the layers in the stack.</li>
+</ul>
+</li>
+<li>Return: a list of the names of materials used in the layer geometries</li>
+</ul>
+<p><code class="docutils literal"><span class="pre">update_epsilon(S,</span> <span class="pre">stack_OS,</span> <span class="pre">shape_mats_OS,</span> <span class="pre">wl)</span></code></p>
+<ul class="simple">
+<li>This updates the materials in the S4 simulations structure S using the S4 function S.SetMaterial using the information contained in stack_OS (for the base layers) and shape_mats_OS (for the shapes within those layers).</li>
+<li>Paramaters:<ul>
+<li>S: S4 Simulation object</li>
+<li>stack_OS: OptiStack object of the base layers</li>
+<li>shape_mats_OS: OptiStack object of the materials used in the geometry shapes</li>
+<li>wl: the wavelength for which the optical constants should be set.</li>
+</ul>
+</li>
+<li>Return: the S4 simulation object S with updated optical materials (i.e. optical constants) in order to loop through the wavelengths</li>
+</ul>
+<p><code class="docutils literal"><span class="pre">calculate_absorption_profile_rcwa(structure,</span> <span class="pre">size,</span> <span class="pre">orders,</span> <span class="pre">wavelength,</span> <span class="pre">rat_output,</span> <span class="pre">z_limit=None,</span> <span class="pre">steps_size=2,</span> <span class="pre">dist=None,</span> <span class="pre">theta=0,</span> <span class="pre">phi=0,</span> <span class="pre">pol='u')</span></code></p>
+<ul class="simple">
+<li>Mostly copied from TMM code, but calls <code class="docutils literal"><span class="pre">rcwa_position_resolved</span></code> to calculate the absorption profile (depth-dependent) in the stack. Like <code class="docutils literal"><span class="pre">calculate_rat_rcwa</span></code>, it creates an S4 simulation object and gets the optical constants from OptiStack objects using <code class="docutils literal"><span class="pre">initialise_S</span></code>, sets the parameters for the incident light using the S4 function SetExcitationPlaneWave and SetFrequency. It loops through the wavelengths, and at each wavelength it loops through the z-coordinates in dist. It then has to identify which Layer in the structure we are looking at, and how deep inside that layer the z-coordinate is, which is done using the function find_in_structure_with_inf from the tmm module. Once this has been identified, <code class="docutils literal"><span class="pre">rcwa_position_resolved</span></code> is called.</li>
+<li>Parameters:<ul>
+<li>structure: SolarCell object</li>
+<li>size: [x, y] size of unit cell (x and y periodicity)</li>
+<li>orders: Fourier orders to retain in calculation</li>
+<li>wavelength</li>
+<li>rat_output: output from the calculate_rat_rcwa function. This is used to normalise the differential absorption.</li>
+<li>z_limit: depth up to which absorption profile should be calculated (default None, if None, set to thickness of cell inside function)</li>
+<li>steps_size: step size in nm at which to calculate depth-dependent absorption (default 2)</li>
+<li>dist: array of z-locations at which to calculate depth-dependent absorption (default None, if None, calculated inside function from z_limit and steps_size.</li>
+<li>theta: incident polar angle in degrees</li>
+<li>phi: incident azimuthal angle in degrees</li>
+</ul>
+</li>
+<li>Return: output, an array describing depth-dependent absorption. First index is the wavelength, second index is the depth.</li>
+</ul>
+<p><code class="docutils literal"><span class="pre">rcwa_position_resolved(S,</span> <span class="pre">layer,</span> <span class="pre">depth,</span> <span class="pre">A)</span></code></p>
+<ul class="simple">
+<li>This function manually differentiates the absorption with respect to depth. The absorbed power across a small interval is calculated using S4's GetPowerFlux function (like in <code class="docutils literal"><span class="pre">rcwa_rat</span></code>).-delta is an arbitrarily small distance, in order to do very simple numerical differentiation. This was chosen because it gives good results (consistent with TMM for planar structures, integrated A sums correctly).</li>
+<li>Parameters:<ul>
+<li>S: S4 Simulation object</li>
+<li>layer: which layer of the structure we are looking at</li>
+<li>depth: how deep in that layer we are</li>
+<li>A: total absorption</li>
+</ul>
+</li>
+<li>Return: the absorbed energy density in layer at depth.</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="other_methods.html" title="Other optical methods"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tmm.html" title="Transfer matrix method"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="optics.html" >Optical methods</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

@@ -11,7 +11,7 @@ db_options.db_mode = 'boltzmann'
 
 
 def iv_detailed_balance(junction, options):
-    """ Calculates the IV curve of a junction of kind "DB". This is a detailed balanced calculation of the IV curve of a PN junction characterized by a certain eqe, temperature and chemical potential (voltage). Normally, the eqe will be calculated based on a a given absorption edge and absorptance level resulting in a "top hat" type of eqe, but it can also be provided externally.
+    """ Calculates the IV curve of a junction of kind "DB". This is a detailed balanced calculation of the IV curve of a PN junction characterized by a certain eqe, temperature and chemical potential (voltage). Normally, the eqe will be calculated based on a a given absorption edge and absorptance level resulting in a "top hat" type of eqe, but it can also be provided externally. By default, the solver uses the Boltzmann aproximation, although the full Planck equation might be used, also.
 
     :param junction: A Junction object of kind "DB"
     :param options: Other arguments for the calculation of the IV.

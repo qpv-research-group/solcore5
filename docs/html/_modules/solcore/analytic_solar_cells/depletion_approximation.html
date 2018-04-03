@@ -1,0 +1,732 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>solcore.analytic_solar_cells.depletion_approximation &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '5.2.0.dev.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/header2.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for solcore.analytic_solar_cells.depletion_approximation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="k">import</span> <span class="n">solve_bvp</span>
+
+<span class="kn">from</span> <span class="nn">solcore.constants</span> <span class="k">import</span> <span class="n">kb</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">vacuum_permittivity</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">hbar</span><span class="p">,</span> <span class="n">electron_mass</span>
+<span class="kn">from</span> <span class="nn">solcore.science_tracker</span> <span class="k">import</span> <span class="n">science_reference</span>
+<span class="kn">from</span> <span class="nn">solcore.state</span> <span class="k">import</span> <span class="n">State</span>
+
+
+<div class="viewcode-block" id="iv_depletion"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.iv_depletion">[docs]</a><span class="k">def</span> <span class="nf">iv_depletion</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the IV curve of a junction object using the depletion approximation as described in J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003). The junction is then updated with an &quot;iv&quot; function that calculates the IV curve at any voltage.</span>
+
+<span class="sd">    :param junction: A junction object.</span>
+<span class="sd">    :param options: Solver options.</span>
+<span class="sd">    :return: None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">science_reference</span><span class="p">(</span><span class="s1">&#39;Depletion approximation&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).&#39;</span><span class="p">)</span>
+
+    <span class="n">junction</span><span class="o">.</span><span class="n">voltage</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">internal_voltages</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># First we have to figure out if we are talking about a PN, NP, PIN or NIP junction</span>
+    <span class="n">sn</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;sn&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">sn</span>
+    <span class="n">sp</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;sp&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">sp</span>
+
+    <span class="c1"># We search for the emitter and check if it is n-type or p-type</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">pn_or_np</span> <span class="o">=</span> <span class="s1">&#39;pn&#39;</span>
+
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">junction</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s1">&#39;emitter&#39;</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Na</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">Nd</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="s1">&#39;Na&#39;</span><span class="p">):</span> <span class="n">Na</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Na</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="s1">&#39;Nd&#39;</span><span class="p">):</span> <span class="n">Nd</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nd</span>
+            <span class="k">if</span> <span class="n">Na</span> <span class="o">&lt;</span> <span class="n">Nd</span><span class="p">:</span>
+                <span class="n">pn_or_np</span> <span class="o">=</span> <span class="s2">&quot;np&quot;</span>
+                <span class="n">nRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+            <span class="n">id_top</span> <span class="o">=</span> <span class="n">idx</span>
+
+            <span class="k">break</span>
+
+    <span class="c1"># Now we check for an intrinsic region and, if there is, for the base.</span>
+    <span class="k">if</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="s1">&#39;intrinsic&#39;</span><span class="p">:</span>
+        <span class="n">iRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="s1">&#39;base&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pn_or_np</span> <span class="o">==</span> <span class="s2">&quot;pn&quot;</span><span class="p">:</span>
+                <span class="n">nRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">nidx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">pidx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span>
+
+            <span class="n">id_bottom</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s1">&#39;ERROR processing junctions: A layer following the &quot;intrinsic&quot; layer must be defined as &#39;</span>
+                <span class="s1">&#39;&quot;base&quot;.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># If there is no intrinsic region, we check directly the base</span>
+    <span class="k">elif</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="s1">&#39;base&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pn_or_np</span> <span class="o">==</span> <span class="s2">&quot;pn&quot;</span><span class="p">:</span>
+            <span class="n">nRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">nidx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">pidx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">iRegion</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">id_bottom</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s1">&#39;ERROR processing junctions: A layer following the &quot;emitter&quot; must be defined as &quot;intrinsic&quot;&#39;</span>
+            <span class="s1">&#39;or &quot;base&quot;.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># With all regions identified, it&#39;s time to start doing calculations</span>
+    <span class="n">kbT</span> <span class="o">=</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span>
+    <span class="n">Egap</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">band_gap</span>
+    <span class="n">R_shunt</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">R_shunt</span><span class="p">,</span> <span class="mf">1e14</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;R_shunt&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mf">1e14</span>
+
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">width</span>
+    <span class="n">xn</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">width</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">iRegion</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">iRegion</span><span class="o">.</span><span class="n">width</span>
+
+    <span class="c1"># Now we have to get all the material parameters needed for the calculation</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;dielectric_constant&quot;</span><span class="p">):</span>
+        <span class="n">es</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">dielectric_constant</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">es</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">permittivity</span> <span class="o">*</span> <span class="n">vacuum_permittivity</span>  <span class="c1"># equal for n and p.  I hope.</span>
+
+    <span class="c1"># For the diffusion lenght, subscript n and p refer to the carriers, electrons and holes</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;ln&quot;</span><span class="p">):</span>
+        <span class="n">ln</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">ln</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ln</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">electron_diffusion_length</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;lp&quot;</span><span class="p">):</span>
+        <span class="n">lp</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">lp</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lp</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">hole_diffusion_length</span>
+
+    <span class="c1"># For the diffusion coefficient, n and p refer to the regions, n side and p side. Yeah, it&#39;s confusing...</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;mup&quot;</span><span class="p">):</span>
+        <span class="n">dp</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">mup</span> <span class="o">*</span> <span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dp</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">electron_mobility</span> <span class="o">*</span> <span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;mun&quot;</span><span class="p">):</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">mun</span> <span class="o">*</span> <span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">hole_mobility</span> <span class="o">*</span> <span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span>
+
+    <span class="c1"># Effective masses and effective density of states</span>
+    <span class="n">mEff_h</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">eff_mass_hh_z</span> <span class="o">*</span> <span class="n">electron_mass</span>
+    <span class="n">mEff_e</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">eff_mass_electron</span> <span class="o">*</span> <span class="n">electron_mass</span>
+
+    <span class="n">Nv</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">mEff_h</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="mf">1.5</span>  <span class="c1"># Jenny p58</span>
+    <span class="n">Nc</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">mEff_e</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="mf">1.5</span>
+    <span class="n">niSquared</span> <span class="o">=</span> <span class="n">Nc</span> <span class="o">*</span> <span class="n">Nv</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Egap</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span>
+    <span class="n">ni</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">niSquared</span><span class="p">)</span>
+
+    <span class="n">Na</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Na</span>
+    <span class="n">Nd</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nd</span>
+    <span class="n">Vbi</span> <span class="o">=</span> <span class="p">(</span><span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Nd</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">/</span> <span class="n">niSquared</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;Vbi&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">Vbi</span>  <span class="c1"># Jenny p146</span>
+
+    <span class="c1"># And now we account for the possible applied voltage, which can be, at most, equal to Vbi</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span> <span class="o">&lt;</span> <span class="n">Vbi</span> <span class="o">-</span> <span class="mf">0.001</span><span class="p">,</span> <span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">,</span> <span class="n">Vbi</span> <span class="o">-</span> <span class="mf">0.001</span><span class="p">)</span>
+
+    <span class="c1"># It&#39;s time to calculate the depletion widths</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;wp&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;wn&quot;</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;depletion_approximation&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">junction</span><span class="o">.</span><span class="n">depletion_approximation</span> <span class="o">==</span> <span class="s2">&quot;one-sided abrupt&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;using one-sided abrupt junction approximation for depletion width&quot;</span><span class="p">)</span>
+            <span class="n">science_reference</span><span class="p">(</span><span class="s2">&quot;Sze abrupt junction approximation&quot;</span><span class="p">,</span>
+                              <span class="s2">&quot;Sze: The Physics of Semiconductor Devices, 2nd edition, John Wiley &amp; Sons, Inc (2007)&quot;</span><span class="p">)</span>
+            <span class="n">wp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">es</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vbi</span> <span class="o">-</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">Na</span><span class="p">))</span>
+            <span class="n">wn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">es</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vbi</span> <span class="o">-</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">Nd</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wn</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">xi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xi</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">es</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vbi</span> <span class="o">-</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="n">q</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Na</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Nd</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Nd</span> <span class="o">/</span> <span class="n">Na</span><span class="p">)</span>
+            <span class="n">wp</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">xi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xi</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">es</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vbi</span> <span class="o">-</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="n">q</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Na</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Nd</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Na</span> <span class="o">/</span> <span class="n">Nd</span><span class="p">)</span>
+
+    <span class="n">wn</span> <span class="o">=</span> <span class="n">wn</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;wn&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">wn</span>
+    <span class="n">wp</span> <span class="o">=</span> <span class="n">wp</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;wp&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">wp</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">wn</span> <span class="o">+</span> <span class="n">wp</span> <span class="o">+</span> <span class="n">xi</span>
+
+    <span class="c1"># Now it is time to calculate currents</span>
+    <span class="k">if</span> <span class="n">pn_or_np</span> <span class="o">==</span> <span class="s2">&quot;pn&quot;</span><span class="p">:</span>
+        <span class="n">l_top</span><span class="p">,</span> <span class="n">l_bottom</span> <span class="o">=</span> <span class="n">ln</span><span class="p">,</span> <span class="n">lp</span>
+        <span class="n">x_top</span><span class="p">,</span> <span class="n">x_bottom</span> <span class="o">=</span> <span class="n">xp</span><span class="p">,</span> <span class="n">xn</span>
+        <span class="n">w_top</span><span class="p">,</span> <span class="n">w_bottom</span> <span class="o">=</span> <span class="n">wp</span><span class="p">,</span> <span class="n">wn</span>
+        <span class="n">s_top</span><span class="p">,</span> <span class="n">s_bottom</span> <span class="o">=</span> <span class="n">sp</span><span class="p">,</span> <span class="n">sn</span>
+        <span class="n">d_top</span><span class="p">,</span> <span class="n">d_bottom</span> <span class="o">=</span> <span class="n">dp</span><span class="p">,</span> <span class="n">dn</span>
+        <span class="n">min_top</span><span class="p">,</span> <span class="n">min_bot</span> <span class="o">=</span> <span class="n">niSquared</span> <span class="o">/</span> <span class="n">Na</span><span class="p">,</span> <span class="n">niSquared</span> <span class="o">/</span> <span class="n">Nd</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">l_bottom</span><span class="p">,</span> <span class="n">l_top</span> <span class="o">=</span> <span class="n">ln</span><span class="p">,</span> <span class="n">lp</span>
+        <span class="n">x_bottom</span><span class="p">,</span> <span class="n">x_top</span> <span class="o">=</span> <span class="n">xp</span><span class="p">,</span> <span class="n">xn</span>
+        <span class="n">w_bottom</span><span class="p">,</span> <span class="n">w_top</span> <span class="o">=</span> <span class="n">wp</span><span class="p">,</span> <span class="n">wn</span>
+        <span class="n">s_bottom</span><span class="p">,</span> <span class="n">s_top</span> <span class="o">=</span> <span class="n">sp</span><span class="p">,</span> <span class="n">sn</span>
+        <span class="n">d_bottom</span><span class="p">,</span> <span class="n">d_top</span> <span class="o">=</span> <span class="n">dp</span><span class="p">,</span> <span class="n">dn</span>
+        <span class="n">min_bot</span><span class="p">,</span> <span class="n">min_top</span> <span class="o">=</span> <span class="n">niSquared</span> <span class="o">/</span> <span class="n">Na</span><span class="p">,</span> <span class="n">niSquared</span> <span class="o">/</span> <span class="n">Nd</span>
+
+    <span class="n">JtopDark</span> <span class="o">=</span> <span class="n">get_j_top</span><span class="p">(</span><span class="n">x_top</span><span class="p">,</span> <span class="n">w_top</span><span class="p">,</span> <span class="n">l_top</span><span class="p">,</span> <span class="n">s_top</span><span class="p">,</span> <span class="n">d_top</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">min_top</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+    <span class="n">JbotDark</span> <span class="o">=</span> <span class="n">get_j_bot</span><span class="p">(</span><span class="n">x_bottom</span><span class="p">,</span> <span class="n">w_bottom</span><span class="p">,</span> <span class="n">l_bottom</span><span class="p">,</span> <span class="n">s_bottom</span><span class="p">,</span> <span class="n">d_bottom</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">min_bot</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+
+    <span class="c1"># hereby we define the subscripts to refer to the layer in which the current is generated:</span>
+    <span class="k">if</span> <span class="n">pn_or_np</span> <span class="o">==</span> <span class="s2">&quot;pn&quot;</span><span class="p">:</span>
+        <span class="n">JnDark</span><span class="p">,</span> <span class="n">JpDark</span> <span class="o">=</span> <span class="n">JbotDark</span><span class="p">,</span> <span class="n">JtopDark</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">JpDark</span><span class="p">,</span> <span class="n">JnDark</span> <span class="o">=</span> <span class="n">JbotDark</span><span class="p">,</span> <span class="n">JtopDark</span>
+
+    <span class="c1"># These might not be the right lifetimes. Actually, they are not as they include all recombination processes, not</span>
+    <span class="c1"># just SRH recombination, which is what the equation in Jenny, p159 refers to. Let´ leave them, for now.</span>
+    <span class="n">lifetime_n</span> <span class="o">=</span> <span class="n">ln</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">dn</span>
+    <span class="n">lifetime_p</span> <span class="o">=</span> <span class="n">lp</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">dp</span>  <span class="c1"># Jenny p163</span>
+
+    <span class="c1"># Here we use the full version of the SRH recombination term as calculated by Sah et al. Works for positive bias</span>
+    <span class="c1"># and moderately negative ones.</span>
+    <span class="n">science_reference</span><span class="p">(</span><span class="s1">&#39;SRH current term.&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and Recombination in P-N Junctions and P-N Junction Characteristics,” presented at the Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.&#39;</span><span class="p">)</span>
+    <span class="n">Jrec</span> <span class="o">=</span> <span class="n">get_Jsrh</span><span class="p">(</span><span class="n">ni</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">Vbi</span><span class="p">,</span> <span class="n">lifetime_p</span><span class="p">,</span> <span class="n">lifetime_n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">kbT</span><span class="p">)</span>
+
+    <span class="n">J_sc_top</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">J_sc_bot</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">J_sc_scr</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">light_iv</span><span class="p">:</span>
+
+        <span class="n">widths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">junction</span><span class="p">:</span>
+            <span class="n">widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+        <span class="n">cum_widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">widths</span><span class="p">)</span>
+
+        <span class="n">g</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">absorbed</span>
+        <span class="n">wl</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">wavelength</span>
+        <span class="n">wl_sp</span><span class="p">,</span> <span class="n">ph</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">light_source</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">output_units</span><span class="o">=</span><span class="s1">&#39;photon_flux_per_m&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">wl</span><span class="p">)</span>
+        <span class="n">id_v0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">))</span>
+
+        <span class="c1"># The contribution from the Emitter (top side).</span>
+        <span class="n">xa</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_top</span><span class="p">]</span>
+        <span class="n">xb</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_top</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w_top</span><span class="p">[</span><span class="n">id_v0</span><span class="p">]</span>
+        <span class="n">deriv</span> <span class="o">=</span> <span class="n">get_J_sc_diffusion</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">d_top</span><span class="p">,</span> <span class="n">l_top</span><span class="p">,</span> <span class="n">min_top</span><span class="p">,</span> <span class="n">s_top</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+        <span class="n">J_sc_top</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="n">d_top</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">deriv</span><span class="p">)</span>
+
+        <span class="c1"># The contribution from the Base (bottom side).</span>
+        <span class="n">xa</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_bottom</span><span class="p">]</span> <span class="o">+</span> <span class="n">w_bottom</span><span class="p">[</span><span class="n">id_v0</span><span class="p">]</span>
+        <span class="n">xb</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_bottom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">deriv</span> <span class="o">=</span> <span class="n">get_J_sc_diffusion</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">d_bottom</span><span class="p">,</span> <span class="n">l_bottom</span><span class="p">,</span> <span class="n">min_bot</span><span class="p">,</span> <span class="n">s_bottom</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+        <span class="n">J_sc_bot</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="n">d_bottom</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">deriv</span><span class="p">)</span>
+
+        <span class="c1"># The contribution from the SCR (includes the intrinsic region, if present).</span>
+        <span class="n">xa</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_top</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w_top</span><span class="p">[</span><span class="n">id_v0</span><span class="p">]</span>
+        <span class="n">xb</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_bottom</span><span class="p">]</span> <span class="o">+</span> <span class="n">w_bottom</span><span class="p">[</span><span class="n">id_v0</span><span class="p">]</span>
+        <span class="n">J_sc_scr</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="n">get_J_sc_SCR</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">)</span>
+
+    <span class="c1"># And, finally, we output the currents</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">Jrec</span> <span class="o">+</span> <span class="n">JnDark</span> <span class="o">+</span> <span class="n">JpDark</span> <span class="o">+</span> <span class="n">V</span> <span class="o">/</span> <span class="n">R_shunt</span> <span class="o">-</span> <span class="n">J_sc_top</span> <span class="o">-</span> <span class="n">J_sc_bot</span> <span class="o">-</span> <span class="n">J_sc_scr</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">iv</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">voltage</span><span class="p">,</span> <span class="n">junction</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assume_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                           <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">current</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">junction</span><span class="o">.</span><span class="n">current</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">region_currents</span> <span class="o">=</span> <span class="n">State</span><span class="p">({</span><span class="s2">&quot;Jn_dif&quot;</span><span class="p">:</span> <span class="n">JnDark</span><span class="p">,</span> <span class="s2">&quot;Jp_dif&quot;</span><span class="p">:</span> <span class="n">JpDark</span><span class="p">,</span> <span class="s2">&quot;Jscr_srh&quot;</span><span class="p">:</span> <span class="n">Jrec</span><span class="p">,</span>
+                                      <span class="s2">&quot;J_sc_top&quot;</span><span class="p">:</span> <span class="n">J_sc_top</span><span class="p">,</span> <span class="s2">&quot;J_sc_bot&quot;</span><span class="p">:</span> <span class="n">J_sc_bot</span><span class="p">,</span> <span class="s2">&quot;J_sc_scr&quot;</span><span class="p">:</span> <span class="n">J_sc_scr</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="get_j_top"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_j_top">[docs]</a><span class="k">def</span> <span class="nf">get_j_top</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">minority</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="c1"># We calculate some fractions</span>
+    <span class="n">harg</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">w</span><span class="p">)</span> <span class="o">/</span> <span class="n">l</span>
+    <span class="n">sinh_harg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">harg</span><span class="p">)</span>
+    <span class="n">cosh_harg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">harg</span><span class="p">)</span>
+    <span class="n">lsod</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="n">d</span>
+
+    <span class="c1"># And then we are ready to calculate the different currents</span>
+    <span class="c1"># Missing the voltage dependent part of these equations.</span>
+    <span class="c1"># They should be 6.34 and 6.39, not 6.62 and 6.63</span>
+
+    <span class="n">J_top_dark</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">minority</span> <span class="o">/</span> <span class="n">l</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">V</span> <span class="o">/</span> <span class="n">kb</span> <span class="o">/</span> <span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
+                 <span class="p">((</span><span class="n">lsod</span> <span class="o">*</span> <span class="n">cosh_harg</span> <span class="o">+</span> <span class="n">sinh_harg</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">lsod</span> <span class="o">*</span> <span class="n">sinh_harg</span> <span class="o">+</span> <span class="n">cosh_harg</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">J_top_dark</span></div>
+
+
+<div class="viewcode-block" id="get_j_bot"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_j_bot">[docs]</a><span class="k">def</span> <span class="nf">get_j_bot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">minority</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="c1"># We calculate some fractions</span>
+    <span class="n">harg</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">w</span><span class="p">)</span> <span class="o">/</span> <span class="n">l</span>
+    <span class="n">cosh_harg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">harg</span><span class="p">)</span>
+    <span class="n">sinh_harg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">harg</span><span class="p">)</span>
+    <span class="n">lsod</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="n">d</span>
+
+    <span class="c1"># And then we are ready to calculate the different currents</span>
+    <span class="c1"># Missing the voltage dependent part of these equations.</span>
+    <span class="c1"># They should be 6.34 and 6.39, not 6.62 and 6.63</span>
+
+    <span class="n">J_bottom_dark</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">minority</span> <span class="o">/</span> <span class="n">l</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">V</span> <span class="o">/</span> <span class="n">kb</span> <span class="o">/</span> <span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
+                    <span class="p">((</span><span class="n">lsod</span> <span class="o">*</span> <span class="n">cosh_harg</span> <span class="o">+</span> <span class="n">sinh_harg</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">lsod</span> <span class="o">*</span> <span class="n">sinh_harg</span> <span class="o">+</span> <span class="n">cosh_harg</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">J_bottom_dark</span></div>
+
+
+<div class="viewcode-block" id="get_Jsrh"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_Jsrh">[docs]</a><span class="k">def</span> <span class="nf">get_Jsrh</span><span class="p">(</span><span class="n">ni</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">Vbi</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">tn</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">kbT</span><span class="p">,</span> <span class="n">dEt</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">science_reference</span><span class="p">(</span><span class="s1">&#39;SRH current term.&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and Recombination in P-N Junctions and P-N Junction Characteristics,” presented at the Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.&#39;</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">m</span> <span class="o">=</span> <span class="n">V</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1120</span> <span class="o">*</span> <span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">forward</span><span class="p">(</span><span class="n">ni</span><span class="p">,</span> <span class="n">V</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">Vbi</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">tn</span><span class="p">,</span> <span class="n">w</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">kbT</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="forward"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.forward">[docs]</a><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ni</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">Vbi</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">tn</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">kbT</span><span class="p">,</span> <span class="n">dEt</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Equation 27 of Sah&#39;s paper. Strictly speaking, it is not valid for intermediate negative bias. &quot;&quot;&quot;</span>
+    <span class="n">J0</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">ni</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tn</span> <span class="o">*</span> <span class="n">tp</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">factor</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">Vbi</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">tn</span><span class="p">,</span> <span class="n">kbT</span><span class="p">,</span> <span class="n">dEt</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">J0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">V</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">kbT</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vbi</span> <span class="o">-</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="n">kbT</span><span class="p">)</span> <span class="o">*</span> <span class="n">f</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="factor"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.factor">[docs]</a><span class="k">def</span> <span class="nf">factor</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">Vbi</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">tn</span><span class="p">,</span> <span class="n">kbT</span><span class="p">,</span> <span class="n">dEt</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; The integral of Eq. 27 in Sah&#39;s paper. While it is coninuum (in principle) it has to be done in two parts.</span>
+<span class="sd">    (or three) &quot;&quot;&quot;</span>
+    <span class="n">trap</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="n">dEt</span> <span class="o">/</span> <span class="n">kbT</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tp</span> <span class="o">/</span> <span class="n">tn</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">q</span> <span class="o">*</span> <span class="n">V</span> <span class="o">/</span> <span class="n">kbT</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">trap</span><span class="p">)</span>
+
+    <span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tp</span> <span class="o">/</span> <span class="n">tn</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">q</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vbi</span> <span class="o">-</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="n">kbT</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tp</span> <span class="o">/</span> <span class="n">tn</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vbi</span> <span class="o">-</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="n">kbT</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="c1"># For b values &lt; 1</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="mi">1</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">((</span><span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">+</span> <span class="n">z2</span><span class="p">[</span><span class="n">m</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">((</span><span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">+</span> <span class="n">z1</span><span class="p">[</span><span class="n">m</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">out</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span> <span class="o">-</span> <span class="n">bot</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># For b values &gt;= 1 and &lt;=1e7</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">&lt;=</span> <span class="mf">1e7</span><span class="p">)</span>
+    <span class="n">xx</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+    <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z2</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">-</span> <span class="n">yy</span> <span class="o">+</span> <span class="n">xx</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z2</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">+</span> <span class="n">xx</span><span class="p">))</span>
+    <span class="n">bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z1</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">-</span> <span class="n">yy</span> <span class="o">+</span> <span class="n">xx</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z1</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">+</span> <span class="n">xx</span><span class="p">))</span>
+
+    <span class="n">out</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span> <span class="o">-</span> <span class="n">bot</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">yy</span><span class="p">)</span>
+
+    <span class="c1"># For b values &gt; 1e7</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">b</span> <span class="o">&gt;=</span> <span class="mf">1e7</span>
+
+    <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">z2</span><span class="p">[</span><span class="n">m</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">z2</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+    <span class="n">bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">z1</span><span class="p">[</span><span class="n">m</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">z1</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+
+    <span class="n">out</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span> <span class="o">-</span> <span class="n">bot</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="get_J_sc_diffusion"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_J_sc_diffusion">[docs]</a><span class="k">def</span> <span class="nf">get_J_sc_diffusion</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">):</span>
+    <span class="n">zz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="mi">1001</span><span class="p">)</span>
+    <span class="n">gg</span> <span class="o">=</span> <span class="n">g</span><span class="p">(</span><span class="n">zz</span><span class="p">)</span> <span class="o">*</span> <span class="n">ph</span>
+    <span class="n">g_vs_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">gg</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">g_vs_z</span><span class="p">)</span> <span class="o">/</span> <span class="n">D</span> <span class="o">+</span> <span class="n">y0</span> <span class="o">/</span> <span class="n">L</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">out1</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">out2</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">L</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">A</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">out1</span><span class="p">,</span> <span class="n">out2</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">bc</span><span class="p">(</span><span class="n">ya</span><span class="p">,</span> <span class="n">yb</span><span class="p">):</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">ya</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">S</span> <span class="o">/</span> <span class="n">D</span> <span class="o">*</span> <span class="p">(</span><span class="n">ya</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">yb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">bc</span><span class="p">(</span><span class="n">ya</span><span class="p">,</span> <span class="n">yb</span><span class="p">):</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">ya</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">yb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">S</span> <span class="o">/</span> <span class="n">D</span> <span class="o">*</span> <span class="p">(</span><span class="n">yb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">])</span>
+
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">zz</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+    <span class="n">guess</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">guess</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">solve_bvp</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">guess</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="get_J_sc_SCR"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_J_sc_SCR">[docs]</a><span class="k">def</span> <span class="nf">get_J_sc_SCR</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">):</span>
+    <span class="n">zz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="mi">1001</span><span class="p">)</span>
+    <span class="n">gg</span> <span class="o">=</span> <span class="n">g</span><span class="p">(</span><span class="n">zz</span><span class="p">)</span> <span class="o">*</span> <span class="n">ph</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">gg</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">zz</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="qe_depletion"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.qe_depletion">[docs]</a><span class="k">def</span> <span class="nf">qe_depletion</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the QE curve of a junction object using the depletion approximation as described in J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003). The junction is then updated with an &quot;iqe&quot; and several &quot;eqe&quot; functions that calculates the QE curve at any wavelength.</span>
+
+<span class="sd">    :param junction: A junction object.</span>
+<span class="sd">    :param options: Solver options.</span>
+<span class="sd">    :return: None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">science_reference</span><span class="p">(</span><span class="s1">&#39;Depletion approximation&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).&#39;</span><span class="p">)</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># First we have to figure out if we are talking about a PN, NP, PIN or NIP junction</span>
+    <span class="n">sn</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;sn&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">sn</span>
+    <span class="n">sp</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;sp&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">sp</span>
+
+    <span class="c1"># We search for the emitter and check if it is n-type or p-type</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">pn_or_np</span> <span class="o">=</span> <span class="s1">&#39;pn&#39;</span>
+
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">junction</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s1">&#39;emitter&#39;</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Na</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">Nd</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="s1">&#39;Na&#39;</span><span class="p">):</span> <span class="n">Na</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Na</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="s1">&#39;Nd&#39;</span><span class="p">):</span> <span class="n">Nd</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nd</span>
+            <span class="k">if</span> <span class="n">Na</span> <span class="o">&lt;</span> <span class="n">Nd</span><span class="p">:</span>
+                <span class="n">pn_or_np</span> <span class="o">=</span> <span class="s2">&quot;np&quot;</span>
+                <span class="n">nRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+            <span class="n">id_top</span> <span class="o">=</span> <span class="n">idx</span>
+
+            <span class="k">break</span>
+
+    <span class="c1"># Now we check for an intrinsic region and, if there is, for the base.</span>
+    <span class="k">if</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="s1">&#39;intrinsic&#39;</span><span class="p">:</span>
+        <span class="n">iRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="s1">&#39;base&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pn_or_np</span> <span class="o">==</span> <span class="s2">&quot;pn&quot;</span><span class="p">:</span>
+                <span class="n">nRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">nidx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">pidx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span>
+
+            <span class="n">id_bottom</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s1">&#39;ERROR processing junctions: A layer following the &quot;intrinsic&quot; layer must be defined as &#39;</span>
+                <span class="s1">&#39;&quot;base&quot;.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># If there is no intrinsic region, we check directly the base</span>
+    <span class="k">elif</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="s1">&#39;base&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pn_or_np</span> <span class="o">==</span> <span class="s2">&quot;pn&quot;</span><span class="p">:</span>
+            <span class="n">nRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">nidx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pRegion</span> <span class="o">=</span> <span class="n">junction</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">pidx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">iRegion</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">id_bottom</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s1">&#39;ERROR processing junctions: A layer following the &quot;emitter&quot; must be defined as &quot;intrinsic&quot;&#39;</span>
+            <span class="s1">&#39;or &quot;base&quot;.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># With all regions identified, it&#39;s time to start doing calculations</span>
+    <span class="n">kbT</span> <span class="o">=</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span>
+    <span class="n">Egap</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">band_gap</span>
+    <span class="n">R_shunt</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">junction</span><span class="o">.</span><span class="n">R_shunt</span><span class="p">,</span> <span class="mf">1e14</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s1">&#39;R_shunt&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mf">1e14</span>
+
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">width</span>
+    <span class="n">xn</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">width</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">iRegion</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">iRegion</span><span class="o">.</span><span class="n">width</span>
+
+    <span class="c1"># Now we have to get all the material parameters needed for the calculation</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;dielectric_constant&quot;</span><span class="p">):</span>
+        <span class="n">es</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">dielectric_constant</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">es</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">permittivity</span> <span class="o">*</span> <span class="n">vacuum_permittivity</span>  <span class="c1"># equal for n and p.  I hope.</span>
+
+    <span class="c1"># For the diffusion lenght, subscript n and p refer to the carriers, electrons and holes</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;ln&quot;</span><span class="p">):</span>
+        <span class="n">ln</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">ln</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ln</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">electron_diffusion_length</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;lp&quot;</span><span class="p">):</span>
+        <span class="n">lp</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">lp</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lp</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">hole_diffusion_length</span>
+
+    <span class="c1"># For the diffusion coefficient, n and p refer to the regions, n side and p side. Yeah, it&#39;s confusing...</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;mup&quot;</span><span class="p">):</span>
+        <span class="n">dp</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">mup</span> <span class="o">*</span> <span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dp</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">electron_mobility</span> <span class="o">*</span> <span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;mun&quot;</span><span class="p">):</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">mun</span> <span class="o">*</span> <span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">hole_mobility</span> <span class="o">*</span> <span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span>
+
+    <span class="c1"># Effective masses and effective density of states</span>
+    <span class="n">mEff_h</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">eff_mass_hh_z</span> <span class="o">*</span> <span class="n">electron_mass</span>
+    <span class="n">mEff_e</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">eff_mass_electron</span> <span class="o">*</span> <span class="n">electron_mass</span>
+
+    <span class="n">Nv</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">mEff_h</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="mf">1.5</span>  <span class="c1"># Jenny p58</span>
+    <span class="n">Nc</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">mEff_e</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">hbar</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="mf">1.5</span>
+    <span class="n">niSquared</span> <span class="o">=</span> <span class="n">Nc</span> <span class="o">*</span> <span class="n">Nv</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Egap</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span>
+    <span class="n">ni</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">niSquared</span><span class="p">)</span>
+
+    <span class="n">Na</span> <span class="o">=</span> <span class="n">pRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Na</span>
+    <span class="n">Nd</span> <span class="o">=</span> <span class="n">nRegion</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nd</span>
+    <span class="n">Vbi</span> <span class="o">=</span> <span class="p">(</span><span class="n">kbT</span> <span class="o">/</span> <span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Nd</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">/</span> <span class="n">niSquared</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;Vbi&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">Vbi</span>  <span class="c1"># Jenny p146</span>
+
+    <span class="c1"># It&#39;s time to calculate the depletion widths</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;wp&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;wn&quot;</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;depletion_approximation&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">junction</span><span class="o">.</span><span class="n">depletion_approximation</span> <span class="o">==</span> <span class="s2">&quot;one-sided abrupt&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;using one-sided abrupt junction approximation for depletion width&quot;</span><span class="p">)</span>
+            <span class="n">science_reference</span><span class="p">(</span><span class="s2">&quot;Sze abrupt junction approximation&quot;</span><span class="p">,</span>
+                              <span class="s2">&quot;Sze: The Physics of Semiconductor Devices, 2nd edition, John Wiley &amp; Sons, Inc (2007)&quot;</span><span class="p">)</span>
+            <span class="n">wp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">es</span> <span class="o">*</span> <span class="n">Vbi</span> <span class="o">/</span> <span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">Na</span><span class="p">))</span>
+            <span class="n">wn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">es</span> <span class="o">*</span> <span class="n">Vbi</span> <span class="o">/</span> <span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">Nd</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wn</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">xi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xi</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">es</span> <span class="o">*</span> <span class="n">Vbi</span> <span class="o">/</span> <span class="n">q</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Na</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Nd</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Nd</span> <span class="o">/</span> <span class="n">Na</span><span class="p">)</span>
+            <span class="n">wp</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">xi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xi</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">es</span> <span class="o">*</span> <span class="n">Vbi</span> <span class="o">/</span> <span class="n">q</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">Na</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Nd</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Na</span> <span class="o">/</span> <span class="n">Nd</span><span class="p">)</span>
+
+    <span class="n">wn</span> <span class="o">=</span> <span class="n">wn</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;wn&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">wn</span>
+    <span class="n">wp</span> <span class="o">=</span> <span class="n">wp</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">junction</span><span class="p">,</span> <span class="s2">&quot;wp&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">junction</span><span class="o">.</span><span class="n">wp</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">wn</span> <span class="o">+</span> <span class="n">wp</span> <span class="o">+</span> <span class="n">xi</span>
+
+    <span class="c1"># Now it is time to calculate currents</span>
+    <span class="k">if</span> <span class="n">pn_or_np</span> <span class="o">==</span> <span class="s2">&quot;pn&quot;</span><span class="p">:</span>
+        <span class="n">l_top</span><span class="p">,</span> <span class="n">l_bottom</span> <span class="o">=</span> <span class="n">ln</span><span class="p">,</span> <span class="n">lp</span>
+        <span class="n">x_top</span><span class="p">,</span> <span class="n">x_bottom</span> <span class="o">=</span> <span class="n">xp</span><span class="p">,</span> <span class="n">xn</span>
+        <span class="n">w_top</span><span class="p">,</span> <span class="n">w_bottom</span> <span class="o">=</span> <span class="n">wp</span><span class="p">,</span> <span class="n">wn</span>
+        <span class="n">s_top</span><span class="p">,</span> <span class="n">s_bottom</span> <span class="o">=</span> <span class="n">sp</span><span class="p">,</span> <span class="n">sn</span>
+        <span class="n">d_top</span><span class="p">,</span> <span class="n">d_bottom</span> <span class="o">=</span> <span class="n">dp</span><span class="p">,</span> <span class="n">dn</span>
+        <span class="n">min_top</span><span class="p">,</span> <span class="n">min_bot</span> <span class="o">=</span> <span class="n">niSquared</span> <span class="o">/</span> <span class="n">Na</span><span class="p">,</span> <span class="n">niSquared</span> <span class="o">/</span> <span class="n">Nd</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">l_bottom</span><span class="p">,</span> <span class="n">l_top</span> <span class="o">=</span> <span class="n">ln</span><span class="p">,</span> <span class="n">lp</span>
+        <span class="n">x_bottom</span><span class="p">,</span> <span class="n">x_top</span> <span class="o">=</span> <span class="n">xp</span><span class="p">,</span> <span class="n">xn</span>
+        <span class="n">w_bottom</span><span class="p">,</span> <span class="n">w_top</span> <span class="o">=</span> <span class="n">wp</span><span class="p">,</span> <span class="n">wn</span>
+        <span class="n">s_bottom</span><span class="p">,</span> <span class="n">s_top</span> <span class="o">=</span> <span class="n">sp</span><span class="p">,</span> <span class="n">sn</span>
+        <span class="n">d_bottom</span><span class="p">,</span> <span class="n">d_top</span> <span class="o">=</span> <span class="n">dp</span><span class="p">,</span> <span class="n">dn</span>
+        <span class="n">min_bot</span><span class="p">,</span> <span class="n">min_top</span> <span class="o">=</span> <span class="n">niSquared</span> <span class="o">/</span> <span class="n">Na</span><span class="p">,</span> <span class="n">niSquared</span> <span class="o">/</span> <span class="n">Nd</span>
+
+    <span class="n">widths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">junction</span><span class="p">:</span>
+        <span class="n">widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+    <span class="n">cum_widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">widths</span><span class="p">)</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">junction</span><span class="o">.</span><span class="n">absorbed</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">wavelength</span>
+    <span class="n">wl_sp</span><span class="p">,</span> <span class="n">ph</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">light_source</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">output_units</span><span class="o">=</span><span class="s1">&#39;photon_flux_per_m&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">wl</span><span class="p">)</span>
+
+    <span class="c1"># The contribution from the Emitter (top side).</span>
+    <span class="n">xa</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_top</span><span class="p">]</span>
+    <span class="n">xb</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_top</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w_top</span>
+    <span class="n">deriv</span> <span class="o">=</span> <span class="n">get_J_sc_diffusion_vs_WL</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">d_top</span><span class="p">,</span> <span class="n">l_top</span><span class="p">,</span> <span class="n">min_top</span><span class="p">,</span> <span class="n">s_top</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+    <span class="n">j_sc_top</span> <span class="o">=</span> <span class="n">d_top</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">deriv</span><span class="p">)</span>
+
+    <span class="c1"># The contribution from the Base (bottom side).</span>
+    <span class="n">xa</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_bottom</span><span class="p">]</span> <span class="o">+</span> <span class="n">w_bottom</span>
+    <span class="n">xb</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_bottom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">deriv</span> <span class="o">=</span> <span class="n">get_J_sc_diffusion_vs_WL</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">d_bottom</span><span class="p">,</span> <span class="n">l_bottom</span><span class="p">,</span> <span class="n">min_bot</span><span class="p">,</span> <span class="n">s_bottom</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+    <span class="n">j_sc_bot</span> <span class="o">=</span> <span class="n">d_bottom</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">deriv</span><span class="p">)</span>
+
+    <span class="c1"># The contribution from the SCR (includes the intrinsic region, if present).</span>
+    <span class="n">xa</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_top</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w_top</span>
+    <span class="n">xb</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_bottom</span><span class="p">]</span> <span class="o">+</span> <span class="n">w_bottom</span>
+    <span class="n">j_sc_scr</span> <span class="o">=</span> <span class="n">get_J_sc_SCR_vs_WL</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">)</span>
+
+    <span class="c1"># The total ligth absorbed, but not necesarily collected, is:</span>
+    <span class="n">xa</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_top</span><span class="p">]</span>
+    <span class="n">xb</span> <span class="o">=</span> <span class="n">cum_widths</span><span class="p">[</span><span class="n">id_bottom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">zz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="mi">3001</span><span class="p">)</span>
+    <span class="n">gg</span> <span class="o">=</span> <span class="n">g</span><span class="p">(</span><span class="n">zz</span><span class="p">)</span> <span class="o">*</span> <span class="n">ph</span>
+    <span class="n">current_absorbed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">gg</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Now, we put everything together</span>
+    <span class="n">j_sc</span> <span class="o">=</span> <span class="n">j_sc_top</span> <span class="o">+</span> <span class="n">j_sc_bot</span> <span class="o">+</span> <span class="n">j_sc_scr</span>
+
+    <span class="n">eqe</span> <span class="o">=</span> <span class="n">j_sc</span> <span class="o">/</span> <span class="n">ph</span>
+    <span class="n">eqe_emitter</span> <span class="o">=</span> <span class="n">j_sc_top</span> <span class="o">/</span> <span class="n">ph</span>
+    <span class="n">eqe_base</span> <span class="o">=</span> <span class="n">j_sc_bot</span> <span class="o">/</span> <span class="n">ph</span>
+    <span class="n">eqe_scr</span> <span class="o">=</span> <span class="n">j_sc_scr</span> <span class="o">/</span> <span class="n">ph</span>
+
+    <span class="n">junction</span><span class="o">.</span><span class="n">iqe</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">wl</span><span class="p">,</span> <span class="n">j_sc</span> <span class="o">/</span> <span class="n">current_absorbed</span><span class="p">)</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">eqe</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">wl</span><span class="p">,</span> <span class="n">eqe</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assume_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="n">eqe</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">eqe</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">eqe_emitter</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">wl</span><span class="p">,</span> <span class="n">eqe_emitter</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assume_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                    <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="n">eqe_emitter</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">eqe_emitter</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">eqe_base</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">wl</span><span class="p">,</span> <span class="n">eqe_base</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assume_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                 <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="n">eqe_base</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">eqe_base</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">junction</span><span class="o">.</span><span class="n">eqe_scr</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">wl</span><span class="p">,</span> <span class="n">eqe_scr</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assume_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="n">eqe_scr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">eqe_scr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="get_J_sc_SCR_vs_WL"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_J_sc_SCR_vs_WL">[docs]</a><span class="k">def</span> <span class="nf">get_J_sc_SCR_vs_WL</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">):</span>
+    <span class="n">zz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="mi">1001</span><span class="p">)</span>
+    <span class="n">gg</span> <span class="o">=</span> <span class="n">g</span><span class="p">(</span><span class="n">zz</span><span class="p">)</span> <span class="o">*</span> <span class="n">ph</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">gg</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="get_J_sc_diffusion_vs_WL"><a class="viewcode-back" href="../../../Solvers/depletion.html#solcore.analytic_solar_cells.depletion_approximation.get_J_sc_diffusion_vs_WL">[docs]</a><span class="k">def</span> <span class="nf">get_J_sc_diffusion_vs_WL</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">):</span>
+    <span class="n">zz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span> <span class="n">xb</span><span class="p">,</span> <span class="mi">1001</span><span class="p">)</span>
+    <span class="n">gg</span> <span class="o">=</span> <span class="n">g</span><span class="p">(</span><span class="n">zz</span><span class="p">)</span> <span class="o">*</span> <span class="n">ph</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">wl</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wl</span><span class="p">)):</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">gg</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">D</span> <span class="o">+</span> <span class="n">y0</span> <span class="o">/</span> <span class="n">L</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="n">out1</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">out2</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">L</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">A</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">out1</span><span class="p">,</span> <span class="n">out2</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">bc</span><span class="p">(</span><span class="n">ya</span><span class="p">,</span> <span class="n">yb</span><span class="p">):</span>
+                <span class="n">left</span> <span class="o">=</span> <span class="n">ya</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">S</span> <span class="o">/</span> <span class="n">D</span> <span class="o">*</span> <span class="p">(</span><span class="n">ya</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span>
+                <span class="n">right</span> <span class="o">=</span> <span class="n">yb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">bc</span><span class="p">(</span><span class="n">ya</span><span class="p">,</span> <span class="n">yb</span><span class="p">):</span>
+                <span class="n">left</span> <span class="o">=</span> <span class="n">ya</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">right</span> <span class="o">=</span> <span class="n">yb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">S</span> <span class="o">/</span> <span class="n">D</span> <span class="o">*</span> <span class="p">(</span><span class="n">yb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">])</span>
+
+        <span class="n">guess</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">zz</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">guess</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">guess</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">solution</span> <span class="o">=</span> <span class="n">solve_bvp</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">guess</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

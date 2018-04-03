@@ -5,7 +5,7 @@ import types
 
 
 def solve_external_optics(solar_cell, options):
-    """ Calculates the reflection, transmission and absorption of a solar cell from external data, preparing the structure for further calculations. The external data that must be provided is:
+    """ Calculates the reflection, transmission and absorption of a solar cell from external data, preparing the structure for further calculations. The external data that must be provided in the solar cell definition is:
 
     external_reflected: a function that provides the fraction of reflected light at the specified wavelengths (in m)
     external_absorbed: a function that provides an array with the differential absorption at a depth Z (in m) at the specified wavelengths.

@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.material_data.mobility &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.material_data.mobility &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -102,13 +99,23 @@
 <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">mobility_low_field</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">muMin</span><span class="p">,</span> <span class="n">muMax</span><span class="p">,</span> <span class="n">Nref</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<div class="viewcode-block" id="mobility_low_field"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.mobility_low_field">[docs]</a><span class="k">def</span> <span class="nf">mobility_low_field</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">muMin</span><span class="p">,</span> <span class="n">muMax</span><span class="p">,</span> <span class="n">Nref</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
     <span class="n">m</span> <span class="o">=</span> <span class="n">muMin</span> <span class="o">+</span> <span class="p">(</span><span class="n">muMax</span> <span class="o">*</span> <span class="p">(</span><span class="mi">300</span> <span class="o">/</span> <span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">muMin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">N</span> <span class="o">/</span> <span class="p">(</span><span class="n">Nref</span> <span class="o">*</span> <span class="p">(</span><span class="mi">300</span> <span class="o">/</span> <span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="n">t2</span><span class="p">))</span> <span class="o">**</span> <span class="n">l</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">m</span>
+    <span class="k">return</span> <span class="n">m</span></div>
 
 
-<span class="k">def</span> <span class="nf">calculate_mobility</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">holes</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_mobility"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.calculate_mobility">[docs]</a><span class="k">def</span> <span class="nf">calculate_mobility</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">holes</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculates the mobility using the model by Sotoodeh et al. If the material is not in the database, then the function returns the mobility for GaAs at that temperature, T, and impurity concentration, N.</span>
+
+<span class="sd">    :param material: A string with the material name</span>
+<span class="sd">    :param holes: If calculation should be done for electrons (holes=0) or holes (holes=1)</span>
+<span class="sd">    :param N: Impurity concentration</span>
+<span class="sd">    :param x: The fractional composition in the case of ternaries</span>
+<span class="sd">    :param y: The other fractional composition in the case of quaternaries</span>
+<span class="sd">    :param T: Temperature</span>
+<span class="sd">    :return: The calculated mobility</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">science_reference</span><span class="p">(</span><span class="s1">&#39;mobility calculator&#39;</span><span class="p">,</span> <span class="s1">&#39;M. Sotoodeh, A. H. Khalid, and A. A. Rezazadeh,&#39;</span>
                                              <span class="s1">&#39;“Empirical low-field mobility model for III–V compounds applicable in device simulation codes,&quot;&#39;</span>
                                              <span class="s1">&#39;J. Appl. Phys., vol. 87, no. 6, p. 2890, 2000.&#39;</span><span class="p">)</span>
@@ -142,10 +149,10 @@
     <span class="n">t2</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;t2&quot;</span><span class="p">]</span>
 
     <span class="n">m</span> <span class="o">=</span> <span class="n">mobility_low_field</span><span class="p">(</span><span class="n">N</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span> <span class="n">muMin</span><span class="p">,</span> <span class="n">muMax</span><span class="p">,</span> <span class="n">Nref</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10000</span>  <span class="c1"># To convert it from cm2 to m2</span>
-    <span class="k">return</span> <span class="n">m</span>
+    <span class="k">return</span> <span class="n">m</span></div>
 
 
-<div class="viewcode-block" id="calculate_InGaAs"><a class="viewcode-back" href="../../../Systems/Mobility.html#solcore.material_data.mobility.calculate_InGaAs">[docs]</a><span class="k">def</span> <span class="nf">calculate_InGaAs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_InGaAs"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.calculate_InGaAs">[docs]</a><span class="k">def</span> <span class="nf">calculate_InGaAs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the parameters for an InGaAs alloy.</span>
 
 <span class="sd">    :param x: Indium fraction</span>
@@ -170,7 +177,7 @@
     <span class="k">return</span> <span class="n">newData</span></div>
 
 
-<div class="viewcode-block" id="calculate_InGaP"><a class="viewcode-back" href="../../../Systems/Mobility.html#solcore.material_data.mobility.calculate_InGaP">[docs]</a><span class="k">def</span> <span class="nf">calculate_InGaP</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_InGaP"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.calculate_InGaP">[docs]</a><span class="k">def</span> <span class="nf">calculate_InGaP</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the parameters for an InGaP alloy.</span>
 
 <span class="sd">    :param x: Indium fraction</span>
@@ -230,7 +237,7 @@
     <span class="k">return</span> <span class="n">newData</span></div>
 
 
-<div class="viewcode-block" id="calculate_AlGaAs"><a class="viewcode-back" href="../../../Systems/Mobility.html#solcore.material_data.mobility.calculate_AlGaAs">[docs]</a><span class="k">def</span> <span class="nf">calculate_AlGaAs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_AlGaAs"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.calculate_AlGaAs">[docs]</a><span class="k">def</span> <span class="nf">calculate_AlGaAs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the parameters for an AlGaAs alloy.</span>
 
 <span class="sd">    :param x: Al fraction</span>
@@ -297,7 +304,7 @@
     <span class="k">return</span> <span class="n">newData</span></div>
 
 
-<div class="viewcode-block" id="calculate_InAlAs"><a class="viewcode-back" href="../../../Systems/Mobility.html#solcore.material_data.mobility.calculate_InAlAs">[docs]</a><span class="k">def</span> <span class="nf">calculate_InAlAs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_InAlAs"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.calculate_InAlAs">[docs]</a><span class="k">def</span> <span class="nf">calculate_InAlAs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the parameters for an InAlAs alloy.</span>
 
 <span class="sd">    :param x: Al fraction</span>
@@ -367,7 +374,7 @@
     <span class="k">return</span> <span class="n">newData</span></div>
 
 
-<div class="viewcode-block" id="calculate_InGaAsP"><a class="viewcode-back" href="../../../Systems/Mobility.html#solcore.material_data.mobility.calculate_InGaAsP">[docs]</a><span class="k">def</span> <span class="nf">calculate_InGaAsP</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_InGaAsP"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.calculate_InGaAsP">[docs]</a><span class="k">def</span> <span class="nf">calculate_InGaAsP</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the parameters for an InGaAsP alloy. The calculation is based on a interpolation scheme between</span>
 <span class="sd">    InGaP and InGaAs using data of compositions lattice matched to InP. Results for compositions away from this might</span>
 <span class="sd">    not be very accurate.</span>
@@ -398,7 +405,7 @@
     <span class="k">return</span> <span class="n">newData</span></div>
 
 
-<div class="viewcode-block" id="calculate_General"><a class="viewcode-back" href="../../../Systems/Mobility.html#solcore.material_data.mobility.calculate_General">[docs]</a><span class="k">def</span> <span class="nf">calculate_General</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_General"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.calculate_General">[docs]</a><span class="k">def</span> <span class="nf">calculate_General</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the parameters for a general alloy of the materials in the database assuming a simple linear</span>
 <span class="sd">    interpolation. Only ternaries are supported this way.</span>
 
@@ -425,7 +432,7 @@
     <span class="k">return</span> <span class="n">newData</span></div>
 
 
-<div class="viewcode-block" id="Rd"><a class="viewcode-back" href="../../../Systems/Mobility.html#solcore.material_data.mobility.Rd">[docs]</a><span class="k">def</span> <span class="nf">Rd</span><span class="p">(</span><span class="n">EgG</span><span class="p">,</span> <span class="n">EgX</span><span class="p">,</span> <span class="n">EgL</span><span class="p">,</span> <span class="n">mnG</span><span class="p">,</span> <span class="n">mnX</span><span class="p">,</span> <span class="n">mnL</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<div class="viewcode-block" id="Rd"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.Rd">[docs]</a><span class="k">def</span> <span class="nf">Rd</span><span class="p">(</span><span class="n">EgG</span><span class="p">,</span> <span class="n">EgX</span><span class="p">,</span> <span class="n">EgL</span><span class="p">,</span> <span class="n">mnG</span><span class="p">,</span> <span class="n">mnX</span><span class="p">,</span> <span class="n">mnL</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculates the fraction of electrons in the direct valley.</span>
 
 <span class="sd">    :param EgG: Gamma-valley bandgap</span>
@@ -445,19 +452,19 @@
     <span class="k">return</span> <span class="n">fraction</span></div>
 
 
-<span class="k">def</span> <span class="nf">mind</span><span class="p">(</span><span class="n">EgX</span><span class="p">,</span> <span class="n">EgL</span><span class="p">,</span> <span class="n">mnX</span><span class="p">,</span> <span class="n">mnL</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<div class="viewcode-block" id="mind"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.mind">[docs]</a><span class="k">def</span> <span class="nf">mind</span><span class="p">(</span><span class="n">EgX</span><span class="p">,</span> <span class="n">EgL</span><span class="p">,</span> <span class="n">mnX</span><span class="p">,</span> <span class="n">mnL</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
     <span class="n">RX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">EgL</span> <span class="o">-</span> <span class="n">EgX</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span>
 
     <span class="n">fraction</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">RX</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">mnL</span> <span class="o">*</span> <span class="n">fraction</span> <span class="o">+</span> <span class="n">mnX</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fraction</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mnL</span> <span class="o">*</span> <span class="n">fraction</span> <span class="o">+</span> <span class="n">mnX</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fraction</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">interpolate_parameter_linear</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">AC</span><span class="p">,</span> <span class="n">BC</span><span class="p">,</span> <span class="n">ABC</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">AC</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">BC</span> <span class="o">-</span> <span class="n">ABC</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
+<div class="viewcode-block" id="interpolate_parameter_linear"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.interpolate_parameter_linear">[docs]</a><span class="k">def</span> <span class="nf">interpolate_parameter_linear</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">AC</span><span class="p">,</span> <span class="n">BC</span><span class="p">,</span> <span class="n">ABC</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">AC</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">BC</span> <span class="o">-</span> <span class="n">ABC</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">interpolate_parameter_quad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="interpolate_parameter_quad"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.interpolate_parameter_quad">[docs]</a><span class="k">def</span> <span class="nf">interpolate_parameter_quad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="n">dem0</span> <span class="o">=</span> <span class="p">(</span><span class="n">x0</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x0</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
     <span class="n">dem1</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
     <span class="n">dem2</span> <span class="o">=</span> <span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
@@ -468,16 +475,16 @@
 
     <span class="n">p</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">nom0</span> <span class="o">/</span> <span class="n">dem0</span> <span class="o">+</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">nom1</span> <span class="o">/</span> <span class="n">dem1</span> <span class="o">+</span> <span class="n">y2</span> <span class="o">*</span> <span class="n">nom2</span> <span class="o">/</span> <span class="n">dem2</span>
 
-    <span class="k">return</span> <span class="n">p</span>
+    <span class="k">return</span> <span class="n">p</span></div>
 
 
-<span class="k">def</span> <span class="nf">interpolate_epsilon</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">AC</span><span class="p">,</span> <span class="n">BC</span><span class="p">):</span>
+<div class="viewcode-block" id="interpolate_epsilon"><a class="viewcode-back" href="../../../Systems/Materials.html#solcore.material_data.mobility.interpolate_epsilon">[docs]</a><span class="k">def</span> <span class="nf">interpolate_epsilon</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">AC</span><span class="p">,</span> <span class="n">BC</span><span class="p">):</span>
     <span class="n">ratioAC</span> <span class="o">=</span> <span class="p">(</span><span class="n">AC</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">AC</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">ratioBC</span> <span class="o">=</span> <span class="p">(</span><span class="n">BC</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">BC</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">k</span> <span class="o">=</span> <span class="n">interpolate_parameter_linear</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ratioAC</span><span class="p">,</span> <span class="n">ratioBC</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">k</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">k</span><span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -508,7 +515,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

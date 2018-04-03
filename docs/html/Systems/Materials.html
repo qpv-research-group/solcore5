@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>The Materials System &#8212; Solcore 5.0.2 documentation</title>
+    <title>The Material System &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="The mobility module" href="Mobility.html" />
-    <link rel="prev" title="The Parameters System" href="Parameters.html" /> 
+    <link rel="next" title="The Parameters System" href="Parameters.html" />
+    <link rel="prev" title="Materials and units" href="systems.html" /> 
   </head>
   <body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,12 +37,13 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="Mobility.html" title="The mobility module"
+          <a href="Parameters.html" title="The Parameters System"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="Parameters.html" title="The Parameters System"
+          <a href="systems.html" title="Materials and units"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="systems.html" accesskey="U">Materials and units</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -52,25 +53,27 @@
             </a></p>
 <h3><a href="../index.html">Table Of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="systems.html">Materials and units</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">The Material System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parameters.html">The Parameters System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">The Units System</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="Parameters.html"
-                        title="previous chapter">The Parameters System</a></p>
+  <p class="topless"><a href="systems.html"
+                        title="previous chapter">Materials and units</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="Mobility.html"
-                        title="next chapter">The mobility module</a></p>
+  <p class="topless"><a href="Parameters.html"
+                        title="next chapter">The Parameters System</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -96,8 +99,10 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-solcore.material_system.material_system">
-<span id="the-materials-system"></span><h1>The Materials System<a class="headerlink" href="#module-solcore.material_system.material_system" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="the-material-system">
+<h1>The Material System<a class="headerlink" href="#the-material-system" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-solcore.material_system.material_system">
+<span id="the-material-class"></span><h2>The material class<a class="headerlink" href="#module-solcore.material_system.material_system" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="solcore.material_system.material_system.MaterialSystem">
 <em class="property">class </em><code class="descclassname">solcore.material_system.material_system.</code><code class="descname">MaterialSystem</code><span class="sig-paren">(</span><em>sources=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/material_system.html#MaterialSystem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.material_system.MaterialSystem" title="Permalink to this definition">¶</a></dt>
@@ -246,7 +251,235 @@ mind that the available n and k.txt data is valid only at room temperature.</p>
 
 </dd></dl>
 
-<span class="target" id="module-solcore.material_system.critical_point_picker"></span><dl class="class">
+</div>
+<div class="section" id="the-mobility-module">
+<h2>The mobility module<a class="headerlink" href="#the-mobility-module" title="Permalink to this headline">¶</a></h2>
+<p>This module allows to calculate the carrier mobilities based on the material composition, temperature (T&gt;100K) and impurity concentration. It is an implementation of the mobility model by Sotoodeh <em>et al.</em> (<a class="footnote-reference" href="#ref6" id="id1">[1]</a>). The material class described above uses this module internally to get the mobililty of the materials it is implemented for.</p>
+<p>The material parameters used in the model are included in the file <em>mobility_parameters.json</em>. At the moment, the supported materials are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>Binaries</strong>: AlAs, GaAs, InAs, InP, GaP</li>
+<li><strong>Ternaries</strong>: InAlAs, AlGaAs, InGaAs, GaInP, (GaAsP), (InAsP)</li>
+<li><strong>Quaternaries</strong>: InGaAsP</li>
+</ul>
+</div></blockquote>
+<p>The last two ternaries are simply calculated as a linear interpolation of the parameters of the corresponding binaries, so the transition from direct to indirect bandgap and other dependencies might not be very accurate. <em>InGaAsP</em>, in turn, is calculated only based on the <em>InGaAs</em> and <em>GaInP</em> data and it is mostly valid for compositions lattice matched to <em>InP</em>.</p>
+<span class="target" id="module-solcore.material_data.mobility"></span><dl class="function">
+<dt id="solcore.material_data.mobility.Log">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">Log</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#solcore.material_data.mobility.Log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.mobility_low_field">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">mobility_low_field</code><span class="sig-paren">(</span><em>N</em>, <em>muMin</em>, <em>muMax</em>, <em>Nref</em>, <em>l</em>, <em>t1</em>, <em>t2</em>, <em>T=300</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#mobility_low_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.mobility_low_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.calculate_mobility">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">calculate_mobility</code><span class="sig-paren">(</span><em>material</em>, <em>holes</em>, <em>N</em>, <em>x=0.0</em>, <em>y=0.0</em>, <em>T=300</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#calculate_mobility"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.calculate_mobility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the mobility using the model by Sotoodeh et al. If the material is not in the database, then the function returns the mobility for GaAs at that temperature, T, and impurity concentration, N.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>material</strong> – A string with the material name</li>
+<li><strong>holes</strong> – If calculation should be done for electrons (holes=0) or holes (holes=1)</li>
+<li><strong>N</strong> – Impurity concentration</li>
+<li><strong>x</strong> – The fractional composition in the case of ternaries</li>
+<li><strong>y</strong> – The other fractional composition in the case of quaternaries</li>
+<li><strong>T</strong> – Temperature</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The calculated mobility</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.calculate_InGaAs">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">calculate_InGaAs</code><span class="sig-paren">(</span><em>x</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#calculate_InGaAs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.calculate_InGaAs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an InGaAs alloy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – Indium fraction</li>
+<li><strong>i</strong> – If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.calculate_InGaP">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">calculate_InGaP</code><span class="sig-paren">(</span><em>x</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#calculate_InGaP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.calculate_InGaP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an InGaP alloy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – Indium fraction</li>
+<li><strong>i</strong> – If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.calculate_AlGaAs">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">calculate_AlGaAs</code><span class="sig-paren">(</span><em>x</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#calculate_AlGaAs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.calculate_AlGaAs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an AlGaAs alloy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – Al fraction</li>
+<li><strong>i</strong> – If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.calculate_InAlAs">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">calculate_InAlAs</code><span class="sig-paren">(</span><em>x</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#calculate_InAlAs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.calculate_InAlAs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an InAlAs alloy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – Al fraction</li>
+<li><strong>i</strong> – If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.calculate_InGaAsP">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">calculate_InGaAsP</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#calculate_InGaAsP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.calculate_InGaAsP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for an InGaAsP alloy. The calculation is based on a interpolation scheme between
+InGaP and InGaAs using data of compositions lattice matched to InP. Results for compositions away from this might
+not be very accurate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – Indium fraction</li>
+<li><strong>y</strong> – Phosphorus fraction</li>
+<li><strong>i</strong> – If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.calculate_General">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">calculate_General</code><span class="sig-paren">(</span><em>material</em>, <em>x</em>, <em>i</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#calculate_General"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.calculate_General" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the parameters for a general alloy of the materials in the database assuming a simple linear
+interpolation. Only ternaries are supported this way.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>material</strong> – Material to calculate, which must be in the database</li>
+<li><strong>x</strong> – Main fraction</li>
+<li><strong>i</strong> – If the data for electrons (1) or holes (2) should be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.Rd">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">Rd</code><span class="sig-paren">(</span><em>EgG</em>, <em>EgX</em>, <em>EgL</em>, <em>mnG</em>, <em>mnX</em>, <em>mnL</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#Rd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.Rd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the fraction of electrons in the direct valley.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>EgG</strong> – Gamma-valley bandgap</li>
+<li><strong>EgX</strong> – X-valley bandgap</li>
+<li><strong>EgL</strong> – L-valley bandgap</li>
+<li><strong>mnG</strong> – Gamma-valley effective mass</li>
+<li><strong>mnX</strong> – X-valley effective mass</li>
+<li><strong>mnL</strong> – L-valley effective mass</li>
+<li><strong>T</strong> – The temperature</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The fraction.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.mind">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">mind</code><span class="sig-paren">(</span><em>EgX</em>, <em>EgL</em>, <em>mnX</em>, <em>mnL</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#mind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.mind" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.interpolate_parameter_linear">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">interpolate_parameter_linear</code><span class="sig-paren">(</span><em>x</em>, <em>AC</em>, <em>BC</em>, <em>ABC=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#interpolate_parameter_linear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.interpolate_parameter_linear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.interpolate_parameter_quad">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">interpolate_parameter_quad</code><span class="sig-paren">(</span><em>x</em>, <em>y0</em>, <em>y1</em>, <em>y2</em>, <em>x1</em>, <em>x0=1</em>, <em>x2=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#interpolate_parameter_quad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.interpolate_parameter_quad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="solcore.material_data.mobility.interpolate_epsilon">
+<code class="descclassname">solcore.material_data.mobility.</code><code class="descname">interpolate_epsilon</code><span class="sig-paren">(</span><em>x</em>, <em>AC</em>, <em>BC</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_data/mobility.html#interpolate_epsilon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_data.mobility.interpolate_epsilon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-solcore.material_system.critical_point_picker">
+<span id="the-critical-point-picker"></span><h2>The critical point picker<a class="headerlink" href="#module-solcore.material_system.critical_point_picker" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
 <dt id="solcore.material_system.critical_point_picker.CPPicker">
 <em class="property">class </em><code class="descclassname">solcore.material_system.critical_point_picker.</code><code class="descname">CPPicker</code><span class="sig-paren">(</span><em>directory</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solcore/material_system/critical_point_picker.html#CPPicker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#solcore.material_system.critical_point_picker.CPPicker" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class can be used to pick the critical points out of a collection of n and k curves for a range of
@@ -305,6 +538,19 @@ other intermediate composition.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils footnote" frame="void" id="ref6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td><ol class="first last upperalpha simple" start="13">
+<li>Sotoodeh, A. H. Khalid, and A. A. Rezazadeh, “Empirical low-field mobility model for III–V compounds applicable in device simulation codes,” <em>J. Appl. Phys.</em>, <strong>87</strong>, 2890, (2000).</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+</div>
+</div>
 
 
           </div>
@@ -322,12 +568,13 @@ other intermediate composition.</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="Mobility.html" title="The mobility module"
+          <a href="Parameters.html" title="The Parameters System"
              >next</a> |</li>
         <li class="right" >
-          <a href="Parameters.html" title="The Parameters System"
+          <a href="systems.html" title="Materials and units"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="systems.html" >Materials and units</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

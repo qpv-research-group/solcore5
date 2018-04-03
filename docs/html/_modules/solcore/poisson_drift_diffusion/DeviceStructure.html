@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.poisson_drift_diffusion.DeviceStructure &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.poisson_drift_diffusion.DeviceStructure &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -83,6 +80,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="k">import</span> <span class="n">quad</span>
 
 <span class="kn">from</span> <span class="nn">solcore</span> <span class="k">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">material</span>
 <span class="kn">from</span> <span class="nn">solcore.absorption_calculator</span> <span class="k">import</span> <span class="n">adachi_alpha</span><span class="p">,</span> <span class="n">calculate_absorption_profile</span><span class="p">,</span> <span class="n">calculate_rat</span>
@@ -97,6 +95,7 @@
 <span class="n">kb</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">kb</span>
 <span class="n">m0</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">electron_mass</span>
 <span class="n">vacuum_permittivity</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">vacuum_permittivity</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">c</span>
 
 <span class="c1"># The default material is a set of minimum properties that are used for the layers unless otherwise stated</span>
 <span class="n">DefaultMaterial</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;GaAs&quot;</span><span class="p">)(</span><span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">)</span>
@@ -107,19 +106,23 @@
                      <span class="s1">&#39;eff_mass_lh_z&#39;</span><span class="p">:</span> <span class="n">DefaultMaterial</span><span class="o">.</span><span class="n">eff_mass_lh_z</span><span class="p">,</span>  <span class="c1"># relative to m0</span>
                      <span class="s1">&#39;electron_mobility&#39;</span><span class="p">:</span> <span class="n">calculate_mobility</span><span class="p">(</span><span class="s2">&quot;GaAs&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>  <span class="c1"># m2 V-1 s-1</span>
                      <span class="s1">&#39;hole_mobility&#39;</span><span class="p">:</span> <span class="n">calculate_mobility</span><span class="p">(</span><span class="s2">&quot;GaAs&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>  <span class="c1"># m2 V-1 s-1</span>
+                     <span class="s1">&#39;ni&#39;</span><span class="p">:</span> <span class="n">DefaultMaterial</span><span class="o">.</span><span class="n">ni</span><span class="p">,</span>  <span class="c1"># m-3</span>
+                     <span class="s1">&#39;Nc&#39;</span><span class="p">:</span> <span class="n">DefaultMaterial</span><span class="o">.</span><span class="n">Nc</span><span class="p">,</span>  <span class="c1"># m-3</span>
+                     <span class="s1">&#39;Nv&#39;</span><span class="p">:</span> <span class="n">DefaultMaterial</span><span class="o">.</span><span class="n">Nv</span><span class="p">,</span>  <span class="c1"># m-3</span>
                      <span class="s1">&#39;electron_minority_lifetime&#39;</span><span class="p">:</span> <span class="mf">3e-6</span><span class="p">,</span>  <span class="c1"># s</span>
                      <span class="s1">&#39;hole_minority_lifetime&#39;</span><span class="p">:</span> <span class="mf">2.5e-7</span><span class="p">,</span>  <span class="c1"># s</span>
                      <span class="s1">&#39;permittivity&#39;</span><span class="p">:</span> <span class="mf">12.9</span><span class="p">,</span>  <span class="c1"># relative to epsilon0</span>
                      <span class="s1">&#39;electron_auger_recombination&#39;</span><span class="p">:</span> <span class="mf">1e-42</span><span class="p">,</span>  <span class="c1"># m6 s-1,</span>
                      <span class="s1">&#39;hole_auger_recombination&#39;</span><span class="p">:</span> <span class="mf">1e-42</span><span class="p">,</span>  <span class="c1"># m6 s-1</span>
-                     <span class="s1">&#39;radiative_recombination&#39;</span><span class="p">:</span> <span class="mf">7.2e-16</span><span class="p">,</span>  <span class="c1"># m3 s-1</span>
+                     <span class="c1"># &#39;radiative_recombination&#39;: 7.2e-16,  # m3 s-1</span>
+                     <span class="s1">&#39;radiative_recombination&#39;</span><span class="p">:</span> <span class="n">DefaultMaterial</span><span class="o">.</span><span class="n">radiative_recombination</span><span class="p">,</span>  <span class="c1"># m3 s-1</span>
                      <span class="s1">&#39;Nd&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># m-3</span>
                      <span class="s1">&#39;Na&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># m3</span>
                      <span class="s1">&#39;sn&#39;</span><span class="p">:</span> <span class="mf">1e6</span><span class="p">,</span>  <span class="c1"># m s-1</span>
                      <span class="s1">&#39;sp&#39;</span><span class="p">:</span> <span class="mf">1e6</span><span class="p">}</span>  <span class="c1"># m s-1</span>
 
 
-<div class="viewcode-block" id="CreateDeviceStructure"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.CreateDeviceStructure">[docs]</a><span class="k">def</span> <span class="nf">CreateDeviceStructure</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s1">&#39;device&#39;</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">substrate</span><span class="o">=</span><span class="n">DefaultMaterial</span><span class="p">,</span>
+<div class="viewcode-block" id="CreateDeviceStructure"><a class="viewcode-back" href="../../../Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.CreateDeviceStructure">[docs]</a><span class="k">def</span> <span class="nf">CreateDeviceStructure</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s1">&#39;device&#39;</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">substrate</span><span class="o">=</span><span class="n">DefaultMaterial</span><span class="p">,</span>
                           <span class="n">reflection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Creates the structure of a device to be used in drift diffusion calculations.</span>
 <span class="sd">    </span>
@@ -153,13 +156,15 @@
     <span class="n">output</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SolcoreMaterialToStr</span><span class="p">(</span><span class="n">substrate</span><span class="p">)</span>
     <span class="n">output</span><span class="p">[</span><span class="s1">&#39;reflection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reflection</span>
     <span class="n">output</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">absorbed</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="s1">&#39;absorbed&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span>
+    <span class="n">output</span><span class="p">[</span><span class="s1">&#39;sn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">sn</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="s1">&#39;sn&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mf">1e6</span>
+    <span class="n">output</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">sp</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="s1">&#39;sp&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mf">1e6</span>
 
     <span class="n">AddLayers</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">layers</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">output</span></div>
 
 
-<div class="viewcode-block" id="AddLayers"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.AddLayers">[docs]</a><span class="k">def</span> <span class="nf">AddLayers</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+<div class="viewcode-block" id="AddLayers"><a class="viewcode-back" href="../../../Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.AddLayers">[docs]</a><span class="k">def</span> <span class="nf">AddLayers</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Add layers to the structure</span>
 
 <span class="sd">    :param device: The device structure</span>
@@ -169,122 +174,18 @@
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">:</span>
         <span class="n">NewLayer</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Layer</span><span class="p">:</span>
-            <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">role</span>
-            <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Layer&#39;</span>
-            <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;repeat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GetLayerProperties</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">])</span>
-            <span class="k">if</span> <span class="s1">&#39;absorption_file&#39;</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;absorption_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">absorption_file</span>
+        <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">role</span>
+        <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Layer&#39;</span>
+        <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;repeat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">NewLayer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GetLayerProperties</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">])</span>
 
-            <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NewLayer</span><span class="p">)</span>
-            <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">sublayer</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]:</span>
-                <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sublayer</span><span class="p">))</span>
-                <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-
-                <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-                <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span>
-                <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;repeat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;repeat&#39;</span><span class="p">]</span></div>
+        <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NewLayer</span><span class="p">)</span>
+        <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span></div>
 
 
-<div class="viewcode-block" id="Load"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.Load">[docs]</a><span class="k">def</span> <span class="nf">Load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">yaml</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Loads a device structure stored in a file. By default, the file must be JSON format</span>
-
-<span class="sd">    :param filename: The filename</span>
-<span class="sd">    :param yaml: If the format is YALM rather than JSON</span>
-<span class="sd">    :return: A device structure</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">yaml</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># If chosen, we try to use yaml. If anything fails, we try with json. </span>
-            <span class="kn">import</span> <span class="nn">yaml</span>
-            <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">json</span>
-            <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">json</span>
-        <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
-
-    <span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="s1">&#39;absorption_file&#39;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="c1"># If there is a file containing the absorption in this layer, we try to load it. It must have at least to columns: wavelengths and absorption coefficient. Both must be in SI units. The result is interpolated to the current working wavelengths.</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;absorption_file&#39;</span><span class="p">])</span>
-                <span class="n">output</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;absorption&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="c1"># The file can not be loaded. Maybe it does not exists or is not in the correct format. We move forward to calculating the absorption. Later, the calculated absorption can be saved with this filename. </span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error loading absorption file </span><span class="si">%s</span><span class="s1">. The absorption will be calculated later if necesary. &#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">output</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;absorption_file&#39;</span><span class="p">]))</span>
-
-    <span class="k">return</span> <span class="n">output</span></div>
-
-
-<div class="viewcode-block" id="Save"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.Save">[docs]</a><span class="k">def</span> <span class="nf">Save</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_absorptions_individually</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">remove_absorption_from_json</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-         <span class="n">override_absorption</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">yaml</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Save the device structure to a file.</span>
-
-<span class="sd">    :param device: The device structure to save</span>
-<span class="sd">    :param filename: The filename</span>
-<span class="sd">    :param save_absorptions_individually: If the absorption of the materials must be saved in individual files</span>
-<span class="sd">    :param remove_absorption_from_json: If the absorption must be removed from the JSON file to make it more readable</span>
-<span class="sd">    :param override_absorption: If the external absrption files must override the default absorption</span>
-<span class="sd">    :param directory: Directory in which to save the absorption data</span>
-<span class="sd">    :param yaml: If YALM should be used rather than JSON</span>
-<span class="sd">    :return: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">save_absorptions_individually</span><span class="p">:</span>
-        <span class="c1"># The absorption coefficient of each layer is saved in an individual file. Optionally, it removes them from the structure so they are not saved also in in the json file        </span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="s1">&#39;absorption&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="k">continue</span>
-            <span class="c1"># if (&#39;absorption_file&#39; in device[&#39;layers&#39;][i].keys()) and override_absorption:</span>
-            <span class="c1">#     abs_filename = device[&#39;layers&#39;][i][&#39;absorption_file&#39;]</span>
-            <span class="c1"># else:</span>
-            <span class="c1">#     abs_filename = &#39;%s_inputs/%s_%s_%s_%s.dat&#39;   %(filename.split(&#39;.&#39;)[0], device[&#39;name&#39;], InLineComposition(device[&#39;layers&#39;][i]), device[&#39;layers&#39;][i][&#39;label&#39;], i)</span>
-
-            <span class="k">if</span> <span class="n">directory</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="n">directory</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_inputs&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-
-            <span class="n">abs_filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">.dat&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">directory</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">i</span><span class="p">,</span> <span class="n">InLineComposition</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]),</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
-
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;absorption_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_filename</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">abs_filename</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;absorption&#39;</span><span class="p">]))</span>
-
-    <span class="k">if</span> <span class="n">remove_absorption_from_json</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="s1">&#39;absorption&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="k">continue</span>
-            <span class="k">del</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;absorption&#39;</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="n">yaml</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># If chosen, we try to use yaml. If anything fails, we try with json. </span>
-            <span class="kn">import</span> <span class="nn">yaml</span>
-            <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-            <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">json</span>
-            <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">json</span>
-        <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-
-    <span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="RemoveLayer"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.RemoveLayer">[docs]</a><span class="k">def</span> <span class="nf">RemoveLayer</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="RemoveLayer"><a class="viewcode-back" href="../../../Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.RemoveLayer">[docs]</a><span class="k">def</span> <span class="nf">RemoveLayer</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Remove a layer from the device structure</span>
 
 <span class="sd">    :param device: the device structure</span>
@@ -295,7 +196,7 @@
     <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;numlayers&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span></div>
 
 
-<div class="viewcode-block" id="GetLayerProperties"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.GetLayerProperties">[docs]</a><span class="k">def</span> <span class="nf">GetLayerProperties</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<div class="viewcode-block" id="GetLayerProperties"><a class="viewcode-back" href="../../../Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.GetLayerProperties">[docs]</a><span class="k">def</span> <span class="nf">GetLayerProperties</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Given a layer, get all the properties of that layer and the material it is made of at the given temperature</span>
 
 <span class="sd">    :param layer: The layer of interest</span>
@@ -307,38 +208,16 @@
     <span class="n">NewProperties</span><span class="p">[</span><span class="s1">&#39;composition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SolcoreMaterialToStr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">)</span>
     <span class="n">NewProperties</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span>
 
-    <span class="n">updateMun</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">updateMup</span> <span class="o">=</span> <span class="kc">False</span>
-
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">DefaultProperties</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="c1"># Numpy floats are not the same as python&#39;s so we need to make a conversion in order for Yaml to produce sensible files. </span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">NewProperties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="n">NewProperties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">DefaultProperties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-    <span class="c1"># The drift diffusion model uses the density of states. We calculate them now</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">NewProperties</span><span class="p">[</span><span class="s2">&quot;Nc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="s1">&#39;Nc&#39;</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">me</span> <span class="o">=</span> <span class="n">NewProperties</span><span class="p">[</span><span class="s1">&#39;eff_mass_electron_Gamma&#39;</span><span class="p">]</span>
-        <span class="n">NewProperties</span><span class="p">[</span><span class="s2">&quot;Nc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">me</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">1.5</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">NewProperties</span><span class="p">[</span><span class="s2">&quot;Nv&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">material</span><span class="p">,</span> <span class="s1">&#39;Nv&#39;</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">mhh</span> <span class="o">=</span> <span class="n">NewProperties</span><span class="p">[</span><span class="s1">&#39;eff_mass_hh_z&#39;</span><span class="p">]</span>
-        <span class="n">mlh</span> <span class="o">=</span> <span class="n">NewProperties</span><span class="p">[</span><span class="s1">&#39;eff_mass_lh_z&#39;</span><span class="p">]</span>
-        <span class="n">NewProperties</span><span class="p">[</span><span class="s2">&quot;Nv&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">mhh</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">1.5</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
-                                                                                         <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">mlh</span> <span class="o">*</span> <span class="n">m0</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">1.5</span>
-
-    <span class="n">NewProperties</span><span class="p">[</span><span class="s2">&quot;ni&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-        <span class="n">NewProperties</span><span class="p">[</span><span class="s2">&quot;Nc&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">NewProperties</span><span class="p">[</span><span class="s2">&quot;Nv&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">NewProperties</span><span class="p">[</span><span class="s2">&quot;band_gap&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">)))</span>
-
     <span class="k">return</span> <span class="n">NewProperties</span></div>
 
 
-<div class="viewcode-block" id="LoadAbsorption"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.LoadAbsorption">[docs]</a><span class="k">def</span> <span class="nf">LoadAbsorption</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">wavelengths</span><span class="p">,</span> <span class="n">use_Adachi</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="LoadAbsorption"><a class="viewcode-back" href="../../../Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.LoadAbsorption">[docs]</a><span class="k">def</span> <span class="nf">LoadAbsorption</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">wavelengths</span><span class="p">,</span> <span class="n">use_Adachi</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; If there is a file containing the absorption in this layer, we try to load it. It must have at least two</span>
 <span class="sd">    columns: wavelengths and absorption coefficient. Both must be in SI units. The result is interpolated to the current</span>
 <span class="sd">    working wavelengths.</span>
@@ -379,16 +258,18 @@
                 <span class="n">absorption</span><span class="p">[</span><span class="n">edgeidx</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;composition&#39;</span><span class="p">])</span>
+        <span class="n">absorption</span> <span class="o">=</span> <span class="n">ToSolcoreMaterial</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;composition&#39;</span><span class="p">],</span> <span class="n">T</span><span class="p">,</span> <span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">absorption</span> <span class="o">=</span> <span class="n">ToSolcoreMaterial</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;composition&#39;</span><span class="p">],</span> <span class="n">T</span><span class="p">,</span> <span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alpha</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;composition&#39;</span><span class="p">][</span><span class="s1">&#39;material&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;InGaAs&#39;</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="s2">&quot;Warning: Extrapolation of experimental absorption data for InGaAs is not reliable at longer wavelengths.&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    &gt;&gt;&gt;: We truncate the absorption at the bandgap wavelength.&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    &gt;&gt;&gt;: We truncate the absorption at the bulk bandgap wavelength.&quot;</span><span class="p">)</span>
                 <span class="n">edge</span> <span class="o">=</span> <span class="mf">1240e-9</span> <span class="o">/</span> <span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;band_gap&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="p">)</span>
                 <span class="n">edgeidx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">wavelengths</span> <span class="o">-</span> <span class="n">edge</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
                 <span class="n">absorption</span><span class="p">[</span><span class="n">edgeidx</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Using Adachi calculation to estimate the absorption coefficient of material: &quot;</span><span class="p">,</span>
                   <span class="n">InLineComposition</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span>
             <span class="c1"># 0 = Energy, 1 = n, 2 = k.txt, 3 = Absorption</span>
@@ -402,7 +283,7 @@
     <span class="k">return</span> <span class="p">[</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">absorption</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span></div>
 
 
-<div class="viewcode-block" id="SolveQWproperties"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.SolveQWproperties">[docs]</a><span class="k">def</span> <span class="nf">SolveQWproperties</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">calculate_absorption</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">WLsteps</span><span class="o">=</span><span class="p">(</span><span class="mf">300e-9</span><span class="p">,</span> <span class="mf">1100e-9</span><span class="p">,</span> <span class="mi">201</span><span class="p">),</span> <span class="n">wavelengths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="SolveQWproperties"><a class="viewcode-back" href="../../../Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.SolveQWproperties">[docs]</a><span class="k">def</span> <span class="nf">SolveQWproperties</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">calculate_absorption</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">WLsteps</span><span class="o">=</span><span class="p">(</span><span class="mf">300e-9</span><span class="p">,</span> <span class="mf">1100e-9</span><span class="p">,</span> <span class="mi">201</span><span class="p">),</span> <span class="n">wavelengths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">periodic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filter_strength</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;kp8x8_bulk&#39;</span><span class="p">,</span>
                       <span class="n">use_Adachi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                       <span class="n">alpha_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -421,6 +302,9 @@
 <span class="sd">    :param alpha_params:</span>
 <span class="sd">    :return: A dictionary with the output of the Schrodinger solver.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Solving QW properties...&#39;</span><span class="p">)</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span>
+
     <span class="n">QW</span> <span class="o">=</span> <span class="n">QWunit</span><span class="p">(</span><span class="n">ToStructure</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">substrate</span><span class="o">=</span><span class="n">ToSolcoreMaterial</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">],</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">QW</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">calculate_absorption</span><span class="o">=</span><span class="n">calculate_absorption</span><span class="p">,</span> <span class="n">WLsteps</span><span class="o">=</span><span class="n">WLsteps</span><span class="p">,</span> <span class="n">wavelengths</span><span class="o">=</span><span class="n">wavelengths</span><span class="p">,</span>
                       <span class="n">T</span><span class="o">=</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span><span class="p">,</span> <span class="n">filter_strength</span><span class="o">=</span><span class="n">filter_strength</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="n">blur</span><span class="p">,</span> <span class="n">blurmode</span><span class="o">=</span><span class="n">blurmode</span><span class="p">,</span>
@@ -434,14 +318,16 @@
         <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;eff_mass_lh_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">eff_mass_lh_z</span>
         <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;Nc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nc</span>
         <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;Nv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nv</span>
+        <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;ni&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">QW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nc</span> <span class="o">*</span> <span class="n">QW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Nv</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">QW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">eff_band_gap</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">)))</span>
 
         <span class="k">if</span> <span class="n">calculate_absorption</span><span class="p">:</span>
             <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;absorption&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">QW</span><span class="o">.</span><span class="n">wl</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">QW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">absorption</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
 
     <span class="c1"># Finally, we re-build a list of layers with the effective properties</span>
     <span class="n">N</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;repeat&#39;</span><span class="p">]</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span>
     <span class="n">new_QW</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">QW</span><span class="p">)):</span>
         <span class="c1"># First, we create a dictionary with all the updated parameters</span>
         <span class="n">param</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">])</span>
@@ -459,6 +345,13 @@
         <span class="c1"># In the end, we convert the absorption coeficient in extinction coefficient</span>
         <span class="n">kk</span> <span class="o">=</span> <span class="n">QW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">absorption</span> <span class="o">*</span> <span class="n">QW</span><span class="o">.</span><span class="n">wl</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
         <span class="n">layer_mat</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">QW</span><span class="o">.</span><span class="n">wl</span><span class="p">,</span> <span class="n">kk</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="c1"># layer_mat.alpha = interp1d(QW.wl, QW[i].material.absorption, bounds_error=False, fill_value=(0, 0))</span>
+
+        <span class="c1"># And the radiative recombination parameter</span>
+        <span class="n">inter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">E</span><span class="p">:</span> <span class="n">layer_mat</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">layer_mat</span><span class="o">.</span><span class="n">alphaE</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">*</span> <span class="n">E</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="n">layer_mat</span><span class="o">.</span><span class="n">band_gap</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span>
+        <span class="n">Br</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">layer_mat</span><span class="o">.</span><span class="n">ni</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">c</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">quad</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upper</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">layer_mat</span><span class="o">.</span><span class="n">radiative_recombination</span> <span class="o">=</span> <span class="n">Br</span>
 
         <span class="c1"># And add the layer to the list of layers</span>
         <span class="n">new_QW</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Layer</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">layer_mat</span><span class="p">))</span>
@@ -469,83 +362,210 @@
     <span class="k">return</span> <span class="n">new_QW</span></div>
 
 
-<div class="viewcode-block" id="calculate_reflection"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.calculate_reflection">[docs]</a><span class="k">def</span> <span class="nf">calculate_reflection</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">wavelengths</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Calculates the reflexion of a device structure</span>
-
-<span class="sd">    :param device: The device structure</span>
-<span class="sd">    :param wavelengths: The wavelengths</span>
-<span class="sd">    :return: The reflexion at the given wavelengths</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;reflection&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># We asumme that we have a file with the reflection</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading reflection from file </span><span class="si">%s</span><span class="s1"> ...&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;reflection&#39;</span><span class="p">]))</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="s1">&#39;reflection&#39;</span><span class="p">])</span>
-            <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;...Sucess!!&#39;</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="c1"># If it fails, we calculate it based on the refractive index of the first layer</span>
-            <span class="n">comp</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;composition&#39;</span><span class="p">]</span>
-            <span class="n">n</span> <span class="o">=</span> <span class="n">ToSolcoreMaterial</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
-            <span class="n">R</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">n</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="s1">&#39;... Error!! Device surface reflection calculated from the refractive index of the first layer, instead. &#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Otherwise, we calculate it based on the refractive index of the first layer</span>
-        <span class="n">comp</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;composition&#39;</span><span class="p">]</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">ToSolcoreMaterial</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="n">ToSolcoreMaterial</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
-        <span class="n">nc</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="mf">1.0</span><span class="n">j</span>
-        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">nc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">nc</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Device surface reflection calculated from the refractive index of the first layer. &#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">R</span></div>
-
-
-<div class="viewcode-block" id="calculate_optics"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.calculate_optics">[docs]</a><span class="k">def</span> <span class="nf">calculate_optics</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">wavelengths</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Uses the transfer matrix solver to calculate the optical properties of the structure: that is, the reflection</span>
-<span class="sd">    and the absorption as a function of the position.</span>
-
-<span class="sd">    :param device: A device structure</span>
-<span class="sd">    :param wavelengths: The wavelengths at which to calculate the optical information (in m)</span>
-<span class="sd">    :param dist: The positions at which to calculate the absorption (in m). If None, it is calculated internally.</span>
-<span class="sd">    :return: A dictionary with the reflection, the position, the wavelengths and the absorption as a function of</span>
-<span class="sd">    the wavelength and position.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">output</span><span class="p">[</span><span class="s1">&#39;wavelengths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavelengths</span>
-    <span class="n">wl</span> <span class="o">=</span> <span class="n">wavelengths</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># Input is in meters but the calculators use nm</span>
-    <span class="k">if</span> <span class="n">dist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">dist</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">dist</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># Input is in meters but the calculators use nm</span>
-
-    <span class="n">rat</span> <span class="o">=</span> <span class="n">calculate_rat</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">wl</span><span class="p">)</span>
-    <span class="n">output</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rat</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span>
-
-    <span class="n">absorption</span> <span class="o">=</span> <span class="n">calculate_absorption_profile</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
-
-    <span class="n">output</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">absorption</span><span class="p">[</span><span class="s1">&#39;absorption&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e9</span>
-    <span class="n">output</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">absorption</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-9</span>
-
-    <span class="n">optics_thickness</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">device</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;optics&#39;</span><span class="p">,</span> <span class="s1">&#39;Optics&#39;</span><span class="p">]:</span>
-            <span class="n">optics_thickness</span> <span class="o">+=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;width&#39;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">break</span>
-
-    <span class="n">output</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="n">optics_thickness</span>
-
-    <span class="k">return</span> <span class="n">output</span></div>
-
-
-<div class="viewcode-block" id="CalculateAbsorptionProfile"><a class="viewcode-back" href="../../../PDD/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.CalculateAbsorptionProfile">[docs]</a><span class="k">def</span> <span class="nf">CalculateAbsorptionProfile</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">absorption</span><span class="p">):</span>
+<div class="viewcode-block" id="CalculateAbsorptionProfile"><a class="viewcode-back" href="../../../Solvers/DeviceStructure.html#solcore.poisson_drift_diffusion.DeviceStructure.CalculateAbsorptionProfile">[docs]</a><span class="k">def</span> <span class="nf">CalculateAbsorptionProfile</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">wl</span><span class="p">,</span> <span class="n">absorption</span><span class="p">):</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wl</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">out</span><span class="p">,</span> <span class="n">absorption</span><span class="p">(</span><span class="n">z</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">out</span></div>
+
+    <span class="c1">#</span>
+    <span class="c1"># def calculate_reflection(device, wavelengths):</span>
+    <span class="c1">#     &quot;&quot;&quot; Calculates the reflexion of a device structure</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param device: The device structure</span>
+    <span class="c1">#     :param wavelengths: The wavelengths</span>
+    <span class="c1">#     :return: The reflexion at the given wavelengths</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if device[&#39;reflection&#39;] is not None:</span>
+    <span class="c1">#         try:</span>
+    <span class="c1">#             # We asumme that we have a file with the reflection</span>
+    <span class="c1">#             print(&#39;Loading reflection from file %s ...&#39; % (device[&#39;reflection&#39;]))</span>
+    <span class="c1">#             data = np.loadtxt(device[&#39;reflection&#39;])</span>
+    <span class="c1">#             R = np.interp(wavelengths, data[:, 0], data[:, 1])</span>
+    <span class="c1">#             print(&#39;...Sucess!!&#39;)</span>
+    <span class="c1">#         except:</span>
+    <span class="c1">#             # If it fails, we calculate it based on the refractive index of the first layer</span>
+    <span class="c1">#             comp = device[&#39;layers&#39;][0][&#39;properties&#39;][&#39;composition&#39;]</span>
+    <span class="c1">#             n = ToSolcoreMaterial(comp, device[&#39;T&#39;], execute=True).n(wavelengths)</span>
+    <span class="c1">#             R = ((1 - n) / (1 + n)) ** 2</span>
+    <span class="c1">#             print(</span>
+    <span class="c1">#                 &#39;... Error!! Device surface reflection calculated from the refractive index of the first layer, instead. &#39;)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         # Otherwise, we calculate it based on the refractive index of the first layer</span>
+    <span class="c1">#         comp = device[&#39;layers&#39;][0][&#39;properties&#39;][&#39;composition&#39;]</span>
+    <span class="c1">#         n = ToSolcoreMaterial(comp, device[&#39;T&#39;], execute=True).n(wavelengths)</span>
+    <span class="c1">#         k = ToSolcoreMaterial(comp, device[&#39;T&#39;], execute=True).k(wavelengths)</span>
+    <span class="c1">#         nc = n + k * 1.0j</span>
+    <span class="c1">#         R = np.abs((1 - nc) / (1 + nc)) ** 2</span>
+    <span class="c1">#         print(&#39;Device surface reflection calculated from the refractive index of the first layer. &#39;)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return R</span>
+    <span class="c1">#</span>
+    <span class="c1"># def calculate_optics(device, wavelengths, dist=None):</span>
+    <span class="c1">#     &quot;&quot;&quot; Uses the transfer matrix solver to calculate the optical properties of the structure: that is, the reflection</span>
+    <span class="c1">#     and the absorption as a function of the position.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param device: A device structure</span>
+    <span class="c1">#     :param wavelengths: The wavelengths at which to calculate the optical information (in m)</span>
+    <span class="c1">#     :param dist: The positions at which to calculate the absorption (in m). If None, it is calculated internally.</span>
+    <span class="c1">#     :return: A dictionary with the reflection, the position, the wavelengths and the absorption as a function of</span>
+    <span class="c1">#     the wavelength and position.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1">#     output = {}</span>
+    <span class="c1">#     output[&#39;wavelengths&#39;] = wavelengths</span>
+    <span class="c1">#     wl = wavelengths * 1e9  # Input is in meters but the calculators use nm</span>
+    <span class="c1">#     if dist is None:</span>
+    <span class="c1">#         d = dist</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         d = dist * 1e9  # Input is in meters but the calculators use nm</span>
+    <span class="c1">#</span>
+    <span class="c1">#     rat = calculate_rat(device, wl)</span>
+    <span class="c1">#     output[&#39;R&#39;] = rat[&#39;R&#39;]</span>
+    <span class="c1">#</span>
+    <span class="c1">#     absorption = calculate_absorption_profile(device, wl, dist=d)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     output[&#39;absorption&#39;] = absorption[&#39;absorption&#39;] * 1e9</span>
+    <span class="c1">#     output[&#39;position&#39;] = absorption[&#39;position&#39;] * 1e-9</span>
+    <span class="c1">#</span>
+    <span class="c1">#     optics_thickness = 0</span>
+    <span class="c1">#     for layer in device[&#39;layers&#39;]:</span>
+    <span class="c1">#         if layer[&#39;label&#39;] in [&#39;optics&#39;, &#39;Optics&#39;]:</span>
+    <span class="c1">#             optics_thickness += layer[&#39;properties&#39;][&#39;width&#39;]</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             break</span>
+    <span class="c1">#</span>
+    <span class="c1">#     output[&#39;position&#39;] -= optics_thickness</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return output</span>
+
+
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># def Load(filename, yaml=False):</span>
+    <span class="c1">#     &quot;&quot;&quot; Loads a device structure stored in a file. By default, the file must be JSON format</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param filename: The filename</span>
+    <span class="c1">#     :param yaml: If the format is YALM rather than JSON</span>
+    <span class="c1">#     :return: A device structure</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if yaml:</span>
+    <span class="c1">#         try:</span>
+    <span class="c1">#             # If chosen, we try to use yaml. If anything fails, we try with json.</span>
+    <span class="c1">#             import yaml</span>
+    <span class="c1">#             stream = open(filename + &#39;.yaml&#39;, &#39;r&#39;)</span>
+    <span class="c1">#             output = yaml.load(stream)</span>
+    <span class="c1">#         except:</span>
+    <span class="c1">#             import json</span>
+    <span class="c1">#             stream = open(filename + &#39;.json&#39;, &#39;r&#39;)</span>
+    <span class="c1">#             output = json.load(stream)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         import json</span>
+    <span class="c1">#         stream = open(filename + &#39;.json&#39;, &#39;r&#39;)</span>
+    <span class="c1">#         output = json.load(stream)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     stream.close()</span>
+    <span class="c1">#</span>
+    <span class="c1">#     for i in range(output[&#39;numlayers&#39;]):</span>
+    <span class="c1">#         if &#39;absorption_file&#39; in output[&#39;layers&#39;][i].keys():</span>
+    <span class="c1">#             # If there is a file containing the absorption in this layer, we try to load it. It must have at least to columns: wavelengths and absorption coefficient. Both must be in SI units. The result is interpolated to the current working wavelengths.</span>
+    <span class="c1">#             try:</span>
+    <span class="c1">#                 data = np.loadtxt(output[&#39;layers&#39;][i][&#39;absorption_file&#39;])</span>
+    <span class="c1">#                 output[&#39;layers&#39;][i][&#39;properties&#39;][&#39;absorption&#39;] = [data[:, 0].tolist(), data[:, 1].tolist()]</span>
+    <span class="c1">#             except:</span>
+    <span class="c1">#                 # The file can not be loaded. Maybe it does not exists or is not in the correct format. We move forward to calculating the absorption. Later, the calculated absorption can be saved with this filename.</span>
+    <span class="c1">#                 print(&#39;Error loading absorption file %s. The absorption will be calculated later if necesary. &#39; % (</span>
+    <span class="c1">#                     output[&#39;layers&#39;][i][&#39;absorption_file&#39;]))</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return output</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># def Save(device, filename, save_absorptions_individually=False, remove_absorption_from_json=False,</span>
+    <span class="c1">#          override_absorption=False, directory=&#39;default&#39;, yaml=False):</span>
+    <span class="c1">#     &quot;&quot;&quot; Save the device structure to a file.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param device: The device structure to save</span>
+    <span class="c1">#     :param filename: The filename</span>
+    <span class="c1">#     :param save_absorptions_individually: If the absorption of the materials must be saved in individual files</span>
+    <span class="c1">#     :param remove_absorption_from_json: If the absorption must be removed from the JSON file to make it more readable</span>
+    <span class="c1">#     :param override_absorption: If the external absrption files must override the default absorption</span>
+    <span class="c1">#     :param directory: Directory in which to save the absorption data</span>
+    <span class="c1">#     :param yaml: If YALM should be used rather than JSON</span>
+    <span class="c1">#     :return: None</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if save_absorptions_individually:</span>
+    <span class="c1">#         # The absorption coefficient of each layer is saved in an individual file. Optionally, it removes them from the structure so they are not saved also in in the json file</span>
+    <span class="c1">#         for i in range(device[&#39;numlayers&#39;]):</span>
+    <span class="c1">#             if &#39;absorption&#39; not in device[&#39;layers&#39;][i][&#39;properties&#39;].keys(): continue</span>
+    <span class="c1">#             # if (&#39;absorption_file&#39; in device[&#39;layers&#39;][i].keys()) and override_absorption:</span>
+    <span class="c1">#             #     abs_filename = device[&#39;layers&#39;][i][&#39;absorption_file&#39;]</span>
+    <span class="c1">#             # else:</span>
+    <span class="c1">#             #     abs_filename = &#39;%s_inputs/%s_%s_%s_%s.dat&#39;   %(filename.split(&#39;.&#39;)[0], device[&#39;name&#39;], InLineComposition(device[&#39;layers&#39;][i]), device[&#39;layers&#39;][i][&#39;label&#39;], i)</span>
+    <span class="c1">#</span>
+    <span class="c1">#             if directory == &#39;default&#39;: directory = &#39;%s_inputs&#39; % (filename)</span>
+    <span class="c1">#</span>
+    <span class="c1">#             abs_filename = &#39;%s/%s_%s_%s_%s.dat&#39; % (</span>
+    <span class="c1">#                 directory, device[&#39;name&#39;], i, InLineComposition(device[&#39;layers&#39;][i]), device[&#39;layers&#39;][i][&#39;label&#39;])</span>
+    <span class="c1">#</span>
+    <span class="c1">#             os.makedirs(directory, exist_ok=True)</span>
+    <span class="c1">#             device[&#39;layers&#39;][i][&#39;absorption_file&#39;] = abs_filename</span>
+    <span class="c1">#             np.savetxt(abs_filename, np.transpose(device[&#39;layers&#39;][i][&#39;properties&#39;][&#39;absorption&#39;]))</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if remove_absorption_from_json:</span>
+    <span class="c1">#         for i in range(device[&#39;numlayers&#39;]):</span>
+    <span class="c1">#             if &#39;absorption&#39; not in device[&#39;layers&#39;][i][&#39;properties&#39;].keys(): continue</span>
+    <span class="c1">#             del device[&#39;layers&#39;][i][&#39;properties&#39;][&#39;absorption&#39;]</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if yaml:</span>
+    <span class="c1">#         try:</span>
+    <span class="c1">#             # If chosen, we try to use yaml. If anything fails, we try with json.</span>
+    <span class="c1">#             import yaml</span>
+    <span class="c1">#             stream = open(filename + &#39;.yaml&#39;, &#39;w&#39;)</span>
+    <span class="c1">#             yaml.dump(device, stream, default_flow_style=False)</span>
+    <span class="c1">#         except:</span>
+    <span class="c1">#             import json</span>
+    <span class="c1">#             stream = open(filename + &#39;.json&#39;, &#39;w&#39;)</span>
+    <span class="c1">#             json.dump(device, stream, sort_keys=True, indent=2)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         import json</span>
+    <span class="c1">#         stream = open(filename + &#39;.json&#39;, &#39;w&#39;)</span>
+    <span class="c1">#         json.dump(device, stream, sort_keys=True, indent=2)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     stream.close()</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># def OldAddLayers(device, layers):</span>
+    <span class="c1">#     &quot;&quot;&quot; Add layers to the structure</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param device: The device structure</span>
+    <span class="c1">#     :param layers: A list with the layers to add</span>
+    <span class="c1">#     :return: None</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     for layer in layers:</span>
+    <span class="c1">#         NewLayer = {}</span>
+    <span class="c1">#</span>
+    <span class="c1">#         if type(layer) is Layer:</span>
+    <span class="c1">#             NewLayer[&#39;label&#39;] = layer.role</span>
+    <span class="c1">#             NewLayer[&#39;class&#39;] = &#39;Layer&#39;</span>
+    <span class="c1">#             NewLayer[&#39;group&#39;] = None</span>
+    <span class="c1">#             NewLayer[&#39;numlayers&#39;] = 1</span>
+    <span class="c1">#             NewLayer[&#39;repeat&#39;] = 1</span>
+    <span class="c1">#             NewLayer[&#39;properties&#39;] = GetLayerProperties(layer, device[&#39;T&#39;])</span>
+    <span class="c1">#             if &#39;absorption_file&#39; in layer.material.__dict__.keys():</span>
+    <span class="c1">#                 NewLayer[&#39;absorption_file&#39;] = layer.material.absorption_file</span>
+    <span class="c1">#</span>
+    <span class="c1">#             device[&#39;layers&#39;].append(NewLayer)</span>
+    <span class="c1">#             device[&#39;numlayers&#39;] = device[&#39;numlayers&#39;] + 1</span>
+    <span class="c1">#</span>
+    <span class="c1">#         elif type(layer) is dict:</span>
+    <span class="c1">#             for sublayer in layer[&#39;layers&#39;]:</span>
+    <span class="c1">#                 device[&#39;layers&#39;].append(copy.deepcopy(sublayer))</span>
+    <span class="c1">#                 device[&#39;numlayers&#39;] = device[&#39;numlayers&#39;] + 1</span>
+    <span class="c1">#</span>
+    <span class="c1">#                 device[&#39;layers&#39;][-1][&#39;group&#39;] = layer[&#39;name&#39;]</span>
+    <span class="c1">#                 device[&#39;layers&#39;][-1][&#39;numlayers&#39;] = layer[&#39;numlayers&#39;]</span>
+    <span class="c1">#                 device[&#39;layers&#39;][-1][&#39;repeat&#39;] = layer[&#39;repeat&#39;]</span>
 </pre></div>
 
           </div>
@@ -562,7 +582,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

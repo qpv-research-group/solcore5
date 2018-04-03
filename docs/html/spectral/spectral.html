@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Light Sources &#8212; Solcore 5.0.2 documentation</title>
+    <title>Light Sources &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Analytic solar cells calculator" href="../ASC/ASC.html" />
-    <link rel="prev" title="Absorption calculator" href="../Absorption/Absorption.html" /> 
+    <link rel="next" title="Optical methods" href="../Optics/optics.html" />
+    <link rel="prev" title="Quantum Solvers" href="../QM/Schrodinger.html" /> 
   </head>
   <body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,12 +37,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../ASC/ASC.html" title="Analytic solar cells calculator"
+          <a href="../Optics/optics.html" title="Optical methods"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../Absorption/Absorption.html" title="Absorption calculator"
+          <a href="../QM/Schrodinger.html" title="Quantum Solvers"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -52,28 +52,25 @@
             </a></p>
 <h3><a href="../index.html">Table Of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Light Sources</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-solcore.light_source.light_source">Description of functions and modules</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../Absorption/Absorption.html"
-                        title="previous chapter">Absorption calculator</a></p>
+  <p class="topless"><a href="../QM/Schrodinger.html"
+                        title="previous chapter">Quantum Solvers</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../ASC/ASC.html"
-                        title="next chapter">Analytic solar cells calculator</a></p>
+  <p class="topless"><a href="../Optics/optics.html"
+                        title="next chapter">Optical methods</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -276,12 +273,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../ASC/ASC.html" title="Analytic solar cells calculator"
+          <a href="../Optics/optics.html" title="Optical methods"
              >next</a> |</li>
         <li class="right" >
-          <a href="../Absorption/Absorption.html" title="Absorption calculator"
+          <a href="../QM/Schrodinger.html" title="Quantum Solvers"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.0.2 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.absorption_calculator.sopra_db &#8212; Solcore 5.0.2 documentation</title>
+    <title>solcore.absorption_calculator.sopra_db &#8212; Solcore 5.2.0.dev.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.0.2',
+        VERSION:     '5.2.0.dev.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -45,17 +45,14 @@
             </a></p>
 <h3><a href="../../../index.html">Table Of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation and configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../structure.html">Structures and support classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Units.html">The Units System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Parameters.html">The Parameters System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Materials.html">The Materials System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Systems/Mobility.html">The mobility module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">1D arbitrary potential Schrödinger and k•p band structure solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../Absorption/Absorption.html">Absorption calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation/installation.html">Installation and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Structures/structure.html">Structures and support classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Systems/systems.html">Materials and units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QM/Schrodinger.html">Quantum Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral/spectral.html">Light Sources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ASC/ASC.html">Analytic solar cells calculator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../PDD/DDsolver.html">Poisson - Drift-Diffusion solver (PDD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Optics/optics.html">Optical methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Solvers/solving_solar_cells.html">Solar cell solvers</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -77,7 +74,11 @@
           <div class="body" role="main">
             
   <h1>Source code for solcore.absorption_calculator.sopra_db</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="sd">&quot;&quot;&quot;This module gives access to the vast library of optical constant data, made freely available by the SOPRA-SA</span>
+<span class="sd">optoelectronics company founded in 1948. For further detail on the data and SOPRA-SA see the legacy website:</span>
+<span class="sd">http://www.sspectra.com/sopra.html&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">natsort</span> <span class="k">import</span> <span class="n">natsorted</span>
@@ -90,20 +91,10 @@
 <span class="n">compounds_info</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
 <span class="n">compounds_info</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">compounds_path</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SOPRAError"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.SOPRAError">[docs]</a><span class="k">class</span> <span class="nc">SOPRAError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
-
 
 <span class="c1"># Defining the SOPRA_DB class variable</span>
-<div class="viewcode-block" id="sopra_database"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database">[docs]</a><span class="k">class</span> <span class="nc">sopra_database</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Welcome to the SOPRA DB class for Solcore!</span>
-
-<span class="sd">    This module gives access to the vast library of optical constant data, made freely available by the SOPRA-SA</span>
-<span class="sd">    optoelectronics company founded in 1948. For further detail on the data and SOPRA-SA see the legacy website:</span>
-<span class="sd">    http://www.sspectra.com/sopra.html</span>
-
-<span class="sd">    Import the SOPRA_DB module from the solcore.material_system package and get started by selecting a material from</span>
+<div class="viewcode-block" id="sopra_database"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database">[docs]</a><span class="k">class</span> <span class="nc">sopra_database</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Import the SOPRA_DB module from the solcore.material_system package and get started by selecting a material from</span>
 <span class="sd">    the extensive list that SOPRA-SA compiled;</span>
 
 <span class="sd">    &gt;&gt;&gt; GaAs = sopra_database(&#39;GaAs&#39;)</span>
@@ -146,10 +137,10 @@
                     <span class="nb">print</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
 
             <span class="c1"># If the exception is caught, exit the program as nothing else useful can be done...</span>
-            <span class="c1">#sys.exit()</span>
+            <span class="c1"># sys.exit()</span>
             <span class="k">raise</span> <span class="n">SOPRAError</span><span class="p">(</span><span class="s2">&quot;Material not found in SOPRA database: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Material</span><span class="p">))</span>
 
-<div class="viewcode-block" id="sopra_database.material_list"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.material_list">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="sopra_database.material_list"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.material_list">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">material_list</span><span class="p">():</span>
         <span class="sd">&quot;&quot;&quot; SOPRA_DB.material_list() :: Loads a list (.pdf file) of all available SOPRA materials. &quot;&quot;&quot;</span>
 
@@ -181,7 +172,7 @@
 
             <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;start &quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SOPRA_PATH</span><span class="p">,</span> <span class="s2">&quot;List_Of_Files_Updated_PDF.pdf&quot;</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="sopra_database.load_n"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_n">[docs]</a>    <span class="k">def</span> <span class="nf">load_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="sopra_database.load_n"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_n">[docs]</a>    <span class="k">def</span> <span class="nf">load_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; SOPRA_DB.load_n(Lambda) :: Load refractive index (n) data of the requested material.</span>
 <span class="sd">            Optional argument Lambda allows user to specify a custom wavelength range. data will be interpolated into</span>
 <span class="sd">                this range before output.</span>
@@ -207,7 +198,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">Wav</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="sopra_database.load_k"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_k">[docs]</a>    <span class="k">def</span> <span class="nf">load_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="sopra_database.load_k"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_k">[docs]</a>    <span class="k">def</span> <span class="nf">load_k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; SOPRA_DB.load_k(Lambda) :: Load refractive index (n) data of the requested material.</span>
 <span class="sd">            Optional argument Lambda allows user to specify a custom wavelength range. data will be interpolated into</span>
 <span class="sd">                this range before output.</span>
@@ -232,7 +223,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">Wav</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="sopra_database.load_alpha"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_alpha">[docs]</a>    <span class="k">def</span> <span class="nf">load_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="sopra_database.load_alpha"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_alpha">[docs]</a>    <span class="k">def</span> <span class="nf">load_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; SOPRA_DB.load_alpha(Lambda) :: Load refractive index (n) data of the requested material.</span>
 <span class="sd">            Optional argument Lambda allows user to specify a custom wavelength range. data will be interpolated into</span>
 <span class="sd">                this range before output.</span>
@@ -243,7 +234,7 @@
 
         <span class="k">return</span> <span class="p">(</span><span class="n">Wav</span><span class="p">,</span> <span class="p">((</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Wav</span> <span class="o">*</span> <span class="mf">1E-9</span><span class="p">))</span> <span class="o">*</span> <span class="n">k</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="sopra_database.load_temperature"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_temperature">[docs]</a>    <span class="k">def</span> <span class="nf">load_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<div class="viewcode-block" id="sopra_database.load_temperature"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_temperature">[docs]</a>    <span class="k">def</span> <span class="nf">load_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; SOPRA_DB.load_temperature(T, Lambda) :: Loads n and k.txt data for a set of materials with temperature dependent</span>
 <span class="sd">                data sets</span>
 <span class="sd">            Optional argument T defaults to 300K</span>
@@ -330,7 +321,7 @@
         <span class="c1"># Return the Wavelength vector and the new n and k data...</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">DATA</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_interp_data</span><span class="p">,</span> <span class="n">k_interp_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="sopra_database.load_composition"><a class="viewcode-back" href="../../../Absorption/Absorption.html#solcore.absorption_calculator.sopra_db.sopra_database.load_composition">[docs]</a>    <span class="k">def</span> <span class="nf">load_composition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="sopra_database.load_composition"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.sopra_db.sopra_database.load_composition">[docs]</a>    <span class="k">def</span> <span class="nf">load_composition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; SOPRA_DB.load_temperature(T, Lambda) :: Loads n and k data for a set of materials with varying composition.</span>
 <span class="sd">            Required argument Lambda specifies a wavelength range and the data is interpolated to fit. This is a</span>
 <span class="sd">                required argument here as not all data sets in a group are the same length (will be fixed in a</span>
@@ -415,6 +406,11 @@
 
         <span class="c1"># Return the Wavelength vector and the new n and k data...</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">DATA</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_interp_data</span><span class="p">,</span> <span class="n">k_interp_data</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SOPRAError"><a class="viewcode-back" href="../../../Optics/material_optics.html#solcore.absorption_calculator.sopra_db.SOPRAError">[docs]</a><span class="k">class</span> <span class="nc">SOPRAError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
 </pre></div>
 
           </div>
@@ -431,7 +427,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.0.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
