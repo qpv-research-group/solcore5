@@ -1,4 +1,4 @@
-**New in Solcore 5.2.0.dev.1**
+**New in Solcore 5.2.0**
 - Improvements in the quantum solver
 - Added plot generation for LDOS
 - Corrected an error in the parameters for InP
