@@ -66,7 +66,6 @@ ax2.set_ylabel("Extinction Coefficient, k")
 ax2.legend(loc="upper right", frameon=False)
 ax2.text(0.05, 0.9, '(b)', transform=ax2.transAxes, fontsize=12)
 plt.tight_layout(w_pad=4)
-plt.savefig('/Users/diego/Desktop/sopra.pdf')
 
 plt.show()
 

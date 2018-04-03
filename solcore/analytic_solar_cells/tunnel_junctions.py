@@ -74,8 +74,12 @@ def parametric_tunnel_junction(junction, options):
                           np.maximum(iv(junction.v_peak), junction.current))
 
     # And the corresponding function doing that
-    def vi(j):
-        return np.interp(j, MJ_current, junction.voltage)
+    if junction.pn:
+        def vi(j):
+            return np.interp(-j, MJ_current, -junction.voltage)
+    else:
+        def vi(j):
+            return np.interp(j, MJ_current, junction.voltage)
 
     junction.iv = iv
     junction.vi = vi

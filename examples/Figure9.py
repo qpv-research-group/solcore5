@@ -32,10 +32,14 @@ for mat in [n_GaAs, p_GaAs]:
 # Define the different parts of the structure we will use. For the GaAs junction, we use the depletion approximation
 GaAs_junction = [Junction([Layer(width=si('100nm'), material=p_GaAs, role="emitter"),
                            Layer(width=si('400nm'), material=n_GaAs, role="base")], T=T, kind='DA')]
-DBR = 10 * [Layer(width=si("73nm"), material=AlAs), Layer(width=si("60nm"), material=GaAs)]
+
 # this creates 10 repetitions of the AlAs and GaAs layers, to make the DBR structure
+DBR = 10 * [Layer(width=si("73nm"), material=AlAs), Layer(width=si("60nm"), material=GaAs)]
+
+# The layer with nanoparticles
 NP_layer = [Layer(si('50nm'), Air, geometry=[{'type': 'circle', 'mat': TiO2, 'center': (200, 200),
                                               'radius': 50}])]
+
 substrate = [Layer(width=si('50um'), material=GaAs)]
 spacer = [Layer(width=si('25nm'), material=SiO2)]
 

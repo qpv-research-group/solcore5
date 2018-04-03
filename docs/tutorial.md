@@ -7,7 +7,6 @@ This tutorial will guide you, step-by-step, in the creation of a solar cell and 
 
 - Dual junction GaInP/GaAs solar cell, lattice matched to GaAs. 
 - The bottom cell has 30 strained-balanced quantum wells (QW), made of GaAsP/InGaAs.
-- There is a distributed Brag reflector on the back of the cell, designed to reflect the radiation in the wavelength range of the QWs. 
 - There is a tunnel junction in between the subcells.
 - There is a dual layer anti-reflecting coating on the front made of MgF-ZnS
 
@@ -30,8 +29,10 @@ First we need to create the solar cell structure. It is made of several bits and
 from solcore import material
 from solcore.structure import Layer
 import solcore.poisson_drift_diffusion as PDD
+import numpy as np
 
 T = 300 
+wl = np.linspace(350, 1050, 1001) * 1e-9
 
 # First, we create the materials of the QW
 QWmat = material('InGaAs')(T=T, In=0.2, strained=True)
@@ -48,7 +49,7 @@ QW = PDD.CreateDeviceStructure('QW', T=T, repeat=30, substrate=i_GaAs, layers=[
     Layer(width=10e-9, material=Bmat, role="barrier") ])
 
 # We solve the quantum properties of the QW, leaving the default values of all parameters
-QW_list = PDD.SolveQWproperties(QW)
+QW_list = PDD.SolveQWproperties(QW, wavelengths=wl)
 ```
 
 The first few lines import the *Solcore* utilities needed to define the structure, including the *material* function, the *Layer* class and the Poisson-Drift-Diffusion solver. After that, we create the materials that will made the QWs and create a "Device structure". We will use these structure just to be able to solve the QWs afterwards and transform it into a sequence of layers with effective properties that the PDD solver understands. The call to "CreateDeviceStructure" has several inputs, including the temperature, the substrate, the number of repetition of the QWs and the structure of the layers. The call to "SolveQWproperties" will, indeed, use the utilities within the *quantum_mechanics* module to calculate the band structure of the QWs, their absorption coefficient and, finally, will calculate effective bandgap, density of states, etc. that the PDD solver will use. Although the device will have 30 quantum wells, only one unit (the one indicated in *Layers*) will be modelled as an isolated QW.  
@@ -103,24 +104,24 @@ bsf_bottom = material('GaInP')(T=T, Na=5e24, In=0.49)
 GaAs_junction = Junction([Layer(width=10e-9, material=window_bottom, role="Window"),
                           Layer(width=150e-9, material=n_GaAs, role="Emitter")] +
                          QW_list +
-                         [Layer(width=3000e-9, material=p_GaAs, role="Base"),
+                         [Layer(width=2000e-9, material=p_GaAs, role="Base"),
                           Layer(width=200e-9, material=bsf_bottom, role="BSF")], sn=1e6, sp=1e6, T=T, kind='PDD')
 
 ## Materials for the TOP junction
-window_top = material('AlInP')(T=T, Nd=5e24, Al=0.53)
-n_GaInP = material('GaInP')(T=T, Nd=5e24, In=0.49)
+window_top = material('AlInP')(T=T, Nd=5e23, Al=0.53)
+n_GaInP = material('GaInP')(T=T, Nd=5e23, In=0.49)
 p_GaInP = material('GaInP')(T=T, Na=8e22, In=0.49)
 bsf_top = material('AlInP')(T=T, Na=5e24, Al=0.53)
 
 GaInP_junction = Junction([Layer(width=120e-9, material=n_GaInP, role="Emitter"),
-                           Layer(width=800e-9, material=p_GaInP, role="Base")], sn=0e2, sp=0e2, T=T, kind='PDD')
+                           Layer(width=800e-9, material=p_GaInP, role="Base")], sn=1e3, sp=1e3, T=T, kind='PDD')
 ```
 
-As it can be seen, while we have defined the window and back surface field layer (BSF) for the TOP junction, we have not included it into the Junction definition. The reason for this is that very wide bandgap materials cause convergence problems when doing calculations under illumination, specially when working as the front-most window layers. In order to account for its presence, two things are done: (1) the surface recombination velocity of the top junction is set to a low value to mimic the passivating effect of the window and BSF layers, and (2) the missing layers are added outside the Junction object when creating the full solar cell in order to consider their optical properties (see below). 
+As it can be seen, while we have defined the window and back surface field layer (BSF) for the TOP junction, we have not included it into the Junction definition. The reason for this is that very wide bandgap materials cause convergence problems when doing calculations under illumination, specially when working as the front-most window layers or in distributted Bragg reflectors, where there are very abrupt changes of properties in pery short distances. In order to account for their presence, two things are done: (1) the surface recombination velocity of the top junction is set to a low value to mimic the passivating effect of the window and BSF layers, and (2) the missing layers are added outside the Junction object when creating the full solar cell in order to consider their optical properties (see below). 
+
+**TRICK:** The TMM solver work best with "thin" layers therefore, if the results of optical calculations look strange, try dividing thick layers (> 2-3 µm) into thinner ones (~500 nm). The reason is that the waves propagating forwards and backwards, leading to interference are ultimately complex exponentials that increase (or decrease) quite fast away from the interfaces, resulting in a loss of numerical accuracy when they trying to interact far from the interfaces. 
 
 The only tunnel junction of this solar cell will be defined according to the parametric model and we will assume it is made of GaInP layers, 40 nm-thick in total, that will block part of the light reaching the bottom junction. Since the top junction is also made of GaInP, most of the light should already be absorbed and therefore it should not represent a very important loss. We will use a relatively low peak current to demonstrate the effect of tunnel junction breakdown when working at high concentration.
-
-**TRICK:** The TMM solver work best with "thin" layers therefore, if the results of optical calculations look strange, try dividing thick layers (> 2-3 µm) into thinner ones (~500 nm). The reason is that the waves propagating forwards and backwards, leading to interference are ultimately complex exponentials that increase (or decrease) quite fast away from the interfaces, resulting in a loss of numerical accuracy when they try to interact far from the interfaces. 
 
 ```python
 from solcore.structure import TunnelJunction
@@ -131,7 +132,7 @@ tunnel = TunnelJunction([Layer(width=40e-9, material=n_GaInP, role="TJ")],
 
 **Defining the AR coating:**
 
-The AR coating will reduce the front surface reflection and, therefore, increase the photocurrent of the solar cell. We use a simple dual layer coating made of MgF2 and ZnS. Both materials are available in the SOPRA database of optical constants ("MgF2" and "ZnScub", respectively). 
+The AR coating will reduce the front surface reflection and, therefore, increase the photocurrent of the solar cell. We use a simple dual layer coating made of MgF2 and ZnS. Both materials are available in the SOPRA database of optical constants ("MgF2" and "ZnScub", respectively). The data for MgF2 only extends to 900 nm, but we will assume its optical properties will be similar at longer wavelengths, extrapolating the available data.  
 
 ```python
 MgF2 = material('MgF2')()
@@ -140,7 +141,7 @@ ZnS = material('ZnScub')()
 
 **Creating the solar cell:**
 
-With all the materials and structures defined, we just need to put everything togeteher, including the front window layer and the BSF layer of the top junction.
+With all the materials and structures defined, we just need to put everything together, including the front window layer and the BSF layer of the top junction that we had left outside.
 
 ```python
 from solcore.solar_cell import SolarCell
@@ -155,5 +156,35 @@ my_solar_cell = SolarCell([Layer(width=110e-9, material=MgF2, role="ARC1"),
                            T=T, substrate=n_GaAs)
 ```
 
+Calculating the external quantum efficiency
+-------------------------------------------
 
+With the structure fully defined, now it is possible to calculate its behavior as solar cell. We first calculate the external quantum efficiency at 1 Sun of intensity using the AM1.5g solar spectrum. The code that defines the spectrum to use and lunch the calculation will be:
 
+```python
+from solcore.solar_cell_solver import solar_cell_solver
+from solcore.light_source import LightSource
+
+light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
+                           output_units='photon_flux_per_m', concentration=1)
+
+solar_cell_solver(my_solar_cell, 'qe',
+                  user_options={'light_source': light_source, 'wavelength': wl, 'optics_method': 'TMM'})
+
+```
+
+The calculation will proceed in several stages: (1) The structure is processed and discretized, (2) the problem is solved under equilibrium, (2) the problem is solved under short circuit conditions increasing in small steps the intensity of the illumination, and (3), the quantum efficiency is calculated, one wavelength at a time. This is done for the two junctions. The following code plots the electrons and holes densities at equilibrium (dashed line) and at short circuit (continuous line), as well as the EQE of the two junctions and the total absorption in the layers. 
+
+```python
+from solcore.solar_cell_solver import solar_cell_solver
+from solcore.light_source import LightSource
+
+light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
+                           output_units='photon_flux_per_m', concentration=1)
+
+solar_cell_solver(my_solar_cell, 'qe',
+                  user_options={'light_source': light_source, 'wavelength': wl, 'optics_method': 'TMM'})
+
+```
+
+As it can be seen, the minority carrier population increases significantly under illumination, specially in the QW region of the bottom cell, which is a relatively thick, undoped region. The EQE of the bottom junction, in comparison with the total absorbed light, indicates excellent carrier collection with only some missing carriers in the region of the spectrum where light is absorbed by the QWs. The top junction is not performing that well, the reason being a combination of low mobility of carriers in GaInP ()between 3 and 6 times smaller than that of p-GaAs), insufficient thickness to absorb all light (part of it reaching the GaAs junction), parasitic absorption of the AlGaP window layer and surface recombination.   

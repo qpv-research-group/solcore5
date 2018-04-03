@@ -5,13 +5,9 @@ import numpy as np
 import solcore.quantum_mechanics as QM
 from solcore.constants import vacuum_permittivity, q
 
-
 # First we create the materials we need
-bulk = material("GaAs")(T=293)
-barrier = material("GaAsP")(T=293, P=0.1)
-
-bulk.strained = False
-barrier.strained = True
+bulk = material("GaAs")(T=293, strained=False)
+barrier = material("GaAsP")(T=293, P=0.1, strained=True)
 
 # As well as some of the layers
 top_layer = Layer(width=si("30nm"), material=bulk)
@@ -41,29 +37,20 @@ colors = plt.cm.jet(np.linspace(0, 1, len(comp)))
 
 plt.figure(figsize=(4, 4.5))
 for j, i in enumerate(comp):
-
     # We create the QW material at the given composition
-    QW = material("InGaAs")(T=293, In=i)
-    QW.strained = True
+    QW = material("InGaAs")(T=293, In=i, strained=True)
 
     # And the layer
     well_layer = Layer(width=si("7.2nm"), material=QW)
 
     # The following lines create the QW structure, with different number of QWs and interlayers
-    # test_structure = Structure([top_layer, barrier_layer, inter] + 1 * [well_layer, inter, barrier_layer, inter] +
-    #                            [bottom_layer])
-
-    test_structure = Structure([barrier_layer, inter] + 1 * [well_layer, inter] +
-                               [barrier_layer])
-
-    # test_structure = Structure([top_layer, barrier_layer] + 1 * [well_layer, barrier_layer] +
-    #                            [bottom_layer])
+    test_structure = Structure([barrier_layer, inter, well_layer, inter, barrier_layer])
 
     test_structure.substrate = bulk
 
     # Finally, the quantum properties are claculated here
     output = QM.schrodinger(test_structure, quasiconfined=0,
-                         num_eigenvalues=20, alpha_params=alpha_params, calculate_absorption=True)
+                            num_eigenvalues=20, alpha_params=alpha_params, calculate_absorption=True)
 
     alfa = output[0]['alphaE'](E)
     plt.plot(1240 / (E / q), alfa / 100, label='{}%'.format(int(i * 100)))

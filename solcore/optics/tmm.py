@@ -37,8 +37,8 @@ def solve_tmm(solar_cell, options):
     no_back_reflexion = options.no_back_reflexion if 'no_back_reflexion' in options.keys() else True
     stack = OptiStack(all_layers, no_back_reflexion=no_back_reflexion)
 
-    dist = np.logspace(0, np.log10(solar_cell.width * 1e9), int(300 * np.log10(solar_cell.width * 1e9)))
-    # dist = np.arange(0, solar_cell.width * 1e9, 1)
+    #dist = np.logspace(-1, np.log10(solar_cell.width * 1e9), int(1000 * np.log10(solar_cell.width * 1e9)))
+    dist = np.arange(0, solar_cell.width * 1e9, 1)
     # print(len(dist))
     position = options.position if 'position' in options.keys() else dist
 

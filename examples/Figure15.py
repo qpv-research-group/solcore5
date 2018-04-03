@@ -10,8 +10,6 @@ parametric_tunnel_junction(tunnel, default_options)
 
 v = tunnel.voltage
 
-I = np.linspace(0, 150, 100)
-
 plt.plot(v, tunnel.tunnel_current(v), 'r--', label='Tunnel')
 plt.plot(v, tunnel.excess_current(v), 'g--', label='Excess')
 plt.plot(v, tunnel.diffusion_current(v), 'b--', label='Diffusion')

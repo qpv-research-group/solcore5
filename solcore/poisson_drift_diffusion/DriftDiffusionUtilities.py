@@ -189,7 +189,7 @@ def iv_pdd(junction, options):
     for layer in junction:
         Eg = min([Eg, layer.material.band_gap / q])
 
-    s = True if junction[0].material.Na >= junction[-1].material.Nd else False
+    s = True if junction[0].material.Na >= junction[0].material.Nd else False
 
     if s:
         vmax = min(Eg - 3 * kb * T / q, max(junction.voltage))

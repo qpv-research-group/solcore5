@@ -201,6 +201,6 @@ class CPPicker:
 
 
 if __name__ == '__main__':
-    directory = '/Users/diego/OneDrive - Imperial College London/Developement/solcore5/solcore/material_data/AlInP-Material/n'
+    directory = '/Users/diego/OneDrive - Imperial College London/Developement/solcore5/solcore/material_data/AlInP-Material/k'
     pickerApp = CPPicker(directory)
     pickerApp.loop()

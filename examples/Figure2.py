@@ -52,5 +52,4 @@ plt.xlabel('Lattice constant ($\AA$)')
 plt.legend(ncol=3, loc="upper right", frameon=False, columnspacing=0.2)
 plt.tight_layout()
 
-plt.savefig('/Users/diego/Desktop/materials.pdf')
 plt.show()
