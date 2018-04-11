@@ -1,3 +1,7 @@
+**New in Solcore 5.3.0.dev.1**
+- New installer including the compilation of extension modules
+- New documentation about installing Solcore, specially under Windows
+
 **New in Solcore 5.2.1**
 - Corrected errors in tests and examples.
 
