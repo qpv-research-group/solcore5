@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>S4 - Rigorous Coupled Wave Analysis &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <title>S4 - Rigorous Coupled Wave Analysis &#8212; Solcore 5.2.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '5.2.0.dev.1',
+        VERSION:     '5.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="tmm.html" title="Transfer matrix method"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="optics.html" accesskey="U">Optical methods</a> &#187;</li> 
       </ul>
     </div>
@@ -119,14 +119,14 @@
 <p>The geometry attribute is a <strong>list of dictionaries</strong> containing relevant entries. You can add more than one shape per layer by simply adding more dictionaries to the list; each dictionary defines one shape, which is assumed to be periodic in two directions. The necessary information to define shapes is:</p>
 <p>For all shapes:</p>
 <ul class="simple">
-<li>‘type’: 'circle', 'ellipse', 'rectangle' or 'polygon'</li>
+<li>‘type’: ‘circle’, ‘ellipse’, ‘rectangle’ or ‘polygon’</li>
 <li>‘mat’: the material the shape is made of; a Solcore material object.</li>
 <li>‘center’: a tuple giving x and y coordinates (in nm) of the centre of the shape: <code class="docutils literal"><span class="pre">(x,</span> <span class="pre">y)</span></code></li>
 </ul>
 <p>Shape-dependent:</p>
 <ul class="simple">
 <li>Circle:<ul>
-<li>'radius': a number in nm</li>
+<li>‘radius’: a number in nm</li>
 </ul>
 </li>
 </ul>
@@ -182,13 +182,13 @@
 <span id="absorption-calculator-rigorous-coupled-wave-py"></span><h3>absorption_calculator/rigorous_coupled_wave.py:<a class="headerlink" href="#absorption-calculator-rigorous-coupled-wave-py" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal"><span class="pre">calculate_rat_rcwa(structure,</span> <span class="pre">size,</span> <span class="pre">orders,</span> <span class="pre">wavelength,</span> <span class="pre">theta,</span> <span class="pre">phi,</span> <span class="pre">pol)</span></code></p>
 <ul class="simple">
-<li>Calculates the total reflected, absorbed and transmitted intensity of the whole solar cell structure for the wavelengths and angles defined using an RCWA method implemented using the S4 package. It can handle different incident angles theta and phi and polarizations ('s', 'p' or 'u', the latter meaning unpolarised). It first creates an S4 simulation object using <code class="docutils literal"><span class="pre">initialise_S</span></code> and sets the incident angle and polarization using S4's SetExcitationPlaneWave, then loops through the wavelengths (updated in S4 using SetFrequency), using update_epsilon to update the optical constants of all the materials. It calls <code class="docutils literal"><span class="pre">rcwa_rat</span></code> to actually calculate R, A and T at each wavelength.</li>
+<li>Calculates the total reflected, absorbed and transmitted intensity of the whole solar cell structure for the wavelengths and angles defined using an RCWA method implemented using the S4 package. It can handle different incident angles theta and phi and polarizations (‘s’, ‘p’ or ‘u’, the latter meaning unpolarised). It first creates an S4 simulation object using <code class="docutils literal"><span class="pre">initialise_S</span></code> and sets the incident angle and polarization using S4’s SetExcitationPlaneWave, then loops through the wavelengths (updated in S4 using SetFrequency), using update_epsilon to update the optical constants of all the materials. It calls <code class="docutils literal"><span class="pre">rcwa_rat</span></code> to actually calculate R, A and T at each wavelength.</li>
 <li>Parameters:<ul>
 <li>structure: A solcore SolarCell object with layers and materials or a OptiStack object.</li>
 <li>options: options for the calculation</li>
 <li>wavelength: Wavelengths (in nm) in which calculate the data.</li>
 <li>angle: Angle (in degrees) of the incident light. Default: 0 (normal incidence).</li>
-<li>pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).</li>
+<li>pol: Polarisation of the light: ‘s’, ‘p’ or ‘u’. Default: ‘u’ (unpolarised).</li>
 </ul>
 </li>
 <li>Returns:<ul>
@@ -198,7 +198,7 @@
 </ul>
 <p><code class="docutils literal"><span class="pre">rcwa_rat(S,</span> <span class="pre">n_layers)</span></code></p>
 <ul class="simple">
-<li>This is called from <code class="docutils literal"><span class="pre">calculate_rat_rcwa</span></code> and calculates R and T using S4's <code class="docutils literal"><span class="pre">GetPowerFlux</span></code> function which gives the forward and backward Poynting vector; the sum gives the effective real &amp; imaginary power flux. T is given by the power flux entering the transmission medium, while R is given by 1 - (power flux entering top of solar cell).</li>
+<li>This is called from <code class="docutils literal"><span class="pre">calculate_rat_rcwa</span></code> and calculates R and T using S4’s <code class="docutils literal"><span class="pre">GetPowerFlux</span></code> function which gives the forward and backward Poynting vector; the sum gives the effective real &amp; imaginary power flux. T is given by the power flux entering the transmission medium, while R is given by 1 - (power flux entering top of solar cell).</li>
 <li>Parameters:<ul>
 <li>S: an S4 Simulation object</li>
 <li>n_layers: number of layers in the stack, including incidence and transmission medium.</li>
@@ -212,7 +212,7 @@
 <li>Initialises the S4 simulation object with basis vectors of the correct length and the desired number of Fourier orders using S4.New.</li>
 <li>Makes a list of all the geometry objects contained in the Layers of the SolarCell object stack, and passes that to <code class="docutils literal"><span class="pre">necessary_materials</span></code> to identify the materials used in the shapes for which we need optical constant information. The OptiStack function ignores the geometry attribute, so if we ignored this step we would not have optical constant data for materials which are only used in the geometry attribute and not in a base layer.</li>
 <li>Makes an OptiStack object called stack_OS from the SolarCell stack itself.</li>
-<li>S4 uses named materials, so Solcore creates the required number of materials (S.SetMaterial) and creates the base layers (S.AddLayer), then loops through each Layer's geometry list to add the shapes to the layer.</li>
+<li>S4 uses named materials, so Solcore creates the required number of materials (S.SetMaterial) and creates the base layers (S.AddLayer), then loops through each Layer’s geometry list to add the shapes to the layer.</li>
 </ul>
 </li>
 <li>Parameters:<ul>
@@ -269,7 +269,7 @@
 </ul>
 <p><code class="docutils literal"><span class="pre">rcwa_position_resolved(S,</span> <span class="pre">layer,</span> <span class="pre">depth,</span> <span class="pre">A)</span></code></p>
 <ul class="simple">
-<li>This function manually differentiates the absorption with respect to depth. The absorbed power across a small interval is calculated using S4's GetPowerFlux function (like in <code class="docutils literal"><span class="pre">rcwa_rat</span></code>).-delta is an arbitrarily small distance, in order to do very simple numerical differentiation. This was chosen because it gives good results (consistent with TMM for planar structures, integrated A sums correctly).</li>
+<li>This function manually differentiates the absorption with respect to depth. The absorbed power across a small interval is calculated using S4’s GetPowerFlux function (like in <code class="docutils literal"><span class="pre">rcwa_rat</span></code>).-delta is an arbitrarily small distance, in order to do very simple numerical differentiation. This was chosen because it gives good results (consistent with TMM for planar structures, integrated A sums correctly).</li>
 <li>Parameters:<ul>
 <li>S: S4 Simulation object</li>
 <li>layer: which layer of the structure we are looking at</li>
@@ -304,13 +304,13 @@
         <li class="right" >
           <a href="tmm.html" title="Transfer matrix method"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="optics.html" >Optical methods</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.
     </div>
   </body>
 </html>

@@ -4,28 +4,32 @@ Installation and configuration
 Installing Solcore
 ^^^^^^^^^^^^^^^^^^
 
-Written mostly in Python, Solcore should work in all OS. The following instructions are expected to work in more systems, but check the sections below for OS specific instructions and caveats.
-
-In order to install Solcore in your computer, you will need the following:
+Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient. The following instructions are expected to work in more systems, but check the sections below for OS specific instructions and caveats. In order to install Solcore in your computer, you will need the following:
 
 - Python >3.4
 - pip
 - setuptools
+- numpy
+- :doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`
 
-*Pip* is normally part of the standard Python 3 installation, but you might need to install *setuptools* manually with (pip3 only indicates that is the *pip* that comes with Python 3)::
+*Pip* is normally part of the standard Python 3 installation, but you might need to install *setuptools* and *numpy* manually with (pip3 only indicates that is the *pip* that comes with Python 3)::
 
-    pip3 install setuptools
+    pip3 install setuptools numpy
 
 After downloading Solcore, either using 'git' or as a zip file using one of the links on the right, installing it and become a user should be as easy as writing in the terminal (within the Solcore5 folder, where there is the *setup.py* file)::
 
     python3 setup.py install
 
-You will be asked to accept the license and then it will install all Solcore dependencies (except a Fortran compiler) and Solcore itself in the Python3 package tree. Using it will be as easy as making::
+If you do not want to use the PDD solver, you can skip the compilation step by doing::
+
+    python3 setup.py install --no_pdd
+
+You will be asked to accept the license and then it will compile the PDD solver (unless indicated otherwise), install all Solcore dependencies and Solcore itself in the Python3 package tree. Using it will be as easy as making::
 
     >>> import solcore
 
-        Welcome to Solcore - version 5.2.0
-        Copyright (c) 2017, Imperial College, London All rights reserved.
+        Welcome to Solcore - version 5.2.1
+        Copyright (c) 2018, Imperial College, London All rights reserved.
         Software released under the GNU Lesser General Public License.
 
 
@@ -33,14 +37,11 @@ If you want to test first if Solcore will work in your computer, without actuall
 
     python3 setup.py test
 
-This will also install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore's functionality, but it will be expanded with time.
+This will also install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore's functionality, but it will be expanded with time. Again, you can skip the compilation of the PDD solver by running::
 
-Another thing that you might want to do before installing Solcore 5 is compiling the Poisson-drfit-diffusion solver. Assuming there is a Fortran compiler correctly configured to work with F2Py, compiling the library should be as easy as::
+    python3 setup.py test --no_pdd
 
-    >>> python3 setup.py build_pdd
-
-This can also be done afterwards using the *config_tools* (see below) but you might need admin privileges, depending on where the Python packages tree is located. Solcore will try to compile the fortran code automatically the first time that any of the modules using it are imported. During the compilation, you will see many warnings printed. Don't worry, it is normal and, hopefully, the compilation should complete without any critical error.
-
+Of course, the tests related to the PDD solver will fail in this case.
 
 Getting started
 ^^^^^^^^^^^^^^^

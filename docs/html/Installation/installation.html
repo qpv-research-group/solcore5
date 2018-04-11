@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Installation and configuration &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <title>Installation and configuration &#8212; Solcore 5.2.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '5.2.0.dev.1',
+        VERSION:     '5.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="../index.html" title="Contents:"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.1 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -102,26 +102,31 @@
 <h1>Installation and configuration<a class="headerlink" href="#installation-and-configuration" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="installing-solcore">
 <h2>Installing Solcore<a class="headerlink" href="#installing-solcore" title="Permalink to this headline">¶</a></h2>
-<p>Written mostly in Python, Solcore should work in all OS. The following instructions are expected to work in more systems, but check the sections below for OS specific instructions and caveats.</p>
-<p>In order to install Solcore in your computer, you will need the following:</p>
+<p>Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient. The following instructions are expected to work in more systems, but check the sections below for OS specific instructions and caveats. In order to install Solcore in your computer, you will need the following:</p>
 <ul class="simple">
 <li>Python &gt;3.4</li>
 <li>pip</li>
 <li>setuptools</li>
+<li>numpy</li>
+<li><a class="reference internal" href="compilation.html"><span class="doc">a suitable Fortran compiler (only needed for the PDD solver)</span></a></li>
 </ul>
-<p><em>Pip</em> is normally part of the standard Python 3 installation, but you might need to install <em>setuptools</em> manually with (pip3 only indicates that is the <em>pip</em> that comes with Python 3):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="n">setuptools</span>
+<p><em>Pip</em> is normally part of the standard Python 3 installation, but you might need to install <em>setuptools</em> and <em>numpy</em> manually with (pip3 only indicates that is the <em>pip</em> that comes with Python 3):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="n">setuptools</span> <span class="n">numpy</span>
 </pre></div>
 </div>
 <p>After downloading Solcore, either using ‘git’ or as a zip file using one of the links on the right, installing it and become a user should be as easy as writing in the terminal (within the Solcore5 folder, where there is the <em>setup.py</em> file):</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
-<p>You will be asked to accept the license and then it will install all Solcore dependencies (except a Fortran compiler) and Solcore itself in the Python3 package tree. Using it will be as easy as making:</p>
+<p>If you do not want to use the PDD solver, you can skip the compilation step by doing:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">no_pdd</span>
+</pre></div>
+</div>
+<p>You will be asked to accept the license and then it will compile the PDD solver (unless indicated otherwise), install all Solcore dependencies and Solcore itself in the Python3 package tree. Using it will be as easy as making:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">solcore</span>
 
-<span class="go">    Welcome to Solcore - version 5.2.0</span>
-<span class="go">    Copyright (c) 2017, Imperial College, London All rights reserved.</span>
+<span class="go">    Welcome to Solcore - version 5.2.1</span>
+<span class="go">    Copyright (c) 2018, Imperial College, London All rights reserved.</span>
 <span class="go">    Software released under the GNU Lesser General Public License.</span>
 </pre></div>
 </div>
@@ -129,12 +134,11 @@
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span>
 </pre></div>
 </div>
-<p>This will also install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore’s functionality, but it will be expanded with time.</p>
-<p>Another thing that you might want to do before installing Solcore 5 is compiling the Poisson-drfit-diffusion solver. Assuming there is a Fortran compiler correctly configured to work with F2Py, compiling the library should be as easy as:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">build_pdd</span>
+<p>This will also install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore’s functionality, but it will be expanded with time. Again, you can skip the compilation of the PDD solver by running:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span> <span class="o">--</span><span class="n">no_pdd</span>
 </pre></div>
 </div>
-<p>This can also be done afterwards using the <em>config_tools</em> (see below) but you might need admin privileges, depending on where the Python packages tree is located. Solcore will try to compile the fortran code automatically the first time that any of the modules using it are imported. During the compilation, you will see many warnings printed. Don’t worry, it is normal and, hopefully, the compilation should complete without any critical error.</p>
+<p>Of course, the tests related to the PDD solver will fail in this case.</p>
 </div>
 <div class="section" id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
@@ -586,12 +590,12 @@ replaced by the new one.</p>
         <li class="right" >
           <a href="../index.html" title="Contents:"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.
     </div>
   </body>
 </html>

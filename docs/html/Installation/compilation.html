@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Solcore on Mac OS X &#8212; Solcore 5.2.1 documentation</title>
+    <title>Fortran Compilers &#8212; Solcore 5.2.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -57,7 +57,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/Installation/Solcore_on_MacOSX.md.txt"
+      <li><a href="../_sources/Installation/compilation.md.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -79,33 +79,41 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="solcore-on-mac-os-x">
-<span id="solcore-on-mac-os-x"></span><h1>Solcore on Mac OS X<a class="headerlink" href="#solcore-on-mac-os-x" title="Permalink to this headline">¶</a></h1>
-<p>Solcore has been heavely tested under Mac OS X, so there should be no problems. However, using NGSPICE requires some details, as shown below.</p>
-<div class="section" id="installing-ngspice-on-macosx">
-<span id="installing-ngspice-on-macosx"></span><h2>Installing NGSpice on MacOSX<a class="headerlink" href="#installing-ngspice-on-macosx" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="fortran-compilers">
+<span id="fortran-compilers"></span><h1>Fortran Compilers<a class="headerlink" href="#fortran-compilers" title="Permalink to this headline">¶</a></h1>
+<p>In order to use the Poisson-Drift-diffusion solver, it will be necessary to have a suitable fortran compiler installed and correctly configured in your system. After that, you do not need to worry about the compilation process: it is done automatically by the installation script.</p>
+<div class="section" id="linux">
+<span id="linux"></span><h2>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h2>
+<p>Most linux systems have a Fortran compiler already installed, typically part of GCC, the GNU compiler collection. If not, you will need to check how to install it for your particular linux distribution.</p>
+</div>
+<div class="section" id="mac-os-x">
+<span id="mac-os-x"></span><h2>Mac OS X<a class="headerlink" href="#mac-os-x" title="Permalink to this headline">¶</a></h2>
+<p>For Mac OS X we have used the <em>gfortran</em> compiler installed together with GCC using <a class="reference external" href="https://brew.sh">Homebrew</a>, a MacOS package manager.</p>
+<p><code class="docutils literal"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">gcc</span></code></p>
+<p>Other package managers like <a class="reference external" href="https://www.macports.org">MacPorts</a> or <a class="reference external" href="http://www.finkproject.org">Fink</a> might also work, but we have not tried.</p>
+</div>
+<div class="section" id="windows">
+<span id="windows"></span><h2>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h2>
+<p>To get a Fortran compiler properly working under Windows with F2Py, we have followed the <a class="reference external" href="https://www.scivision.co/f2py-running-fortran-code-in-python-on-windows/">detailed instructions written by Michael Hirsch</a>. This instructions recommend to use <a class="reference external" href="https://www.anaconda.com/download/">Anaconda Python</a> (or <a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a>) and so do we: this is the only way we have found to make the PDD solver to work under Windows, appart from using the Ubuntu Shell that comes with Windows 10 and that <a class="reference external" href="Solcore_on_Windows.md">we describe here</a>. Read Michael Hirsch’s instructions in full for a complete picture, but the important bits are:</p>
+<ol>
+<li><p class="first">Install <a class="reference external" href="https://sourceforge.net/projects/mingw-w64/">MinGW-W64</a> to <code class="docutils literal"><span class="pre">c:\mingw</span></code> with:</p>
 <ul class="simple">
-<li>Download NGSpice from
-<a class="reference external" href="http://ngspice.sourceforge.net/download.html">http://ngspice.sourceforge.net/download.html</a></li>
-<li>Installing the binary package on mac os X will result in the executable residing in <code class="docutils literal"><span class="pre">/Applications/ngspice/bin/ngspice</span></code></li>
-<li>You an set the path using
-```&nbsp;`&gt;&gt;&gt;import solcore.config_tools as config</li>
-</ul>
-<blockquote>
-<div><blockquote>
-<div><blockquote>
-<div>config.set_location_of_spice(‘/Applications/ngspice/bin/ngspice’)</div></blockquote>
-</div></blockquote>
-</div></blockquote>
-<ul class="simple">
-<li>If NG spice throws an error
-<code class="docutils literal"><span class="pre">`dyld:</span> <span class="pre">Library</span> <span class="pre">not</span> <span class="pre">loaded:</span> <span class="pre">/opt/X11/lib/libXaw.7.dylib</span></code>
-`* then you will likely need to install xquartz.  It can be downloaded from from <a class="reference external" href="https://www.xquartz.org">https://www.xquartz.org</a><ul>
-<li>run the installer and restart the computer.</li>
+<li>Architecture: x86_64</li>
+<li>Threads: win32        &lt;– posix, as indicated in the instructions, did not work for us</li>
+<li>Exception: seh</li>
 </ul>
 </li>
-<li>You can test the NGSpice installation using Example_PV_module.py</li>
-</ul>
+<li><p class="first">Insert the <em>mingw</em> bin path to your system path permanently: Control Panel → Advanced System Settings → Environment Variables → System variables → Path (you might need to scroll down the System variables window to find <em>Path</em>). To the end of the list of values for the variable <em>Path</em> add the path to <em>gfortran.exe</em>, such as:</p>
+<p><code class="docutils literal"><span class="pre">c:\mingw\mingw64\bin</span></code></p>
+</li>
+<li><p class="first">Tell Python to use MinGW: create file <code class="docutils literal"><span class="pre">c:\path_to_Anaconda\Lib\distutils\distutils.cfg</span></code> containing:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">build</span><span class="p">]</span>
+<span class="n">compiler</span><span class="o">=</span><span class="n">mingw32</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>And that should be it. With this, your will be able to call the gfortran compiler from the Windows terminal and also the Solcore installer should be able to find it. You can try installing Solcore itself or with the <em>lowtran</em> package described in the instructions by <a class="reference external" href="https://www.scivision.co/f2py-running-fortran-code-in-python-on-windows/">Michael Hirsch</a>.</p>
 </div>
 </div>
 

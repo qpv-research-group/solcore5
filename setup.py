@@ -53,7 +53,7 @@ if 'update_manifest' in sys.argv:
 
 # Asking to accept the license
 if 'install' in sys.argv:
-    with open(os.path.join(here, 'LICENSE')) as f:
+    with open(os.path.join(here, 'LICENSE'), encoding='utf-8') as f:
         print(f.read())
 
     answer = input('Do you agree with these conditions (y/n)? ')

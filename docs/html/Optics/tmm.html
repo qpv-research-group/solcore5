@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Transfer matrix method &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <title>Transfer matrix method &#8212; Solcore 5.2.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '5.2.0.dev.1',
+        VERSION:     '5.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="material_optics.html" title="Optical properties of materials"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="optics.html" accesskey="U">Optical methods</a> &#187;</li> 
       </ul>
     </div>
@@ -251,7 +251,7 @@ defined.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>structure</strong> – A solcore Structure object with layers and materials or a OptiStack object.</li>
-<li><strong>wavelength</strong> – Wavelengths (in nm) in which calculate the data.</li>
+<li><strong>wavelength</strong> – Wavelengths (in nm) in which calculate the data. An array.</li>
 <li><strong>angle</strong> – Angle (in degrees) of the incident light. Default: 0 (normal incidence).</li>
 <li><strong>pol</strong> – Polarisation of the light: ‘s’, ‘p’ or ‘u’. Default: ‘u’ (unpolarised).</li>
 <li><strong>coherent</strong> – If the light is coeherent or not. If not, a coherency list must be added.</li>
@@ -280,7 +280,7 @@ reaches that position without any reflexion, to remove the reflexion from the ba
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>structure</strong> – A solcore structure with layers and materials.</li>
-<li><strong>wavelength</strong> – Wavelengths (in nm) in which calculate the data.</li>
+<li><strong>wavelength</strong> – Wavelengths (in nm) in which calculate the data. An array.</li>
 <li><strong>angle</strong> – A tupple or list with the angles (in degrees) in which to calculate the data.</li>
 <li><strong>no_back_reflexion</strong> – If reflexion from the back must be supressed. Default=True.</li>
 </ul>
@@ -309,7 +309,7 @@ very thick and the mesh not thin enough, the calculation might diverege at short
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>structure</strong> – A solcore structure with layers and materials.</li>
-<li><strong>wavelength</strong> – Wavelengths in which calculate the data (in nm). An array-like object.</li>
+<li><strong>wavelength</strong> – Wavelengths in which calculate the data (in nm). An array</li>
 <li><strong>z_limit</strong> – Maximum value in the z direction</li>
 </ul>
 </td>
@@ -738,13 +738,13 @@ partly-incoherent stack.</p>
         <li class="right" >
           <a href="material_optics.html" title="Optical properties of materials"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="optics.html" >Optical methods</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.
     </div>
   </body>
 </html>

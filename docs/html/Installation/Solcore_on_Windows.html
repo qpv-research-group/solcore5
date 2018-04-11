@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Solcore on Windows 10 &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <title>Solcore on Windows 10 &#8212; Solcore 5.2.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '5.2.0.dev.1',
+        VERSION:     '5.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.1 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -85,7 +85,7 @@
 <div class="section" id="installing-solcore">
 <span id="installing-solcore"></span><h2>Installing Solcore<a class="headerlink" href="#installing-solcore" title="Permalink to this headline">¶</a></h2>
 <p>(thanks Phoebe!)</p>
-<p>After a lot of effort, we have Solcore fully up and running in Windows 10... more or less, using the Ubuntu shell that comes with Windows 10. To install Solcore there, follow this steps:</p>
+<p>After a lot of effort, we have Solcore fully up and running in Windows 10… more or less, using the Ubuntu shell that comes with Windows 10. To install Solcore there, follow this steps:</p>
 <p>All steps on fresh install of Ubuntu (using the Ubuntu terminal on
 Windows 10 distributed by Canonical Group, Ubuntu 16.04.3 LTS, Codename:
 xenial)</p>
@@ -118,7 +118,7 @@ sudo apt-get install python3-tk
 </div>
 <ul class="simple">
 <li>Other dependencies install automatically &amp; successfully when
-installing Solcore5... hopefully.</li>
+installing Solcore5… hopefully.</li>
 <li>Now, we actually Install Solcore::</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>git clone https://github.com/dalonsoa/solcore5.git
@@ -182,7 +182,7 @@ you cannot access the database – running sudo python3, or sudo
 <li>Register and download SMARTS FOR MAC from http://www.nrel.gov/rredc/smarts/    Yes, we are going to use a Mac software on Windows. Hold on tight.</li>
 <li>Move the SMARTS_xxx_Mac.tar.gz file from Windows to the dedicated Ubuntu folder (e.g. ~$ mv /mnt/c/Users/Andrew/Downloads ~/)</li>
 <li>Unpack the file (~$ tar zxf SMARTS_xxx_Mac.tar.gz)</li>
-<li>The executable script &quot;smarts295.command&quot; in the folder won't work (try running ~$ ./smarts295.command). For example on 64bit Windows the following error is thrown, requiring the source to be recompiled:</li>
+<li>The executable script “smarts295.command” in the folder won’t work (try running ~$ ./smarts295.command). For example on 64bit Windows the following error is thrown, requiring the source to be recompiled:</li>
 </ul>
 <div class="highlight-default"><div class="highlight"><pre><span></span>Source_code/smarts295_cmd: 1: Source_code/smarts295_cmd: dJ: not found
 Source_code/smarts295_cmd: 1: Source_code/smarts295_cmd: ȅ8__PAGEZERO__TEXT: not found
@@ -193,15 +193,15 @@ Source_code/smarts295_cmd: 1: Source_code/smarts295_cmd: Syntax error: word unex
 <span id="recompiling-smarts"></span><h3>Recompiling SMARTS<a class="headerlink" href="#recompiling-smarts" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Move to the directory /SMARTS_295_Mac/Source_code/</li>
-<li>Delete the file &quot;smarts295_cmd&quot; (type ~$ rm smarts_cmd). This will need to be recompiled on for your CPU architecture</li>
-<li>Assuming you have gfortran installed (either as part of Anaconda or another third party distribution) you should compile smarts (type ~$ gfortran smarts295.f) which results in an executable called &quot;a.out&quot;<ul>
+<li>Delete the file “smarts295_cmd” (type ~$ rm smarts_cmd). This will need to be recompiled on for your CPU architecture</li>
+<li>Assuming you have gfortran installed (either as part of Anaconda or another third party distribution) you should compile smarts (type ~$ gfortran smarts295.f) which results in an executable called “a.out”<ul>
 <li>N.B. Although the SMARTS documentation suggests changing some flags in the source code you <em>should not modify</em> the SMARTS source code.  Solcore expects the default behaviour with respect to batch mode and file overwrites.</li>
 </ul>
 </li>
-<li>Rename the file &quot;a.out&quot; to &quot;smarts295_cmd&quot;. Now SMARTS has been recompiled for your CPU architecture.</li>
-<li>IMPORTANT FOR WINDOWS: Solcore on Windows10/Ubuntu looks for the script called &quot;smarts295&quot;, instead of &quot;smarts295.command&quot;, due to different naming systems in Linux and Mac. Rename &quot;smarts295.command&quot; to just &quot;smarts295&quot;.</li>
+<li>Rename the file “a.out” to “smarts295_cmd”. Now SMARTS has been recompiled for your CPU architecture.</li>
+<li>IMPORTANT FOR WINDOWS: Solcore on Windows10/Ubuntu looks for the script called “smarts295”, instead of “smarts295.command”, due to different naming systems in Linux and Mac. Rename “smarts295.command” to just “smarts295”.</li>
 <li>You can test the installation of SMARTS using the example file Figure8.py</li>
-<li>Please note that running SMARTS from the command line (typing ~$ ./smarts295) will produce two text files, &quot;smarts295.ext.txt&quot; and &quot;smarts295.out.txt&quot;.
+<li>Please note that running SMARTS from the command line (typing ~$ ./smarts295) will produce two text files, “smarts295.ext.txt” and “smarts295.out.txt”.
 If these are in the SMARTS root folder, they will mess up running SMARTS on Solcore. If you do run SMARTS in the command line, remove these files when you are done.</li>
 </ul>
 </div>
@@ -223,12 +223,12 @@ If these are in the SMARTS root folder, they will mess up running SMARTS on Solc
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.2.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.
     </div>
   </body>
 </html>

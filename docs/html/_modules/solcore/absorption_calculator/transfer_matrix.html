@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>solcore.absorption_calculator.transfer_matrix &#8212; Solcore 5.2.0.dev.1 documentation</title>
+    <title>solcore.absorption_calculator.transfer_matrix &#8212; Solcore 5.2.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '5.2.0.dev.1',
+        VERSION:     '5.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -336,7 +336,7 @@
 <span class="sd">    defined.</span>
 
 <span class="sd">    :param structure: A solcore Structure object with layers and materials or a OptiStack object.</span>
-<span class="sd">    :param wavelength: Wavelengths (in nm) in which calculate the data.</span>
+<span class="sd">    :param wavelength: Wavelengths (in nm) in which calculate the data. An array.</span>
 <span class="sd">    :param angle: Angle (in degrees) of the incident light. Default: 0 (normal incidence).</span>
 <span class="sd">    :param pol: Polarisation of the light: &#39;s&#39;, &#39;p&#39; or &#39;u&#39;. Default: &#39;u&#39; (unpolarised).</span>
 <span class="sd">    :param coherent: If the light is coeherent or not. If not, a coherency list must be added.</span>
@@ -409,7 +409,7 @@
 <span class="sd">    reaches that position without any reflexion, to remove the reflexion from the back surface.</span>
 
 <span class="sd">    :param structure: A solcore structure with layers and materials.</span>
-<span class="sd">    :param wavelength: Wavelengths (in nm) in which calculate the data.</span>
+<span class="sd">    :param wavelength: Wavelengths (in nm) in which calculate the data. An array.</span>
 <span class="sd">    :param angle: A tupple or list with the angles (in degrees) in which to calculate the data.</span>
 <span class="sd">    :param no_back_reflexion: If reflexion from the back must be supressed. Default=True.</span>
 <span class="sd">    :return: A dictionary with psi and delta at the specified wavelengths and angles (2D arrays).</span>
@@ -499,7 +499,7 @@
 <span class="sd">    For now, it only works for normal incident, coherent light.</span>
 
 <span class="sd">    :param structure: A solcore structure with layers and materials.</span>
-<span class="sd">    :param wavelength: Wavelengths in which calculate the data (in nm). An array-like object.</span>
+<span class="sd">    :param wavelength: Wavelengths in which calculate the data (in nm). An array</span>
 <span class="sd">    :param z_limit: Maximum value in the z direction</span>
 <span class="sd">    :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a</span>
 <span class="sd">    function of the position and the wavelength.</span>
@@ -594,13 +594,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.0.dev.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Solcore 5.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Quantum Photovoltaics Group, Imperial College London.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.
     </div>
   </body>
 </html>
