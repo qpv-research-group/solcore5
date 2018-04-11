@@ -1,3 +1,6 @@
+**New in Solcore 5.2.1**
+- Corrected errors in tests and examples.
+
 **New in Solcore 5.2.0**
 - Improvements in the quantum solver
 - Added plot generation for LDOS

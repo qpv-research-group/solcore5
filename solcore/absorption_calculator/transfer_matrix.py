@@ -260,7 +260,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u', coherent=True, cohere
     defined.
 
     :param structure: A solcore Structure object with layers and materials or a OptiStack object.
-    :param wavelength: Wavelengths (in nm) in which calculate the data.
+    :param wavelength: Wavelengths (in nm) in which calculate the data. An array.
     :param angle: Angle (in degrees) of the incident light. Default: 0 (normal incidence).
     :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
     :param coherent: If the light is coeherent or not. If not, a coherency list must be added.
@@ -333,7 +333,7 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflexion=True)
     reaches that position without any reflexion, to remove the reflexion from the back surface.
 
     :param structure: A solcore structure with layers and materials.
-    :param wavelength: Wavelengths (in nm) in which calculate the data.
+    :param wavelength: Wavelengths (in nm) in which calculate the data. An array.
     :param angle: A tupple or list with the angles (in degrees) in which to calculate the data.
     :param no_back_reflexion: If reflexion from the back must be supressed. Default=True.
     :return: A dictionary with psi and delta at the specified wavelengths and angles (2D arrays).
@@ -423,7 +423,7 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     For now, it only works for normal incident, coherent light.
 
     :param structure: A solcore structure with layers and materials.
-    :param wavelength: Wavelengths in which calculate the data (in nm). An array-like object.
+    :param wavelength: Wavelengths in which calculate the data (in nm). An array
     :param z_limit: Maximum value in the z direction
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.

@@ -70,10 +70,10 @@ plt.xlabel('Bias (V)')
 plt.ylabel('Current (A/m$^2}$)')
 
 # Now we calculate the quantum efficiency
-# solar_cell_solver(my_solar_cell, 'qe',
-#                   user_options={'T_ambient': T, 'db_mode': 'boltzmann', 'voltages': V, 'light_iv': True,
-#                                 'wavelength': wl, 'optics_method': 'BL', 'mpp': True, 'internal_voltages': Vin,
-#                                 'light_source': light_source})
+solar_cell_solver(my_solar_cell, 'qe',
+                  user_options={'T_ambient': T, 'db_mode': 'boltzmann', 'voltages': V, 'light_iv': True,
+                                'wavelength': wl, 'optics_method': 'BL', 'mpp': True, 'internal_voltages': Vin,
+                                'light_source': light_source})
 
 plt.figure(3)
 
