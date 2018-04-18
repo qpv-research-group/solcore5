@@ -1,4 +1,5 @@
-**New in Solcore 5.3.0.dev.1**
+**New in Solcore 5.3.0**
+- Solcore has been added to Pypi and can now be installed with ```pip install solcore```
 - New installer including the compilation of extension modules
 - New documentation about installing Solcore, specially under Windows
 

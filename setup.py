@@ -51,18 +51,6 @@ if 'update_manifest' in sys.argv:
 
     sys.exit()
 
-# Asking to accept the license
-if 'install' in sys.argv:
-    with open(os.path.join(here, 'LICENSE.txt'), encoding='utf-8') as f:
-        print(f.read())
-
-    answer = input('Do you agree with these conditions (y/n)? ')
-    answer = answer.lower()
-
-    if answer != 'y':
-        print('Sorry, but you need to accept the license in order to use Solcore.\n')
-        sys.exit()
-
 # Get the long description from the README file
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -80,6 +68,7 @@ setup(
     author='The Quantum Photovoltaics Group',
     author_email='d.alonso-alvarez@imperial.ac.uk',
     license='GNU LGPL',
+    python_requires='>=3.4',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',

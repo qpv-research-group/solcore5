@@ -12,34 +12,42 @@ Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solve
 - numpy
 - :doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`
 
-*Pip* is normally part of the standard Python 3 installation, but you might need to install *setuptools* and *numpy* manually with (pip3 only indicates that is the *pip* that comes with Python 3)::
+*Pip* is normally part of the standard Python installation, but you might need to install *setuptools* and *numpy* manually with::
 
-    pip3 install setuptools numpy
+    pip install setuptools numpy
 
-After downloading Solcore, either using 'git' or as a zip file using one of the links on the right, installing it and become a user should be as easy as writing in the terminal (within the Solcore5 folder, where there is the *setup.py* file)::
+Now, installing Solcore should be as easy as writing in the terminal::
 
-    python3 setup.py install
+    pip install solcore
+
+This will download Solcore form the Pypi repository, compile the PDD solver :doc:`(read this to install your Fortran compiler) <compilation>` and install the package within the Python packages tree. Alternatively, you can `download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_, either using 'git' or as a zip file using one of the links on the right, unpack it and run from the directory where *setup.py* is located::
+
+    python setup.py install
 
 If you do not want to use the PDD solver, you can skip the compilation step by doing::
 
-    python3 setup.py install --no_pdd
+    pip install solcore --install-option="--no_pdd"
 
-You will be asked to accept the license and then it will compile the PDD solver (unless indicated otherwise), install all Solcore dependencies and Solcore itself in the Python3 package tree. Using it will be as easy as making::
+or::
+
+    python setup.py install --no_pdd
+
+And that's all!!::
 
     >>> import solcore
 
-        Welcome to Solcore - version 5.2.1
+        Welcome to Solcore - version 5.3.0
         Copyright (c) 2018, Imperial College, London All rights reserved.
         Software released under the GNU Lesser General Public License.
 
 
 If you want to test first if Solcore will work in your computer, without actually installing it, or if you want to become a developer and therefore you need to have it in a more accessible place, you can test if Solcore works with::
 
-    python3 setup.py test
+    python setup.py test
 
 This will also install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore's functionality, but it will be expanded with time. Again, you can skip the compilation of the PDD solver by running::
 
-    python3 setup.py test --no_pdd
+    python setup.py test --no_pdd
 
 Of course, the tests related to the PDD solver will fail in this case.
 
@@ -55,7 +63,7 @@ After installing Solcore (or even without installing it), there are a few things
 
     >>> import solcore.config_tools
 
-2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper (Journal of Computational Electronics, https://doi.org/10.1007/s10825-018-1171-3) and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time.
+2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper in the `Journal of Computational Electronics (2018) <https://doi.org/10.1007/s10825-018-1171-3>`_ and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time.
 
 3. **Check the Tutorial:** The :doc:`Tutorial <../tutorial>` (with the code available in the Examples folder) contains a step-by-step example on how to create a solar cell with multiple junctions and quantum wells, and calculate its quantum efficiency and current-voltage characteristics. While it does not cover every option - not even close! - it should give you a good idea on how things are done within Solcore and its possibilities.
 

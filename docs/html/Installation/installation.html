@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Installation and configuration &#8212; Solcore 5.3.0.dev.1 documentation</title>
+    <title>Installation and configuration &#8212; Solcore 5.3.0 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '5.3.0.dev.1',
+        VERSION:     '5.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="../index.html" title="Contents:"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.3.0.dev.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.3.0 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -110,32 +110,40 @@
 <li>numpy</li>
 <li><a class="reference internal" href="compilation.html"><span class="doc">a suitable Fortran compiler (only needed for the PDD solver)</span></a></li>
 </ul>
-<p><em>Pip</em> is normally part of the standard Python 3 installation, but you might need to install <em>setuptools</em> and <em>numpy</em> manually with (pip3 only indicates that is the <em>pip</em> that comes with Python 3):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="n">setuptools</span> <span class="n">numpy</span>
+<p><em>Pip</em> is normally part of the standard Python installation, but you might need to install <em>setuptools</em> and <em>numpy</em> manually with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">setuptools</span> <span class="n">numpy</span>
 </pre></div>
 </div>
-<p>After downloading Solcore, either using ‘git’ or as a zip file using one of the links on the right, installing it and become a user should be as easy as writing in the terminal (within the Solcore5 folder, where there is the <em>setup.py</em> file):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+<p>Now, installing Solcore should be as easy as writing in the terminal:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">solcore</span>
+</pre></div>
+</div>
+<p>This will download Solcore form the Pypi repository, compile the PDD solver <a class="reference internal" href="compilation.html"><span class="doc">(read this to install your Fortran compiler)</span></a> and install the package within the Python packages tree. Alternatively, you can <a class="reference external" href="https://github.com/dalonsoa/solcore5">download the source from the Solcore GitHub repository</a>, either using ‘git’ or as a zip file using one of the links on the right, unpack it and run from the directory where <em>setup.py</em> is located:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
 <p>If you do not want to use the PDD solver, you can skip the compilation step by doing:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">no_pdd</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">solcore</span> <span class="o">--</span><span class="n">install</span><span class="o">-</span><span class="n">option</span><span class="o">=</span><span class="s2">&quot;--no_pdd&quot;</span>
 </pre></div>
 </div>
-<p>You will be asked to accept the license and then it will compile the PDD solver (unless indicated otherwise), install all Solcore dependencies and Solcore itself in the Python3 package tree. Using it will be as easy as making:</p>
+<p>or:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">no_pdd</span>
+</pre></div>
+</div>
+<p>And that’s all!!:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">solcore</span>
 
-<span class="go">    Welcome to Solcore - version 5.2.1</span>
+<span class="go">    Welcome to Solcore - version 5.3.0</span>
 <span class="go">    Copyright (c) 2018, Imperial College, London All rights reserved.</span>
 <span class="go">    Software released under the GNU Lesser General Public License.</span>
 </pre></div>
 </div>
 <p>If you want to test first if Solcore will work in your computer, without actually installing it, or if you want to become a developer and therefore you need to have it in a more accessible place, you can test if Solcore works with:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span>
 </pre></div>
 </div>
 <p>This will also install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore’s functionality, but it will be expanded with time. Again, you can skip the compilation of the PDD solver by running:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span> <span class="o">--</span><span class="n">no_pdd</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span> <span class="o">--</span><span class="n">no_pdd</span>
 </pre></div>
 </div>
 <p>Of course, the tests related to the PDD solver will fail in this case.</p>
@@ -153,7 +161,7 @@
 </pre></div>
 </div>
 </li>
-<li><p class="first"><strong>Check Solcore examples:</strong> This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper (Journal of Computational Electronics, <a class="reference external" href="https://doi.org/10.1007/s10825-018-1171-3">https://doi.org/10.1007/s10825-018-1171-3</a>) and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time.</p>
+<li><p class="first"><strong>Check Solcore examples:</strong> This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper in the <a class="reference external" href="https://doi.org/10.1007/s10825-018-1171-3">Journal of Computational Electronics (2018)</a> and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time.</p>
 </li>
 <li><p class="first"><strong>Check the Tutorial:</strong> The <a class="reference internal" href="../tutorial.html"><span class="doc">Tutorial</span></a> (with the code available in the Examples folder) contains a step-by-step example on how to create a solar cell with multiple junctions and quantum wells, and calculate its quantum efficiency and current-voltage characteristics. While it does not cover every option - not even close! - it should give you a good idea on how things are done within Solcore and its possibilities.</p>
 </li>
@@ -590,7 +598,7 @@ replaced by the new one.</p>
         <li class="right" >
           <a href="../index.html" title="Contents:"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.3.0.dev.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Solcore 5.3.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
