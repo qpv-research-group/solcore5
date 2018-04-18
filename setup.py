@@ -53,7 +53,7 @@ if 'update_manifest' in sys.argv:
 
 # Asking to accept the license
 if 'install' in sys.argv:
-    with open(os.path.join(here, 'LICENSE'), encoding='utf-8') as f:
+    with open(os.path.join(here, 'LICENSE.txt'), encoding='utf-8') as f:
         print(f.read())
 
     answer = input('Do you agree with these conditions (y/n)? ')
@@ -73,6 +73,10 @@ setup(
     description='Python-based solar cell simulator',
     long_description=long_description,
     url='https://github.com/dalonsoa/solcore5',
+    download_url='https://github.com/dalonsoa/solcore5/archive/v{}.tar.gz'.format(config.get('Configuration', 'version')),
+    project_urls={
+        'Documentation': 'https://dalonsoa.github.io/solcore5/html/index.html',
+        'Solcore research paper': 'https://doi.org/10.1007/s10825-018-1171-3'},
     author='The Quantum Photovoltaics Group',
     author_email='d.alonso-alvarez@imperial.ac.uk',
     license='GNU LGPL',

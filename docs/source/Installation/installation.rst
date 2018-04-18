@@ -55,7 +55,7 @@ After installing Solcore (or even without installing it), there are a few things
 
     >>> import solcore.config_tools
 
-2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper (submitted to Journal of Computational Electronics, preprint in https://arxiv.org/abs/1709.06741 ) and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time.
+2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper (Journal of Computational Electronics, https://doi.org/10.1007/s10825-018-1171-3) and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time.
 
 3. **Check the Tutorial:** The :doc:`Tutorial <../tutorial>` (with the code available in the Examples folder) contains a step-by-step example on how to create a solar cell with multiple junctions and quantum wells, and calculate its quantum efficiency and current-voltage characteristics. While it does not cover every option - not even close! - it should give you a good idea on how things are done within Solcore and its possibilities.
 
