@@ -78,7 +78,6 @@ include solcore/graphing/Colours.txt
 include solcore/poisson_drift_diffusion/DriftDiffusionUtilities.py
 include solcore/poisson_drift_diffusion/DeviceStructure.py
 include solcore/poisson_drift_diffusion/QWunit.py
-include solcore/poisson_drift_diffusion/ddModel.so
 include solcore/poisson_drift_diffusion/__init__.py
 include solcore/poisson_drift_diffusion/DDmodel-current.f95
 include solcore/poisson_drift_diffusion/driftdiffusion_compiler.py
