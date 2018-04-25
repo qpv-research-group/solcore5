@@ -1,5 +1,5 @@
 from setuptools import find_packages
-from numpy.distutils.core import setup, Extension
+from numpy.distutils.core import Extension, setup
 
 import os
 import sys
@@ -89,5 +89,5 @@ setup(
     install_requires=['numpy', 'matplotlib', 'scipy', 'Sphinx', 'tmm', 'natsort', 'regex', 'cycler'],
     include_package_data=True,
     test_suite='nose.collector',
-    tests_require=['nose', 'numpy', 'matplotlib', 'scipy', 'Sphinx', 'tmm', 'natsort', 'regex', 'cycler'],
+    tests_require=['nose', 'numpy', 'matplotlib', 'scipy', 'tmm', 'natsort', 'regex', 'cycler'],
 )

@@ -1,3 +1,7 @@
+**New in Solcore 5.4.0.dev0**
+- Corrected several file names to avoid spaces: all have been replaced by underscores
+- Added exe=1 flag in setup.cfg to ensure tests are run, even if they are labelled as executable files.
+
 **New in Solcore 5.3.0**
 - Solcore has been added to Pypi and can now be installed with ```pip install solcore```
 - New installer including the compilation of extension modules
