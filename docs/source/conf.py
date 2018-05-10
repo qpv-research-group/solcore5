@@ -246,7 +246,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'DDdocs.tex', u'DDdocs documentation',
+  ('index', 'DDdocs.tex', u'Solcore documentation',
    u'Diego Alonso-Álvarez', 'manual'),
 ]
 
@@ -276,7 +276,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'dddocs', u'DDdocs documentation',
+    ('index', 'dddocs', u'Solcore documentation',
      [u'Diego Alonso-Álvarez'], 1)
 ]
 
@@ -290,8 +290,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'DDdocs', u'DDdocs documentation',
-   u'Diego Alonso-Álvarez', 'DDdocs', 'One line description of project.',
+  ('index', 'DDdocs', u'Solcore documentation',
+   u'Diego Alonso-Álvarez', 'Solcore', 'One line description of project.',
    'Miscellaneous'),
 ]
 
