@@ -13,20 +13,20 @@
 # serve to show the default.
 
 
-# from configparser import ConfigParser
-# import sys
-# import os
-#
-# this_dir = os.path.split(__file__)[0]
-# solcore_root = this_dir.split('/docs/')[0]
-# print(solcore_root)
-#
-# sys.path.append(solcore_root)
-# default_config = os.path.join(solcore_root, 'solcore', 'solcore_config.txt')
-# config = ConfigParser()
-# config.read([default_config, ])
-# __version__ = config.get('Configuration', 'version')
-__version__ = '5.4.0.dev0'
+from configparser import ConfigParser
+import sys
+import os
+
+this_dir = os.path.split(__file__)[0]
+solcore_root = this_dir.split('/docs/')[0]
+print(solcore_root)
+
+sys.path.append(solcore_root)
+default_config = os.path.join(solcore_root, 'solcore', 'solcore_config.txt')
+config = ConfigParser()
+config.read([default_config, ])
+__version__ = config.get('Configuration', 'version')
+# __version__ = '5.4.0.dev0'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

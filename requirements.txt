@@ -1,0 +1,8 @@
+numpy
+matplotlib
+scipy
+Sphinx
+tmm
+natsort
+regex
+cycler
