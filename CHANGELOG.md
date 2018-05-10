@@ -1,6 +1,8 @@
-**New in Solcore 5.4.0.dev0**
+**New in Solcore 5.4.0.dev1**
 - Corrected several file names to avoid spaces: all have been replaced by underscores
 - Added exe=1 flag in setup.cfg to ensure tests are run, even if they are labelled as executable files.
+- Several files adapted to be able to create the documentation in Read the Docs
+- Now the default installation does NOT install the PDD solver and, in order to install it, the option --with_pdd must be given.
 
 **New in Solcore 5.3.0**
 - Solcore has been added to Pypi and can now be installed with ```pip install solcore```
