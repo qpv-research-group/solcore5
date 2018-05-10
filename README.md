@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316) [![Documentation Status](https://readthedocs.org/projects/solcore5/badge/?version=latest)](http://solcore5.readthedocs.io/en/latest/?badge=latest)
 
 Solcore
 =======
