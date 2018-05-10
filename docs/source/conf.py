@@ -19,7 +19,6 @@ import os
 
 this_dir = os.path.split(__file__)[0]
 solcore_root = this_dir.split('/docs/')[0]
-print(solcore_root)
 
 sys.path.append(solcore_root)
 default_config = os.path.join(solcore_root, 'solcore', 'solcore_config.txt')

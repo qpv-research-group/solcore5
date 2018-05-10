@@ -23,15 +23,15 @@ default_config = os.path.join(here, 'solcore', 'solcore_config.txt')
 config = ConfigParser()
 config.read([default_config])
 
-# We give the option of not compiling - and installing - the extension modules
-if '--no_pdd' in sys.argv:
-    ext = []
-    sys.argv.remove('--no_pdd')
-else:
+# We give the option of compiling - and installing - the extension modules
+if '--with_pdd' in sys.argv:
     sources = os.path.join('solcore', 'poisson_drift_diffusion', 'DDmodel-current.f95')
     ext = [Extension(name='solcore.poisson_drift_diffusion.ddModel',
                      sources=[sources],
                      f2py_options=['--quiet'])]
+    sys.argv.remove('--with_pdd')
+else:
+    ext = []
 
 # Option for updating the manifest
 if 'update_manifest' in sys.argv:
