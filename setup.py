@@ -1,5 +1,5 @@
 from setuptools import find_packages
-from numpy.distutils.core import setup, Extension
+from numpy.distutils.core import Extension, setup
 
 import os
 import sys
@@ -23,15 +23,15 @@ default_config = os.path.join(here, 'solcore', 'solcore_config.txt')
 config = ConfigParser()
 config.read([default_config])
 
-# We give the option of not compiling - and installing - the extension modules
-if '--no_pdd' in sys.argv:
-    ext = []
-    sys.argv.remove('--no_pdd')
-else:
+# We give the option of compiling - and installing - the extension modules
+if '--with_pdd' in sys.argv:
     sources = os.path.join('solcore', 'poisson_drift_diffusion', 'DDmodel-current.f95')
     ext = [Extension(name='solcore.poisson_drift_diffusion.ddModel',
                      sources=[sources],
                      f2py_options=['--quiet'])]
+    sys.argv.remove('--with_pdd')
+else:
+    ext = []
 
 # Option for updating the manifest
 if 'update_manifest' in sys.argv:
@@ -52,7 +52,7 @@ if 'update_manifest' in sys.argv:
     sys.exit()
 
 # Get the long description from the README file
-with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
@@ -63,7 +63,7 @@ setup(
     url='https://github.com/dalonsoa/solcore5',
     download_url='https://github.com/dalonsoa/solcore5/archive/v{}.tar.gz'.format(config.get('Configuration', 'version')),
     project_urls={
-        'Documentation': 'https://dalonsoa.github.io/solcore5/html/index.html',
+        'Documentation': 'http://solcore5.readthedocs.io',
         'Solcore research paper': 'https://doi.org/10.1007/s10825-018-1171-3'},
     author='The Quantum Photovoltaics Group',
     author_email='d.alonso-alvarez@imperial.ac.uk',
@@ -89,5 +89,5 @@ setup(
     install_requires=['numpy', 'matplotlib', 'scipy', 'Sphinx', 'tmm', 'natsort', 'regex', 'cycler'],
     include_package_data=True,
     test_suite='nose.collector',
-    tests_require=['nose', 'numpy', 'matplotlib', 'scipy', 'Sphinx', 'tmm', 'natsort', 'regex', 'cycler'],
+    tests_require=['nose', 'numpy', 'matplotlib', 'scipy', 'tmm', 'natsort', 'regex', 'cycler'],
 )

@@ -14,7 +14,7 @@ my_energies = {'Elh': np.array([-770., -802., -803., -810., -812., -818., -823.,
                'Ehh': np.array([-677., -731., -801., -801., -803., -803., -806., -807., -811., -813., -815., -816.,
                                 -820., -824., -828., -832., -838., -841., -845., -849., ])}
 
-my_absorption = [1.267056856187291, 988133.9170541381]  # Energy in meV and absorption coeficent in m-1
+my_absorption = [1.267056856187291, 988133.9170522481]  # Energy in meV and absorption coeficent in m-1
 
 
 class TestQM(TestCase):

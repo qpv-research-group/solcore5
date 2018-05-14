@@ -26,7 +26,7 @@
 # config = ConfigParser()
 # config.read([default_config, ])
 # __version__ = config.get('Configuration', 'version')
-__version__ = '5.3.1'
+__version__ = '5.4.0'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -247,8 +247,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'DDdocs.tex', u'DDdocs documentation',
-   u'Diego Alonso-Álvarez', 'manual'),
+  ('index', 'DDdocs.tex', u'Solcore documentation',
+   u'Quantum Photovoltaics Group, Imperial College London', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -277,8 +277,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'dddocs', u'DDdocs documentation',
-     [u'Diego Alonso-Álvarez'], 1)
+    ('index', 'dddocs', u'Solcore documentation',
+     [u'Quantum Photovoltaics Group, Imperial College London'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -291,8 +291,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'DDdocs', u'DDdocs documentation',
-   u'Diego Alonso-Álvarez', 'DDdocs', 'One line description of project.',
+  ('index', 'DDdocs', u'Solcore documentation',
+   u'Quantum Photovoltaics Group, Imperial College London', 'Solcore', 'One line description of project.',
    'Miscellaneous'),
 ]
 
