@@ -4,7 +4,7 @@ Installation and configuration
 Installing Solcore
 ^^^^^^^^^^^^^^^^^^
 
-Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient. The following instructions are expected to work in more systems, but check the sections below for OS specific instructions and caveats. In order to install Solcore in your computer, you will need the following:
+Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient. The following instructions are expected to work in most systems, but check the sections below for OS specific instructions and caveats. In order to install Solcore in your computer, you will need the following:
 
 - Python >3.4
 - pip
