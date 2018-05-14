@@ -21,6 +21,7 @@ Contents:
     spectral/spectral
     Optics/optics
     Solvers/solving_solar_cells
+    Examples/main
 
 .. Indices and tables
 .. ==================
