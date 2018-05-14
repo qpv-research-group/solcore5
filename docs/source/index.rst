@@ -14,7 +14,6 @@ Contents:
     :maxdepth: 2
 
     Installation/installation
-    tutorial
     Structures/structure
     Systems/systems
     QM/Schrodinger
