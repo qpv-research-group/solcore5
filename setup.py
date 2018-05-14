@@ -63,7 +63,7 @@ setup(
     url='https://github.com/dalonsoa/solcore5',
     download_url='https://github.com/dalonsoa/solcore5/archive/v{}.tar.gz'.format(config.get('Configuration', 'version')),
     project_urls={
-        'Documentation': 'https://dalonsoa.github.io/solcore5/html/index.html',
+        'Documentation': 'http://solcore5.readthedocs.io',
         'Solcore research paper': 'https://doi.org/10.1007/s10825-018-1171-3'},
     author='The Quantum Photovoltaics Group',
     author_email='d.alonso-alvarez@imperial.ac.uk',

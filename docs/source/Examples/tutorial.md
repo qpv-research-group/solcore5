@@ -187,7 +187,7 @@ solar_cell_solver(my_solar_cell, 'qe',
 
 ```
 
-![qe](../qe.jpg "Quantum efficiency")
+![qe](qe.jpg "Quantum efficiency")
 
 ﻿As it can be seen, the minority carrier population increases significantly under illumination, specially in the QW region of the bottom cell, which is a relatively thick, undoped region. The EQE of the bottom junction, in comparison with the total absorbed light, indicates excellent carrier collection with only some missing carriers in the region of the spectrum where light is absorbed by the QWs. The top junction is not performing that well, the reason being a combination of low mobility of carriers in GaInP between 3 and 6 times smaller than that of p-GaAs), insufficient thickness to absorb all light (part of it reaching the GaAs junction), parasitic absorption of the AlGaP window layer and surface recombination.   
 
@@ -224,9 +224,9 @@ for c in con:
 ```
 The next figure shows the summary of the efficiency, Isc, Voc and fill factor (FF) versus concentration. 
 
-![iv_params](../iv_params.jpg "iv_params")
+![iv_params](iv_params.jpg "iv_params")
 
 The efficiency of the cell is just above 30\% at 1 sun, and increases with concentration , peaking at around 200-300 suns. Further increasing the concentration rapidly decreases the efficiency. Both, Isc and Voc follow the expected linear trend in log-log and semilog plots, respectively, while the fill factor increases for low concentrations and then continuously drops from 20 suns and, specially, from 200 suns. The initial smooth drop of the fill factor can be related with a limited carrier transport across the QW region, that under concentration, suffers from charge accumulation and damping of the electric field. However, the abrupt drop at higher concentrations is related to the failure of the tunnel junction which, by design, had a low peak current. This effect can be better seen in the last figure where, for the two highest concentrations, the IV curve exhibit steps due to the tunnel junction limiting the current. 
 
-![iv](../iv.jpg "IV")
+![iv](iv.jpg "IV")
 
