@@ -1,4 +1,4 @@
-﻿""" Solves an electrical circuit using SPICE. The input must be a correctly formated SPICE file and the output will be
+""" Solves an electrical circuit using SPICE. The input must be a correctly formated SPICE file and the output will be
 the raw result from SPICE or after some processing, depending of what is requested. """
 
 import numpy
