@@ -25,16 +25,16 @@ for i in range(len(e_inf)):
     out = calculate_rat([[300, model]], x)
 
     plt.figure(1)
-    plt.semilogx(x/1000, out['R'], 'b', label='R ' + label[i], ls=ls[i])
-    plt.semilogx(x/1000, out['A'], 'r', label='A ' + label[i], ls=ls[i])
-    plt.semilogx(x/1000, out['T'], 'g', label='T ' + label[i], ls=ls[i])
+    plt.plot(x/1000, out['R'], 'b', label='R ' + label[i], ls=ls[i])
+    plt.plot(x/1000, out['A'], 'r', label='A ' + label[i], ls=ls[i])
+    plt.plot(x/1000, out['T'], 'g', label='T ' + label[i], ls=ls[i])
 
     # And also want to know the n and k.txt data
     n = model.n_and_k(x)
 
     plt.figure(2)
-    plt.semilogx(x/1000, np.real(n), 'b', label='n ' + label[i], ls=ls[i])
-    plt.semilogx(x/1000, np.imag(n), 'g', label='k ' + label[i], ls=ls[i])
+    plt.plot(x/1000, np.real(n), 'b', label='n ' + label[i], ls=ls[i])
+    plt.plot(x/1000, np.imag(n), 'g', label='k ' + label[i], ls=ls[i])
 
 
 plt.figure(1)

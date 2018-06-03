@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
-import numpy as np
 
 from solcore.structure import TunnelJunction
 from solcore.solar_cell_solver import default_options
 from solcore.analytic_solar_cells import parametric_tunnel_junction
 
+# We define the tunnel junction and solve its properties
 tunnel = TunnelJunction(v_peak=0.2, j_peak=100, v_valley=0.9, j_valley=10, prefactor=10, j01=1e-21, kind='parametric')
 parametric_tunnel_junction(tunnel, default_options)
 

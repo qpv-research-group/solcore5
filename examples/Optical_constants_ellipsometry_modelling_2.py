@@ -17,7 +17,7 @@ my_structure = Structure([
 
 # We want to calculate the ellipsometry of this structure as a function of the wavelength for a few angles
 wavelength = np.linspace(400, 1000, 200)
-angles = [60, 65, 70]
+angles = [65, 70, 75]
 
 out = calculate_ellipsometry(my_structure, wavelength, angle=angles)
 
@@ -25,13 +25,20 @@ out = calculate_ellipsometry(my_structure, wavelength, angle=angles)
 # strange oscillations related with intereference in thick layers, something that should not happen.
 # Setting no_back_reflexion=True (the default) should take care of most of this effects, but might add other unexpected
 # ones.
-plt.plot(wavelength, out['psi'][:, 0], 'b', label=r'$\Psi$')
-plt.plot(wavelength, out['Delta'][:, 0], 'r', label=r'$\Delta$')
-for i in range(1, len(angles)):
-    plt.plot(wavelength, out['psi'][:, i], 'b')
-    plt.plot(wavelength, out['Delta'][:, i], 'r')
+fig, ax1 = plt.subplots(1, 1)
+ax2 = ax1.twinx()
 
-plt.xlabel('Wavelength (µm)')
-plt.ylabel(r'$\Psi$ and $\Delta$ (º)')
-plt.legend()
+ax1.plot(wavelength, out['psi'][:, 0], 'b', label=r'$\Psi$')
+ax2.plot(wavelength, out['Delta'][:, 0], 'r', label=r'$\Delta$')
+for i in range(1, len(angles)):
+    ax1.plot(wavelength, out['psi'][:, i], 'b')
+    ax2.plot(wavelength, out['Delta'][:, i], 'r')
+
+ax1.set_xlabel("Wavelength (nm)")
+ax1.set_ylabel(r'$\Psi$ (º)')
+ax2.set_ylabel(r'$\Delta$ (º)')
+
+ax1.legend(loc="upper left")
+ax2.legend(loc="upper right")
+
 plt.show()

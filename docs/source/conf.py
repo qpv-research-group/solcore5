@@ -14,8 +14,9 @@
 
 
 # from configparser import ConfigParser
-# import sys
-# import os
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../..'))
 #
 # this_dir = os.path.split(__file__)[0]
 # solcore_root = this_dir.split('/docs/')[0]
@@ -26,7 +27,7 @@
 # config = ConfigParser()
 # config.read([default_config, ])
 # __version__ = config.get('Configuration', 'version')
-__version__ = '5.4.0'
+__version__ = '5.5.0.dev0'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

@@ -5,9 +5,8 @@ from .DeviceStructure import *
 from .QWunit import *
 
 try:
-    #result = check_ddModel_library_ok()
-    #if result:
     from .DriftDiffusionUtilities import *
 except Exception as err:
     print('WARNING: The Poisson - Drift-Diffusion solver will not be available because the ddModel fortran library could not be imported.')
+    print(err)
 

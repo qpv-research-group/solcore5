@@ -1,11 +1,9 @@
-# Quick example code to generate some sopra DB plots for the solcore paper...
+""" Quick example code to generate some data from the SOPRA database"""
 
 from solcore import material
 
 import numpy as np
 import matplotlib.pyplot as plt
-import os
-
 
 # Initiate some variables...
 wl = np.linspace(300, 1800, 1000)

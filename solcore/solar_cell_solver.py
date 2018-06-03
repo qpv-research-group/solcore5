@@ -41,7 +41,7 @@ default_options.voltages = np.linspace(0, 1.2, 100)
 default_options.mpp = False
 default_options.light_iv = False
 default_options.internal_voltages = np.linspace(-6, 4, 1000)
-default_options.position = np.linspace(0, 4660, 4661)
+default_options.position = None
 default_options.radiative_coupling = False
 
 # Optics control
@@ -63,7 +63,7 @@ def solar_cell_solver(solar_cell, task, user_options=None):
     else:
         options = merge_dicts(default_options)
 
-    prepare_solar_cell(solar_cell)
+    prepare_solar_cell(solar_cell, options)
     options.T = solar_cell.T
 
     if task == 'optics':
@@ -118,7 +118,7 @@ def solve_iv(solar_cell, options):
     :return: None
     """
     solve_optics(solar_cell, options)
-
+    print('Solving IV of the junctions...')
     for j in solar_cell.junction_indices:
 
         if solar_cell[j].kind == 'PDD':
@@ -134,6 +134,7 @@ def solve_iv(solar_cell, options):
                 'ERROR in "solar_cell_solver":\n\tJunction {} has an invalid "type". It must be "PDD", "DA", "2D" or "DB".'.format(
                     j))
 
+    print('Solving IV of the tunnel junctions...')
     for j in solar_cell.tunnel_indices:
 
         if solar_cell[j].kind == 'resistive':
@@ -152,6 +153,7 @@ def solve_iv(solar_cell, options):
                 'ERROR in "solar_cell_solver":\n\tTunnel junction {} has an invalid "type". It must be "parametric", "analytic", "external" or "resistive".'.format(
                     j))
 
+    print('Solving IV of the total solar cell...')
     ASC.iv_multijunction(solar_cell, options)
 
 
@@ -165,6 +167,7 @@ def solve_qe(solar_cell, options):
 
     solve_optics(solar_cell, options)
 
+    print('Solving QE of the solar cell...')
     for j in solar_cell.junction_indices:
         if solar_cell[j].kind is 'PDD':
             PDD.qe_pdd(solar_cell[j], options)
@@ -215,7 +218,7 @@ def solve_short_circuit(solar_cell, options):
             print('WARNING: Only PDD junctions can be solved in "short_circuit".')
 
 
-def prepare_solar_cell(solar_cell):
+def prepare_solar_cell(solar_cell, options):
     """ This function scans all the layers and junctions of the cell, calculating the relative possition of each of them with respect the front surface (offset). This information will later be use by the optical calculators, for example.
 
     :param solar_cell: A solar_cell object
@@ -260,3 +263,6 @@ def prepare_solar_cell(solar_cell):
         offset += solar_cell[j].width
 
     solar_cell.width = offset
+
+    if options.position is None:
+        options.position = np.arange(0, solar_cell.width, 1e-9)

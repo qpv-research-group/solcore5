@@ -3,11 +3,10 @@ import matplotlib.pyplot as plt
 
 from solcore.light_source import LightSource
 
-plt.figure(figsize=(6, 4.5))
-
 # The wavelength range of the spectra
 wl = np.linspace(300, 3000, 200)
 
+# Now different types of lightsources can be defined
 gauss = LightSource(source_type='laser', x=wl, center=800, linewidth=50, power=200)
 bb = LightSource(source_type='black body', x=wl, T=5800, entendue='Sun')
 am15g = LightSource(source_type='standard', x=wl, version='AM1.5g')

@@ -206,37 +206,6 @@ def verbose_loading(show):
     """
     user_config_data['Configuration']['verbose_loading'] = int(show)
 
-#
-# def get_solcore_examples(destination=home_folder):
-#     """ Copies all Solcore examples to a user designated folder.
-#
-#     :param destination:
-#     :return:
-#     """
-#     examples_folder = os.path.join(solcore.SOLCORE_ROOT, 'examples')
-#     destination = os.path.join(destination, 'solcore', 'examples')
-#
-#     if os.path.isdir(destination):
-#         response = input('The destination folder for the examples already exists: \n\t{}\nIt will be deleted. '
-#                          'Do you want to continue (Y/n)?'.format(destination))
-#         if response not in 'Yy':
-#             return
-#
-#         shutil.rmtree(destination)
-#
-#     shutil.copytree(examples_folder, destination)
-#
-#     # We remove all the files/folders that are unnecesary
-#     pushdir = os.getcwd()
-#     os.chdir(destination)
-#     init_files = glob.glob(os.path.join('**', '__init__.py'), recursive=True)
-#     for f in init_files:
-#         os.remove(f)
-#     init_files = glob.glob(os.path.join('**', '__pycache__'), recursive=True)
-#     for f in init_files:
-#         shutil.rmtree(f)
-#     os.chdir(pushdir)
-
 
 def set_location_of_spice(location):
     """ Sets the location of the spice executable. It does not test if it works.
@@ -258,27 +227,6 @@ def set_location_of_smarts(location):
     save_user_config()
 
 
-def set_fortran_compiler(location):
-    """ Sets the fotran compiler. It does not test if it works.
-
-    :param location: The fortran compiler or the path to the fortran compiler, if it is not in the system path.
-    :return: None
-    """
-    user_config_data['External programs']['fortran'] = location
-    save_user_config()
-
-
-def compile_poisson_drift_diffusion():
-    """ Compiles the fortran-based poisson-drift-diffusion solver, wrapping the resulting library using F2Py to be accessible from Python.
-
-    :return: none
-    """
-
-    from .poisson_drift_diffusion.driftdiffusion_compiler import check_ddModel_library_ok
-
-    check_ddModel_library_ok(force=True)
-
-
 def get_current_config():
     """ Prints the current Solcore configuration
 
@@ -291,18 +239,7 @@ def get_current_config():
             print('{} = {}'.format(option, user_config_data.get(section, option)))
 
         print()
-#
-#
-# def open_documentation():
-#     """ Opens Solcore documentation in a new tab in your web browser.
-#
-#     :return: None
-#     """
-#     import webbrowser
-#
-#     url = 'file:' + os.path.join(solcore.SOLCORE_ROOT, 'documentation', 'Solcore.html')
-#     webbrowser.open(url)
-#
+
 
 if len(user_config_data.sections()) == 0:
     response = input('No user configuration was detected. Do you want to create one (Y/n)?')

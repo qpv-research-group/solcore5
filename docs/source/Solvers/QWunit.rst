@@ -2,7 +2,7 @@
 QW unit creator
 ===============
 
-This module defines a class derived from *solcore3.Structure* that allows to solve the Schrodinger equation and the kp model. It also prepares the properties of the structure (bandedges, efective density of states (DOS), etc) in order to have a meaningful set of properties for the PDD. Without this preparation, the structure is just a colection of layers with bulk-like properties, as it is illustrated in the figure:
+This module defines a class derived from *solcore.Structure* that allows to solve the Schrodinger equation and the kp model. It also prepares the properties of the structure (bandedges, efective density of states (DOS), etc) in order to have a meaningful set of properties for the PDD. Without this preparation, the structure is just a collection of layers with bulk-like properties, as it is illustrated in the figure:
 
 .. _figure-QWunit: 
 
@@ -16,7 +16,7 @@ The QWunit class
 
 .. py:class:: QWunit (*args, **kwargs)
 
-	Asembles a group of layers as a quantum well, calculating its properties as a whole. As with any **solcore3.Structure**, a QWunit usually gets as input a list of **solcore3.Layers** and a **solcore3.material** as substrate (defined with the keyword 'substrate'). In this case, the class constructor is disigned to work specifically for the PDD solver so it requires the following:
+	Asembles a group of layers as a quantum well, calculating its properties as a whole. As with any **solcore.Structure**, a QWunit usually gets as input a list of **solcore.Layers** and a **solcore.material** as substrate (defined with the keyword 'substrate'). In this case, the class constructor is designed to work specifically for the PDD solver so it requires the following:
 
 	- It needs a minimum of 3 layers.
 	- There must be exactly one layer with the role = "well".
@@ -24,12 +24,12 @@ The QWunit class
 	- Anything not a barrier nor a well will be considered as "interlayer".
 	- A substrate.
 
-	Since the PDD solver can not work with superlatices, there is no point of considering the solution of more than one QW. All QWs entering into the solver are independent, regardless of the width of the barriers. To account for the possible presence of nearby QWs, perdiodic boundary conditions can be used to solve the Schrodinger equation. If barriers + interlayers are thick enought, this make no difference but if they are thin, it affects the number and energy of the confined levels. It does not 'create' minibands, though, so the results with thin barriers must be used with caution. 
+	Since the PDD solver can not work with superlattices, there is no point of considering the solution of more than one QW. All QWs entering into the solver are independent, regardless of the width of the barriers. To account for the possible presence of nearby QWs, perdiodic boundary conditions can be used to solve the Schrodinger equation. If barriers + interlayers are thick enought, this make no difference but if they are thin, it affects the number and energy of the confined levels. It does not 'create' minibands, though, so the results with thin barriers must be used with caution.
 	
 	
 	.. py:method:: solve([V=0, WLsteps=(300e-9, 1100e-9, 201), wavelengths=None, periodic=True, filter_strength=0.0, blur=None, blurmode="left", offset=0,use_kp=True, use_Adachi=False, calculate_absorption=True, alpha_params=None, T=293])
 	
-		Solves the structure, calculating the energy levels, the absorption, etc. First, it calls the Schrodinger solver (**solcore3.qm.schrodinger**) and then it uses the result to obtain an efective band profile for the conduction and valence band, an efective density of states considering both, the bulk and quantum levels, and the absorption coefficient. This is done for each layer of the structure (see the following methods for details). The input parameters of this method are the same that for the Schrodinger solver except for the wavelengths definition that can be used as default (WLsteps) or be added with 'wavelengths'.
+		Solves the structure, calculating the energy levels, the absorption, etc. First, it calls the Schrodinger solver and then it uses the result to obtain an effective band profile for the conduction and valence band, an effective density of states considering both, the bulk and quantum levels, and the absorption coefficient. This is done for each layer of the structure (see the following methods for details). The input parameters of this method are the same that for the Schrodinger solver except for the wavelengths definition that can be used as default (WLsteps) or be added with 'wavelengths'.
 		
 		The method returns as output the output dictionary of the Schrodinger solver.
 		
@@ -37,9 +37,9 @@ The QWunit class
 	
 		From the perspective of the PDD solver, the actual bandgap and electron affinity of each layer depend on the energy levels, i.e. the minimum energy for electrons is not the band edge of the conduction band, but the ground confined level. The same applies to holes, being the actual band edge the maximum between the ground states of light holes and heavy holes (see :ref:`figure-QWunit`). 
 		
-		In this method we modify that by creating an effective electron affinity and band gaps for all layers in the QW. For the barriers, the electron affinity and band gap are the same than in bulk, modified by the kp calculation, if necesary. For interlayers, it depends on what is higher, the bandedges of the interlayer or the confined carrier levels.
+		In this method we modify that by creating an effective electron affinity and band gaps for all layers in the QW. For the barriers, the electron affinity and band gap are the same than in bulk, modified by the kp calculation, if necessary. For interlayers, it depends on what is higher, the bandedges of the interlayer or the confined carrier levels.
 		
-		It requires as input kp should be used to recalculate the band positons and effective mases ('use_kp=True') and the output of the Schrodinger solver.  
+		It requires as input if kp should be used to recalculate the band positions and effective masses ('use_kp=True') and the output of the Schrodinger solver.
 		
 	.. py:method:: RecalculateDensityOfStates()
 	
@@ -48,7 +48,7 @@ The QWunit class
 		- QW have ALL the density of states asociated with the confined states + bulk density of states above the barrier
 		- Interlayers have only the bulk density of states above the barrier
 
-		This simplification is similar to that in Nelson et al. [#Ref2]_ and allow us to keep the bulk-like form of the carrier densities in the drift diffusion equations under the Boltzmann aproximation. From a physical porint of view, it probably can be done better.
+		This simplification is similar to that in Nelson et al. [#Ref2]_ and allow us to keep the bulk-like form of the carrier densities in the drift diffusion equations under the Boltzmann approximation. From a physical porint of view, it probably can be done better.
 		
 	.. py:method:: CalculateAbsorption(use_Adachi, SR):
 	

@@ -45,14 +45,13 @@ pdd_options.output_qe = 1
 
 
 # Functions for creating the streucture in the fortran variables and executing the DD solver
-def ProcessStructure(device, meshpoints, wavelengths=None, use_Adachi=False):
+def ProcessStructure(device, meshpoints, wavelengths=None):
     """ This function reads a dictionary containing all the device structure, extract the electrical and optical
-    properties of the materials, and loads all that information into the Fortran variables. Finally, it initiallise the
-    device (in fortran) calculating an initial mesh and all the properties as a function of the possition.
+    properties of the materials, and loads all that information into the Fortran variables. Finally, it initialises the
+    device (in Fortran) calculating an initial mesh and all the properties as a function of the position.
 
     :param device: A dictionary containing the device structure. See PDD.DeviceStructure
     :param wavelengths: (Optional) Wavelengths at which to calculate the optical properties.
-    :param use_Adachi: (Optional) If Adachi model should be use to calculate the dielectric constant of the material.
     :return: Dictionary containing the device structure properties as a function of the position.
     """
     print('Processing structure...')
@@ -100,12 +99,11 @@ def ProcessStructure(device, meshpoints, wavelengths=None, use_Adachi=False):
 
 
 def equilibrium_pdd(junction, options):
-    """ Solves the Poisson-DD equations under equilibrium: in the dark with no external current and zero applied voltage. Internally, it calls *ProcessStructure*. Absorption coeficients are not calculated unless *wavelengths* is given as input.
+    """ Solves the PDD equations under equilibrium: in the dark with no external current and zero applied voltage.
 
-    :param device: A dictionary containing the device structure. See PDD.DeviceStructure
-    :param output_info: Indicates how much information must be printed by the fortran solver (1=less, 2=more)
-    :param wavelengths: (Optional) Wavelengths at which to calculate the optical properties.
-    :return: Dictionary containing the device properties as a function of the position at equilibrium.
+    :param junction: A junction object
+    :param options: Options to be passed to the solver
+    :return: None
     """
     T = options.T
     wl = options.wavelength
@@ -131,12 +129,9 @@ def equilibrium_pdd(junction, options):
 def short_circuit_pdd(junction, options):
     """ Solves the devices electronic properties at short circuit. Internally, it calls Equilibrium.
 
-    :param device: A dictionary containing the device structure. See PDD.DeviceStructure
-    :param output_info: Indicates how much information must be printed by the fortran solver (0=min, 2=max)
-    :param rs: Series resistance. Default=0
-    :param wavelengths: Array with the wavelengths (in m)
-    :param photon_flux: Array with the photon_flux (in photons/m2/m) corresponding to the above wavelengths
-    :return: A dictionary containing the device properties as a function of the position at short circuit.
+    :param junction: A junction object
+    :param options: Options to be passed to the solver
+    :return: None
     """
 
     # We run equilibrium
@@ -162,21 +157,11 @@ def short_circuit_pdd(junction, options):
 
 
 def iv_pdd(junction, options):
-    """ Calculates the IV curve of the device between 0 V and a given voltage. Depending if the "sol" parameter is set
-    or not, the IV will be calculated in the dark (calling the Equilibrium function) or under illumination (calling
-    the ShortCircuit function).
+    """ Calculates the IV curve of the device between 0 V and a given voltage. Depending on the options, the IV will be calculated in the dark (calling the equilibrium_pdd function) or under illumination (calling the short_circuit_pdd function). If the voltage range has possitive and negative values, the problem is solved twice: from 0 V to the maximu positive and from 0 V to the maximum negative, concatenating the results afterwards.
 
-    :param device: A dictionary containing the device structure. See PDD.DeviceStructure
-    :param vfin: Final voltage. If it is negative, vstep must also be negative.
-    :param vstep: Maximum step size for the IV curve. This is adapted dynamically to ensure that the shape is reproduced correctly.
-    :param output_info: Indicates how much information must be printed by the fortran solver (0=min, 2=max)
-    :param IV_info: If information about the Voc, Isc and FF should be provided after the calculation. Default=True
-    :param rs: Series resistance. Default=0
-    :param escape: Indicates if the calculation should stop when Voc is reached (0=False, 1=True). Default=1
-    :param light: Indicates if the light IV curve should be calculated
-    :param wavelengths: Array with the wavelengths (in m)
-    :param photon_flux: Array with the photon_flux (in photons/m2/m) corresponding to the above wavelengths
-    :return: A dictionary containing the IV curves, the different components and also the output of Equilibrium or ShortCircuit.
+    :param junction: A junction object
+    :param options: Options to be passed to the solver
+    :return: None
     """
     print('Solving IV...')
     light = options.light_iv
@@ -266,12 +251,9 @@ def iv_pdd(junction, options):
 def qe_pdd(junction, options):
     """ Calculates the quantum efficiency of the device at short circuit. Internally it calls ShortCircuit
 
-    :param device: A dictionary containing the device structure. See PDD.DeviceStructure
-    :param wavelengths: Array with the wavelengths (in m)
-    :param photon_flux: Array with the photon_flux (in photons/m2/m) corresponding to the above wavelengths
-    :param output_info: Indicates how much information must be printed by the fortran solver (0=min, 2=max)
-    :param rs: Series resistance. Default=0
-    :return: The internal and external quantum efficiencies, in adition to the output of ShortCircuit.
+    :param junction: A junction object
+    :param options: Options to be passed to the solver
+    :return: None
     """
     print('Solving quantum efficiency...')
     output_info = options.output_qe

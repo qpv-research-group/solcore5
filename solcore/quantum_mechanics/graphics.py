@@ -250,7 +250,7 @@ def split_schrodinger_graph_potentials(schrodinger_result,
 
 
 def split_schrodinger_graph_LDOS(schrodinger_result, **kwargs):
-    defaults = {'step': 0.001, 'margin': 0.02, 'pdf': True, 'show': False, 'dpi': 100, 'fontsize': 12,
+    defaults = {'step': 0.001, 'margin': 0.02, 'pdf': False, 'show': False, 'dpi': 100, 'fontsize': 12,
                 'figsize': (7, 6)}
     defaults.update(kwargs)
 

@@ -2058,18 +2058,18 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
                 Psi(0:M) = Psi(0:M) * Vap/Psi(0)    
             END IF    
 
-            IF ((Dynamic).AND.(FLOOR(2*nvolt*ABS(step))/=FLOOR(2*(nvolt+1)*ABS(step)))) THEN 
-                CALL DynamicMesh(0)
-                WRITE(ou,*) 'Remeshing...  M+1 = ',  M+1, ' nodes.'
-                IF (GEN/=0) CALL Generation
-            END IF
+!            IF ((Dynamic).AND.(FLOOR(2*nvolt*ABS(step))/=FLOOR(2*(nvolt+1)*ABS(step)))) THEN
+!                CALL DynamicMesh(0)
+!                WRITE(ou,*) 'Remeshing...  M+1 = ',  M+1, ' nodes.'
+!                IF (GEN/=0) CALL Generation
+!            END IF
             
             CALL SolveNonLin(sum, sum1, sum2, sum3, niter, info, OutputLevel)
 
             WHERE (ABS(Currents) < Atol) Currents = 0
                 
             ! We fill the arrays. 
-            vpoint(nVolt)        = Vapp + Currents(1)*Rs        ! The external voltage depends on the series resistance
+            vpoint(nVolt)        = Vapp !+ Currents(1)*Rs        ! The external voltage depends on the series resistance
             jpoint(nVolt)        = Currents(1)
             jsrhpoint(nVolt)     = Currents(2)
             jradpoint(nVolt)    = Currents(3)
@@ -2094,12 +2094,12 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
                 EXIT
             END IF
             
-            ! To take into account corrections due to series resistence
-            IF (GEN/=0) THEN
-                factor = 1/MIN(20.0, 1.0 + 20*ABS(LOG( ABS( jpoint(nVolt)/Isc ) ) ) )
-            ELSE
-                IF (nvolt>0) factor = (step/( vpoint(nVolt) - vpoint(nVolt-1) ) )**2
-            END IF
+!            ! To take into account corrections due to series resistence
+!            IF (GEN/=0) THEN
+!                factor = 1/MIN(20.0, 1.0 + 20*ABS(LOG( ABS( jpoint(nVolt)/Isc ) ) ) )
+!            ELSE
+!                IF (nvolt>0) factor = (step/( vpoint(nVolt) - vpoint(nVolt-1) ) )**2
+!            END IF
             
             nvolt = nvolt+1            
             Vapp = Vapp + step*factor

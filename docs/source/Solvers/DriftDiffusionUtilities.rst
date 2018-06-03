@@ -1,151 +1,178 @@
 Drift Diffusion Utilities
 =========================
 
-This module is the interface between Python and Fortran. It takes a structure created with the tools in :doc:`Device Structure <DeviceStructure>` and dumps all that information into the Fortran variables. Then, it runs the selected 'virtual experiment'. This process is completeley transparent for the user who only needs to run the desired experiment with the structure as the input.
+This module is the interface between Python and Fortran. It takes a structure created with the tools in :doc:`Device Structure <DeviceStructure>` and dumps all that information into the Fortran variables. Then, it runs the selected calculation. This process is completely transparent for the user who only needs to use the higher level methods in the :doc:`solar cell solver <solving_solar_cells>`.
 
-Virtual experiments
--------------------
+At the end of this page there is a detailed description of the format of all the functions within this module, but here we focus in the more practical aspect, including also examples of usage.
 
-At the end of this page there is a detailed description of the format of all the functions withi this module, but here we focuse in the more practical aspect, including also exambles of usage.
+.. py:function:: ProcessStructure(device [, wavelengths=None] )
 
-.. py:function:: ProcessStructure(device [, wavelengths=None, use_Adachi = False] )
-
-	Dumps the structure of the device into the fortran code and calculates an apropiate mesh, based on the values of the mesh_control variable. An initial estimation of the quasi-Fermi energies, electrostatic potential and carrier concentration is also performed. This will be used as inicial condition for the numerical solver. Absorption coeficients are not calculated unless *wavelengths* is given as input.
-	
-	If *use_Adachi = True*, the absorption is calculated (if necesary) using the method described by S. Adachi in [#Ref1]_. Otherwise, interpolated experimental data is used.  
+	This function reads a dictionary containing all the device structure, extract the electrical and optical properties of the materials, and loads all that information into the Fortran variables. Finally, it initialises the device (in Fortran) calculating an initial mesh and all the properties as a function of the position. An initial estimation of the quasi-Fermi energies, electrostatic potential and carrier concentration is also performed. This will be used as initial condition for the numerical solver.
 
 	**Output** (see :ref:`output-dictionary`): **Properties**
 
-.. py:function:: Equilibrium(device [, output_info=2, wavelengths=None, use_Adachi = False] )
+.. py:function:: equilibrium_pdd(junction, options):
 
-	Solves the Poisson-DD equations under equilibrium: in the dark with no external current and zero applied voltage. Internally, it calls *ProcessStructure*. Absorption coeficients are not calculated unless *wavelengths* is given as input. 
+	Solves the PDD equations under equilibrium: in the dark with no external current and zero applied voltage. Internally, it calls *CreateDeviceStructure* to retrieve all the material parameters (as described in :doc:`DeviceStructure`) and *ProcessStructure* to dump all the data into the Fortran variables and perform the initialization of the structure.
+
+	After finishing the calculation, the junction object will be updated with an attribute called "equilibrium_data" containing the dictionaries **Properties** and **Bandstructure** (see :ref:`output-dictionary`).
+
+
+.. py:function:: short_circuit_pdd(junction, options):
+
+	Solves the PDD equations under short circuit conditions: current flowing through the structure due to the light absorbed and zero applied voltage. It calls internally to *equilibrium_pdd* before solving the problem in short circuit.
+
+	After finishing the calculation, the junction object will be updated with an attribute called "short_circuit_data" containing the dictionaries **Properties**, **Bandstructure** and **Optics** (see :ref:`output-dictionary`), in addition to the "equilibrium_data" attribute.
+
+The following example shows the result of calculating a solar cell under short circuit conditions, comparing the resulting band structure. Note that neither equilibrium_pdd nor short_circuit_pdd are called directly, but they are accessed internally by *solve_solar_cell*.
+
+.. code-block:: python
+
+    import matplotlib.pyplot as plt
+
+    from solcore import material
+    from solcore.structure import Layer, Junction
+    from solcore.solar_cell import SolarCell
+    from solcore.solar_cell_solver import solar_cell_solver
+
+    T = 298
+
+    # First, we create the materials, overriding any default property we want, such as the doping or the absorption coefficient
+    window = material('AlGaAs')(T=T, Na=1e24, Al=0.8)
+    p_GaAs = material('GaAs')(T=T, Na=1e24)
+    i_GaAs = material('GaAs')(T=T)
+    n_GaAs = material('GaAs')(T=T, Nd=1e23)
+    bsf = material('AlGaAs')(T=T, Nd=1e24, Al=0.4)
+
+    # We put everything together in a Junction.
+    MyJunction = Junction([ Layer(width=30e-9, material=window, role="Window"),
+                            Layer(width=400e-9, material=p_GaAs, role="Emitter"),
+                            Layer(width=400e-9, material=i_GaAs, role="Intrinsic"),
+                            Layer(width=2000e-9, material=n_GaAs, role="Base"),
+                            Layer(width=200e-9, material=bsf, role="BSF")],
+                            sn=1e3, sp=1e3, T=T, kind='PDD')
+
+    my_solar_cell = SolarCell([MyJunction], T=T, R_series=0, substrate=n_GaAs)
+
+    # We solve the short circuit problem
+    solar_cell_solver(my_solar_cell, 'short_circuit')
+
+    # We can plot the electron and hole densities in short circuit...
+    zz = my_solar_cell[0].short_circuit_data.Bandstructure['x'] * 1e9
+    n = my_solar_cell[0].short_circuit_data.Bandstructure['n']
+    p = my_solar_cell[0].short_circuit_data.Bandstructure['p']
+    plt.semilogy(zz, n, 'b', label='e @ short circuit')
+    plt.semilogy(zz, p, 'r', label='h @ short circuit')
+
+    # ... and equilibrium
+    zz = my_solar_cell[0].equilibrium_data.Bandstructure['x'] * 1e9
+    n = my_solar_cell[0].equilibrium_data.Bandstructure['n']
+    p = my_solar_cell[0].equilibrium_data.Bandstructure['p']
+    plt.semilogy(zz, n, 'b--', label='e @ equilibrium')
+    plt.semilogy(zz, p, 'r--', label='h @ equilibrium')
+
+    plt.xlabel('Position (nm)')
+    plt.ylabel('Carrier density (m$^{-3}$)')
+    plt.legend()
+    plt.show()
+
+
+The result of the above calculation is this:
 	
-	*output_info* controls how much information is printed in the terminal by the solver. It can be 1 (less) or 2 (more). 
+.. image:: Figures/EQandSC.png
+    :align: center
 
-	**Output** (see :ref:`output-dictionary`): **Properties** and **Bandstructure**
+.. py:function:: iv_pdd(junction, options):
+
+	Calculates the IV curve of the device at the **internal_voltages** included indicated in the options. Depending on the options, also, the IV will be calculated in the dark (calling the equilibrium_pdd function) or under illumination (calling the short_circuit_pdd function). If the voltage range has positive and negative values, the problem is solved twice: from 0 V to the maximum positive and from 0 V to the maximum negative, concatenating the results afterwards.
+
+    After finishing the calculation, the Junction object will have a few extra attributes, in addition to those resulting from equilibrium_pdd and short_circuit_pdd (yes, there is a lot of redundancy at the moment):
+
+    - **pdd_data**: Contains all the data (**Properties**, **Bandstructure**, etc.) of the positive and negative voltage calculations.
+    - **voltage**: An array with the internal_voltages
+    - **current**: An array with the total current at the internal_voltages, including the effect of any shunt resistance, if present.
+    - **recombination_currents**: A dictionary containing the different recombination currents at the internal voltages: radiative, SRH, Auger and surface recombination.
+    - **iv**: A function that returns the current at the input voltage. Essentially, it interpolates the voltages and currents of the junction using the Scipy function interp1d.
+
+In the following example, we use the same solar cell described above and calculate the dark IV curve, plotting the different contributions to the current.
+
+.. code-block:: python
+
+    import matplotlib.pyplot as plt
+
+    from solcore import material
+    from solcore.structure import Layer, Junction
+    from solcore.solar_cell import SolarCell
+    from solcore.solar_cell_solver import solar_cell_solver
+
+    T = 298
+
+    substrate = material('GaAs')(T=T)
+
+    # First, we create the materials, overriding any default property we want, such as the doping or the absorption coefficient
+    window = material('AlGaAs')(T=T, Na=1e24, Al=0.8)
+    p_GaAs = material('GaAs')(T=T, Na=1e24)
+    i_GaAs = material('GaAs')(T=T)
+    n_GaAs = material('GaAs')(T=T, Nd=1e23)
+    bsf = material('AlGaAs')(T=T, Nd=1e24, Al=0.4)
+
+    # We put everything together in a Junction. We include the surface recombination velocities,
+    # sn and sp, although they are not necessary in this case.
+    MyJunction = Junction([Layer(width=30e-9, material=window, role="Window"),
+                           Layer(width=400e-9, material=p_GaAs, role="Emitter"),
+                           Layer(width=400e-9, material=i_GaAs, role="Intrinsic"),
+                           Layer(width=2000e-9, material=n_GaAs, role="Base"),
+                           Layer(width=200e-9, material=bsf, role="BSF")],
+                          sn=1e3, sp=1e3, T=T, kind='PDD')
+
+    my_solar_cell = SolarCell([MyJunction], T=T, R_series=0, substrate=substrate)
+
+    # We calculate the IV curve under illumination, using all the default options
+    solar_cell_solver(my_solar_cell, 'iv')
+
+    plt.semilogy(my_solar_cell[0].voltage, abs(my_solar_cell[0].current), 'k', linewidth=4, label='Total')
+    plt.semilogy(my_solar_cell[0].voltage, abs(my_solar_cell[0].recombination_currents['Jrad']), 'r', label='Jrad')
+    plt.semilogy(my_solar_cell[0].voltage, abs(my_solar_cell[0].recombination_currents['Jsrh']), 'b', label='Jsrh')
+    plt.semilogy(my_solar_cell[0].voltage, abs(my_solar_cell[0].recombination_currents['Jsur']), 'g', label='Jsur')
+
+    plt.legend()
+    plt.xlim(-0.5, 1.3)
+    plt.ylim(1e-10, 1e5)
+    plt.xlabel('Bias (V)')
+    plt.ylabel('Current (A/m$^2}$)')
+
+    plt.show()
 
 
-.. py:function:: ShortCircuit(device [, sol="AM1.5d", rs=0, output_info=1, use_Reflection=True, use_Adachi = False] )
-
-	Solves the Poisson-DD equations under short circuit conditions: current flowing trhought the structure due to the light absorbed and zero applied voltage. It calls internally to *Equilibrium* before appliying the illumination. *sol* can be a string with the name of the standard spectrum to use - 'AM1.5d', 'AM1.5g' or 'AM0' [#Ref4]_- or an object of class *solcore3.PDD.Illumination* (see :doc:`Illumination <Illumination>`). If one of the standard spectra is used, the default wavelength range will be from 300 nm to 1100 nm every 4 nm. 
+The result of the above calculation is this:
 	
-	*use_Reflection* controls whether the calculation should account for the front surface reflection or not. 
+.. image:: Figures/IV.png
+    :align: center
+
+In order to get the IV curve under illumination, we simply indicate it with the *user_options* keyword in the solar_solar_cell solver function, also asking for the parameters under illumination (Voc, Isc, etc.).
+
+.. code-block:: python
+
+    solar_cell_solver(my_solar_cell, 'iv', user_options={'light_iv' : True, 'mpp' : True})
+
+    plt.plot(my_solar_cell[0].voltage, -my_solar_cell[0].current, 'r', linewidth=2, label='Total')
+
+    plt.xlim(-0.5, 1.3)
+    plt.ylim(0, 350)
+    plt.xlabel('Bias (V)')
+    plt.ylabel('Current (A/m$^2}$)')
+
+    plt.text(0, 200, 'Voc = {:4.1f} V\n'
+                     'Isc = {:4.1f} A/m${^2}$\n'
+                     'FF = {:4.1f} %\n'
+                     'Pmpp = {:4.1f} W/m${^2}$'.format(my_solar_cell.iv['Voc'], my_solar_cell.iv['Isc'],
+                                               my_solar_cell.iv['FF'] * 100, my_solar_cell.iv['Pmpp']))
+
+
+While the power at maximum power point seems very high (>300 W/m :sup:`2` ) let's keep in mind that the default modelling options use the Beer-Lambert law optics method which *does not take into account* front surface reflection. If that is included (for example using the TMM optics method) Isc will be much lower and so will the power.
 	
-	*output_info* controls how much information is printed in the terminal by the solver. It can be 1 (less) or 2 (more). 
-
-	**Output** (see :ref:`output-dictionary`): **Properties**, **Bandstructure** and **Optics**
-
-	Example 1: We use as starting point the structure created in the example 2 of :doc:`Device Structure <DeviceStructure>`. 
-	::
-	
-		import solcore.PDD as PDD
-		import matplotlib.pyplot as plt
-
-		# -----
-		# PASTE HERE THE CONTENTS OF EXAMPLE 2 IN DEVICE STRUCTURE
-		# -----
-		
-		# Then we run two virtual experiments, just calculate the structure under equilibrum and under short circuit conditions.
-		# We use the default settings of the solver. 
-		EQ = PDD.Equilibrium(MyDevice)
-		SC = PDD.ShortCircuit(MyDevice)
-		
-		# Finally, we plot the carrier densities in both cases using the information stored in the output dictionaries
-		plt.semilogy(EQ['Bandstructure']['x']*1e9, EQ['Bandstructure']['n'], 'b', label=' n equilibrium')
-		plt.semilogy(EQ['Bandstructure']['x']*1e9, EQ['Bandstructure']['p'], 'r', label=' p equilibrium')
-		plt.semilogy(SC['Bandstructure']['x']*1e9, SC['Bandstructure']['n'], 'c', label=' n short circuit')
-		plt.semilogy(SC['Bandstructure']['x']*1e9, SC['Bandstructure']['p'], 'm', label=' p short circuit')
-		plt.legend(loc='lower right')
-		plt.ylabel('Carrier densities (m-3)')
-		plt.xlabel('Position (nm)')
-
-		plt.show()
-
-\
-	The result of the above calculation is this:
-	
-	.. image:: Figures/EQandSC.png
-		:align: center
-
-.. py:function:: IV(device, vfin, vstep [, output_info=1, IV_info=True, rs=0, escape = 1, sol=None, use_Adachi = False] )
-
-	Calculates the IV curve of the device from *V = 0V* to *V = Vfin*. It calls internally to *Equilibrium* or *ShortCircuit*, depending if the dark or the lght IV is to be calculated. Voltage steps are equal to *vstep* in the dark but are dynamically reduced in light IV around the maximum power point and Voc to do a proper mapping of that fast-changing region. If *sol* is given as input, then the solver calculates the light IV. In this case, *escape = 1* ends the calculation when the Voc is reached. *IV_info = True* prints the Jsc, Voc, Jmpp, Vmpp and FF at the end of the calculation.
-	
-	Note that the sign of the voltages and the currents for direct biasing the solar cell depends on having a PN or an NP device.
-
-	*output_info* controls how much information is printed in the terminal by the solver. It can be 1 (less) or 2 (more). 
-	
-	**Output** (see :ref:`output-dictionary`): **Properties**, **Bandstructure** at the last voltage point and **IV**. If light IV, then also **Optics**.
-
-	Example 2: Using the same structure that before, we calculate the dark current, plotting the different components that contribute to it.
-	::
-	
-		import solcore.PDD as PDD
-		import matplotlib.pyplot as plt
-		
-		# -----
-		# PASTE HERE THE CONTENTS OF EXAMPLE 2 IN DEVICE STRUCTURE
-		# -----
-		
-		# We use the default settings of the solver to calculate the dark IV. 
-		IV = PDD.IV(MyDevice, vfin=1.2, vstep=0.05)
-		
-		# Finally, we plot the different components of the dark current using the information stored in the output dictionaries
-		plt.semilogy(IV['IV']['V'], IV['IV']['J'], 'o', label='Jtot' )
-		plt.semilogy(IV['IV']['V'], IV['IV']['Jrad'], label='Jrad')
-		plt.semilogy(IV['IV']['V'], IV['IV']['Jsrh'], label='Jsrh')
-		plt.semilogy(IV['IV']['V'], IV['IV']['Jsur'], label='Jsur' )
-		plt.legend(loc='lower right')
-		plt.ylabel('Current density (A/m2)')
-		plt.xlabel('Voltage (V)')
-
-		plt.show()
-
-\
-	The result of the above calculation is this:
-	
-	.. image:: Figures/IV.png
-		:align: center
-
-\
-	Example 3: Now we calculate the light IV curve under the AM1.5d spectrum assuming Rs = 0 Ohm m2 and Rs = 0.001 Ohm m2
-	::
-	
-		import solcore.PDD as PDD
-		import matplotlib.pyplot as plt
-		
-		# -----
-		# PASTE HERE THE CONTENTS OF EXAMPLE 2 IN DEVICE STRUCTURE
-		# -----
-		
-		# We use the default settings of the solver to calculate the light IV. 
-		IV = PDD.IV(MyDevice, vfin=1.2, vstep=0.05, sol="AM1.5d")
-		IVrs = PDD.IV(MyDevice, vfin=1.2, vstep=0.05, sol="AM1.5d", rs=0.001)
-		
-		# Finally, we plot the two curves
-		plt.plot( IV['IV']['V'], -IV['IV']['J'], label='Rs = 0 Ohm m2')
-		plt.plot( IVrs['IV']['V'], -IVrs['IV']['J'], label='Rs= 0.001 Ohm m2')
-		plt.ylim(0, 1.1*max(-IV['IV']['J']) )
-		plt.legend(loc='lower left')
-		plt.ylabel('Current density (A/m2)')
-		plt.xlabel('Voltage (V)')
-
-		plt.show()
-
-\
-	The result of the above calculation is this:
-	
-	====== ========== ========== ==========
-	\      Rs = 0     Rs = 10    Ohm cm2
-	====== ========== ========== ==========
-	Jsc    20.873     20.866     mA/cm2
-	Voc    0.895      0.895      V
-	FF     0.843      0.648      \-
-	====== ========== ========== ==========
-	
-	
-	.. image:: Figures/LightIV.png
-		:align: center
+.. image:: Figures/LightIV.png
+    :align: center
 
 
 
@@ -153,7 +180,7 @@ At the end of this page there is a detailed description of the format of all the
 
 .. py:function:: QE(device [, sol="AM1.5d", rs=0, output_info=1, use_Reflection=True, use_Adachi = False] )
 
-	Calculates the quantum efficiency at short circuit with bias light given by *sol*. By defualt, reflection if the front surface is included in the calculation.  
+	Calculates the quantum efficiency at short circuit with bias light given by *sol*. By defualt, reflection if the front surface is included in the calculation.
 
 	*output_info* controls how much information is printed in the terminal by the solver. It can be 1 (less) or 2 (more). 
 	
@@ -186,7 +213,7 @@ At the end of this page there is a detailed description of the format of all the
 	The result of the above calculation is this:
 	
 	.. image:: Figures/QE.png
-		:align: center
+    :align: center
 
 Get data from Fortran
 ---------------------
@@ -198,7 +225,7 @@ Get data from Fortran
 
 \
 
-	Functions used to retrieve the current data from the Fortran variables. They produce as output a dictionary with the corresponding set of variables.  
+	Functions used to retrieve the current data from the Fortran variables. They produce as output a dictionary with the corresponding set of variables.
 
 
 Setting different aspects of the solver
@@ -262,13 +289,13 @@ The total list of primary (columns) and secondary (rows) keys are:
 Properties     Bandstructure  IV             QE             Optics
 ============== ============== ============== ============== ==============
 x              x              V              wavelengths    wavelengths
-Xi             n              J              IQE            R    
+Xi             n              J              IQE            R
 Eg	           p              Jrad           EQE            T
 Nd             ni             Jsrh           IQEsrh         \-
 Na             Rho            Jaug           IQErad         \-
 Nc             Efe            Jsur           IQEaug         \-
 Nv             Efh            Jsc [a]_       IQEsurf        \-
-\-             potential      Voc [a]_       IQEsurb        \-   
+\-             potential      Voc [a]_       IQEsurb        \-
 \-             Ec             Jmpp [a]_      \-             \-
 \-             Ev             Vmpp [a]_      \-             \-
 \-             GR             FF [a]_        \-             \-
@@ -284,9 +311,9 @@ All functions description
 -------------------------
 
 .. automodule:: solcore.poisson_drift_diffusion.DriftDiffusionUtilities
-    :members:
-    :undoc-members:
-	
+:members:
+        :undoc-members:
+
 References
 ----------
 

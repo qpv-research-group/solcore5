@@ -1,7 +1,8 @@
-from solcore import si, material
-from solcore.structure import Layer, Structure
 import matplotlib.pyplot as plt
 import numpy as np
+
+from solcore import si, material
+from solcore.structure import Layer, Structure
 import solcore.quantum_mechanics as QM
 from solcore.constants import vacuum_permittivity, q
 
@@ -15,10 +16,14 @@ inter = Layer(width=si("3nm"), material=bulk)
 barrier_layer = Layer(width=si("15nm"), material=barrier)
 bottom_layer = top_layer
 
-E = np.linspace(1.15, 1.5, 300) * q
-alfas = np.zeros((len(E), 6))
+# We are going to calculate the absorption coefficient of InGaAs QWs of fixed thickness but different compositions
+num_comp = 5
+comp = np.linspace(0.05, 0.25, num_comp)
+colors = plt.cm.jet(np.linspace(0, 1, num_comp))
 
-alfas[:, 0] = E / q
+# The absorption coefficients will be calculated at these energies and stored in alfas
+num_energy = 300
+E = np.linspace(1.15, 1.5, num_energy) * q
 
 # We define some parameters need to calculate the shape of the excitonic absorption
 alpha_params = {
@@ -31,11 +36,7 @@ alpha_params = {
     "line_shape": "Gauss"
 }
 
-# We are going to calculate the absorption coefficient of InGaAs QWs of fixed thickness but different compositions
-comp = [0.05, 0.1, 0.15, 0.2, 0.25]
-colors = plt.cm.jet(np.linspace(0, 1, len(comp)))
-
-plt.figure(figsize=(4, 4.5))
+# plt.figure(figsize=(4, 4.5))
 for j, i in enumerate(comp):
     # We create the QW material at the given composition
     QW = material("InGaAs")(T=293, In=i, strained=True)
@@ -44,17 +45,14 @@ for j, i in enumerate(comp):
     well_layer = Layer(width=si("7.2nm"), material=QW)
 
     # The following lines create the QW structure, with different number of QWs and interlayers
-    test_structure = Structure([barrier_layer, inter, well_layer, inter, barrier_layer])
-
-    test_structure.substrate = bulk
+    test_structure = Structure([barrier_layer, inter, well_layer, inter, barrier_layer], substrate=bulk)
 
     # Finally, the quantum properties are claculated here
-    output = QM.schrodinger(test_structure, quasiconfined=0,
-                            num_eigenvalues=20, alpha_params=alpha_params, calculate_absorption=True)
+    output = QM.schrodinger(test_structure, quasiconfined=0, num_eigenvalues=20, alpha_params=alpha_params,
+                            calculate_absorption=True)
 
     alfa = output[0]['alphaE'](E)
     plt.plot(1240 / (E / q), alfa / 100, label='{}%'.format(int(i * 100)))
-    alfas[:, j + 1] = alfa / 100
 
 plt.xlim(826, 1100)
 plt.ylim(0, 23000)

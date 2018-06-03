@@ -1,10 +1,11 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
 from solcore import si, material
 from solcore.structure import Junction, Layer
 from solcore.solar_cell import SolarCell
 from solcore.solar_cell_solver import solar_cell_solver, default_options
 from solcore.light_source import LightSource
-import numpy as np
-import matplotlib.pyplot as plt
 
 # user options
 T = 298
@@ -43,28 +44,39 @@ NP_layer = [Layer(si('50nm'), Air, geometry=[{'type': 'circle', 'mat': TiO2, 'ce
 substrate = [Layer(width=si('50um'), material=GaAs)]
 spacer = [Layer(width=si('25nm'), material=SiO2)]
 
-solar_cell = SolarCell(spacer + GaAs_junction + substrate)  # solar cell with SiO2 coating
+# --------------------------------------------------------------------------
+# solar cell with SiO2 coating
+solar_cell = SolarCell(spacer + GaAs_junction + substrate)
+
 opts.optics_method = 'TMM'
 solar_cell_solver(solar_cell, 'qe', opts)
 TMM_EQE = solar_cell[1].eqe(opts.wavelength)
+
 opts.optics_method = 'BL'
 solar_cell_solver(solar_cell, 'qe', opts)
 BL_EQE = solar_cell[1].eqe(opts.wavelength)
 
-solar_cell = SolarCell(spacer + GaAs_junction + DBR + substrate)  # as above, with a DBR on the back
+# --------------------------------------------------------------------------
+# as above, with a DBR on the back
+solar_cell = SolarCell(spacer + GaAs_junction + DBR + substrate)
+
 opts.optics_method = 'TMM'
 solar_cell_solver(solar_cell, 'qe', opts)
 TMM_EQE_DBR = solar_cell[1].eqe(opts.wavelength)
 
-solar_cell = SolarCell(NP_layer + spacer + GaAs_junction + DBR + substrate)
+# --------------------------------------------------------------------------
 # cell with TiO2 nanocylinder array on the front
+solar_cell = SolarCell(NP_layer + spacer + GaAs_junction + DBR + substrate)
+
 opts.optics_method = 'RCWA'
 opts.orders = 49  # number of diffraction orders to keep in the RCWA solver
 solar_cell_solver(solar_cell, 'qe', opts)
 RCWA_EQE_NP = solar_cell[2].eqe(opts.wavelength)
+
 opts.optics_method = 'TMM'
 solar_cell_solver(solar_cell, 'qe', opts)
 TMM_EQE_NP = solar_cell[2].eqe(opts.wavelength)
+
 opts.optics_method = 'BL'
 solar_cell_solver(solar_cell, 'qe', opts)
 BL_EQE_NP = solar_cell[2].eqe(opts.wavelength)

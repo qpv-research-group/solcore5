@@ -6,6 +6,7 @@ import re
 from solcore.science_tracker import science_reference
 import solcore.constants as const
 
+
 class Custom_CPPB():
     """
     Customisable Critical-Point Parabolic-Band model (CPPB) using expressions from Sadao Adachi and Charles Kim.
@@ -24,12 +25,11 @@ class Custom_CPPB():
 
         # Opens MaterialParameters file and dumps all content into a list...
         with open(self.__PARAMS_PATH, mode="r") as File:
-
             self.__MatParams = File.read().splitlines()
 
         # Single line lists all callable functions in the Custom_CPPB class, with the exception of __init__...
         self.__METHODS = [func for func in dir(Custom_CPPB)
-                            if callable(getattr(Custom_CPPB, func)) and not func.startswith("__")]
+                          if callable(getattr(Custom_CPPB, func)) and not func.startswith("__")]
 
     def Material_Params(self, material, *parameters):
         """
@@ -107,7 +107,7 @@ class Custom_CPPB():
                           "C. C. Kim et al, 'Modelling the optical dielectric function of semiconductors: Extension of "
                           "the critical-point parabolic band approximation', Physical Review B 45(20) 11749, 1992")
 
-        return Gamma*np.exp(-1*Alpha*((energy - E0)/Gamma)**2)
+        return Gamma * np.exp(-1 * Alpha * ((energy - E0) / Gamma) ** 2)
 
     def E0andE0_d0(self, energy, material_parameters=None, **kwargs):
         """
@@ -171,11 +171,11 @@ class Custom_CPPB():
         ChiO = (energy + 1j * Gamma) / Params["E0"]
         ChiSO = (energy + 1j * Gamma) / Params["E0_d0"]
 
-        F_ChiO = (ChiO**(-2)) * (2 - (1 + ChiO)**0.5 - (1 - ChiO)**0.5)
-        F_ChiSO = (ChiSO**(-2)) * (2 - (1 + ChiSO)**0.5 - (1 - ChiSO)**0.5)
+        F_ChiO = (ChiO ** (-2)) * (2 - (1 + ChiO) ** 0.5 - (1 - ChiO) ** 0.5)
+        F_ChiSO = (ChiSO ** (-2)) * (2 - (1 + ChiSO) ** 0.5 - (1 - ChiSO) ** 0.5)
 
-        Eps = (Params["A"] * (Params["E0"]**(-1.5))) * (F_ChiO + 0.5 * ((Params["E0"] / Params["E0_d0"]) ** 1.5) \
-                * F_ChiSO)
+        Eps = (Params["A"] * (Params["E0"] ** (-1.5))) * (F_ChiO + 0.5 * ((Params["E0"] / Params["E0_d0"]) ** 1.5) \
+                                                          * F_ChiSO)
 
         # Additional line to address change in phase of the imaginary signal.
         return Eps.real + 1j * abs(Eps.imag)
@@ -202,7 +202,7 @@ class Custom_CPPB():
         # Scientific reference for this work...
         science_reference("Sadao Adachi, Physical Properties of III-V Semiconductor Compounds",
                           "Adachi, S., Physical Properties of III-V Semiconductor Compounds, John Wiley & Sons (1992)")
-                          
+
         # Conditional statement determining where the input parameters come from...
         if material_parameters is None and bool(kwargs) is False:
 
@@ -235,7 +235,7 @@ class Custom_CPPB():
                     Params[key] = kwargs[key]
                 except KeyError:
                     print("Invalid material parameter...")
-        
+
         # Frequency dependent broadening parameter...
         Gamma = self.Broad(Params["Gamma_E1"], Params["Alpha_E1"], Params["E1"], energy)
 
@@ -445,7 +445,7 @@ class Custom_CPPB():
         Gamma = self.Broad(Params["Gamma_E2"], Params["Alpha_E2"], Params["E2"], energy)
 
         # Damped harmonic oscillator function described by Adachi...
-        Eps = Params["C"] / ((1 - (energy/Params["E2"])**2) - 1j * (energy/Params["E2"]) * Gamma)
+        Eps = Params["C"] / ((1 - (energy / Params["E2"]) ** 2) - 1j * (energy / Params["E2"]) * Gamma)
 
         # Additional line to address change in phase of the imaginary signal.
         return Eps.real + 1j * abs(Eps.imag)
@@ -470,13 +470,12 @@ class Custom_CPPB():
 
         # Remove material_parameters argument from the kwargs dictionary to avoid confusion...
         if "material_parameters" in kwargs:
-
             del kwargs["material_parameters"]
 
         Gamma = self.Broad(kwargs["Gamma"], kwargs["Alpha"], kwargs["E0"], energy)
 
         # Eps = (Params["C"] * Params["E0"]**2) / ((Params["E0"]**2 - energy**2) - 1j*energy*Gamma)
-        Eps = (kwargs["Amp"] * kwargs["E0"]) / (kwargs["E0"]**2 - energy**2 - 1j*Gamma*energy)
+        Eps = (kwargs["Amp"] * kwargs["E0"]) / (kwargs["E0"] ** 2 - energy ** 2 - 1j * Gamma * energy)
 
         # Additional line to address change in phase of the imaginary signal.
         return Eps.real + 1j * abs(Eps.imag)
@@ -502,7 +501,6 @@ class Custom_CPPB():
 
         # Remove material_parameters argument from the kwargs dictionary to avoid confusion...
         if "material_parameters" in kwargs:
-
             del kwargs["material_parameters"]
 
         # Work out number of Sellmeier terms from length of kwargs...
@@ -522,8 +520,8 @@ class Custom_CPPB():
 
         # calculate Sellmeier expression for the given coefficients...
         for i in range(0, int(terms)):
-
-            epsilon[i] = (kwargs["A%d" % (i+1)] * (C/energy)**2) / ((C/energy)**2 - kwargs["L%d" % (i+1)]**2)
+            epsilon[i] = (kwargs["A%d" % (i + 1)] * (C / energy) ** 2) / (
+            (C / energy) ** 2 - kwargs["L%d" % (i + 1)] ** 2)
 
         return sum(epsilon, 0) + 1
 

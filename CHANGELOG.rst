@@ -1,4 +1,15 @@
-**New in Solcore 5.4.0.dev1**
+**New in Solcore 5.5.0.dev0**
+- Updated documentation for solar cell solvers
+- The *position* option is now set consistently for all optical solvers
+- License badge added to the README file
+- The Fortran compiler methods have been eliminated, since this is done by distutils, now.
+- Eliminated the auto-meshing during the IV calculation of the PDD solver. It was causing inconsistencies.
+- Changed name of examples files to be more meaningful
+- Corrected an error in light_source.smarts
+- Eliminated legacy functions from config_tools
+- Added default "pn=True" value to the tunnel junctions
+
+**New in Solcore 5.4.0**
 - Corrected several file names to avoid spaces: all have been replaced by underscores
 - Added exe=1 flag in setup.cfg to ensure tests are run, even if they are labelled as executable files.
 - Several files adapted to be able to create the documentation in Read the Docs

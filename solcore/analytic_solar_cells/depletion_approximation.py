@@ -558,10 +558,10 @@ def qe_depletion(junction, options):
     xb = cum_widths[id_bottom] + w_bottom
     j_sc_scr = get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph)
 
-    # The total ligth absorbed, but not necesarily collected, is:
+    # The total light absorbed, but not necessarily collected, is:
     xa = cum_widths[id_top]
     xb = cum_widths[id_bottom + 1]
-    zz = np.linspace(xa, xb, 3001)
+    zz = np.linspace(xa, xb, 10001)
     gg = g(zz) * ph
     current_absorbed = np.trapz(gg, zz, axis=0)
 

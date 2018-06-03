@@ -111,6 +111,7 @@ class TunnelJunction(Junction):
         Junction.__init__(self, *args, **kwargs)
 
         self.R = kwargs['R'] if 'R' in kwargs.keys() else 1e-16
+        self.pn = kwargs['pn'] if 'pn' in kwargs.keys() else True
 
 
 # CONVERSION UTILITIES

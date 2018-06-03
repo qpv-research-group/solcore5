@@ -6,6 +6,7 @@ from solcore.quantum_mechanics import schrodinger
 from solcore.quantum_mechanics.kp_bulk import kp8x8_bulk
 from solcore.quantum_mechanics.strain import strain_calculation_parameters
 from solcore.absorption_calculator import adachi_alpha
+from solcore.science_tracker import science_reference
 import sys
 
 q = constants.q
@@ -17,14 +18,14 @@ vacuum_permittivity = constants.vacuum_permittivity
 
 
 class QWunit(Structure):
-    """ Asembles a group of layers as a quantum well, calculating its properties as a whole
+    """ Assembles a group of layers as a quantum well, calculating its properties as a whole
     
     - It needs a minimum of 3 layers
     - There must be exactly one layer with the role = "well".
     - Top and bottom layers are assumed to be the barriers.
     - Anything not a barrier not a well will be considered as "interlayer".    
     
-    Since the Poisson - Drift-Diffusion solver can not work with superlatices, there is no point of considering the solution of more than one QW. 
+    Since the Poisson - Drift-Diffusion solver can not work with superlattices, there is no point of considering the solution of more than one QW.
     All QWs entering into the solver are independent, regardless of the width of the barriers.
     
     To account for the possible presence of nearby QWs, perdiodic boundary conditions can be used to solve the Schrodinger equation. 
@@ -38,7 +39,7 @@ class QWunit(Structure):
         super().__init__(*args, **kwargs)
 
         if len(self) < 3:
-            print("ERROR creating a QWunit: a minimum of 3 layers is necesarry to make a unit. Only {0} found. ".format(
+            print("ERROR creating a QWunit: a minimum of 3 layers is necessary to make a unit. Only {0} found. ".format(
                 len(self)))
             sys.exit()
 
@@ -48,7 +49,6 @@ class QWunit(Structure):
         self[0].__dict__["role"] = "barrier"
         self[-1].__dict__["role"] = "barrier"
         for index in range(1, len(self) - 1):
-            layer = self[index]
 
             if self[index].role in ["well", "qw", "QW", "Qw", "Well"]:
                 self.QW_number += 1
@@ -108,8 +108,8 @@ class QWunit(Structure):
 
     def RecalculateBandEdges(self, mode, SR):
         """The effective bandgap and effective affinity of each layer depends on the energy level, e.g.: the minimum energy for electrons is not the band edge of the conduction band, but the ground level. In this function we modify that creating an effective electron afinity and band gaps for all layers in the QW.
-        # 
-        # For the barriers, the electron afinity and band gap is the same than in bulk, modified by the kp calculation, if necesary."""
+
+        For the barriers, the electron afinity and band gap is the same than in bulk, modified by the kp calculation, if necesary."""
 
         for index in range(len(self)):
             self.RecalculateKP(index, mode)
@@ -154,13 +154,16 @@ class QWunit(Structure):
     # ------
     def RecalculateDensityOfStates(self):
         """ Calculates the effective density of states for each layer in the QW. The general rule is:
-        #   1- Barriers have the bulk density of states
-        #   2- QW have ALL the density of states asociated with the confined states + bulk density of states above the barrier
-        #   3- Interlayers have only the bulk density of states above the barrier
-        #
-        # This simplification is similar to that in J. Nelson, M. Paxman, K. W. J. Barnham, J. S. Roberts, and C. Button, “Steady-state carrier escape from single quantum wells,” IEEE J. Quantum Electron., vol. 29, no. 6, pp. 1460–1468, 1993.
-        #
-        # From a physical porint of view, it can certainly be done much better"""
+
+        - Barriers have the bulk density of states
+        - QW have ALL the density of states asociated with the confined states + bulk density of states above the barrier
+        - Interlayers have only the bulk density of states above the barrier
+
+        This simplification is similar to that in J. Nelson, M. Paxman, K. W. J. Barnham, J. S. Roberts, and C. Button, “Steady-state carrier escape from single quantum wells,” IEEE J. Quantum Electron., vol. 29, no. 6, pp. 1460–1468, 1993.
+
+        From a physical porint of view, it can certainly be done much better"""
+
+        science_reference("Density of state for QWs in the PDD solver", "J. Nelson, M. Paxman, K. W. J. Barnham, J. S. Roberts, and C. Button, “Steady-state carrier escape from single quantum wells,” IEEE J. Quantum Electron., vol. 29, no. 6, pp. 1460–1468, 1993")
 
         # We use the average barrier electron afinity (considering only the barriers at the ends) as the electron afinity of the barrier
         Xb = (self[0].electron_affinity + self[-1].electron_affinity) / 2
@@ -222,10 +225,13 @@ class QWunit(Structure):
     # ------
     def CalculateAbsorption(self, use_Adachi, SR):
         """ If required, this function calculates the absorption of the QW, putting together the absorption of the confined levels and the absorption of the bulk. As with the density of states, the rules are:
-        # 
-        #   1- Barriers have the bulk absorption
-        #   2- Interlayers have the bulk absorption from the barrier energy and zero below that
-        #   3- Wells have the absorption of the confined levels below the barrier energy and of the bulk above it. The calculation is similar to: C. I. Cabrera, J. C. Rimada, J. P. Connolly, and L. Hernandez, “Modelling of GaAsP/InGaAs/GaAs strain-balanced multiple-quantum well solar cells,” J. Appl. Phys., vol. 113, no. 2, p. 024512, Jan. 2013."""
+
+        - Barriers have the bulk absorption
+        - Interlayers have the bulk absorption from the barrier energy and zero below that
+        - Wells have the absorption of the confined levels below the barrier energy and of the bulk above it. The calculation is similar to: C. I. Cabrera, J. C. Rimada, J. P. Connolly, and L. Hernandez, “Modelling of GaAsP/InGaAs/GaAs strain-balanced multiple-quantum well solar cells,” J. Appl. Phys., vol. 113, no. 2, p. 024512, Jan. 2013."""
+
+        science_reference("Absorption for QWs in the PDD solver",
+                          "C. I. Cabrera, J. C. Rimada, J. P. Connolly, and L. Hernandez, “Modelling of GaAsP/InGaAs/GaAs strain-balanced multiple-quantum well solar cells,” J. Appl. Phys., vol. 113, no. 2, p. 024512, Jan. 2013.")
 
         edge = (self[0].band_gap + self[-1].band_gap) / 2 / q
         edge_index = np.abs(self.wl - 1240e-9 / edge).argmin()

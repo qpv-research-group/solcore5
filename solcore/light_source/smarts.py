@@ -56,6 +56,7 @@ def calculate_spectrum_smarts(smarts_file_contents=None, filename='smarts295', t
         assert os.access(target_directory, os.W_OK), 'ERROR: Target folder for smarts output does not exists ' \
                                                      'or is not writable.'
 
+    data = []
     # We use a temp directory to store temporary the data.
     # If needed, we'll copy it later to the target directory.
     with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3SMARTS") as working_directory:
@@ -282,7 +283,8 @@ def get_default_smarts_object():
     T_day = 25  # 'TDAY', deg, average daily temperature
     humid = 30  # 'RH', %, relative humidity
     water_vapour = 1  # 'W', cm, precipitable water
-    targetTime = datetime(2015, 5, 19, 12, 30)  # has to be split in 'YEAR', 'MONTH', 'DAY', 'HOUR', the later in Local Standard Time
+    targetTime = datetime(2015, 5, 19, 12,
+                          30)  # has to be split in 'YEAR', 'MONTH', 'DAY', 'HOUR', the later in Local Standard Time
 
     smarts_input = {
         'LATIT': latitude,
