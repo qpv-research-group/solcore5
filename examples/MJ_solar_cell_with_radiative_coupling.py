@@ -4,7 +4,7 @@ import numpy as np
 from solcore.structure import Junction
 from solcore.solar_cell import SolarCell
 from solcore.light_source import LightSource
-from solcore.solar_cell_solver import solar_cell_solver, default_options
+from solcore.solar_cell_solver import solar_cell_solver
 from solcore.graphing.Custom_Colours import colours
 
 T = 298

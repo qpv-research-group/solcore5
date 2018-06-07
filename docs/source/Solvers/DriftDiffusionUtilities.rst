@@ -175,57 +175,79 @@ While the power at maximum power point seems very high (>300 W/m :sup:`2` ) let'
     :align: center
 
 
+.. py:function:: qe_pdd(junction, options):
 
+	Calculates the quantum efficiency at short circuit with bias light, given in the options. Internally, it calls short_circuit_pdd, getting all the related output information (see above).
 
+    After finishing the calculation, the junction object will have an attribute called **qe_data** with the EQE and all the associated losses due to radiative recombination, SRH recombination, Auger recombination or front/back surface recombination. It will also have a method **eqe** that accepts an array of wavelengths and returns the EQE.
 
-.. py:function:: QE(device [, sol="AM1.5d", rs=0, output_info=1, use_Reflection=True, use_Adachi = False] )
+.. code-block:: Python
 
-	Calculates the quantum efficiency at short circuit with bias light given by *sol*. By defualt, reflection if the front surface is included in the calculation.
+    import matplotlib.pyplot as plt
 
-	*output_info* controls how much information is printed in the terminal by the solver. It can be 1 (less) or 2 (more). 
-	
-	**Output** (see :ref:`output-dictionary`): **Properties**, **Bandstructure** at the last wavelength point, **Optics** and **QE**.
+    from solcore import material
+    from solcore.structure import Layer, Junction
+    from solcore.solar_cell import SolarCell
+    from solcore.solar_cell_solver import solar_cell_solver
 
-	Example 4: Finally, we calculate the quantum efficiency, plotting the internal and the external ones.
-	::
-	
-		import solcore.PDD as PDD
-		import matplotlib.pyplot as plt
-		
-		# -----
-		# PASTE HERE THE CONTENTS OF EXAMPLE 2 IN DEVICE STRUCTURE
-		# -----
-		
-		# We use the default settings of the solver to calculate the QE. 
-		QE = PDD.QE(MyDevice)
-		
-		# Finally, we plot the internal and external quantum efficiencies using the information stored in the output dictionaries
-		plt.plot(QE['QE']['wavelengths']/1e-9, QE['QE']['IQE']*100, label='IQE')
-		plt.plot(QE['QE']['wavelengths']/1e-9, QE['QE']['EQE']*100, label='EQE')
-		plt.ylim(0, 100)
-		plt.legend(loc='lower left')
-		plt.ylabel('QE (%)')
-		plt.xlabel('Wavelength (nm)')
+    T = 298
 
-		plt.show()
+    substrate = material('GaAs')(T=T)
 
-\
-	The result of the above calculation is this:
-	
-	.. image:: Figures/QE.png
+    # First, we create the materials, overriding any default property we want, such as the doping or the absorption coefficient
+    window = material('AlGaAs')(T=T, Na=1e24, Al=0.8)
+    p_GaAs = material('GaAs')(T=T, Na=1e24)
+    i_GaAs = material('GaAs')(T=T)
+    n_GaAs = material('GaAs')(T=T, Nd=1e23)
+    bsf = material('AlGaAs')(T=T, Nd=1e24, Al=0.4)
+
+    # We put everything together in a Junction. We include the surface recombination velocities,
+    # sn and sp, although they are not necessary in this case.
+    MyJunction = Junction([Layer(width=30e-9, material=window, role="Window"),
+                           Layer(width=400e-9, material=p_GaAs, role="Emitter"),
+                           Layer(width=400e-9, material=i_GaAs, role="Intrinsic"),
+                           Layer(width=2000e-9, material=n_GaAs, role="Base"),
+                           Layer(width=200e-9, material=bsf, role="BSF")],
+                          sn=1e6, sp=1e6, T=T, kind='PDD')
+
+    my_solar_cell = SolarCell([MyJunction], T=T, R_series=0, substrate=substrate)
+
+    # We calculate the EQE of the cell, using the TMM optics method.
+    solar_cell_solver(my_solar_cell, 'qe', user_options={'optics_method': 'TMM'})
+
+    wl = my_solar_cell[0].qe_data.wavelengths * 1e9
+
+    plt.plot(wl, 1 - my_solar_cell.reflected, 'b')
+    plt.fill_between(wl, 1 - my_solar_cell.reflected, 1, facecolor='blue', alpha=0.6, label='Reflected')
+    plt.fill_between(wl, 1 - my_solar_cell.reflected, my_solar_cell.absorbed, facecolor='yellow', alpha=0.5,
+                     label='Transmitted')
+
+    # EQE + fraction lost due to recombination in the front surface
+    plt.plot(wl, my_solar_cell[0].qe_data.EQE + my_solar_cell[0].qe_data.EQEsurf, 'r')
+    plt.fill_between(wl, my_solar_cell[0].qe_data.EQE + my_solar_cell[0].qe_data.EQEsurf, my_solar_cell[0].qe_data.EQE,
+                     facecolor='red', alpha=0.5, label='Front surface recombination')
+
+    plt.plot(wl, my_solar_cell[0].qe_data.EQE, 'k', linewidth=4)
+    plt.fill_between(wl, my_solar_cell[0].qe_data.EQE, 0, facecolor='green', alpha=0.5, label='EQE')
+
+    plt.legend()
+    plt.xlim(300, 950)
+    plt.ylim(0, 1)
+    plt.xlabel('Wavelength (nm)')
+    plt.ylabel('EQE (%/100)')
+
+    plt.show()
+
+The result of running the code above is the next figure, where the EQE of the cell is plotted together with the main sources of losses in this particular case: reflection, recombination in the front surface and sub-bandgap light transmission.
+
+.. image:: Figures/QE.png
     :align: center
 
-Get data from Fortran
----------------------
+In principle, EQE + all the internal sources of losses (SRH, surface recombination, etc.) should be equal to the total absorbed light and, in any case, smaller than 1. **Sometimes this does not happen and the result is > 1**. The reason is the vertical discretization process of the solar cell which is not accurate in situations where there is a fast variation of the absorption and/or the electron generation. This happens at short wavelengths, when absorption is very fast in the first few nanometers, and at longer wavelengths in the presence of oscillations due to interference. There are three tricks to tackle this issue:
 
-.. py:function:: DumpInputProperties()
-.. py:function:: DumpBandStructure()
-.. py:function:: DumpIV([IV_info=False])
-.. py:function:: DumpQE()
-
-\
-
-	Functions used to retrieve the current data from the Fortran variables. They produce as output a dictionary with the corresponding set of variables.
+- Increase the number of mesh points in the PDD solver by adjusting the options dealing with the mesh creation (see below and :ref:`solver-options`). This will result in a global increase in mesh points and therefore will make the PDD solver slower.
+- Divide thick layers into thinner ones. This will increase the number of mesh points locally in that region, and therefore good if the one causing problems is identified. This solution is helpful for the case of fast oscillations.
+- Increase the number of points used by the optical solver. By default, this is one point per angstrom, and therefore very dense already, but might help, specially at short wavelengths. This is controlled by the 'position' option (see :ref:`solver-options`).
 
 
 Setting different aspects of the solver
@@ -233,7 +255,7 @@ Setting different aspects of the solver
 
 .. py:function:: SetMeshParameters(**kwargs)
 
-	Set the parameters that control the meshing of the structure. Changing this values might improve convergence in some difficult cases. The absolute maximum number of meshpoints at any time is 6000. The keywords and default values are:
+Set the parameters that control the meshing of the structure. Changing this values might improve convergence in some difficult cases. The absolute maximum number of meshpoints at any time is 6000. The keywords and default values are:
 	
 	- **meshpoints = -400** : Defines the type of meshing that must be done. 
 		- *meshpoints* > 0: The mesh is homogeneous with that many mesh points. 
@@ -289,13 +311,13 @@ The total list of primary (columns) and secondary (rows) keys are:
 Properties     Bandstructure  IV             QE             Optics
 ============== ============== ============== ============== ==============
 x              x              V              wavelengths    wavelengths
-Xi             n              J              IQE            R
-Eg	           p              Jrad           EQE            T
-Nd             ni             Jsrh           IQEsrh         \-
-Na             Rho            Jaug           IQErad         \-
-Nc             Efe            Jsur           IQEaug         \-
-Nv             Efh            Jsc [a]_       IQEsurf        \-
-\-             potential      Voc [a]_       IQEsurb        \-
+Xi             n              J              EQE            R
+Eg	           p              Jrad           EQEsrh         T
+Nd             ni             Jsrh           EQErad         \-
+Na             Rho            Jaug           EQEaug         \-
+Nc             Efe            Jsur           EQEsurf        \-
+Nv             Efh            Jsc [a]_       EQEsurb        \-
+\-             potential      Voc [a]_       \-             \-
 \-             Ec             Jmpp [a]_      \-             \-
 \-             Ev             Vmpp [a]_      \-             \-
 \-             GR             FF [a]_        \-             \-
@@ -311,8 +333,8 @@ All functions description
 -------------------------
 
 .. automodule:: solcore.poisson_drift_diffusion.DriftDiffusionUtilities
-:members:
-        :undoc-members:
+    :members:
+    :undoc-members:
 
 References
 ----------

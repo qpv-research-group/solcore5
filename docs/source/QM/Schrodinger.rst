@@ -1,6 +1,9 @@
 Quantum Solvers
 ===============
 
+- Example 1: :doc:`KP calculator and effective mass fitting <../Examples/example_K_and_effective_mass>`
+- Example 2: :doc:`Calculating the bandstructure and local density of states in QWs and MQWs <../Examples/example_QWs>`
+
 ﻿The electronic band structure of semiconductor materials is responsible for their light absorption and emission properties as well as for many of their transport properties, ultimately depending on the carriers' effective masses. These properties are not intrinsic to the material, but depend on external factors, too, most notably the strain and the quantum confinement.
 
 Given the crystalline nature of most semiconductor materials, there will be strain whenever two materials with different crystal lattice constants are grown on top of each other pseudomorphically. Even those with the same lattice constant might be under stress due to other effects such as the presence of impurities or if used at different temperatures having dissimilar thermal expansion coefficients. Quantum confinement, in turn, takes place when the size of the semiconductor material in one or more dimensions is reduced to a few nanometres. In that situation, the energy levels available to the carriers become quantized in the direction of confinement, also changing the density of states. Both conditions take place simultaneously when dealing with strain-balanced quantum wells (QW).

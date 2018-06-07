@@ -123,7 +123,7 @@ if __name__ == "__main__":
         "line_shape": "Gauss"
     }
 
-    comp = [0.05, 0.1, 0.15, 0.2, 0.25]
+    comp = [0.05, 0.10, 0.15, 0.20]
     colors = plt.cm.jet(np.linspace(0, 1, len(comp)))
 
     plt.figure(figsize=(6, 4.5))
@@ -143,7 +143,7 @@ if __name__ == "__main__":
 
         test_structure.substrate = bulk
 
-        output = schrodinger(test_structure, quasiconfined=0,  # mode='kp4x4', plot_bands=True,
+        output = schrodinger(test_structure, quasiconfined=0,  mode='kp4x4', plot_bands=False,
                              num_eigenvalues=20, alpha_params=alpha_params, calculate_absorption=True)
 
         alfa = output[0]['alphaE'](E)

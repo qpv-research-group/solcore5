@@ -8,6 +8,7 @@
 - Corrected an error in light_source.smarts
 - Eliminated legacy functions from config_tools
 - Added default "pn=True" value to the tunnel junctions
+- Added more examples to the Examples page
 
 **New in Solcore 5.4.0**
 - Corrected several file names to avoid spaces: all have been replaced by underscores

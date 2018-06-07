@@ -41,7 +41,7 @@ def solve_rcwa(solar_cell, options):
     # With all the information, we create the optical stack
     stack = all_layers
 
-    position = options.position
+    position = options.position * 1e9
     # angle_theta = options.angle_theta if 'angle_theta' in options.keys() else 0
     # angle_phi = options.angle_phi if 'angle_phi' in options.keys() else 0
     # pol = options.pol if 'pol' in options.keys() else 'u'

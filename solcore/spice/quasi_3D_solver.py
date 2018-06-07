@@ -3,17 +3,29 @@ from solcore.solar_cell_solver import solar_cell_solver
 from solcore.spice import solve_circuit
 
 
-def solve_quasi_3D(solar_cell, options, injection, contacts, Lx=10e-6, Ly=10e-6, h=2e-6, R_back=1e-16,
-                   R_contact=1e-16, R_line=1e-16,
-                   bias_start=0, bias_end=1.8, bias_step=0.01):
-    """ Calculate the IV curve of a PV module made of a certain number solar_cells connected in series in a single string. A certain dispersion to the distribution of photocurrents among cells and shadowing losses can be added to ahoeve more realistic results.
+def solve_quasi_3D(solar_cell, injection, contacts, options=None, Lx=10e-6, Ly=10e-6, h=2e-6, R_back=1e-16,
+                   R_contact=1e-16, R_line=1e-16, bias_start=0, bias_end=1.8, bias_step=0.01):
+    """ Entry function for the quasi-3D solver
 
-    :param solar_cell: A solar cell object containing all the junctions
-    :param options: A state object with all the options needed to solve the solar cell IV
-    :param bias_start: Initial voltage of the IV curve of the module
-    :param bias_end: Final voltage of the IV curve of the module
-    :param bias_step: Step for the bias
-    :return: A tuple with the array of voltages, currents, a list with the Isc of each junction in each cell and the raw output from SPICE.
+    :param solar_cell: A solar cell object
+    :param injection: 2D array indicating the (optical) injection mask
+    :param contacts: 2D array indicating the electrical contacts
+    :param options: Options for the 1D solar cell solver
+    :param Lx: Pixel size in the X direction
+    :param Ly: Pixel size in the Y direction
+    :param h: Height of the metal fingers
+    :param R_back: Resistance back contact
+    :param R_contact: Contact resistance
+    :param R_line: Resistivity metal fingers
+    :param bias_start: Initial voltage (V)
+    :param bias_end: Final voltage (V)
+    :param bias_step: Voltage step (V)
+    :return: A tuple with:
+
+        - V [steps + 1] : 1D Array with the external voltages
+        - I [steps + 1] : 1D Array with the current at all external V
+        - Vall [xnodes, ynodes, 2 * junctions, steps + 1] : 4D Array with the voltages in all nodes, at all external V
+        - Vmet [xnodes, ynodes, steps + 1] : 3D Array with the voltages in the metal nodes, at all external V
     """
     # We first start by the solar cell as if it were a normal, isolated cell
     print("Solving 1D Solar Cell...")
@@ -23,8 +35,6 @@ def solve_quasi_3D(solar_cell, options, injection, contacts, Lx=10e-6, Ly=10e-6,
     # We don't care about this IV curve, in principle, but we care about some of the parameters calculated, like jsc,
     # j01 or j02 if calculated from detailed balance. We extract those parameters from the cell
     totaljuncs = solar_cell.junctions
-
-    cell_temp = solar_cell.T - 273
 
     Isc_array = np.zeros(totaljuncs)
     I01_array = np.zeros(totaljuncs)
@@ -51,10 +61,10 @@ def solve_quasi_3D(solar_cell, options, injection, contacts, Lx=10e-6, Ly=10e-6,
             I02_array[i] = solar_cell(i).j02
             Eg_array[i] = solar_cell(i).Eg
         except AttributeError as err:
-            raise AttributeError('ERROR in PV module: Junction is missing one essential argument. {}'.format(err))
+            raise AttributeError('ERROR in quasi-3D solver: Junction is missing one essential argument. {}'.format(err))
 
     j = 0
-    for i in solar_cell.tunel_indices:
+    for i in solar_cell.tunnel_indices:
         rseries_array[j] = max(solar_cell[i].R_series, 1e-16) if hasattr(solar_cell[i], 'R_series') else 1e-16
         j += 1
 
@@ -68,8 +78,24 @@ def solve_quasi_3D(solar_cell, options, injection, contacts, Lx=10e-6, Ly=10e-6,
     return V, I, Vall, Vmet
 
 
-def create_node(type, idx, idy, Lx, Ly, Isc, topLCL, botLCL, rshunt, rseries, xMetalTop, yMetalTop,
-                contact):
+def create_node(type, idx, idy, Lx, Ly, Isc, topLCL, botLCL, rshunt, rseries, xMetalTop, yMetalTop, contact):
+    """ Creates a node of the solar cell, meaning all the circuit elements at an XY location in the plane. This includes all the diodes, resistances and current sources for all the junctions at that location.
+
+    :param type: The type of the node, 'Normal', 'Finger' or 'Bus'
+    :param idx: Index with the location in the X direction
+    :param idy: Index with the location in the Y direction
+    :param Lx: Pixel size in the X direction
+    :param Ly: Pixel size in the Y direction
+    :param Isc: Array of Isc for each of the junctions
+    :param topLCL: Array of resistances of the top lateral conductive layer
+    :param botLCL: Array of resistances of the bottom lateral conductive layers
+    :param rshunt: Array of Rshunt for each of the junctions
+    :param rseries: Array of Rseries for each of the junctions
+    :param xMetalTop: Resistance of the metal in the X direction
+    :param yMetalTop: Resistance of the metal in the Y direction
+    :param contact: Contact resistance
+    :return: The node define in SPICE file as a string.
+    """
     node = ''
     for j in range(len(Isc)):
         loc = str(j) + "_" + str(idx).zfill(3) + "_" + str(idy).zfill(3)
@@ -136,6 +162,16 @@ def create_node(type, idx, idy, Lx, Ly, Isc, topLCL, botLCL, rshunt, rseries, xM
 
 
 def create_header(I01, I02, n1, n2, Eg, T=20):
+    """ Creates the header of the SPICE file, where the diode models, the temperature and the independent voltage source are defined.
+
+    :param I01: Array of I01 for each of the junctions
+    :param I02: Array of I02 for each of the junctions
+    :param n1: Array of n1 for each of the junctions
+    :param n2: Array of n2 for each of the junctions
+    :param Eg: Array of Eg for each of the junctions
+    :param T: Temperature of the device
+    :return: The header of the SPICE file as a string.
+    """
     title = "*** A SPICE simulation with python\n\n"
 
     diodes = ""
@@ -155,10 +191,39 @@ def create_header(I01, I02, n1, n2, Eg, T=20):
     return SPICEheader
 
 
-def solve_circuit_quasi3D(vini, vfin, step, Isc, I01, I02, n1, n2, Eg, Rshunt, Rseries, injection, contacts,
-                          RsTop, RsBot, Rline, Rcontact, Lx, Ly):
+def solve_circuit_quasi3D(vini, vfin, step, Isc, I01, I02, n1, n2, Eg, Rshunt, Rseries, injection, contacts, RsTop,
+                          RsBot, Rline, Rcontact, Lx, Ly):
+    """ This is the function that actually dumps all the information to the Spice engine, runs the calculation, and retrieves the datafrom the calculator.
 
-    gn = np.sqrt(1.0 / I01[0])  # Scaling factor to bring the magnitudes to a regime where the solver is comfortable
+    :param vini: Initial voltage (V)
+    :param vfin: Final voltage (V)
+    :param step: Voltage step (V)
+    :param Isc: Array of Isc for each of the junctions
+    :param I01: Array of I01 for each of the junctions
+    :param I02: Array of I02 for each of the junctions
+    :param n1: Array of n1 for each of the junctions
+    :param n2: Array of n2 for each of the junctions
+    :param Eg: Array of Eg for each of the junctions
+    :param Rshunt: Array of Rshunt for each of the junctions
+    :param Rseries: Array of Rseries for each of the junctions
+    :param injection: 2D array indicating the (optical) injection mask
+    :param contacts: 2D array indicating the electrical contacts
+    :param RsTop: Array of sheet resistance on the top for each of the junctions
+    :param RsBot: Array of sheet resistance on the bottom for each of the junctions
+    :param Rline: Resistance of the metal fingers
+    :param Rcontact: Contact resistance
+    :param Lx: Pixel size in the X direction
+    :param Ly: Pixel size in the Y direction
+    :return: A tuple with:
+
+        - V [steps + 1] : 1D Array with the external voltages
+        - I [steps + 1] : 1D Array with the current at all external V
+        - Vall [xnodes, ynodes, 2 * junctions, steps + 1] : 4D Array with the voltages in all nodes, at all external V
+        - Vmet [xnodes, ynodes, steps + 1] : 3D Array with the voltages in the metal nodes, at all external V
+    """
+
+    # Scaling factor to bring the magnitudes to a regime where the solver is comfortable
+    gn = np.sqrt(1.0 / I01[0])
 
     areaPerPixel = Lx * Ly
 
@@ -172,12 +237,11 @@ def solve_circuit_quasi3D(vini, vfin, step, Isc, I01, I02, n1, n2, Eg, Rshunt, R
     contact = Rcontact / areaPerPixel / gn
     metal = Rline / gn
 
-    illumination = injection/255
-    pads = np.where(contacts == 255, 1, 0)
-    shadow = np.where(contacts > 0, 1, 0)
+    illumination = injection / 255
+    pads = np.where(contacts > 200, 1, 0)
+    shadow = np.where(contacts > 55, 1, 0)
 
-    xnodes = injection.shape[0]
-    ynodes = injection.shape[1]
+    xnodes, ynodes = injection.shape
     junctions = len(I01)
     steps = round((vfin - vini) / step)
 
@@ -201,31 +265,25 @@ def solve_circuit_quasi3D(vini, vfin, step, Isc, I01, I02, n1, n2, Eg, Rshunt, R
     for xx in x:
         for yy in y:
 
-            metalX = 1e12
-            metalY = 1e12
-            if xx < xnodes - 1:
-                isMetalX = shadow[xx, yy] and shadow[xx - 1, yy]
-                metalX = max(metal * isMetalX, 1e-12) + metalX * (1 - isMetalX)
-            if yy < ynodes - 1:
-                isMetalY = shadow[xx, yy] and shadow[xx, yy - 1]
-                metalY = max(metal * isMetalY, 1e-12) + metalY * (1 - isMetalY)
+            # This calculates the metal resistance depending on having metal on top or not. It leaves some dangling
+            # resistors in the circuit, but it shouldn't be a problem.
+            metalR = max(metal * shadow[xx, yy], 1e-16) + 1e-16 * (1 - shadow[xx, yy])
 
             if not shadow[xx, yy]:
                 # we create a normal node
                 SPICEbody = SPICEbody + create_node('Normal', xx, yy, Lx, Ly, Isc=illumination[xx, yy] * isc,
                                                     topLCL=rsTop, botLCL=rsBot, rshunt=rshunt, rseries=rseries,
-                                                    xMetalTop=metalX, yMetalTop=metalY, contact=contact)
+                                                    xMetalTop=metalR, yMetalTop=metalR, contact=contact)
             elif pads[xx, yy]:
                 # we create at bus node, with no resistance in the metal and direct electrical injection
                 SPICEbody = SPICEbody + create_node('Bus', xx, yy, Lx, Ly, Isc=0 * isc, topLCL=rsTop,
-                                                    botLCL=rsBot, rshunt=rshunt, rseries=rseries, xMetalTop=metalX,
-                                                    yMetalTop=metalY, contact=contact)
+                                                    botLCL=rsBot, rshunt=rshunt, rseries=rseries, xMetalTop=metalR,
+                                                    yMetalTop=metalR, contact=contact)
             else:
                 # We create a finger node, with resistance in the metal and not direct injection
                 SPICEbody = SPICEbody + create_node('Finger', xx, yy, Lx, Ly, Isc=0 * isc, topLCL=rsTop,
-                                                    botLCL=rsBot, rshunt=rshunt, rseries=rseries, xMetalTop=metalX,
-                                                    yMetalTop=metalY, contact=contact)
-
+                                                    botLCL=rsBot, rshunt=rshunt, rseries=rseries, xMetalTop=metalR,
+                                                    yMetalTop=metalR, contact=contact)
 
     # We combine the different bits to create the SPICE input file
     SPICEcommand = SPICEheader + SPICEbody + SPICEexec + SPICEfooter
@@ -264,6 +322,7 @@ def solve_circuit_quasi3D(vini, vfin, step, Isc, I01, I02, n1, n2, Eg, Rshunt, R
             V[i] = float(rest[0])
             I[i] = -float(rest[1])
 
+    # Finally, we un-do the scaling
     I = I / gn
 
     return V, I, Vall, Vmet

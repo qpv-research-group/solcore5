@@ -1,8 +1,9 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
 from solcore.solar_cell import SolarCell, default_GaAs
 from solcore.structure import Layer, Junction
 from solcore import si
-import matplotlib.pyplot as plt
-import numpy as np
 from solcore import material
 from solcore.light_source import LightSource
 from solcore.solar_cell_solver import solar_cell_solver
@@ -10,6 +11,7 @@ from solcore.solar_cell_solver import solar_cell_solver
 T = 298
 
 substrate = material('GaAs')(T=T)
+
 
 def AlGaAs(T):
     # We create the other materials we need for the device
@@ -25,13 +27,14 @@ def AlGaAs(T):
 
     return output
 
+
 my_solar_cell = SolarCell([AlGaAs(T), default_GaAs(T)], T=T, R_series=0, substrate=substrate)
 
 Vin = np.linspace(-2, 2.61, 201)
 V = np.linspace(0, 2.6, 300)
 wl = np.linspace(350, 1000, 301) * 1e-9
-light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
-                           output_units='photon_flux_per_m', concentration=1)
+light_source = LightSource(source_type='standard', version='AM1.5g', x=wl, output_units='photon_flux_per_m',
+                           concentration=1)
 
 # We calculate the IV curve under illumination
 solar_cell_solver(my_solar_cell, 'iv',
@@ -39,7 +42,8 @@ solar_cell_solver(my_solar_cell, 'iv',
                                 'wavelength': wl, 'optics_method': 'BL', 'mpp': True, 'internal_voltages': Vin,
                                 'light_source': light_source})
 
-# We can plot the electron and hole densities in equilibrium and at short circuit
+# We can plot the electron and hole densities in equilibrium and at short circuit, both calculated automatically
+# before calculating the IV curve
 plt.figure(1)
 for j in my_solar_cell.junction_indices:
     zz = my_solar_cell[j].short_circuit_data.Bandstructure['x'] + my_solar_cell[j].offset
@@ -77,8 +81,8 @@ solar_cell_solver(my_solar_cell, 'qe',
 
 plt.figure(3)
 
-plt.plot(wl*1e9, my_solar_cell[0].eqe(wl), 'b', label='AlGaAs')
-plt.plot(wl*1e9, my_solar_cell[1].eqe(wl), 'r', label='GaAs')
+plt.plot(wl * 1e9, my_solar_cell[0].eqe(wl), 'b', label='AlGaAs')
+plt.plot(wl * 1e9, my_solar_cell[1].eqe(wl), 'r', label='GaAs')
 
 plt.xlabel('Wavelength (nm)')
 plt.ylabel('EQE')

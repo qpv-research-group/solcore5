@@ -267,12 +267,11 @@ def qe_pdd(junction, options):
     output['QE'] = DumpQE()
     output['QE']['wavelengths'] = options.wavelength
 
-    junction.qe_data = State(**output)
+    junction.qe_data = State(**output['QE'])
 
     # The EQE is actually the IQE inside the fortran solver due to an error in the naming --> to be changed
-    junction.eqe = interp1d(options.wavelength, output['QE']['IQE'], kind='linear', bounds_error=False,
-                            assume_sorted=True,
-                            fill_value=(output['QE']['IQE'][0], output['QE']['IQE'][-1]))
+    junction.eqe = interp1d(options.wavelength, output['QE']['EQE'], kind='linear', bounds_error=False,
+                            assume_sorted=True, fill_value=(output['QE']['EQE'][0], output['QE']['EQE'][-1]))
 
 
 # ----
@@ -362,12 +361,12 @@ def DumpIV(IV_info=False):
 def DumpQE():
     output = {}
     numwl = dd.numwl + 1
-    output['IQE'] = dd.get('iqe')[0:numwl]
-    output['IQEsrh'] = dd.get('iqesrh')[0:numwl]
-    output['IQErad'] = dd.get('iqerad')[0:numwl]
-    output['IQEaug'] = dd.get('iqeaug')[0:numwl]
-    output['IQEsurf'] = dd.get('iqesurf')[0:numwl]
-    output['IQEsurb'] = dd.get('iqesurb')[0:numwl]
+    output['EQE'] = dd.get('iqe')[0:numwl]
+    output['EQEsrh'] = dd.get('iqesrh')[0:numwl]
+    output['EQErad'] = dd.get('iqerad')[0:numwl]
+    output['EQEaug'] = dd.get('iqeaug')[0:numwl]
+    output['EQEsurf'] = dd.get('iqesurf')[0:numwl]
+    output['EQEsurb'] = dd.get('iqesurb')[0:numwl]
 
     return output
 
@@ -394,119 +393,3 @@ def SetConvergenceParameters(options):
     dd.set('clamp', options.clamp)
     dd.set('atol', options.ATol)
     dd.set('rtol', options.RTol)
-
-    #
-    # def OldProcessStructure(device, meshpoints, wavelengths=None, use_Adachi=False):
-    #     """ This function reads a dictionary containing all the device structure, extract the electrical and optical
-    #     properties of the materials, and loads all that information into the Fortran variables. Finally, it initiallise the
-    #     device (in fortran) calculating an initial mesh and all the properties as a function of the possition.
-    #
-    #     :param device: A dictionary containing the device structure. See PDD.DeviceStructure
-    #     :param wavelengths: (Optional) Wavelengths at which to calculate the optical properties.
-    #     :param use_Adachi: (Optional) If Adachi model should be use to calculate the dielectric constant of the material.
-    #     :return: Dictionary containing the device structure properties as a function of the position.
-    #     """
-    #     print('Processing structure...')
-    #     # First, we clean any previous data from the Fortran code
-    #     dd.reset()
-    #     output = {}
-    #
-    #     if wavelengths is not None:
-    #         output['Optics'] = {}
-    #         output['Optics']['wavelengths'] = wavelengths
-    #         calculate_absorption = True
-    #     else:
-    #         calculate_absorption = False
-    #
-    #     # We dump the structure information to the Fotran module and initialise the structure
-    #     i = 0
-    #     first = 0
-    #     last = -1
-    #     while i < device['numlayers']:
-    #
-    #         if device['layers'][i]['label'] in ['optics', 'Optics', 'metal', 'Metal']:
-    #             # Optics or metal layers. They are not included in the PDD solver and are just used for optics
-    #             if i == first:
-    #                 first = i + 1
-    #                 i = i + device['layers'][i]['numlayers']
-    #                 continue
-    #             else:
-    #                 last = i - device['numlayers'] - 1
-    #                 break
-    #
-    #         if device['layers'][i]['group'] is None:
-    #             # We have a normal layer
-    #             layer = device['layers'][i]['properties']
-    #             args_list = [layer['width'],
-    #                          asUnit(layer['band_gap'], 'eV'),
-    #                          asUnit(layer['electron_affinity'], 'eV'),
-    #                          layer['electron_mobility'],
-    #                          layer['hole_mobility'],
-    #                          layer['Nc'],
-    #                          layer['Nv'],
-    #                          layer['electron_minority_lifetime'],
-    #                          layer['hole_minority_lifetime'],
-    #                          layer['permittivity'] * Epsi0,
-    #                          layer['radiative_recombination'],
-    #                          layer['electron_auger_recombination'],
-    #                          layer['hole_auger_recombination'],
-    #                          layer['Na'],
-    #                          layer['Nd']]
-    #             dd.addlayer(args=args_list)
-    #
-    #             # We load the absorption coeficients if necessary
-    #             if calculate_absorption:
-    #                 if 'absorption' in layer.keys():
-    #                     layer['absorption'][1] = np.interp(wavelengths, layer['absorption'][0],
-    #                                                        layer['absorption'][1]).tolist()
-    #                     layer['absorption'][0] = wavelengths.tolist()
-    #                 else:
-    #                     layer['absorption'] = LoadAbsorption(device['layers'][i], device['T'], wavelengths,
-    #                                                          use_Adachi=use_Adachi)
-    #                 dd.addabsorption(layer['absorption'][1], wavelengths)
-    #
-    #         else:
-    #             # We have a group of several layers, usually a QW with 'numlayers' repeated 'repeat' times.
-    #             for j in range(device['layers'][i]['repeat']):
-    #                 for k in range(device['layers'][i]['numlayers']):
-    #                     layer = device['layers'][i + k]['properties']
-    #                     args_list = [layer['width'],
-    #                                  asUnit(layer['band_gap'], 'eV'),
-    #                                  asUnit(layer['electron_affinity'], 'eV'),
-    #                                  layer['electron_mobility'],
-    #                                  layer['hole_mobility'],
-    #                                  layer['Nc'],
-    #                                  layer['Nv'],
-    #                                  layer['electron_minority_lifetime'],
-    #                                  layer['hole_minority_lifetime'],
-    #                                  layer['permittivity'] * Epsi0,
-    #                                  layer['radiative_recombination'],
-    #                                  layer['electron_auger_recombination'],
-    #                                  layer['hole_auger_recombination'],
-    #                                  layer['Na'],
-    #                                  layer['Nd']]
-    #                     dd.addlayer(args=args_list)
-    #
-    #                     # We load the absorption coeficients if necessary
-    #                     if calculate_absorption:
-    #                         if 'absorption' in layer.keys():
-    #                             layer['absorption'][1] = np.interp(wavelengths, layer['absorption'][0],
-    #                                                                layer['absorption'][1]).tolist()
-    #                             layer['absorption'][0] = wavelengths.tolist()
-    #                         else:
-    #                             layer['absorption'] = LoadAbsorption(device['layers'][i + k], device['T'], wavelengths,
-    #                                                                  use_Adachi=use_Adachi)
-    #                         dd.addabsorption(layer['absorption'][1], wavelengths)
-    #
-    #         i = i + device['layers'][i]['numlayers']
-    #
-    #     # We set the surface recombination velocities. This needs to be improved at some to consider other boundary conditions
-    #     dd.frontboundary("ohmic", device['layers'][first]['properties']['sn'], device['layers'][first]['properties']['sp'],
-    #                      0)
-    #     dd.backboundary("ohmic", device['layers'][last]['properties']['sn'], device['layers'][last]['properties']['sp'], 0)
-    #
-    #     dd.initdevice(meshpoints)
-    #     print('...done!\n')
-    #
-    #     output['Properties'] = DumpInputProperties()
-    #     return output

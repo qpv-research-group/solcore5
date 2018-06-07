@@ -1,6 +1,8 @@
 Transfer matrix method
 ======================
 
+Example 1: :doc:`Using the TMM solver to calculate the reflextion of a multilayered ARC <../Examples/example_RAT_of_ARC>`
+
 .. toctree::
     :maxdepth: 2
 

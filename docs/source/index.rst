@@ -20,6 +20,7 @@ Contents:
     spectral/spectral
     Optics/optics
     Solvers/solving_solar_cells
+    Quasi3D/spice
     Examples/main
 
 .. Indices and tables

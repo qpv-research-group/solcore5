@@ -1,5 +1,5 @@
-Tutorial
-========
+Tutorial: 2J solar cell with QWs in the bottom cell
+===================================================
 
 This tutorial will guide you, step-by-step, in the creation of a solar
 cell and the calculation of their properties using *Solcore*.

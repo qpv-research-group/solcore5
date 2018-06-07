@@ -1,6 +1,9 @@
 Poisson - Drift-Diffusion solver (PDD)
 ======================================
 
+- Example 1: :doc:`Example of a simple 2J solar cell calculated with the PDD solver <../Examples/example_PDD_solver>`
+- Example 2: :doc:`Tutorial: 2J solar cell with QWs in the bottom cell <../Examples/tutorial>`
+
 The PDD package provide all tools necesary to build a solar cell structure and calculate its properties by solving simultaneously the Poisson equation and the drfit diffusion equations. Normally, these functions will not need to be accessed directly, but are called internally by :literal:`Solcore` when using the higher level methods in the :doc:`solar cell solver <solving_solar_cells>`.
 
 For using the PDD package, it is enough to include the following line in your code:

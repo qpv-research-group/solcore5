@@ -24,7 +24,7 @@ All of the above calculations modify the original solar cell object, adding attr
 More details of the specific electrical solvers included in Solcore can be found in:
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 0
 
     detailed_balance
     TwoDiode
@@ -69,8 +69,8 @@ The options available as well as the default values are:
     - **internal_voltages** = np.linspace(-6, 4, 1000)
         The voltages at which the IV curve of *each of the junctions* inside the cell have to be calculated. This range has to be wider than the **voltages** above, in general. The same voltage range will be used in all junctions.
 
-    - **position** = np.arange(0, solar_cell.width, 1e-9)
-        Positions inside the solar cell structure in which to calculate the absorption. By default, it is calculated each nanometer for the whole width of the cell.
+    - **position** = np.arange(0, solar_cell.width, 1e-10)
+        Positions inside the solar cell structure in which to calculate the absorption. By default, it is calculated each angstrom for the whole width of the cell.
 
     - **radiative_coupling** = False
         If radiative coupling has to be included in the calculation.
@@ -116,8 +116,8 @@ The options available as well as the default values are:
         - **gen** = 0
 
 
-Solar cell solver module details
---------------------------------
+Solar cell solver module functions
+----------------------------------
 
 .. automodule:: solcore.solar_cell_solver
     :members:

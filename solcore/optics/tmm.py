@@ -37,7 +37,7 @@ def solve_tmm(solar_cell, options):
     no_back_reflexion = options.no_back_reflexion if 'no_back_reflexion' in options.keys() else True
     stack = OptiStack(all_layers, no_back_reflexion=no_back_reflexion)
 
-    position = options.position
+    position = options.position * 1e9
 
     print('Calculating RAT...')
     RAT = calculate_rat(stack, wl * 1e9, coherent=True)

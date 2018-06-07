@@ -593,26 +593,30 @@ def solve_bandstructure_QW(structure, num=10, kpoints=40, krange=5e9, quasiconfi
     if plot_bands:
         import matplotlib.pyplot as plt
 
-        fig, ax = plt.subplots(1, 1)
+        fig, (ax1, ax2) = plt.subplots(2, 1)
 
         # Electrons
-        ax.plot(bands["kt"], bands["Ee"][0] / q, 'b', label='Ee')
+        ax1.plot(bands["kt"]*1e-9, bands["Ee"][0] / q, 'b', label='Ee')
         for i in range(1, len(bands["Ee"])):
-            ax.plot(bands["kt"], bands["Ee"][i] / q, 'b')
+            ax1.plot(bands["kt"]*1e-9, bands["Ee"][i] / q, 'b')
 
         # HH
-        ax.plot(bands["kt"], bands["Ehh"][0] / q, 'r', label='Ehh')
+        ax2.plot(bands["kt"]*1e-9, bands["Ehh"][0] / q, 'r', label='Ehh')
         for i in range(1, len(bands["Ehh"])):
-            ax.plot(bands["kt"], bands["Ehh"][i] / q, 'r')
+            ax2.plot(bands["kt"]*1e-9, bands["Ehh"][i] / q, 'r')
 
         # LH
-        ax.plot(bands["kt"], bands["Elh"][0] / q, 'g', label='Elh')
+        ax2.plot(bands["kt"]*1e-9, bands["Elh"][0] / q, 'g', label='Elh')
         for i in range(1, len(bands["Elh"])):
-            ax.plot(bands["kt"], bands["Elh"][i] / q, 'g')
+            ax2.plot(bands["kt"]*1e-9, bands["Elh"][i] / q, 'g')
 
-        plt.ylabel('Energy (eV)')
-        plt.xlabel('k.txt (m-1)')
+        ax1.set_ylabel('Energy (eV)')
+        ax2.set_ylabel('Energy (eV)')
+        plt.xlabel('k (nm$^{-1}$)')
+        plt.xlim(0, max(bands["kt"]*1e-9))
+        plt.setp(ax1.get_xticklabels(), visible=False)
         plt.legend()
+        plt.tight_layout()
         plt.show()
 
     bands2 = structure.copy()
