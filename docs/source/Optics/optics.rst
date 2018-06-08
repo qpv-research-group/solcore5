@@ -7,6 +7,7 @@ Solcore includes several methods to calculate the optical properties of individu
     :maxdepth: 2
 
     material_optics
+    qw_absorption
     tmm
     S4doc
     other_methods

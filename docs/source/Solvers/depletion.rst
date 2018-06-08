@@ -51,7 +51,7 @@ assumptions, the drift-diffusion equations
 simplify and an analytical expression can be found for the dependence of
 the recombination and generation currents on the applied voltage. A full
 derivation of these expressions is included in
-Nelson (2003).
+Nelson (2003) ([#Nelson2003]_).
 
 Solcore’s implementation of the depletion approximation includes two
 modifications to the basic equations. The first one is allowing for an
@@ -79,3 +79,8 @@ Detailed balance functions
 .. automodule:: solcore.analytic_solar_cells.depletion_approximation
     :members:
     :undoc-members:
+
+References
+----------
+
+.. [#Nelson2003] Nelson, J.: The Physics of Solar Cells. Imperial College Press, London; River Edge, NJ: Distributed by World Scientific Pub. Co, (2003)

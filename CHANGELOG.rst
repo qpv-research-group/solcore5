@@ -1,4 +1,4 @@
-**New in Solcore 5.5.0.dev0**
+**New in Solcore 5.5.0**
 - Updated documentation for solar cell solvers
 - The *position* option is now set consistently for all optical solvers
 - License badge added to the README file

@@ -88,7 +88,7 @@ calculate the radiative efficiency of a solar cell, which is useful to
 compare different materials, technologies or processing methods. This
 was done by Chan et al. using :math:`J_{ref} = 30` mA/cm\ :math:`^2`,
 obtaining :math:`\eta` values of 20% for InGaP, 22% for GaAs, and 27%
-for InGaAs devices. It should be pointed
+for InGaAs devices ([#Ref21]_). It should be pointed
 out that this method is only valid under the assumption that
 :math:`J_{01}` corresponds only to radiative recombination and
 :math:`J_{02}` only to non-radiative recombination, which is generally
@@ -96,13 +96,13 @@ true for QW solar cells and some III-V solar cells, like those made of
 GaAs or InGaP, but not for Si or Ge, for example. Other definitions of
 the radiative efficiency are based on the external quantum efficiency,
 the I\ :math:`_{sc}` and V\ :math:`_{oc}` of the cell, as described by
-Green (2011).
+Green (2011) ([#Ref22]_).
 
 Despite the simplicity of the 2-diode model, it is very useful to guide
 the design of new solar cells and explore the performance of new
 materials, such as dilute bismuth
-alloys, or to asses the performance of
-large arrays of solar cells.
+alloys ([#Ref23]_), or to asses the performance of
+large arrays of solar cells ([#Ref24]_).
 
 
 2-diode equation functions
@@ -111,3 +111,11 @@ large arrays of solar cells.
 .. automodule:: solcore.analytic_solar_cells.diode_equation
     :members:
     :undoc-members:
+
+References
+----------
+
+.. [#Ref21] Chan, N.L.A., Ekins-Daukes, N.J., Adams, J.G.J., Lumb, M.P., Gonzalez, M., Jenkins, P.P., Vurgaftman, I., Meyer, J.R., Walters, R.J.: Optimal bandgap combinations—does material quality mat- ter? IEEE J. Photovolt. 2(2), 202–208 (2012)
+.. [#Ref22] Green, M.A.: Radiative efficiency of state-of-the-art photovoltaic cells. Prog. Photovolt. Res. Appl. 20(4), 472–476 (2011)
+.. [#Ref23] Thomas, T., Mellor, A., Hylton, N.P., Führer, M., Alonso-Álvarez, D., Braun, A., Ekins-Daukes, N.J., David, J.P.R., Sweeney, S.J.: Requirements for a GaAsBi 1 eV sub-cell in a GaAs-based multi- junction solar cell. Semicond. Sci. Technol. 30(9), 094010-6 (2015)
+.. [#Ref24] Ekins-Daukes, N.J., Kemmoku, Y., Araki, K., Betts, T.R., Gottschalg, R., Infield, D.G., Yamaguchi, M.: The design specifica- tion for Syracuse; a multi-junction concentrator system computer model. In: Proceedings of the 19th European Photovoltaic Solar Energy Conference, pp. 1–4 (2004)

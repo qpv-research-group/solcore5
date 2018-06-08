@@ -132,7 +132,7 @@ def calculate_absorption_beer_lambert(widths, alphas, fraction):
 
         # And finally, we calculate a 2D array of the absorption per unit length vs position and wavelength
         output = np.zeros((len(z), N))
-        print(output.shape)
+
         inside = np.sum(z < cum_widths[-1])
         for k in range(inside):
             loc = idx[k]

@@ -43,8 +43,8 @@ light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
 
 class TestPDD(TestCase):
     def test_92_light_iv(self):
-        answer = [142.10448701869302, 2.5232188692835922, 0.91864515379576328, 329.39007057637696, 2.347826086956522,
-                  140.29577080104943, 0.32926802554755141]
+        answer = [142.68025180227374, 2.519346556870366, 0.9169672186977382, 329.61395441947565, 2.347826086956522,
+                  140.3911287342211, 0.3294918264376029]
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
             filename = os.path.join(working_directory, 'solcore_log.txt')
             PDD.log(filename)

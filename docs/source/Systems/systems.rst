@@ -7,5 +7,4 @@ These are the modules that deal with material properties and units. Together wit
     :maxdepth: 2
 
     Materials
-    Parameters
     Units

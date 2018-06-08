@@ -24,7 +24,7 @@ At the end of this page there is a detailed description of the format of all the
 
 	After finishing the calculation, the junction object will be updated with an attribute called "short_circuit_data" containing the dictionaries **Properties**, **Bandstructure** and **Optics** (see :ref:`output-dictionary`), in addition to the "equilibrium_data" attribute.
 
-The following example shows the result of calculating a solar cell under short circuit conditions, comparing the resulting band structure. Note that neither equilibrium_pdd nor short_circuit_pdd are called directly, but they are accessed internally by *solve_solar_cell*.
+The following example shows the result of calculating a solar cell under short circuit conditions, comparing the resulting band structure. Note that neither equilibrium_pdd nor short_circuit_pdd are called directly, but they are accessed internally by *solar_cell_solver*.
 
 .. code-block:: python
 
@@ -84,7 +84,7 @@ The result of the above calculation is this:
 
 .. py:function:: iv_pdd(junction, options):
 
-	Calculates the IV curve of the device at the **internal_voltages** included indicated in the options. Depending on the options, also, the IV will be calculated in the dark (calling the equilibrium_pdd function) or under illumination (calling the short_circuit_pdd function). If the voltage range has positive and negative values, the problem is solved twice: from 0 V to the maximum positive and from 0 V to the maximum negative, concatenating the results afterwards.
+	Calculates the IV curve of the device at the **internal_voltages** indicated in the options. Depending on the options, also, the IV will be calculated in the dark (calling the equilibrium_pdd function) or under illumination (calling the short_circuit_pdd function). If the voltage range has positive and negative values, the problem is solved twice: from 0 V to the maximum positive and from 0 V to the maximum negative, concatenating the results afterwards.
 
     After finishing the calculation, the Junction object will have a few extra attributes, in addition to those resulting from equilibrium_pdd and short_circuit_pdd (yes, there is a lot of redundancy at the moment):
 

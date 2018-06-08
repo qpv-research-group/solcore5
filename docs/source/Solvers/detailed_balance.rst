@@ -6,7 +6,7 @@ Detailed balance approximation
 This solver calculates the electrical properties of the junction by
 balancing the elementary processes taking place in the solar cell,
 carrier generation and radiative recombination, using the formalism
-described by Araújo and Martí (1996). The
+described by Araújo and Martí (1996) ([#Ref20]_). The
 method is widely used by the photovoltaic community to calculate the
 limiting conversion efficiencies of the different solar cell
 architectures or materials. The simplest DB formulation only needs an
@@ -25,3 +25,8 @@ Detailed balance functions
 .. automodule:: solcore.analytic_solar_cells.detailed_balance
     :members:
     :undoc-members:
+
+References
+----------
+
+.. [#Ref20] Martí, A., Araújo, G.L.: Limiting efficiencies for photovoltaic energy conversion in multigap systems. Sol. Energy Mater. Sol. Cells 43(2), 203–222 (1996)
