@@ -49,25 +49,24 @@ We start with the first.
 
     # The QW is 7 nm wide, with GaAs interlayers 2 nm thick at each side and GaAsP barriers 10 nm thick.
     # The final device will have 30 of these QWs.
-    QW = PDD.CreateDeviceStructure('QW', T=T, repeat=30, substrate=i_GaAs, layers=[
-        Layer(width=10e-9, material=Bmat, role="barrier"),
-        Layer(width=2e-9, material=i_GaAs, role="interlayer"),
-        Layer(width=7e-9, material=QWmat, role="well"),
-        Layer(width=2e-9, material=i_GaAs, role="interlayer"),
-        Layer(width=10e-9, material=Bmat, role="barrier") ])
+    QW = PDD.QWunit([Layer(width=10e-9, material=Bmat, role="barrier"),
+                 Layer(width=2e-9, material=i_GaAs, role="well"),
+                 Layer(width=7e-9, material=QWmat, role="well"),
+                 Layer(width=2e-9, material=i_GaAs, role="well"),
+                 Layer(width=10e-9, material=Bmat, role="barrier")], T=T, repeat=30, substrate=i_GaAs)
 
     # We solve the quantum properties of the QW, leaving the default values of all parameters
-    QW_list = PDD.SolveQWproperties(QW, wavelengths=wl)
+    QW_list = QW.GetEffectiveQW(wavelengths=wl)
 
 The first few lines import the *Solcore* utilities needed to define the
 structure, including the *material* function, the *Layer* class and the
 Poisson-Drift-Diffusion solver. After that, we create the materials that
-will made the QWs and create a "Device structure". We will use these
+will made the QWs and create a "QWunit". We will use these
 structure just to be able to solve the QWs afterwards and transform it
 into a sequence of layers with effective properties that the PDD solver
-understands. The call to "CreateDeviceStructure" has several inputs,
+understands. The call to "QWunit" has several inputs,
 including the temperature, the substrate, the number of repetition of
-the QWs and the structure of the layers. The call to "SolveQWproperties"
+the QWs and the structure of the layers. The call to "GetEffectiveQW"
 will, indeed, use the utilities within the *quantum\_mechanics* module
 to calculate the band structure of the QWs, their absorption coefficient
 and, finally, will calculate effective bandgap, density of states, etc.
@@ -109,7 +108,7 @@ despite having 30 in the structure. This will clearly represent a
 limitation when modelling the absorption of superlattices, where there
 is a strong coupling between neighbouring QWs.
 
-In the code above, we have used the "PDD.SolveQWproperties" and
+In the code above, we have used the "GetEffectiveQW" and
 "QM.schrodinger" functions with the default values, but they both can
 have a number of optional input parameters to define the number of
 confined states to calculate, the energy of quasiconfined states,
@@ -271,8 +270,6 @@ in the layers.
 .. figure:: qe.jpg
    :alt: Quantum efficiency
 
-   qe
-
 ﻿As it can be seen, the minority carrier population increases
 significantly under illumination, specially in the QW region of the
 bottom cell, which is a relatively thick, undoped region. The EQE of the
@@ -335,7 +332,6 @@ factor (FF) versus concentration.
 .. figure:: iv_params.jpg
    :alt: iv_params
 
-   iv\_params
 
 The efficiency of the cell is just above 30% at 1 sun, and increases
 with concentration , peaking at around 200-300 suns. Further increasing
@@ -354,5 +350,3 @@ junction limiting the current.
 
 .. figure:: iv.jpg
    :alt: IV
-
-   iv

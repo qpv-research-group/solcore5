@@ -240,10 +240,14 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
         # Create the material with the updated properties
         layer_mat = ToSolcoreMaterial(mat, T, execute=True, **param)
 
-        # In the end, we convert the absorption coeficient in extinction coefficient
+        # In the end, we convert the absorption coefficient in extinction coefficient
         kk = QW[i].material.absorption * QW.wl / 4 / np.pi
         layer_mat.k = interp1d(QW.wl, kk, bounds_error=False, fill_value=(0, 0))
+        layer_mat.n = QW[i].material.n
         # layer_mat.alpha = interp1d(QW.wl, QW[i].material.absorption, bounds_error=False, fill_value=(0, 0))
+        import matplotlib.pyplot as plt
+        plt.semilogy(QW.wl*1e9, layer_mat.n(QW.wl), label=i)
+        plt.semilogy(QW.wl*1e9, layer_mat.k(QW.wl))
 
         # And the radiative recombination parameter
         inter = lambda E: layer_mat.n(E) ** 2 * layer_mat.alphaE(E) * np.exp(-E / (kb * T)) * E ** 2
@@ -256,6 +260,12 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
 
     # As the QW might be actually a MQW, we repeat this as many times as needed
     new_QW = N * new_QW
+
+    plt.ylim(1e-5, 10)
+    plt.legend()
+    plt.show()
+    import sys
+    sys.exit()
 
     return new_QW
 

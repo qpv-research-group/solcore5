@@ -1,3 +1,6 @@
+**New in Solcore 5.5.1**
+- Changed the way QWs are solved before using them in a solar cell to avoid problems with not finding the n and k data
+
 **New in Solcore 5.5.0**
 - Updated documentation for solar cell solvers
 - The *position* option is now set consistently for all optical solvers

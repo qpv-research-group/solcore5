@@ -41,7 +41,7 @@ def eight_band_strain_hamiltonian(kx, ky, kz, Ev0, Ec0, exx, ezz, me_eff, gamma1
     # "Modified" Luttinger parameters
     gc = 1 / (me_eff / constants.electron_mass) - (Ep / 3) * (2 / Eg + 1 / (Eg + Delta))
     g1 = gamma1 - Ep / (
-    3 * Eg + Delta)  # There was an error here. It was written as: g1 = gamma1 - Ep/(3*(Eg + Delta))
+            3 * Eg + Delta)  # There was an error here. It was written as: g1 = gamma1 - Ep/(3*(Eg + Delta))
     g2 = gamma2 - Ep / (6 * Eg + 2 * Delta)
     g3 = gamma3 - Ep / (6 * Eg + 2 * Delta)
 
@@ -167,7 +167,7 @@ def kp_bands(material, host_material, kx=0, ky=0, kz=0, return_so=False, graph=F
     # Strain parameters
     exx = - (material.lattice_constant - host_material.lattice_constant) / material.lattice_constant
     ezz = - 2 * material.c12 / material.c11 * exx  # why this?
-    #print("suspect stuff around here")
+    # print("suspect stuff around here")
     zMax = np.pi / (a0) / 4
     kx = 0 * zMax
     ky = 0 * zMax
@@ -175,7 +175,7 @@ def kp_bands(material, host_material, kx=0, ky=0, kz=0, return_so=False, graph=F
     result = eight_band_strain_hamiltonian(kx, ky, kz, Ev0, Ec0, exx, ezz, me_eff, g1, g2, g3, a0, Delta, ac, av, b, Ep)
     so, lh, hh, c = result[::2]
     if material.lattice_constant < host_material.lattice_constant:
-        #print("CAUTION: BLINDLY SWAPPING HH,LH LABELS BASED ON LATTICE CONSTANT")
+        # print("CAUTION: BLINDLY SWAPPING HH,LH LABELS BASED ON LATTICE CONSTANT")
         lh, hh = hh, lh
 
     if fit_effective_mass:
@@ -207,7 +207,7 @@ def kp_bands(material, host_material, kx=0, ky=0, kz=0, return_so=False, graph=F
 
         m_eff_so, m_eff_lh, m_eff_hh, m_eff_c = effective_masses[::2]
         if material.lattice_constant < host_material.lattice_constant:
-            #print("CAUTION: BLINDLY SWAPPING EFF MASS HH,LH LABELS BASED ON LATTICE CONSTANT")
+            # print("CAUTION: BLINDLY SWAPPING EFF MASS HH,LH LABELS BASED ON LATTICE CONSTANT")
             m_eff_lh, m_eff_hh = m_eff_hh, m_eff_lh
 
     if graph:
@@ -235,7 +235,8 @@ def kp_bands(material, host_material, kx=0, ky=0, kz=0, return_so=False, graph=F
                                    alpha=0.7))
 
             g.append(GraphData(x_graph, np.array(b) / electron_charge, color="black"))
-        a = Graph(g, xticks=ticks, xticklabels=labels, ylabel="$E$ (eV)", xlabel="$k$", palette="hue wheel", ylim=(-2, 1))
+        a = Graph(g, xticks=ticks, xticklabels=labels, ylabel="$E$ (eV)", xlabel="$k$", palette="hue wheel",
+                  ylim=(-2, 1))
         # a = Graph(g, xticks = xticks, ylabel="$E$ (eV)", palette="hue wheel", ylim = (-2,1))
         # a = Graph(g,  ylabel="$E$ (eV)", palette="hue wheel", title="{} on {} -- Luttinger-Kohn w/Pikus-Bir(Stanko)".format(str(material), str(host_material)), ylim = (-2,1))
         a.draw()
@@ -291,7 +292,7 @@ def KPbands(material, host_material, return_edges_only=False, plot_result=False,
 
         if a0 < host_material.lattice_constant:
             # We need to figure out a safer way of doing this
-            #print("CAUTION: BLINDLY SWAPPING HH,LH LABELS BASED ON LATTICE CONSTANT")
+            # print("CAUTION: BLINDLY SWAPPING HH,LH LABELS BASED ON LATTICE CONSTANT")
             lh, hh = hh, lh
 
         return (c, hh, lh, so)
@@ -329,14 +330,14 @@ def fit_effective_masses(bands, material, host_material, plot_result=False, dk=0
     # but the difference is generally not too big
     kmax = 2 * np.pi / a0
 
-    # We give more weight in the fit to those k.txt points near k.txt=0
+    # We give more weight in the fit to those k points near k=0
     weigth = np.exp(- bands[0] ** 2 / (dk * kmax) ** 2)
     for i in range(1, len(bands), 2):  # Bands are duplicated (at least for now) so we only fit half of them
         band = bands[i]
 
-        # The initial guess for the effective mass        
-        p0 = 0.3
-        if band[1] < band[0]: p0 = -p0  # If bands bend downwards, the curvature (the effective mass) is negative
+        # The initial guess for the effective mass (forward finite differences at k = 0)
+        p0 = (bands[0][2] - bands[0][1]) * (bands[0][1] - bands[0][0]) / (
+                    band[2] - 2 * band[1] + band[0]) * hbar ** 2 / m0
 
         # We consider only points with weight > 0.01 to speed up the algorithm and prevent convergence errors
         popt, pcov = curve_fit(parabolic, bands[0][weigth > 0.01], band[weigth > 0.01] - band[0], p0=p0,
@@ -344,7 +345,6 @@ def fit_effective_masses(bands, material, host_material, plot_result=False, dk=0
 
         # Standard error in the calculation of the mass
         # perr = np.sqrt(np.diag(pcov))
-
         masses.append(popt[0])
         fit = band[0] + parabolic(bands[0], popt[0])
 
@@ -355,7 +355,7 @@ def fit_effective_masses(bands, material, host_material, plot_result=False, dk=0
 
     if a0 < host_material.lattice_constant:
         # We need to figure out a safer way of doing this
-        #print("CAUTION: BLINDLY SWAPPING HH,LH LABELS BASED ON LATTICE CONSTANT")
+        # print("CAUTION: BLINDLY SWAPPING HH,LH LABELS BASED ON LATTICE CONSTANT")
         masses[1], masses[2] = masses[2], masses[1]
 
     if plot_result:

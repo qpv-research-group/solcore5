@@ -18,15 +18,14 @@ i_GaAs = material('GaAs')(T=T)
 
 # The QW is 7 nm wide, with GaAs interlayers 2 nm thick at each side and GaAsP barriers 10 nm thick.
 # The final device will have 30 of these QWs.
-QW = PDD.CreateDeviceStructure('QW', T=T, repeat=30, substrate=i_GaAs, layers=[
-    Layer(width=10e-9, material=Bmat, role="barrier"),
-    Layer(width=2e-9, material=i_GaAs, role="interlayer"),
-    Layer(width=7e-9, material=QWmat, role="well"),
-    Layer(width=2e-9, material=i_GaAs, role="interlayer"),
-    Layer(width=10e-9, material=Bmat, role="barrier")])
+QW = PDD.QWunit([Layer(width=10e-9, material=Bmat, role="barrier"),
+                 Layer(width=2e-9, material=i_GaAs, role="well"),
+                 Layer(width=7e-9, material=QWmat, role="well"),
+                 Layer(width=2e-9, material=i_GaAs, role="well"),
+                 Layer(width=10e-9, material=Bmat, role="barrier")], T=T, repeat=30, substrate=i_GaAs)
 
 # We solve the quantum properties of the QW, leaving the default values of all parameters
-QW_list = PDD.SolveQWproperties(QW, wavelengths=wl)
+QW_list = QW.GetEffectiveQW(wavelengths=wl)
 
 # Materials for the BOTTOM junction
 window_bottom = material('GaInP')(T=T, Nd=5e24, In=0.49)
@@ -120,7 +119,6 @@ axIV.set_xlabel('Voltage (V)')
 axIV.set_ylabel('Normalized current (-)')
 
 plt.tight_layout()
-plt.savefig('IVvsC.eps')
 
 fig2, axes = plt.subplots(2, 2, figsize=(11.25, 8))
 

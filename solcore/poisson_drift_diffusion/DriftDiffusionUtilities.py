@@ -177,11 +177,11 @@ def iv_pdd(junction, options):
     s = True if junction[0].material.Na >= junction[0].material.Nd else False
 
     if s:
-        vmax = min(Eg - 3 * kb * T / q, max(junction.voltage))
+        vmax = min(Eg + 3 * kb * T / q, max(junction.voltage))
         vmin = min(junction.voltage)
     else:
         vmax = max(junction.voltage)
-        vmin = max(-Eg + 3 * kb * T / q, min(junction.voltage))
+        vmin = max(-Eg - 3 * kb * T / q, min(junction.voltage))
 
     vstep = junction.voltage[1] - junction.voltage[0]
 

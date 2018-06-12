@@ -93,7 +93,7 @@ This module defines a class derived from *solcore.Structure* that allows to solv
 		
 		It requires as input if kp should be used to recalculate the band positions and effective masses ('use_kp=True') and the output of the Schrodinger solver.
 		
-	.. py:method:: RecalculateDensityOfStates()
+	.. py:method:: RecalculateDensityOfStates(SR)
 	
 		Calculates the effective density of states for each layer in the QW. The general rule is:
 		- Barriers have the bulk density of states
@@ -112,7 +112,41 @@ This module defines a class derived from *solcore.Structure* that allows to solv
 		
 		The calculation is similar to that in [#Ref3]_ but, as with the DOS, it can probably be improved. 
 		
-		The required input is if Adachi method [#Ref1]_ for calculating the absorption should be used ('use_Adachi=True') and the output of the Schrodinger solver. 
+		The required input is if Adachi method [#Ref1]_ for calculating the absorption should be used ('use_Adachi=True') and the output of the Schrodinger solver.
+
+    .. py:method:: GetEffectiveQW(calculate_absorption=True, wavelengths=None, periodic=True, filter_strength=0.0, blur=None, blurmode="left",use_kp=True, use_Adachi=False, alpha_params=None)
+
+        Considers the device as a QW and solves its properties, including the modification of the bandeges due to strain, the efective mases and the absorption coefficient. Without calling this function, the structure is just a collection of layers with bulk-like properties.
+
+        **Output**: A list of layers with the effective properties of the QWs, repeated as many times as needed in case of a MQW.
+
+    .. code-block:: python
+
+       # This example illustrates the creation of a QW structure with 40 wells, solve its quantum properties and
+       # add it to the intrinsic region of a p-i-n solar cell
+
+       import solcore.poisson_drift_diffusion as PDD
+       from solcore.structure import Layer
+       from solcore import material
+
+       # First, we create the materials of the QW
+       QWmat       = material('InGaAs')    (T=300, In=0.2)
+       Bmat        = material('GaAsP')     (T=300, P=0.1)
+       i_GaAs      = material('GaAs')      (T=300)
+
+       # The QW is 7 nm wide, with GaAs interlayers 2 nm thick at each side and GaAsP barriers 10 nm thick.
+       # The final device will have 40 of these QWs.
+       QW = PDD.QWunit( [Layer(width = 10e-9,          material = Bmat,           role="barrier"),
+                         Layer(width = 2e-9,           material = i_GaAs,         role="interlayer"),
+                         Layer(width = 7e-9,           material = QWmat,          role="well"),
+                         Layer(width = 2e-9,           material = i_GaAs,         role="interlayer"),
+                         Layer(width = 10e-9,          material = Bmat,           role="barrier") ],
+                         T = 300, repeat = 40)
+
+       # We solve the quantum properties of the QW
+       effective_QW = QW.GetEffectiveQW(QW)
+
+In this case, "effective_QW" is a list of 200 layers (5 layers per QW unit repeated 40 times) but rather than the bulk material properties, they include effective properties as a result of the quantum calculation.
 		
 All functions description
 -------------------------

@@ -25,11 +25,11 @@ With this, all the functionality of the package will be available to the user. T
 
 2.	:doc:`Device Structure <DeviceStructure>`
     **File:** solcore/PDD/DeviceStructure.py
-	Contains several functions necessary to build a structure that can be read by the PDD solver. The most important of this functions is **CreateDeviceStructure** that scans the junction layers and extracts from the materials database all the parameters required by the PDD solver. This same method is used to assemble a QW, which is then solved with **SolveQWproperties**. This is the only situation when the methods in this module might be used directly. Finally, it contains the default properties that are used if they are not found for a particular material. In general, these default properties correspond to those of GaAs at 293 K.
+	Contains several functions necessary to build a structure that can be read by the PDD solver. The most important of this functions is **CreateDeviceStructure** that scans the junction layers and extracts from the materials database all the parameters required by the PDD solver. Finally, it contains the default properties that are used if they are not found for a particular material. In general, these default properties correspond to those of GaAs at 293 K.
 
 3.	:doc:`QW unit creator <QWunit>`
     **File:** solcore/PDD/QWunit.py
-	Contains utilities that transform the device structure into a *structure* that, in turn, can be used to solve the Schrodinger equation and the kp model. It also prepares the properties of the structure (bandedges, efective density of states, etc) in order to have a meaningful set of properties for the DD solver. It is used by the **SolveQWproperties** method described above.
+	Contains utilities that transform the sequence of layers into a *structure* that, in turn, can be used to solve the Schrodinger equation and the kp model. It also prepares the properties of the structure (bandedges, efective density of states, etc) in order to have a meaningful set of properties for the DD solver, using the **GetEffectiveQW**.
 
 4.	**Drift Diffusion Fortran solver**
 
