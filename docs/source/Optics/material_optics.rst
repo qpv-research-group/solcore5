@@ -127,6 +127,27 @@ and the interpolated :math:`n` and :math:`k` data is returned.
 
 .. automodule:: solcore.absorption_calculator.sopra_db
     :members:
+	
+Manually changing optical constants of a material
+------------------------------------------------------
+
+If you would like to define a material with optical constant data from a file, 
+you can do this by telling Solcore the path to the optical constant data, e.g.:
+
+.. code-block:: python
+
+    this_dir = os.path.split(__file__)[0]
+
+    SiGeSn = material('Ge')(T=T, electron_mobility=0.05, hole_mobility=3.4e-3)
+
+    SiGeSn.n_path = this_dir + '/SiGeSn_n.txt'
+    SiGeSn.k_path = this_dir + '/SiGeSn_k.txt'
+	
+In this case, we have defined a material which is like the built-in Solcore germanium
+material, but with new data for the refractive index and extinction coefficient from 
+the files SiGeSn_n.txt and SiGeSn_k.txt, respectively, which are in the same folder 
+as the Python script. The format of these files is tab-separated, with the first column
+being wavelength (in nm) and the second column n or k. 
 
 References
 ----------
