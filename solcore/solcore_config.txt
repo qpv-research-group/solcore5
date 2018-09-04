@@ -30,6 +30,7 @@ AlInP: SOLCORE_ROOT/material_data/AlInP-Material
 
 [Others]
 sopra: SOLCORE_ROOT/material_data/SOPRA_DB
+nk: SOLCORE_ROOT/material_data/NK.db
 
 [External programs]
 spice:
