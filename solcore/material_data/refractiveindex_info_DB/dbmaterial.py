@@ -5,7 +5,7 @@ import argparse
 import numpy
 import scipy.interpolate
 
-class Material:
+class DBMaterial:
     """ Material class"""
     def __init__(self, filename,interpolation_points=100,empty=False):
         """
@@ -166,7 +166,7 @@ class Material:
 
     @staticmethod
     def FromLists(pageinfo,wavelengths_r=None,refractive=None,wavelengths_e=None,extinction=None):
-        mat = Material("",empty=True)
+        mat = DBMaterial("",empty=True)
         mat.pageinfo = pageinfo
         if refractive is not None:
             mat.refractiveIndex = TabulatedRefractiveIndexData.FromLists(wavelengths_r,refractive)

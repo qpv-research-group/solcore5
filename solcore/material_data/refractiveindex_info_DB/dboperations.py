@@ -4,8 +4,8 @@ import yaml
 import sqlite3
 import numpy as np
 
-from solcore.material_data.refractiveindex_info_DB import material
-from solcore.material_data.refractiveindex_info_DB import Material
+from solcore.material_data.refractiveindex_info_DB import dbmaterial
+from solcore.material_data.refractiveindex_info_DB import DBMaterial
 
 Shelf = namedtuple('Shelf', ['shelf', 'name'])
 Book = namedtuple('Book', ['book', 'name'])
@@ -158,7 +158,7 @@ class Database:
                 extinction = [r[1] for r in results]
             conn.close()
             print("Material",pagedata['filepath'],"loaded.")
-            return Material.FromLists(pagedata,wavelengths_r=wavelengths_r,refractive=refractive,
+            return DBMaterial.FromLists(pagedata,wavelengths_r=wavelengths_r,refractive=refractive,
                                       wavelengths_e=wavelengths_e,extinction=extinction)
 
     def get_material_n_numpy(self,pageid):
@@ -306,7 +306,7 @@ def _populate_sqlite_database(refractiveindex_db_path,new_sqlite_db,interpolatio
     c = conn.cursor()
     for e in entries:
         try:
-            mat = material.Material(filename=e.page.path,interpolation_points=interpolation_points)
+            mat = DBMaterial(filename=e.page.path,interpolation_points=interpolation_points)
             hasrefractive=0
             hasextinction=0
             if mat.has_refractive():

@@ -1,1 +1,1 @@
-from .material import Material
+from .dbmaterial import DBMaterial
