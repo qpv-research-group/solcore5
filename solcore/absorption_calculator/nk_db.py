@@ -12,7 +12,7 @@ def download_db(url = None, interpolation_points = 200):
     if url is None:
         db.create_database_from_url(interpolation_points)
     else:
-        db.create_database_from_url(interpolar_points, url)
+        db.create_database_from_url(interpolation_points, url)
 
 
 def search_db(term="", exact=False):
@@ -52,3 +52,10 @@ def nkdb_load_k(pageid):
     wl = res[:, 0]
     k = res[:, 1]
     return wl, k
+
+
+def create_nk_txt(pageid, file, folder=""):
+    db = DB.Database(NK_PATH)
+    if not os.path.exists(folder) and folder != "":
+        os.makedirs(folder)
+    res = db.get_material_txt(int(pageid), output=file, folder=folder)

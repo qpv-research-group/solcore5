@@ -4,7 +4,7 @@ import yaml
 import sqlite3
 import numpy as np
 
-from solcore.material_data.refractiveindex_info_DB import dbmaterial
+# from solcore.material_data.refractiveindex_info_DB import dbmaterial
 from solcore.material_data.refractiveindex_info_DB import DBMaterial
 
 Shelf = namedtuple('Shelf', ['shelf', 'name'])
@@ -193,6 +193,19 @@ class Database:
         if folder != "":
             output = folder+os.sep+output
         mat.to_csv(output)
+
+    def get_material_txt(self, pageid, output="", folder=""):
+        mat = self.get_material(pageid)
+        if mat is None:
+            print("PageID not found.")
+            return None
+        matInfo = mat.get_page_info()
+        #print(matInfo)
+        if output=="":
+            output = "_".join([str(matInfo['pageid']),matInfo['shelf'],matInfo['book'],matInfo['page']])+".csv"
+        if folder != "":
+            output = folder+os.sep+output
+        mat.to_txt(output)
 
     def get_material_csv_all(self, outputfolder):
         allids = self._get_all_pageids()

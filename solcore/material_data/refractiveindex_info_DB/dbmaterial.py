@@ -164,6 +164,29 @@ class DBMaterial:
                 output_f.close()
                 print("Wrote",output.replace(".csv","(k).csv"))
 
+    def to_txt(self, output):
+        refr = self.get_complete_refractive()
+        ext = self.get_complete_extinction()
+        #FizzFuzz
+
+        if self.has_refractive():
+            output_f = open(output.replace(".txt","_n.txt"),'w')
+            for i in range(len(refr)):
+                output_f.write(" ".join(list(map(str,[refr[i][0]*1e-6,refr[i][1]])))+"\n")
+            output_f.close()
+            print("Wrote",output.replace(".txt","_n.txt"))
+        else:
+            print("No n data available, file not written")
+
+        if self.has_extinction():
+            output_f = open(output.replace(".txt","_k.txt"),'w')
+            for i in range(len(ext)):
+                output_f.write(" ".join(list(map(str,[ext[i][0]*1e-6,ext[i][1]])))+"\n")
+            output_f.close()
+            print("Wrote",output.replace(".txt","_k.txt"))
+        else:
+            print("No k data available, file not written")
+
     @staticmethod
     def FromLists(pageinfo,wavelengths_r=None,refractive=None,wavelengths_e=None,extinction=None):
         mat = DBMaterial("",empty=True)

@@ -527,3 +527,4 @@ include solcore/optics/__init__.py
 include solcore/optics/rcwa.py
 include solcore/optics/beer_lambert.py
 include solcore/optics/external_optics.py
+include solcore/material_data/Custom
