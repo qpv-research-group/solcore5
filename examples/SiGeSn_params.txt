@@ -1,0 +1,27 @@
+[SiGeSn]
+lattice_constant=5.658 Angstrom
+Eg0_Gamma=0.89 eV
+alpha_Gamma=0.582 meV K-1
+beta_Gamma=296 K
+Eg0_L=0.742 eV
+alpha_L=0.48 meV K-1
+beta_L=235 K
+spin_orbit_splitting=0.29 eV
+eff_mass_DOS_L=0.22 
+eff_mass_DOS_X=0.22 
+gamma1=13.35
+gamma2=4.25
+gamma3=5.69 
+eff_mass_split_off=0.084
+eff_mass_electron=0.12
+eff_mass_hh_z=0.33
+eff_mass_lh_z=0.043
+interband_matrix_element=26.3 eV
+c11=126 GPa
+c12=44 GPa
+c44=67.7 GPa
+relative_dielectric_constant=16.2
+electron_affinity=4.0 eV
+electron_auger_recombination=1e-42
+hole_auger_recombination=1e-42
+radiative_recombination=6.4e-20

@@ -202,9 +202,13 @@ class Database:
         matInfo = mat.get_page_info()
         #print(matInfo)
         if output=="":
-            output = "_".join([str(matInfo['pageid']),matInfo['shelf'],matInfo['book'],matInfo['page']])+".csv"
+            output = "_".join([str(matInfo['pageid']),matInfo['shelf'],matInfo['book'],matInfo['page']])+".txt"
         if folder != "":
             output = folder+os.sep+output
+
+        if '.txt' not in output:
+            output = output+'.txt'
+
         mat.to_txt(output)
 
     def get_material_csv_all(self, outputfolder):

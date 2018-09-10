@@ -35,7 +35,7 @@ def search_db(term="", exact=False):
         for r in results:
             print("\t".join(map(str, r[:])))
     conn.close()
-    # return results
+    return results
 
 
 def nkdb_load_n(pageid):
