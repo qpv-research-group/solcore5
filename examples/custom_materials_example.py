@@ -5,6 +5,7 @@ from solcore.absorption_calculator import create_nk_txt, download_db, search_db
 import matplotlib.pyplot as plt
 import numpy as np
 
+# note that in both cases
 # EXAMPLE 1
 
 # need to have n and k data, and a parameter file in the correct format -
