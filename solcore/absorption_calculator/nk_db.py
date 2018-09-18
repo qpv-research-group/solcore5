@@ -8,6 +8,15 @@ NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE
 
 
 def download_db(url = None, interpolation_points = 200):
+    """
+    This function downloads the refractiveindex.info database and creates on SQLite databae at
+    the path specified in the (user or default) config file.
+
+    :param url: URL from which the zip archive of the database will be downloaded. Default is "https://refractiveindex.info/download/database/rii-database-2017-09-05.zip"
+    :param interpolation_points: how many interpolation points to save the data at. Default is 200.
+    :return:
+    """
+
     db = DB.Database(NK_PATH)
     if url is None:
         db.create_database_from_url(interpolation_points)
@@ -16,6 +25,15 @@ def download_db(url = None, interpolation_points = 200):
 
 
 def search_db(term="", exact=False):
+    """
+    Search the downloaded SQLite database.
+
+    :param term: search term (e.g. the name of a material, or a source).
+    :param exact: search by exact (True) or approximate (False, default) terms.
+    :return: A list of tuples of with one tuple per database entry matching the search term.
+    The first entry of each tuple is the pageid of the database entry.
+    """
+
     db = DB.Database(NK_PATH)
     conn = sqlite3.connect(db.db_path)
     c = conn.cursor()
@@ -55,6 +73,18 @@ def nkdb_load_k(pageid):
 
 
 def create_nk_txt(pageid, file, folder=""):
+    """
+    This function creates two files called [file]_n.txt and [file]_k.txt (with [file]
+    as specified in the arguments. The format matches that used by create_new_material,
+    with the first column being the wavelength in metres and the second column the n or k values.
+
+    :param pageid: pageid (number) of the database entry to be used
+    :param file: name of the file to be created: the n and k data will be saved separately as
+    [file]_n.txt and [file]_k.txt
+    :param folder: folder where the files should be saved
+    :return: parameter_source: file with list of other parameters for the new material
+    """
+
     db = DB.Database(NK_PATH)
     if not os.path.exists(folder) and folder != "":
         os.makedirs(folder)
