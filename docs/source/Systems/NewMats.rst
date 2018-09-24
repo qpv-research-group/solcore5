@@ -1,5 +1,5 @@
 Defining new materials
-===================
+=======================
 
 .. toctree::
     :maxdepth: 1
@@ -27,7 +27,7 @@ The default locations are within the Solcore package directory:
 - custom_mats: SOLCORE_ROOT/material_data/Custom
 
 Adding new materials to the database
-------------------------------------
+-------------------------------------
 
 .. automodule:: solcore.material_system.create_new_material
     :members:
@@ -44,7 +44,7 @@ the ``custom_mats`` path. The n and k data files you provide will be copied into
 the file specified under the ``custom`` path.
 
 Using refractiveindex.info
---------------------------
+---------------------------
 
 .. automodule:: solcore.absorption_calculator.nk_db
     :members:
@@ -53,8 +53,8 @@ Using refractiveindex.info
 Before the first use, you will need to download the database:
 
 .. code-block:: Python
-from solcore.absorption_calculator download_db
-download_db()
+	from solcore.absorption_calculator download_db
+	download_db()
 
 ``download_db`` takes two (optional) arguments: the URL of the database to be downloaded,
 (default is the most recent, hardcoded into the function), and how many interpolation points 
@@ -69,20 +69,20 @@ of the database entries is appropriate (e.g. in terms of the wavelength range, a
 of data is available) rather than simply using the first result.
 
 .. code-block:: Python
-results = search_db('Diamond')
-Diamond = material(name = str(results[0][0]), nk_db = True)()
+	results = search_db('Diamond')
+	Diamond = material(name = str(results[0][0]), nk_db = True)()
 
 
 Adding materials from refractiveindex.info to the database
-----------------------------------------------
+---------------------------------------------------------------
 
 There is a convenient function, ``create_nk_txt``, to generate the n and k data files needed to
 add a new material to the Solcore database directly from the downloaded refractiveindex.info database:
 
 .. code-block:: Python
-results = search_db('Diamond')
-create_nk_txt(pageid=results[0][0], file='C_Diamond')
-create_new_material(mat_name = 'Diamond', n_source='C_Diamond_n.txt', k_source='C_Diamond_k.txt')
+	results = search_db('Diamond')
+	create_nk_txt(pageid=results[0][0], file='C_Diamond')
+	create_new_material(mat_name = 'Diamond', n_source='C_Diamond_n.txt', k_source='C_Diamond_k.txt')
 
 This searches the refractiveindex.info database for entries matching 'Diamond', and then creates
 files with the n and k data from the first matching database entry in the format required by 
