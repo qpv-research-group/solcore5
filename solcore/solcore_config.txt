@@ -13,6 +13,7 @@ adachi_compounds: SOLCORE_ROOT/material_data/Adachi/ternaries.txt
 vurgaftman_binaries: SOLCORE_ROOT/material_data/Vurgaftman/binaries.txt
 vurgaftman_compounds: SOLCORE_ROOT/material_data/Vurgaftman/ternaries.txt
 levinshtein_groupIV: SOLCORE_ROOT/material_data/Levinshtein/GroupIV.txt
+custom: SOLCORE_ROOT/material_data/Custom/parameters.txt
 
 [Materials]
 GaAs: SOLCORE_ROOT/material_data/GaAs-Material
@@ -30,6 +31,8 @@ AlInP: SOLCORE_ROOT/material_data/AlInP-Material
 
 [Others]
 sopra: SOLCORE_ROOT/material_data/SOPRA_DB
+nk: SOLCORE_ROOT/material_data/NK.db
+custom_mats: SOLCORE_ROOT/material_data/Custom
 
 [External programs]
 spice:
