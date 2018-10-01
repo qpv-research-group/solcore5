@@ -283,7 +283,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u', coherent=True, cohere
             assert len(coherency_list) == stack.num_layers, \
                 'Error: The coherency list must have as many elements (now {}) as the ' \
                 'number of layers (now {}).'.format(len(coherency_list), stack.num_layers)
-            
+
             if stack.no_back_reflexion:
                 coherency_list = ['i'] + coherency_list + ['i', 'i']
             else:
