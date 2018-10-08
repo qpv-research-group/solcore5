@@ -4,9 +4,6 @@ import sqlite3
 from solcore.material_data.refractiveindex_info_DB import dboperations as DB
 from solcore import config, SOLCORE_ROOT
 
-NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
-
-
 def download_db(url = None, interpolation_points = 200):
     """
     This function downloads the refractiveindex.info database and creates on SQLite databae at
@@ -16,6 +13,7 @@ def download_db(url = None, interpolation_points = 200):
     :param interpolation_points: how many interpolation points to save the data at. Default is 200.
     :return:
     """
+    NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
 
     db = DB.Database(NK_PATH)
     if url is None:
@@ -33,6 +31,7 @@ def search_db(term="", exact=False):
     :return: A list of tuples of with one tuple per database entry matching the search term.
     The first entry of each tuple is the pageid of the database entry.
     """
+    NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
 
     db = DB.Database(NK_PATH)
     conn = sqlite3.connect(db.db_path)
@@ -57,6 +56,8 @@ def search_db(term="", exact=False):
 
 
 def nkdb_load_n(pageid):
+    NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
+
     db = DB.Database(NK_PATH)
     res = db.get_material_n_numpy(int(pageid))
     wl = res[:, 0]
@@ -65,6 +66,8 @@ def nkdb_load_n(pageid):
 
 
 def nkdb_load_k(pageid):
+    NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
+
     db = DB.Database(NK_PATH)
     res = db.get_material_k_numpy(int(pageid))
     wl = res[:, 0]
@@ -84,6 +87,7 @@ def create_nk_txt(pageid, file, folder=""):
     :param folder: folder where the files should be saved
     :return: parameter_source: file with list of other parameters for the new material
     """
+    NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
 
     db = DB.Database(NK_PATH)
     if not os.path.exists(folder) and folder != "":
