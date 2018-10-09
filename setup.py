@@ -86,7 +86,7 @@ setup(
     packages=find_packages(exclude=[]),
     package_data={'': ['*.*']},
     data_files=gen_data_files('solcore'),
-    install_requires=['numpy', 'matplotlib', 'scipy', 'Sphinx', 'tmm', 'natsort', 'regex', 'cycler'],
+    install_requires=['numpy', 'matplotlib', 'scipy', 'Sphinx', 'tmm', 'natsort', 'regex', 'cycler', 'yaml'],
     include_package_data=True,
     test_suite='nose.collector',
     tests_require=['nose', 'numpy', 'matplotlib', 'scipy', 'tmm', 'natsort', 'regex', 'cycler'],
