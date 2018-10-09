@@ -4,22 +4,31 @@ import sqlite3
 from solcore.material_data.refractiveindex_info_DB import dboperations as DB
 from solcore import config, SOLCORE_ROOT
 
-def download_db(url = None, interpolation_points = 200):
+def download_db(url = None, interpolation_points = 200, confirm = False):
     """
-    This function downloads the refractiveindex.info database and creates on SQLite databae at
-    the path specified in the (user or default) config file.
+    This function downloads the refractiveindex.info database and creates on SQLite database at
+    the path specified in the user config file.
 
     :param url: URL from which the zip archive of the database will be downloaded. Default is "https://refractiveindex.info/download/database/rii-database-2017-09-05.zip"
     :param interpolation_points: how many interpolation points to save the data at. Default is 200.
+    :param confirm: if True, will not ask if you want to download database again even if it has been downloaded previously
     :return:
     """
     NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
 
-    db = DB.Database(NK_PATH)
-    if url is None:
-        db.create_database_from_url(interpolation_points)
-    else:
-        db.create_database_from_url(interpolation_points, url)
+    if os.path.isfile(NK_PATH):
+        response = input('There is already a downloaded database file.'
+                         'Do you want to download it again (Y/n)?')
+
+        if response in 'Yy':
+            confirm = True
+
+    if confirm:
+        db = DB.Database(NK_PATH)
+        if url is None:
+            db.create_database_from_url(interpolation_points)
+        else:
+            db.create_database_from_url(interpolation_points, url)
 
 
 def search_db(term="", exact=False):
