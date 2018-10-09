@@ -1,3 +1,5 @@
+# From: https: // github.com / HugoGuillen / refractiveindex.info - sqlite
+
 from collections import namedtuple,OrderedDict
 import os
 import yaml

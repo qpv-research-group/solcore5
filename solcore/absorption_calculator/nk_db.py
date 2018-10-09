@@ -1,3 +1,7 @@
+# This code is heavily based on/copied from the refractiveindex.info-sqlite code
+# found here on GitHub: https://github.com/HugoGuillen/refractiveindex.info-sqlite
+# However, there are some modifications from the original code
+
 import os
 import sqlite3
 

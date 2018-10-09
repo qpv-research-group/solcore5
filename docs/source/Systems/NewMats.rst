@@ -37,7 +37,7 @@ file).
     add_source('Others', 'custom_mats', custom_nk_path)
     add_source('Others', 'nk', nk_db_path)
     add_source('Parameters', 'custom', param_path)
-
+	
 
 Adding new materials to the database
 -------------------------------------
@@ -73,6 +73,10 @@ Before the first use, you will need to download the database:
 ``download_db`` takes two (optional) arguments: the URL of the database to be downloaded,
 (default is the most recent, hardcoded into the function), and how many interpolation points 
 to use when saving the database (default is 200).
+
+The code which is used to download and get data from the refractiveindex.info
+database is based on code from `Hugo Guillen
+<https://github.com/HugoGuillen/refractiveindex.info-sqlite>`_.
 
 You can now directly use materials from the .db file created this way by 
 referencing them via their **pageid**. To locate which database entry you want to use,

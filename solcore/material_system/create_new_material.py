@@ -2,8 +2,6 @@
 # Solcore material, its path has to be added to the config file and MANIFEST.in
 # Have to copy the relevant n, k and parameter files into that folder.
 
-# Presumably there will be an issue with permissions?
-
 import os
 
 from shutil import copyfile, move
