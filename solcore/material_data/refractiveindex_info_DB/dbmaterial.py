@@ -1,3 +1,5 @@
+# from: https://github.com/HugoGuillen/refractiveindex.info-sqlite
+
 import os
 import yaml
 import sys

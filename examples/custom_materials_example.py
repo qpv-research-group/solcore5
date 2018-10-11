@@ -2,10 +2,27 @@ from solcore import material
 from solcore import si
 from solcore.material_system import create_new_material
 from solcore.absorption_calculator import create_nk_txt, download_db, search_db
+from solcore.config_tools import add_source
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
-# note that in both cases
+# first we need to tell Solcore some things about where to put custom materials. for this,
+# we use the add_source function from config_tools, although we could also manually edit
+# the solcore configuration file (which should be in your home directory).
+# You need to add two things to the config file: where to put the n and k data for new
+# materials added to the database, and where to put the other parameters (these can all
+# go in the same file).
+
+home_folder = os.path.expanduser('~')
+custom_nk_path = os.path.join(home_folder, 'Solcore/custommats')
+nk_db_path = os.path.join(home_folder, 'Solcore/NK.db')
+param_path = os.path.join(home_folder, 'Solcore/custom_params.txt')
+
+add_source('Others', 'custom_mats', custom_nk_path)
+add_source('Others', 'nk', nk_db_path)
+add_source('Parameters', 'custom', param_path)
+
 # EXAMPLE 1
 
 # need to have n and k data, and a parameter file in the correct format -
@@ -27,7 +44,7 @@ plt.show()
 # Can also create a Solcore material from a material in the refractiveindex.info database:
 
 # if necessary, download database:
-# download_db()
+download_db()
 
 # search what options are available for diamond, then use the first result's pageid to
 # create data files for the n & k of diamond:

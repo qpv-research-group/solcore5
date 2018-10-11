@@ -2,17 +2,14 @@
 # Solcore material, its path has to be added to the config file and MANIFEST.in
 # Have to copy the relevant n, k and parameter files into that folder.
 
-# Presumably there will be an issue with permissions?
-
 import os
 
 from shutil import copyfile, move
 from re import sub
 from solcore import config, SOLCORE_ROOT
 from solcore.parameter_system import ParameterSystem
+from solcore.config_tools import add_source
 
-CUSTOM_PATH = os.path.abspath(config['Others']['custom_mats'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
-PARAMETER_PATH = os.path.abspath(config['Parameters']['custom'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
 
 
 def create_new_material(mat_name, n_source, k_source, parameter_source = None):
@@ -26,6 +23,9 @@ def create_new_material(mat_name, n_source, k_source, parameter_source = None):
     :param k_source: path of the n values (txt file, first column wavelength in m, second column k)
     :return: parameter_source: file with list of materials for the new material
     """
+
+    CUSTOM_PATH = os.path.abspath(config['Others']['custom_mats'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
+    PARAMETER_PATH = os.path.abspath(config['Parameters']['custom'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
 
     # check if there is already a material with this name
     if mat_name not in sorted(ParameterSystem().database.sections()):
@@ -74,14 +74,7 @@ def create_new_material(mat_name, n_source, k_source, parameter_source = None):
         existing_config = open(user_config, 'r').read()
         if not new_entry in existing_config:
 
-            temp = open('temp', 'w')
-            with open(user_config, 'r') as f:
-                for line in f:
-                    if line.startswith('[Materials]'):
-                        line = line.strip() + '\n' + new_entry
-                    temp.write(line)
-            temp.close()
-            move('temp', user_config)
+            add_source('Materials', mat_name, config['Others']['custom_mats'] + '/' + mat_name + '-Material')
 
         else:
             print('A path for this material was already added to the Solcore config file in the home directory.')
