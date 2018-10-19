@@ -6,3 +6,4 @@ tmm
 natsort
 regex
 cycler
+pyyaml
