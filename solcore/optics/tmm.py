@@ -19,6 +19,7 @@ def solve_tmm(solar_cell, options):
     """
     wl = options.wavelength
     BL_correction = options.BL_correction if 'BL_correction' in options.keys() else True
+    theta = options.theta if 'theta' in options.keys() else 0 # angle IN DEGREES
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1
@@ -73,10 +74,10 @@ def solve_tmm(solar_cell, options):
     profile_position = position[position < sum(stack.widths)]
 
     print('Calculating RAT...')
-    RAT = calculate_rat(full_stack, wl * 1e9, coherent=True)
+    RAT = calculate_rat(full_stack, wl * 1e9, angle=theta, coherent=True)
 
     print('Calculating absorption profile...')
-    out = calculate_absorption_profile(stack, wl * 1e9, dist=profile_position)
+    out = calculate_absorption_profile(stack, wl * 1e9, dist=profile_position, angle=theta)
 
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_tmm(out)
