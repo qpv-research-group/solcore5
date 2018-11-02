@@ -91,7 +91,7 @@ def solve_tmm(solar_cell, options):
         layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
                 options.position < solar_cell[j].offset + solar_cell[j].width)]
         layer_positions = layer_positions - np.min(layer_positions)
-        fraction = initial - RAT['R'] - previous_abs
+        fraction = 1 - RAT['R'] - previous_abs
         diff_absorption_BL, transmitted_BL, all_absorbed_BL = calculate_absorption_beer_lambert(widths, alphas,
                                                                                                 fraction)
         solar_cell[j].diff_absorption_BL = diff_absorption_BL
@@ -107,8 +107,8 @@ def solve_tmm(solar_cell, options):
         layer = layer + n_layers_junction[j]
 
     solar_cell.reflected = RAT['R'] * initial
-    solar_cell.transmitted = (1 - RAT['R'] - all_absorbed) * initial
     solar_cell.absorbed = sum([solar_cell[x].layer_absorption for x in np.arange(len(solar_cell))]) * initial
+    solar_cell.transmitted = initial - solar_cell.reflected - solar_cell.absorbed
 
 
 def absorbed(self, z):
@@ -119,6 +119,7 @@ def absorbed(self, z):
 
     else:
         replace = np.broadcast_to(np.any(self.where_BL, axis=0), (len(z), len(self.where_BL[0]))).T
+
     out_BL = (self.diff_absorption_BL(self.offset + z).T) * (z < self.width)
     out[replace] = 0
     out_BL[np.logical_not(replace)] = 0
