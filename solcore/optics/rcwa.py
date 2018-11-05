@@ -57,14 +57,14 @@ def solve_rcwa(solar_cell, options):
                                             dist=position, theta=options.theta, phi=options.phi, pol=options.pol)
 
     # With all this information, we are ready to calculate the differential absorption function
-    diff_absorption, all_absorbed = calculate_absorption_rcwa(out)
+    diff_absorption, all_absorbed = calculate_absorption_rcwa(out, initial)
 
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
     for j in range(len(solar_cell)):
         solar_cell[j].diff_absorption = initial*diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
-        
+
         layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
                 options.position < solar_cell[j].offset + solar_cell[j].width)]
         layer_positions = layer_positions - np.min(layer_positions)
