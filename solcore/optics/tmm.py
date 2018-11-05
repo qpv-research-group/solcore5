@@ -80,7 +80,7 @@ def solve_tmm(solar_cell, options):
     out = calculate_absorption_profile(stack, wl * 1e9, dist=profile_position, angle=theta)
 
     # With all this information, we are ready to calculate the differential absorption function
-    diff_absorption, all_absorbed = calculate_absorption_tmm(out)
+    diff_absorption, all_absorbed = calculate_absorption_tmm(out, initial)
 
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
@@ -91,7 +91,7 @@ def solve_tmm(solar_cell, options):
         layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
                 options.position < solar_cell[j].offset + solar_cell[j].width)]
         layer_positions = layer_positions - np.min(layer_positions)
-        fraction = 1 - RAT['R'] - previous_abs
+        fraction = initial - RAT['R'] - previous_abs
         diff_absorption_BL, transmitted_BL, all_absorbed_BL = calculate_absorption_beer_lambert(widths, alphas,
                                                                                                 fraction)
         solar_cell[j].diff_absorption_BL = diff_absorption_BL
@@ -128,9 +128,9 @@ def absorbed(self, z):
     return out.T
 
 
-def calculate_absorption_tmm(tmm_out):
+def calculate_absorption_tmm(tmm_out, initial=1):
     all_z = tmm_out['position'] * 1e-9
-    all_abs = tmm_out['absorption'] / 1e-9
+    all_abs = initial * tmm_out['absorption'] / 1e-9
 
     def diff_absorption(z):
         idx = all_z.searchsorted(z)

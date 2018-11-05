@@ -62,7 +62,7 @@ def solve_rcwa(solar_cell, options):
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
     for j in range(len(solar_cell)):
-        solar_cell[j].diff_absorption = diff_absorption
+        solar_cell[j].diff_absorption = initial*diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
 
     solar_cell.reflected = RAT['R'] * initial
@@ -75,9 +75,9 @@ def absorbed(self, z):
     return out.T
 
 
-def calculate_absorption_rcwa(tmm_out):
+def calculate_absorption_rcwa(tmm_out, initial=1):
     all_z = tmm_out['position'] * 1e-9
-    all_abs = tmm_out['absorption'] / 1e-9
+    all_abs = initial * tmm_out['absorption'] / 1e-9
 
     def diff_absorption(z):
         idx = all_z.searchsorted(z)
