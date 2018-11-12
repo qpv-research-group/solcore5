@@ -108,7 +108,7 @@ def solve_tmm(solar_cell, options):
 
     solar_cell.reflected = RAT['R'] * initial
     solar_cell.absorbed = sum([solar_cell[x].layer_absorption for x in np.arange(len(solar_cell))]) * initial
-    solar_cell.transmitted = initial - solar_cell.reflected - sum([solar_cell[x].layer_absorption for x in np.arange(len(solar_cell))])
+    solar_cell.transmitted = initial - solar_cell.reflected - solar_cell.absorbed
 
 
 def absorbed(self, z):
