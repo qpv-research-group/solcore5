@@ -15,9 +15,9 @@ def solve_beer_lambert(solar_cell, options):
     :return:
     """
     wl_m = options.wavelength
-    # wl_m = wl * 1e-9
+    solar_cell.wavelength = options.wavelength
+
     fraction = np.ones(wl_m.shape)
-    # absorbed = np.zeros(wl.shape)
 
     # We include the shadowing losses
     if hasattr(solar_cell, 'shading'):
@@ -55,6 +55,18 @@ def solve_beer_lambert(solar_cell, options):
                 # If the junction has a Jsc or EQE already defined, we ignore that junction in the optical calculation
                 if hasattr(solar_cell[j], 'jsc') or hasattr(solar_cell[j], 'eqe'):
                     print('Warning: A junction of kind "2D" found. Junction ignored in the optics calculation!')
+
+                    w = layer_object.width
+
+                    def alf(x):
+                        return 0.0*x
+
+                    solar_cell[j].alpha = alf
+                    solar_cell[j].reflected = interp1d(wl_m, solar_cell.reflected, bounds_error=False,
+                                                       fill_value=(0, 0))
+
+                    widths.append(w)
+                    alphas.append(alf(wl_m))
 
                 # Otherwise, we try to treat is as a DB junction from the optical point of view
                 else:

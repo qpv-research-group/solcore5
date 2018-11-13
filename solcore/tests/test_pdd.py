@@ -43,8 +43,7 @@ light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
 
 class TestPDD(TestCase):
     def test_92_light_iv(self):
-        answer = [142.68025180227374, 2.519346556870366, 0.9169672186977382, 329.61395441947565, 2.347826086956522,
-                  140.3911287342211, 0.3294918264376029]
+        answer = [142.67874466835747, 2.528516381541893, 0.9174137578275228, 330.97127267425367, 2.347826086956522, 140.9692457686636, 0.33084864178121165]
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
             filename = os.path.join(working_directory, 'solcore_log.txt')
             PDD.log(filename)
@@ -63,7 +62,7 @@ class TestPDD(TestCase):
             self.assertAlmostEqual(output[i], answer[i])
 
     def test_93_qe(self):
-        answer = [0.9866334968497021, 2.1512408472022467e-14, 0.9779769012349702, 0.03506561338387434]
+        answer = [0.98712861, 2.07187966e-14, 0.97730717, 0.03500039]
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
             filename = os.path.join(working_directory, 'solcore_log.txt')
             PDD.log(filename)

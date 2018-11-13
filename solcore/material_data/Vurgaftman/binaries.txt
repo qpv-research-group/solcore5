@@ -31,7 +31,7 @@ d=-4.8 eV
 c11=122.1 GPa
 c12=56.6 GPa
 c44=60.0 GPa
-relative_dielectric_constant=10.9
+relative_permittivity=10.9
 
 [AlN]
 lattice_constant=4.38 Angstrom
@@ -151,7 +151,7 @@ d=-5.0 eV
 c11=101.1 GPa
 c12=56.1 GPa
 c44=45.6 GPa
-relative_dielectric_constant=9.61
+relative_permittivity=9.61
 
 [InAs]
 lattice_constant=6.0583+2.74E-5*(T-300) Angstrom
@@ -186,7 +186,7 @@ d=-3.6 eV
 c11=83.29 GPa
 c12=45.26 GPa
 c44=39.59 GPa
-relative_dielectric_constant=12.3
+relative_permittivity=12.3
 
 [GaP]
 lattice_constant=5.4505+2.92e-5*(T-300) Angstrom
@@ -217,7 +217,7 @@ d=-4.6 eV
 c11=140.5 GPa
 c12=62.03 GPa
 c44=70.33 GPa
-relative_dielectric_constant=9.11
+relative_permittivity=9.11
 
 [GaN]
 lattice_constant=4.5 Angstrom

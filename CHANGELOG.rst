@@ -1,3 +1,10 @@
+**New in Solcore 5.6.0.dev1**
+- Parameters "relative_dielectric_constant" and "dielectric_constant" have been renamed "relative_permittivity" and "permittivity" in the parameter system and solar cell solvers. Changed also in the examples.
+- Light holes density of states are now considered in the Depletion Approximation solver by using the ni calculated in the materials system
+- The Depletion Approximation solver now checks that the junction is an homojunction
+- MORE TO BE ADDED (RAY TRACING, REFRACTIVEINDEX, ETC)
+- Added Sunglass, Solcore's graphic user interface
+
 **New in Solcore 5.5.2**
 - Updated installation instructions to avoid an error that ocurs when PiP passes the --with_pdd option to all Solcore dependencies.
 

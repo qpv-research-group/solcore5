@@ -16,6 +16,7 @@ def solve_external_optics(solar_cell, options):
     :param options:
     :return:
     """
+    solar_cell.wavelength = options.wavelength
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1
