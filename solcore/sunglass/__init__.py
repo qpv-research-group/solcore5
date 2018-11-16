@@ -1,1 +1,1 @@
-from sunglass.sunglass import Sunglass
+from .sunglass import Sunglass

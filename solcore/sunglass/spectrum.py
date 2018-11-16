@@ -42,6 +42,7 @@ class SpectrumTab(ttk.Frame):
         self.x_min.trace_add("write", self.update_plot)
         self.x_max.trace_add("write", self.update_plot)
         self.x_points.trace_add("write", self.update_plot)
+        self.concentration.trace_add("write", self.update_plot)
 
         # Next we create the variable that will hold the currently calculated LightSource object
         self.light_source = None
@@ -95,7 +96,7 @@ class SpectrumTab(ttk.Frame):
                                          values=LightSource.type_of_source, textvariable=self.source_type)
         source_type_label.grid(column=0, row=0, sticky=tk.NSEW)
         spectrum_type_box.grid(column=1, row=0, columnspan=2, sticky=tk.NSEW)
-        spectrum_type_box.bind('<<ComboboxSelected>>', self.update_plot)
+        spectrum_type_box.bind('<<ComboboxSelected>>', self.update_source_type_frame)
 
         # Units
         units_label = ttk.Label(general_properties_frame, text="Units")
@@ -108,20 +109,46 @@ class SpectrumTab(ttk.Frame):
         # Range
         range_label = ttk.Label(general_properties_frame, text="Range (min, max, points) in: ")
         x_units_label = ttk.Label(general_properties_frame, textvar=self.units_x)
-        x_max_label = ttk.Entry(general_properties_frame, textvar=self.x_min, width=10)
-        x_min_label = ttk.Entry(general_properties_frame, textvar=self.x_max, width=10)
-        x_points_label = ttk.Entry(general_properties_frame, textvar=self.x_points, width=10)
+        x_max_entry = ttk.Entry(general_properties_frame, textvar=self.x_min, width=10)
+        x_min_entry = ttk.Entry(general_properties_frame, textvar=self.x_max, width=10)
+        x_points_entry = ttk.Entry(general_properties_frame, textvar=self.x_points, width=10)
         range_label.grid(column=0, row=2, columnspan=2, sticky=tk.NSEW)
         x_units_label.grid(column=2, row=2, sticky=tk.NSEW)
-        x_max_label.grid(column=0, row=3, sticky=tk.NSEW)
-        x_min_label.grid(column=1, row=3, sticky=tk.NSEW)
-        x_points_label.grid(column=2, row=3, sticky=tk.NSEW)
+        x_max_entry.grid(column=0, row=3, sticky=tk.NSEW)
+        x_min_entry.grid(column=1, row=3, sticky=tk.NSEW)
+        x_points_entry.grid(column=2, row=3, sticky=tk.NSEW)
+
+        # Concentration
+        concentration_label = ttk.Label(general_properties_frame, text="Concentration")
+        concentration_entry = ttk.Entry(general_properties_frame, textvar=self.concentration)
+        concentration_label.grid(column=0, row=4, sticky=tk.NSEW)
+        concentration_entry.grid(column=1, row=4, columnspan=2, sticky=tk.NSEW)
 
         return control_frame
+
+    def update_source_type_frame(self, *args) -> None:
+        """ Updates the frame with the source options
+
+        :param args: Nothing useful
+        :return: None
+        """
+        source_type = self.source_type.get()
+
+        if source_type == 'standard':
+            self.spectrum = StandardSpectrum(parent=self.control_frame, row=4, update=self.update_plot)
+        elif source_type == 'black body':
+            self.spectrum = BlackBodySpectrum(parent=self.control_frame, row=4, update=self.update_plot)
+        elif source_type == 'laser':
+            self.spectrum = LaserSpectrum(parent=self.control_frame, row=4, update=self.update_plot)
+        else:
+            pass
+
+        self.update_plot()
 
     def update_plot(self, *args) -> None:
         """ Updates the plot whenever one of the settings changes and also update the LightSource variable
 
+        :param args: Nothing useful
         :return: None
         """
         self.update_units_labels_and_values()
@@ -206,24 +233,31 @@ class SpectrumTab(ttk.Frame):
 
         :return: None
         """
-        # First we create the x values
         try:
+            # First we create the x values
             x_min = self.x_min.get()
             x_max = self.x_max.get()
             x_points = self.x_points.get()
-        except Exception:
-            # If any of the parameters causes problems, we return the current light source
+            concentration = self.concentration.get()
+
+            # Now we retrieve the options
+            options = self.spectrum.get_options()
+
+        except Exception as err:
+            # If any of the parameters causes problems, typically because there's text input where there should be a
+            # number, we return the current light source
+            print(err)
             return self.light_source
 
-        # Now we retrieve the options
-        options = self.spectrum.get_options()
-
         # And now we are ready to create the spectrum
-        light_source = LightSource(source_type=self.source_type.get(),
-                                   x=np.linspace(x_min, x_max, x_points),
-                                   output_units=self.units.get(),
-                                   concentration=self.concentration.get(),
-                                   **options)
+        try:
+            light_source = LightSource(source_type=self.source_type.get(),
+                                       x=np.linspace(x_min, x_max, x_points),
+                                       output_units=self.units.get(),
+                                       concentration=concentration,
+                                       **options)
+        except TypeError:
+            return self.light_source
 
         return light_source
 
@@ -253,7 +287,7 @@ class SpectrumTab(ttk.Frame):
 
 
 class StandardSpectrum(ttk.LabelFrame):
-    """
+    """ ttk.Frame withh all the parameters required for the standard spectrum
 
     """
 
@@ -263,7 +297,7 @@ class StandardSpectrum(ttk.LabelFrame):
         :param parent:
         """
         super(StandardSpectrum, self).__init__(parent, text='Standard spectrum')
-        self.grid(column=col, row=row, sticky=tk.NSEW)
+        self.grid(column=col, row=row, sticky=tk.NSEW, pady=15)
 
         self.version = tk.StringVar(value='AM1.5g')
 
@@ -280,4 +314,104 @@ class StandardSpectrum(ttk.LabelFrame):
         :return: A ditcionary with the options
         """
         out = {'version': self.version.get()}
+        return out
+
+
+class BlackBodySpectrum(ttk.LabelFrame):
+    """ ttk.Frame withh all the parameters required for the black body spectrum
+
+    """
+
+    def __init__(self, parent: ttk.Frame, row: int, update: Callable[[], None], col: int = 0) -> None:
+        """
+
+        :param parent:
+        """
+        super(BlackBodySpectrum, self).__init__(parent, text='Black body spectrum')
+        self.grid(column=col, row=row, sticky=tk.NSEW)
+
+        self.temperature = tk.DoubleVar(value=6000.0)
+        self.entendue = tk.StringVar(value='Sun')
+        self.temperature.trace_add('write', update)
+        self.entendue.trace_add('write', update)
+
+        # Temperature
+        temperature_label = ttk.Label(self, text="Temperature (K)")
+        temperature_entry = ttk.Entry(self, textvar=self.temperature)
+        temperature_label.grid(column=0, row=0, sticky=tk.NSEW)
+        temperature_entry.grid(column=1, row=0, columnspan=2, sticky=tk.NSEW)
+
+        # Entendue
+        entendue_label = ttk.Label(self, text="Entendue")
+        entendue_box = ttk.Combobox(self, values=['1', 'Sun', 'hemispheric'], textvariable=self.entendue)
+        entendue_label.grid(column=0, row=1, sticky=tk.NSEW)
+        entendue_box.grid(column=1, row=1, columnspan=2, sticky=tk.NSEW)
+        entendue_box.bind('<<ComboboxSelected>>', update)
+
+    def get_options(self) -> Dict:
+        """ Returns a dictionary with the options of this type of spectrum
+
+        :return: A ditcionary with the options
+        """
+
+        temperature = max(self.temperature.get(), 1)
+
+        # The entendue can be either a number or a string. We try to convert it to float and, if fails, it is a string
+        try:
+            entendue = float(self.entendue.get())
+        except ValueError:
+            entendue = self.entendue.get()
+
+        out = {'T': temperature, 'entendue': entendue}
+        return out
+
+
+class LaserSpectrum(ttk.LabelFrame):
+    """ ttk.Frame with all the parameters required for the laser spectrum
+
+    """
+
+    def __init__(self, parent: ttk.Frame, row: int, update: Callable[[], None], col: int = 0) -> None:
+        """
+
+        :param parent:
+        """
+        super(LaserSpectrum, self).__init__(parent, text='Laser spectrum')
+        self.grid(column=col, row=row, sticky=tk.NSEW)
+
+        # Center of the gaussian
+        self.center = tk.DoubleVar(value=800)
+        self.center.trace_add('write', update)
+        center_label = ttk.Label(self, text="Center (nm)")
+        center_entry = ttk.Entry(self, textvar=self.center)
+        center_label.grid(column=0, row=0, sticky=tk.NSEW)
+        center_entry.grid(column=1, row=0, columnspan=2, sticky=tk.NSEW)
+
+        # Linewidth
+        self.linewidth = tk.DoubleVar(value=20)
+        self.linewidth.trace_add('write', update)
+        linewdith_label = ttk.Label(self, text="Linewidth (nm)")
+        linewidth_entry = ttk.Entry(self, textvar=self.linewidth)
+        linewdith_label.grid(column=0, row=1, sticky=tk.NSEW)
+        linewidth_entry.grid(column=1, row=1, columnspan=2, sticky=tk.NSEW)
+
+        # Total power
+        self.power = tk.DoubleVar(value=1000)
+        self.power.trace_add('write', update)
+        power_label = ttk.Label(self, text="Power (W/m2)")
+        power_entry = ttk.Entry(self, textvar=self.power)
+        power_label.grid(column=0, row=2, sticky=tk.NSEW)
+        power_entry.grid(column=1, row=2, columnspan=2, sticky=tk.NSEW)
+
+    def get_options(self) -> Dict:
+        """ Returns a dictionary with the options of this type of spectrum
+
+        :return: A ditcionary with the options
+        """
+
+        center = max(self.center.get(), 1)
+        linewidth= max(self.linewidth.get(), 1)
+        power = max(self.power.get(), 1)
+
+        out = {'power': power, 'linewidth': linewidth, 'center': center}
         return out

@@ -1,9 +1,9 @@
 import matplotlib
+
 matplotlib.use('TkAgg')
 
 import tkinter as tk
 from tkinter import ttk
-
 
 # import numpy as np
 import sys
@@ -14,11 +14,12 @@ import datetime
 
 # from tkinter import filedialog, messagebox
 # from tkinter import font
+# from solcore import sunglass
 
-from sunglass.materials import MaterialsTab
-from sunglass.solar_cells import SolarCellsTab
-from sunglass.log import LogTab
-from sunglass.spectrum import SpectrumTab
+from solcore.sunglass.materials import MaterialsTab
+from solcore.sunglass.solar_cells import SolarCellsTab
+from solcore.sunglass.log import LogTab
+from solcore.sunglass.spectrum import SpectrumTab
 
 
 class Sunglass(tk.Tk):
@@ -34,9 +35,9 @@ class Sunglass(tk.Tk):
         tk.Tk.__init__(self)
 
         self.title('Sunglass')
-        self.protocol('WM_DELETE_WINDOW', self.__quit)   # Used to force a "safe closing" of the program
+        self.protocol('WM_DELETE_WINDOW', self.__quit)  # Used to force a "safe closing" of the program
         self.resizable(False, False)
-        self.option_add('*tearOff', False)             # Prevents tearing the menus
+        self.option_add('*tearOff', False)  # Prevents tearing the menus
 
         # We create the global variables
         self.create_global_variables()
@@ -87,12 +88,10 @@ class Sunglass(tk.Tk):
         masterframe.grid(column=0, row=0, sticky=tk.NSEW)
         masterframe.rowconfigure(99, weight=1)
 
-
-
         self.book = ttk.Notebook(masterframe)
         self.book.grid(column=0, row=0, sticky=tk.NSEW)
 
-        self.materials = MaterialsTab(self.book, self) # This needs to be called before the others
+        self.materials = MaterialsTab(self.book, self)  # This needs to be called before the others
         self.solar_cells = SolarCellsTab(self.book, self)
         self.output = LogTab(self.book)
         self.spectrum = SpectrumTab(self.book)
@@ -111,6 +110,7 @@ class TextRedirector(object):
 
     https://stackoverflow.com/questions/12351786/how-to-redirect-print-statements-to-tkinter-text-widget
     """
+
     def __init__(self, widget, tag="stdout"):
         self.widget = widget
         self.tag = tag
@@ -123,8 +123,6 @@ class TextRedirector(object):
         self.widget.insert("end", now, (self.tag, 'red'))
         self.widget.insert("end", str + '\n', (self.tag))
         self.widget.configure(state="disabled")
-
-
 
 
 if __name__ == '__main__':
