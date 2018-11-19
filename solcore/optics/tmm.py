@@ -51,7 +51,7 @@ def solve_tmm(solar_cell, options):
     # With all the information, we create the optical stack
     no_back_reflexion = options.no_back_reflexion if 'no_back_reflexion' in options.keys() else True
     attn = np.multiply(np.array(widths), np.array(alphas).T).T
-    byBL = attn > 8
+    byBL = attn > 150
     BL_from = len(all_layers)
     if BL_correction:
         print('Using Beer-Lambert absorption profile for optically thick layers (fewer than 1 in 3000 photons pass through)')
@@ -66,9 +66,6 @@ def solve_tmm(solar_cell, options):
 
     stack = OptiStack(all_layers[0:BL_from], no_back_reflexion=no_back_reflexion)
     full_stack = OptiStack(all_layers, no_back_reflexion=no_back_reflexion)
-
-    # check which
-
 
     position = options.position * 1e9
     profile_position = position[position < sum(stack.widths)]
@@ -94,7 +91,7 @@ def solve_tmm(solar_cell, options):
         #fraction = initial - RAT['R']*initial - previous_abs
         fraction = initial*(1-RAT['R']) - previous_abs
         diff_absorption_BL, transmitted_BL, all_absorbed_BL = calculate_absorption_beer_lambert(widths[layer:layer+n_layers_junction[j]],
-                                                                                                alphas[layer:layer +n_layers_junction[j]],
+                                                                                                alphas[layer:layer+n_layers_junction[j]],
                                                                                                 fraction)
         solar_cell[j].diff_absorption_BL = diff_absorption_BL
         solar_cell[j].diff_absorption = diff_absorption
