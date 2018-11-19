@@ -298,11 +298,10 @@ def calculate_rat(structure, wavelength, angle=0, pol='u', coherent=True, cohere
             output['A'] = 1 - out['R'] - out['T']
             output['T'] = out['T']
         else:
-            for i, wl in enumerate(wavelength):
-                out = tmm.inc_tmm(pol, stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
-                output['R'][i] = out['R']
-                output['A'][i] = 1 - out['R'] - out['T']
-                output['T'][i] = out['T']
+            out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
+            output['R'][i] = out['R']
+            output['A'][i] = 1 - out['R'] - out['T']
+            output['T'][i] = out['T']
 
     else:
         if coherent:
@@ -311,15 +310,14 @@ def calculate_rat(structure, wavelength, angle=0, pol='u', coherent=True, cohere
             output['A'] = 1 - out['R'] - out['T']
             output['T'] = out['T']
         else:
-            for i, wl in enumerate(wavelength):
-                out_p = tmm.inc_tmm('p', stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
-                out_s = tmm.inc_tmm('s', stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
+            out_p = tmm.inc_tmm('p', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
+            out_s = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
 
-                output['R'][i] = 0.5 * (out_p['R'] + out_s['R'])
-                output['T'][i] = 0.5 * (out_p['T'] + out_s['T'])
-                output['A'][i] = 1 - output['R'][i] - output['T'][i]
-                output['all_p'].append(out_p['power_entering_list'])
-                output['all_s'].append(out_s['power_entering_list'])
+            output['R'] = 0.5 * (out_p['R'] + out_s['R'])
+            output['T'] = 0.5 * (out_p['T'] + out_s['T'])
+            output['A'] = 1 - output['R'] - output['T']
+            output['all_p'] = out_p['power_entering_list']
+            output['all_s'] = out_s['power_entering_list']
 
     return output
 
