@@ -630,13 +630,13 @@ def inc_group_layers(n_list, d_list, c_list):
     * num_layers = number of layers total
     """
 
-    if (n_list.ndim != 1) or (d_list.ndim != 1):
+    if (d_list.ndim != 1):
         raise ValueError("Problem with n_list or d_list!")
     if (d_list[0] != inf) or (d_list[-1] != inf):
         raise ValueError('d_list must start and end with inf!')
     if (c_list[0] != 'i') or (c_list[-1] != 'i'):
         raise ValueError('c_list should start and end with "i"')
-    if not n_list.size == d_list.size == len(c_list):
+    if not len(n_list) == d_list.size == len(c_list):
         raise ValueError('List sizes do not match!')
     inc_index = 0
     stack_index = 0
@@ -649,7 +649,7 @@ def inc_group_layers(n_list, d_list, c_list):
     inc_from_stack = []
     stack_from_inc = []
     stack_in_progress = False
-    for alllayer_index in range(n_list.size):
+    for alllayer_index in range(len(n_list)):
         if c_list[alllayer_index] == 'c':  # coherent layer
             inc_from_all.append(nan)
             if not stack_in_progress:  # this layer is starting new stack
@@ -740,10 +740,12 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     d_list = array(d_list, dtype=float)
 
     # Input tests
-    if hasattr(n_list[0], 'size'):
-        raise ValueError(
-            'This function is not vectorized, yet; you need to run one calculation at a time (one wavelength, one angle).')
-    if (np.real_if_close(n_list[0] * np.sin(th_0))).imag != 0:
+# =============================================================================
+#     if hasattr(n_list[0], 'size') and 'complex' not in str(type(n_list[0])):
+#         raise ValueError(
+#             'This function is not vectorized, yet; you need to run one calculation at a time (one wavelength, one angle).')
+# =============================================================================  
+    if any((np.real_if_close(n_list[0] * np.sin(th_0))).imag != 0):
         raise ValueError('Error in n0 or th0!')
 
     group_layers_data = inc_group_layers(n_list, d_list, c_list)
@@ -766,6 +768,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     coh_tmm_data_list = []
     # coh_tmm_bdata_list[i] is the same stack as coh_tmm_data_list[i] but
     # with order of layers reversed
+    
     coh_tmm_bdata_list = []
     for i in range(num_stacks):
         # print(th_list[all_from_stack[i][0]])
@@ -781,22 +784,26 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
 
     # P_list[i] is fraction not absorbed in a single pass through i'th incoherent
     # layer.
-    P_list = zeros(num_inc_layers)
+          
+    P_list = zeros((num_inc_layers, len(lam_vac)))
     for inc_index in range(1, num_inc_layers - 1):  # skip 0'th and last (infinite)
         i = all_from_inc[inc_index]
         P_list[inc_index] = exp(-4 * np.pi * d_list[i]
                                 * (n_list[i] * cos(th_list[i])).imag / lam_vac)
-        # For a very opaque layer, reset P to avoid divide-by-0 and similar
-        # errors.
-        if P_list[inc_index] < 1e-30:
-            P_list[inc_index] = 1e-30
+        
+        
+    # For a very opaque layer, reset P to avoid divide-by-0 and similar
+    # errors.
+    P_list[P_list < 1e-30] = 1e-30 
+    
+    
     # T_list[i,j] and R_list[i,j] are transmission and reflection powers,
     # respectively, coming from the i'th incoherent layer, going to the j'th
     # incoherent layer. Only need to calculate this when j=i+1 or j=i-1.
     # (2D array is overkill but helps avoid confusion.)
     # initialize these arrays
-    T_list = zeros((num_inc_layers, num_inc_layers))
-    R_list = zeros((num_inc_layers, num_inc_layers))
+    T_list = zeros((num_inc_layers, num_inc_layers, len(lam_vac)))
+    R_list = zeros((num_inc_layers, num_inc_layers, len(lam_vac)))
     for inc_index in range(num_inc_layers - 1):  # looking at interface i -> i+1
         alllayer_index = all_from_inc[inc_index]
         nextstack_index = stack_from_inc[inc_index + 1]
@@ -834,57 +841,63 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     # L is the transfer matrix from the i'th to (i+1)st incoherent layer, see
     # manual
     L_list = [nan]  # L_0 is not defined because 0'th layer has no beginning.
-    Ltilde = (array([[1, -R_list[1, 0]],
+    Ltilde = (array([[np.ones(len(lam_vac)), -R_list[1, 0]],
                      [R_list[0, 1],
                       T_list[1, 0] * T_list[0, 1] - R_list[1, 0] * R_list[0, 1]]])
-              / T_list[0, 1])
+              / T_list[0, 1]).transpose(2,0,1)
+    #Ltilde = Ltilde.transpose(2,0,1)
+      
     for i in range(1, num_inc_layers - 1):
-        L = np.dot(
-            array([[1 / P_list[i], 0], [0, P_list[i]]]),
-            array([[1, -R_list[i + 1, i]],
+        L = np.matmul(
+            array([[1 / P_list[i], np.zeros(len(lam_vac))], [np.zeros(len(lam_vac)), P_list[i]]]).transpose(2,0,1),
+            array([[np.ones(len(lam_vac)), -R_list[i + 1, i]],
                    [R_list[i, i + 1],
-                    T_list[i + 1, i] * T_list[i, i + 1] - R_list[i + 1, i] * R_list[i, i + 1]]])
-        ) / T_list[i, i + 1]
+                    T_list[i + 1, i] * T_list[i, i + 1] - R_list[i + 1, i] * R_list[i, i + 1]]]).transpose(2,0,1)
+        ) / T_list[i, i + 1][:,None,None]
         L_list.append(L)
-        Ltilde = np.dot(Ltilde, L)
-    T = 1 / Ltilde[0, 0]
-    R = Ltilde[1, 0] / Ltilde[0, 0]
-
+        Ltilde = np.matmul(Ltilde, L)
+    
+    T = 1 / Ltilde[:, 0, 0]
+    R = Ltilde[:, 1, 0] / Ltilde[:, 0, 0]
+    
     # VW_list[n] = [V_n, W_n], the forward- and backward-moving intensities
     # at the beginning of the n'th incoherent layer. VW_list[0] is undefined
     # because 0'th layer has no beginning.
-    VW_list = zeros((num_inc_layers, 2))
-    VW_list[0, :] = [nan, nan]
-    VW = array([[T], [0]])
-    VW_list[-1, :] = np.transpose(VW)
+    
+    VW_list = zeros((num_inc_layers, 2, len(lam_vac)))
+    VW_list[0, :, :] = nan
+    VW = array([T, zeros(len(lam_vac))])
+    VW_list[-1] = VW
+    
     for i in range(num_inc_layers - 2, 0, -1):
-        VW = np.dot(L_list[i], VW)
-        VW_list[i, :] = np.transpose(VW)
+        VW = np.matmul(L_list[i], VW.T[:,:,None])
+        VW_list[i, :, :] = VW.transpose()
 
     # stackFB_list[n]=[F,B] means that F is light traveling forward towards n'th
     # stack and B is light traveling backwards towards n'th stack.
     # Reminder: inc_from_stack[i] = j means that the i'th stack comes after the
     # layer with incoherent index j.
+    
     stackFB_list = []
     for stack_index, prev_inc_index in enumerate(inc_from_stack):
         if prev_inc_index == 0:  # stack starts right after semi-infinite layer.
-            F = 1
+            F = np.ones(len(lam_vac))
         else:
-            F = VW_list[prev_inc_index][0] * P_list[prev_inc_index]
-        B = VW_list[prev_inc_index + 1][1]
+            F = VW_list[prev_inc_index,0] * P_list[prev_inc_index]
+        B = VW_list[prev_inc_index + 1,1]
         stackFB_list.append([F, B])
 
     # power_entering_list[i] is the normalized Poynting vector crossing the
     # interface into the i'th incoherent layer from the previous (coherent or
     # incoherent) layer. See manual.
-    power_entering_list = [1]  # "1" by convention for infinite 0th layer.
+    power_entering_list = [np.ones(len(lam_vac))]  # "1" by convention for infinite 0th layer.
     for i in range(1, num_inc_layers):
         prev_stack_index = stack_from_inc[i]
         if isnan(prev_stack_index):
             # case where this layer directly follows another incoherent layer
             if i == 1:  # special case because VW_list[0] & A_list[0] are undefined
                 power_entering_list.append(T_list[0, 1]
-                                           - VW_list[1][1] * T_list[1, 0])
+                                           - VW_list[1,1] * T_list[1,0])
             else:
                 power_entering_list.append(
                     VW_list[i - 1][0] * P_list[i - 1] * T_list[i - 1, i]
@@ -895,11 +908,11 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
                 coh_tmm_data_list[prev_stack_index]['T']
                 - stackFB_list[prev_stack_index][1] *
                 coh_tmm_bdata_list[prev_stack_index]['power_entering'])
-    ans = {'T': T, 'R': R, 'VW_list': VW_list,
+    ans = {'T': T, 'R': R, 'VW_list': VW_list.transpose(2,0,1),
            'coh_tmm_data_list': coh_tmm_data_list,
            'coh_tmm_bdata_list': coh_tmm_bdata_list,
-           'stackFB_list': stackFB_list,
-           'power_entering_list': power_entering_list}
+           'stackFB_list': np.stack(stackFB_list).transpose(2,0,1),
+           'power_entering_list': np.stack(power_entering_list).T}
     ans.update(group_layers_data)
     return ans
 
