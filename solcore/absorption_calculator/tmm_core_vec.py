@@ -382,10 +382,11 @@ def position_resolved(layer, dist, coh_tmm_data):
     n_0 = coh_tmm_data['n_list'][0]
     th_0 = coh_tmm_data['th_0']
     pol = coh_tmm_data['pol']
-
+    
     # amplitude of forward-moving wave is Ef, backwards is Eb
-    Ef = (vw[:, :, 0].T * exp(1j * kz.T * dist)).T
-    Eb = (vw[:, :, 1].T * exp(-1j * kz.T * dist)).T
+    
+    Ef = (vw.T[0] * exp(1j * kz.T * dist)).T
+    Eb = (vw.T[1] * exp(-1j * kz.T * dist)).T
 
     # Poynting vector
     if (pol == 's'):
@@ -486,9 +487,10 @@ class absorp_analytic_fn:
         (the output of coh_tmm), for absorption in the layer with index
         "layer".
         """
+        
         pol = coh_tmm_data['pol']
-        v = coh_tmm_data['vw_list'][layer][0]
-        w = coh_tmm_data['vw_list'][layer][1]
+        v = coh_tmm_data['vw_list'][layer,:,0]
+        w = coh_tmm_data['vw_list'][layer,:,1]
         kz = coh_tmm_data['kz_list'][layer]
         n = coh_tmm_data['n_list'][layer]
         n_0 = coh_tmm_data['n_list'][0]
@@ -527,8 +529,14 @@ class absorp_analytic_fn:
         Calculates absorption at a given depth z, where z=0 is the start of the
         layer.
         """
-        return (self.A1 * exp(self.a1 * z) + self.A2 * exp(-self.a1 * z)
-                + self.A3 * exp(1j * self.a3 * z) + conj(self.A3) * exp(-1j * self.a3 * z))
+        if 'ndarray' in str(type(z)) and z.ndim > 0:
+            return (self.A1[:,None] * exp(self.a1[:,None] * z[None,:]) + 
+                    self.A2[:,None] * exp(-self.a1[:,None] * z[None,:]) +
+                    self.A3[:,None] * exp(1j * self.a3[:,None] * z[None,:]) +
+                    conj(self.A3[:,None]) * exp(-1j * self.a3[:,None] * z[None,:]))
+        else:
+            return (self.A1 * exp(self.a1 * z) + self.A2 * exp(-self.a1 * z)
+                    + self.A3 * exp(1j * self.a3 * z) + conj(self.A3) * exp(-1j * self.a3 * z))
 
     def flip(self):
         """
@@ -554,7 +562,7 @@ class absorp_analytic_fn:
         """
         adds another compatible absorption analytical function
         """
-        if (b.a1 != self.a1) or (b.a3 != self.a3):
+        if all(b.a1 != self.a1) or all(b.a3 != self.a3):
             raise ValueError('Incompatible absorption analytical functions!')
         self.A1 += b.A1
         self.A2 += b.A2
@@ -575,14 +583,15 @@ def absorp_in_each_layer(coh_tmm_data):
     coh_tmm_data is output of coh_tmm()
     """
     num_layers = len(coh_tmm_data['d_list'])
-    power_entering_each_layer = zeros(num_layers)
+    num_lam_vec = len(coh_tmm_data['lam_vac'])
+    power_entering_each_layer = zeros((num_layers, num_lam_vec))
     power_entering_each_layer[0] = 1
     power_entering_each_layer[1] = coh_tmm_data['power_entering']
     power_entering_each_layer[-1] = coh_tmm_data['T']
     for i in range(2, num_layers - 1):
         power_entering_each_layer[i] = position_resolved(i, 0, coh_tmm_data)['poyn']
-    final_answer = zeros(num_layers)
-    final_answer[0:-1] = -np.diff(power_entering_each_layer)
+    final_answer = zeros((num_layers, num_lam_vec))
+    final_answer[0:-1] = -np.diff(power_entering_each_layer, axis=0)
     final_answer[-1] = power_entering_each_layer[-1]
     return final_answer
 
@@ -935,7 +944,7 @@ def inc_absorp_in_each_layer(inc_data):
     # if it's not immediately following a stack).
 
     stack_from_inc = inc_data['stack_from_inc']
-    power_entering_list = inc_data['power_entering_list']
+    power_entering_list = inc_data['power_entering_list'].T
     # stackFB_list[n]=[F,B] means that F is light traveling forward towards n'th
     # stack and B is light traveling backwards towards n'th stack.
     stackFB_list = inc_data['stackFB_list']
@@ -952,13 +961,13 @@ def inc_absorp_in_each_layer(inc_data):
             coh_tmm_bdata = inc_data['coh_tmm_bdata_list'][j]
             # First, power in the incoherent layer...
             power_exiting = (
-                stackFB_list[j][0] * coh_tmm_data['power_entering']
-                - stackFB_list[j][1] * coh_tmm_bdata['T'])
+                stackFB_list[:,j,0] * coh_tmm_data['power_entering']
+                - stackFB_list[:,j,1] * coh_tmm_bdata['T'])
             absorp_list.append(power_entering_list[i] - power_exiting)
             # Next, power in the coherent stack...
-            stack_absorp = ((stackFB_list[j][0] *
+            stack_absorp = ((stackFB_list[:,j,0] *
                              absorp_in_each_layer(coh_tmm_data))[1:-1]
-                            + (stackFB_list[j][1] *
+                            + (stackFB_list[:,j,1] *
                                absorp_in_each_layer(coh_tmm_bdata))[-2:0:-1])
             absorp_list.extend(stack_absorp)
     # final semi-infinite layer
@@ -974,16 +983,16 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     inc_data is output of incoherent_main()
     """
     j = inc_data['stack_from_all'][layer]
-    if isnan(j):
+    if any(isnan(j)):
         raise ValueError('layer must be coherent for this function!')
     [stackindex, withinstackindex] = j
     forwardfunc = absorp_analytic_fn()
     forwardfunc.fill_in(inc_data['coh_tmm_data_list'][stackindex],
                         withinstackindex)
-    forwardfunc.scale(inc_data['stackFB_list'][stackindex][0])
+    forwardfunc.scale(inc_data['stackFB_list'][:, stackindex, 0])
     backfunc = absorp_analytic_fn()
     backfunc.fill_in(inc_data['coh_tmm_bdata_list'][stackindex],
                      -1 - withinstackindex)
-    backfunc.scale(inc_data['stackFB_list'][stackindex][1])
+    backfunc.scale(inc_data['stackFB_list'][:, stackindex, 1])
     backfunc.flip()
     return forwardfunc.add(backfunc)
