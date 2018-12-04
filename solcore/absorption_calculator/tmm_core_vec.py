@@ -881,6 +881,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     for i in range(num_inc_layers - 2, 0, -1):
         VW = np.matmul(L_list[i], VW.T[:,:,None])
         VW_list[i, :, :] = VW.transpose()
+        VW = VW[:,:,0].transpose()
 
     # stackFB_list[n]=[F,B] means that F is light traveling forward towards n'th
     # stack and B is light traveling backwards towards n'th stack.
@@ -917,11 +918,13 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
                 coh_tmm_data_list[prev_stack_index]['T']
                 - stackFB_list[prev_stack_index][1] *
                 coh_tmm_bdata_list[prev_stack_index]['power_entering'])
+            
     ans = {'T': T, 'R': R, 'VW_list': VW_list.transpose(2,0,1),
            'coh_tmm_data_list': coh_tmm_data_list,
            'coh_tmm_bdata_list': coh_tmm_bdata_list,
-           'stackFB_list': np.stack(stackFB_list).transpose(2,0,1),
-           'power_entering_list': np.stack(power_entering_list).T}
+           'stackFB_list': np.stack(stackFB_list).transpose(2,0,1) if len(stackFB_list)>0 else [],
+           'power_entering_list': np.stack(power_entering_list).T,
+           'th_list': th_list}
     ans.update(group_layers_data)
     return ans
 
@@ -996,3 +999,15 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     backfunc.scale(inc_data['stackFB_list'][:, stackindex, 1])
     backfunc.flip()
     return forwardfunc.add(backfunc)
+
+def beer_lambert_derivative(vw, theta, n, wavelength):
+    """
+    Outputs an absorp_analytic_fn object for an incoherent layer within a
+    partly-incoherent stack. It assumes that the absorption follows the 
+    beer-lambert law.
+    
+    vw and theta are calculated by inc_tmm
+    """
+    alpha = (4*np.pi/wavelength)*(n*np.cos(theta)).imag
+    decay = lambda d: np.clip(np.exp(-d[:,None]*alpha[None,:]), 1e-20, 1e10)
+    return lambda d: vw[:,0]*alpha[None,:]*decay(d) + vw[:,1]*alpha[None,:]/decay(d)
