@@ -71,7 +71,7 @@ def solve_rcwa(solar_cell, options):
         solar_cell[j].layer_absorption = np.trapz(solar_cell[j].absorbed(layer_positions), layer_positions, axis=0)
 
     solar_cell.reflected = RAT['R'] * initial
-    solar_cell.transmitted = (1 - RAT['R'] - all_absorbed) * initial
+    solar_cell.transmitted = (1 - RAT['R'] - all_absorbed)
     solar_cell.absorbed = all_absorbed * initial
 
 

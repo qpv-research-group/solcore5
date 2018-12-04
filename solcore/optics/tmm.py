@@ -51,6 +51,7 @@ def solve_tmm(solar_cell, options):
     # With all the information, we create the optical stack
     no_back_reflexion = options.no_back_reflexion if 'no_back_reflexion' in options.keys() else True
     attn = np.multiply(np.array(widths), np.array(alphas).T).T
+    #byBL = (attn/np.cos(theta*np.pi/180)) > 150
     byBL = attn > 150
     BL_from = len(all_layers)
     if BL_correction:
@@ -106,7 +107,7 @@ def solve_tmm(solar_cell, options):
         layer = layer + n_layers_junction[j]
 
     solar_cell.reflected = RAT['R'] * initial
-    solar_cell.absorbed = sum([solar_cell[x].layer_absorption for x in np.arange(len(solar_cell))]) * initial
+    solar_cell.absorbed = sum([solar_cell[x].layer_absorption for x in np.arange(len(solar_cell))])
     solar_cell.transmitted = initial - solar_cell.reflected - solar_cell.absorbed
 
 
