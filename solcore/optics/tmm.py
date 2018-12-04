@@ -55,7 +55,7 @@ def solve_tmm(solar_cell, options):
     byBL = attn > 150
     BL_from = len(all_layers)
     if BL_correction:
-        print('Using Beer-Lambert absorption profile for optically thick layers (fewer than 1 in 3000 photons pass through)')
+        print('Using Beer-Lambert absorption profile for optically thick layers (exp(-OD) < 1e-65 at normal incidence)')
         solar_cell.byBL = byBL
         if any(widths > 10*np.max(wl)): # assume it's safe to ignore interference effects
             BL_from = np.where(np.array(widths) > si('10um'))[0][0]
