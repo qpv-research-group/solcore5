@@ -65,17 +65,17 @@ def solve_tmm(solar_cell, options):
     else:
         byBL[:] = False
 
-    stack = OptiStack(all_layers[0:BL_from], no_back_reflexion=no_back_reflexion)
-    full_stack = OptiStack(all_layers, no_back_reflexion=no_back_reflexion)
+    stack = OptiStack(all_layers[0:BL_from], no_back_reflexion=no_back_reflexion, substrate=solar_cell.substrate)
+    full_stack = OptiStack(all_layers, no_back_reflexion=no_back_reflexion, substrate=solar_cell.substrate)
 
     position = options.position * 1e9
     profile_position = position[position < sum(stack.widths)]
 
     print('Calculating RAT...')
-    RAT = calculate_rat(full_stack, wl * 1e9, angle=theta, coherent=True)
+    RAT = calculate_rat(full_stack, wl * 1e9, angle=theta, coherent=True, no_back_reflexion=no_back_reflexion)
 
     print('Calculating absorption profile...')
-    out = calculate_absorption_profile(stack, wl * 1e9, dist=profile_position, angle=theta)
+    out = calculate_absorption_profile(stack, wl * 1e9, dist=profile_position, angle=theta, no_back_reflexion=no_back_reflexion)
 
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_tmm(out, initial)
