@@ -136,4 +136,4 @@ class TestQM(TestCase):
         self.assertTrue(Ehh and Elh and Ee)
         # Test over the absorption coefficent at a given energy
         for i, data in enumerate(out):
-            self.assertAlmostEqual(out[i], my_absorption[i], places=5)
+            self.assertAlmostEqual(out[i], my_absorption[i], places=4)
