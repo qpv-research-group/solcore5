@@ -1,6 +1,6 @@
 """ Poisson_drift_diffusion related tests
 """
-from unittest import TestCase
+from unittest import TestCase, skip
 
 import numpy as np
 import os
@@ -42,6 +42,7 @@ light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
 
 
 class TestPDD(TestCase):
+    @skip("PDD not working in Travis, yet. Problem finding the compiled fortran library")
     def test_92_light_iv(self):
         answer = [142.67874466835747, 2.528516381541893, 0.9174137578275228, 330.97127267425367, 2.347826086956522, 140.9692457686636, 0.33084864178121165]
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
@@ -60,7 +61,8 @@ class TestPDD(TestCase):
 
         for i in range(len(output)):
             self.assertAlmostEqual(output[i], answer[i])
-
+    
+    @skip("PDD not working in Travis, yet. Problem finding the compiled fortran library")
     def test_93_qe(self):
         answer = [0.98712861, 2.07187966e-14, 0.97730717, 0.03500039]
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
