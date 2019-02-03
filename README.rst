@@ -9,7 +9,10 @@
    :alt: Documentation Status
    
 .. image:: https://travis-ci.com/dalonsoa/solcore5.svg?branch=master
-    :target: https://travis-ci.com/dalonsoa/solcore5
+   :target: https://travis-ci.com/dalonsoa/solcore5
+
+.. image:: https://coveralls.io/repos/github/dalonsoa/solcore5/badge.svg
+   :target: https://coveralls.io/github/dalonsoa/solcore5
 
 
 Solcore
