@@ -47,7 +47,7 @@ class TestPDD(TestCase):
                   140.3911287342211, 0.3294918264376029]
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
             filename = os.path.join(working_directory, 'solcore_log.txt')
-            PDD.log(filename)
+            #PDD.log(filename)
 
             my_solar_cell = SolarCell([AlGaAs(T), default_GaAs(T)], T=T, R_series=0, substrate=substrate)
             solar_cell_solver(my_solar_cell, 'iv',
@@ -66,7 +66,7 @@ class TestPDD(TestCase):
         answer = [0.9866334968497021, 2.1512408472022467e-14, 0.9779769012349702, 0.03506561338387434]
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
             filename = os.path.join(working_directory, 'solcore_log.txt')
-            PDD.log(filename)
+            #PDD.log(filename)
 
             my_solar_cell = SolarCell([AlGaAs(T), default_GaAs(T)], T=T, R_series=0, substrate=substrate)
 
