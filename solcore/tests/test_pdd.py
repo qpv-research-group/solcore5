@@ -1,6 +1,6 @@
 """ Poisson_drift_diffusion related tests
 """
-from unittest import TestCase
+from unittest import TestCase, skip
 
 import numpy as np
 import os
@@ -42,12 +42,13 @@ light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
 
 
 class TestPDD(TestCase):
+    @skip("PDD not working in Travis, yet. Problem finding the compiled fortran library")
     def test_92_light_iv(self):
         answer = [142.68025180227374, 2.519346556870366, 0.9169672186977382, 329.61395441947565, 2.347826086956522,
                   140.3911287342211, 0.3294918264376029]
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
             filename = os.path.join(working_directory, 'solcore_log.txt')
-            #PDD.log(filename)
+            PDD.log(filename)
 
             my_solar_cell = SolarCell([AlGaAs(T), default_GaAs(T)], T=T, R_series=0, substrate=substrate)
             solar_cell_solver(my_solar_cell, 'iv',
@@ -61,12 +62,13 @@ class TestPDD(TestCase):
 
         for i in range(len(output)):
             self.assertAlmostEqual(output[i], answer[i])
-
+    
+    @skip("PDD not working in Travis, yet. Problem finding the compiled fortran library")
     def test_93_qe(self):
         answer = [0.9866334968497021, 2.1512408472022467e-14, 0.9779769012349702, 0.03506561338387434]
         with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3TESTS") as working_directory:
             filename = os.path.join(working_directory, 'solcore_log.txt')
-            #PDD.log(filename)
+            PDD.log(filename)
 
             my_solar_cell = SolarCell([AlGaAs(T), default_GaAs(T)], T=T, R_series=0, substrate=substrate)
 
