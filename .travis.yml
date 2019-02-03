@@ -5,10 +5,13 @@ python:
   - "3.6"
 before_install:
   - sudo apt-get install -y gfortran
-# command to install dependencies
 install:
   - pip install -r requirements.txt
+  - pip install pytest
+  - pip install pytest-cov
+  - pip install coveralls
   - python setup.py install --with_pdd
 script:
-  - nosetests
-  
+  - pytest --cov=solcore/
+after_success:
+  - coveralls

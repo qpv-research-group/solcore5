@@ -9,7 +9,10 @@
    :alt: Documentation Status
    
 .. image:: https://travis-ci.com/dalonsoa/solcore5.svg?branch=master
-    :target: https://travis-ci.com/dalonsoa/solcore5
+   :target: https://travis-ci.com/dalonsoa/solcore5
+
+.. image:: https://coveralls.io/repos/github/dalonsoa/solcore5/badge.svg
+   :target: https://coveralls.io/github/dalonsoa/solcore5
 
 
 Solcore
@@ -29,8 +32,8 @@ Solcore is the result of many years of developement by many people,
 trying to put together in a consistent way the tools that the `Quantum
 Photovoltaics Group at Imperial College
 London <https://www.imperial.ac.uk/quantum-photovoltaics/>`__ needs for
-its research in solar cells and photovoltaics. The list of contributors
-(hopefully I am not forgetting anyone!) is:
+its research in solar cells and photovoltaics. The list of original contributors
+(hopefully I am not forgetting anyone!) is below, but check the `contributors list <https://github.com/dalonsoa/solcore5/graphs/contributors>`__ for those currently active:
 
 -  Diego Alonso-Álvarez
 -  Thomas Wilson
