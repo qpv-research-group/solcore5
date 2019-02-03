@@ -1,12 +1,12 @@
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg
    :target: https://doi.org/10.5281/zenodo.1185316
 
+.. image:: https://img.shields.io/badge/License-LGPLv3-blue.svg
+   :target: http://www.gnu.org/licenses/lgpl.html
+   
 .. image:: http://readthedocs.org/projects/solcore5/badge/?version=latest
    :target: http://solcore5.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
-
-.. image:: https://img.shields.io/badge/License-LGPLv3-blue.svg
-   :target: http://www.gnu.org/licenses/lgpl.html
    
 .. image:: https://travis-ci.com/dalonsoa/solcore5.svg?branch=master
     :target: https://travis-ci.com/dalonsoa/solcore5
