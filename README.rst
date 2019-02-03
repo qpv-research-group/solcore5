@@ -7,6 +7,9 @@
 
 .. image:: https://img.shields.io/badge/License-LGPLv3-blue.svg
    :target: http://www.gnu.org/licenses/lgpl.html
+   
+.. image:: https://travis-ci.com/dalonsoa/solcore5.svg?branch=master
+    :target: https://travis-ci.com/dalonsoa/solcore5
 
 
 Solcore
