@@ -241,10 +241,15 @@ def get_current_config():
         print()
 
 
-if len(user_config_data.sections()) == 0:
-    response = input('No user configuration was detected. Do you want to create one (Y/n)?')
+def check_user_config():
+    """ Checks if there's a user configuration file, asking if it needs to be created.
 
-    if response in 'Yy':
-        reset_defaults(True)
-        user_config_data = ConfigParser()
-        user_config_data.read(user_config)
+    :return: None
+    """
+    if len(user_config_data.sections()) == 0:
+        response = input('No user configuration was detected. Do you want to create one (Y/n)?')
+
+        if response in 'Yy':
+            reset_defaults(True)
+            user_config_data = ConfigParser()
+            user_config_data.read(user_config)
