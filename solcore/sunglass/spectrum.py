@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkcalendar import DateEntry
 
 from matplotlib import axes, figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
@@ -52,7 +53,7 @@ class SpectrumTab(ttk.Frame):
         self.control_frame = self.create_control_area()
 
         # We initialize the tab with the Standard AM1.5g solar spectrum
-        self.spectrum = StandardSpectrum(parent=self.control_frame, row=4, update=self.update_plot)
+        self.spectrum = StandardSpectrum(parent=self.control_frame, row=1, update=self.update_plot)
         self.update_plot()
 
     def create_plot_area(self) -> (figure.Figure, axes.Axes):
@@ -135,11 +136,13 @@ class SpectrumTab(ttk.Frame):
         source_type = self.source_type.get()
 
         if source_type == 'standard':
-            self.spectrum = StandardSpectrum(parent=self.control_frame, row=4, update=self.update_plot)
+            self.spectrum = StandardSpectrum(parent=self.control_frame, row=1, update=self.update_plot)
         elif source_type == 'black body':
-            self.spectrum = BlackBodySpectrum(parent=self.control_frame, row=4, update=self.update_plot)
+            self.spectrum = BlackBodySpectrum(parent=self.control_frame, row=1, update=self.update_plot)
         elif source_type == 'laser':
-            self.spectrum = LaserSpectrum(parent=self.control_frame, row=4, update=self.update_plot)
+            self.spectrum = LaserSpectrum(parent=self.control_frame, row=1, update=self.update_plot)
+        elif source_type == 'SPECTRAL2':
+            self.spectrum = Spectral2Spectrum(parent=self.control_frame, row=1, update=self.update_plot)
         else:
             pass
 
@@ -328,7 +331,7 @@ class BlackBodySpectrum(ttk.LabelFrame):
         :param parent:
         """
         super(BlackBodySpectrum, self).__init__(parent, text='Black body spectrum')
-        self.grid(column=col, row=row, sticky=tk.NSEW)
+        self.grid(column=col, row=row, sticky=tk.NSEW, pady=15)
 
         self.temperature = tk.DoubleVar(value=6000.0)
         self.entendue = tk.StringVar(value='Sun')
@@ -377,7 +380,7 @@ class LaserSpectrum(ttk.LabelFrame):
         :param parent:
         """
         super(LaserSpectrum, self).__init__(parent, text='Laser spectrum')
-        self.grid(column=col, row=row, sticky=tk.NSEW)
+        self.grid(column=col, row=row, sticky=tk.NSEW, pady=15)
 
         # Center of the gaussian
         self.center = tk.DoubleVar(value=800)
@@ -415,3 +418,38 @@ class LaserSpectrum(ttk.LabelFrame):
 
         out = {'power': power, 'linewidth': linewidth, 'center': center}
         return out
+
+
+class Spectral2Spectrum(ttk.LabelFrame):
+    """ ttk.Frame with all the parameters required for the laser spectrum
+
+    """
+
+    def __init__(self, parent: ttk.Frame, row: int, update: Callable[[], None], col: int = 0) -> None:
+        """
+
+        :param parent:
+        """
+        super(Spectral2Spectrum, self).__init__(parent, text='Spectral2 spectrum')
+        self.grid(column=col, row=row, sticky=tk.NSEW, pady=15)
+
+        # Date and time
+        self.hour = tk.IntVar(value=12)
+        self.min = tk.IntVar(value=0)
+        self.hour.trace_add('write', update)
+        self.min.trace_add('write', update)
+
+        date_label = ttk.Label(self, text="Date")
+        time_label = ttk.Label(self, text="Time (h:m)")
+        self.cal = DateEntry(self, foreground='black', year=2018, month=12, day=1)
+        hour_box = ttk.Combobox(self, values=list(range(0, 24)), textvariable=self.hour, width=5)
+        min_box = ttk.Combobox(self, values=list(range(0, 60)), textvariable=self.min, width=5)
+
+        date_label.grid(column=0, row=0, sticky=tk.NSEW)
+        time_label.grid(column=1, row=0, columnspan=2, sticky=tk.NSEW)
+        hour_box.grid(column=1, row=1, sticky=tk.NSEW)
+        hour_box.bind('<<ComboboxSelected>>', update)
+        min_box.grid(column=2, row=1, sticky=tk.NSEW)
+        min_box.bind('<<ComboboxSelected>>', update)
+        self.cal.grid(column=0, row=1, sticky=tk.NSEW)
+        self.cal.bind('<<DateEntrySelected>>', update)
