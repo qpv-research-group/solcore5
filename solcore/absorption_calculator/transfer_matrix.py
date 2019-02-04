@@ -52,7 +52,7 @@ class OptiStack(object):
     included at runtime to fulfill the requirements of the TMM solver or to solve some of its limitations.
     """
 
-    def __init__(self, structure=(), no_back_reflexion=False):
+    def __init__(self, structure=(), no_back_reflexion=False, substrate=None):
         """ Class constructor. It takes a Solcore structure and extract the thickness and optical data from the
         Layers and the materials. Option is given to indicate if the reflexion from the back of the structure must be
         supressed, usefull for ellipsometry calculations. This is done by creating an artificial highly absorbing but
@@ -71,6 +71,7 @@ class OptiStack(object):
         self.k_data = []
         self.models = []
         self.layers = []
+        self.substrate = substrate
 
         self.num_layers = 0
         self.add_layers(structure)
@@ -88,6 +89,14 @@ class OptiStack(object):
         out = []
         wl_m = solcore.si(wl, 'nm')
 
+        if hasattr(self, 'n_sub'):
+            n1 = self.n_sub(wl_m) + self.k_sub(wl_m)*1.0j
+        else:
+            if hasattr(wl, 'size'):
+                n1 = np.ones_like(wl, dtype=complex)
+            else:
+                n1 = 1
+
         if hasattr(wl, 'size'):
             n0 = np.ones_like(wl, dtype=complex)
         else:
@@ -96,10 +105,14 @@ class OptiStack(object):
         for i in range(self.num_layers):
             out.append(self.n_data[i](wl_m) + self.k_data[i](wl_m) * 1.0j)
 
+        # substrate irrelevant if no_back_reflexion = True
         if self.no_back_reflexion:
-            return [n0] + out + [self.n_data[-1](wl_m) + self._k_absorbing(wl_m) * 1.0j, n0]
+            return [n0] + out + [self.n_data[-1](wl_m) + self._k_absorbing(wl_m) * 1.0j, n1] # look at last entry in stack,
+            # make high;y absorbing layer based on it.
+
         else:
-            return [n0] + out + [n0]
+            return [n0] + out + [n1]
+
 
     def get_widths(self):
         """ Returns the widths of the layers of the stack.
@@ -144,6 +157,10 @@ class OptiStack(object):
             # If the input is a whole device structure, we get just the layers information
             if type(layers) is dict:
                 layers = ToStructure(layers)
+
+            if self.substrate is not None:
+                self.n_sub = self.substrate.n
+                self.k_sub = self.substrate.k
 
             for layer in layers:
                 self.layers.append(layer)
