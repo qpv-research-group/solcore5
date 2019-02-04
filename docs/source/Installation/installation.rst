@@ -22,13 +22,16 @@ Now, installing Solcore should be as easy as writing in the terminal::
 
 This will download Solcore form the Pypi repository and install the package within the Python packages tree, but it will *NOT* install the PDD solver, for which you need a suitable Fortran compiler :doc:`(read this to install your Fortran compiler) <compilation>`. Assuming you have a Fortran compiler correctly installed and configured, you can install Solcore with the PDD solver by doing::
 
-    pip install solcore --install-option="--with_pdd"
+    pip install solcore
+	pip install --no-deps --force-reinstall --upgrade --install-option="--with_pdd" solcore
+
+**NOTE**: Pip passes the --install-option to all the dependencies of the package and therefore the installation will fail since those dependencies do not have the option "--with_pdd". That is the reason why, for now, Solcore needs to be installed twice: the first one install Solcore normally with all the dependencies and the second one re-installs Solcore with PDD support. 
 
 And that's all!! Solcore should be available to be used as with any Python package::
 
     >>> import solcore
 
-        Welcome to Solcore - version 5.3.0
+        Welcome to Solcore - version 5.5.2
         Copyright (c) 2018, Imperial College, London All rights reserved.
         Software released under the GNU Lesser General Public License.
 

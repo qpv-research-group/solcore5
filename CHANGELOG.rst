@@ -1,3 +1,6 @@
+**New in Solcore 5.5.2**
+- Updated installation instructions to avoid an error that ocurs when PiP passes the --with_pdd option to all Solcore dependencies.
+
 **New in Solcore 5.5.1**
 - Changed the way QWs are solved before using them in a solar cell to avoid problems with not finding the n and k data
 
