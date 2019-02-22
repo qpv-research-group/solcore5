@@ -527,3 +527,8 @@ include solcore/optics/__init__.py
 include solcore/optics/rcwa.py
 include solcore/optics/beer_lambert.py
 include solcore/optics/external_optics.py
+include solcore/material_system/create_new_material.py
+include solcore/absorption_calculator/nk_db.py
+include solcore/material_data/refractive_index_DB/__init__.py
+include solcore/material_data/refractive_index_DB/dbmaterial.py
+include solcore/material_data/refractive_index_DB/dboperations.py

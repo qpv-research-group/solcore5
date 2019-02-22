@@ -46,6 +46,7 @@ default_options.radiative_coupling = False
 
 # Optics control
 default_options.optics_method = 'BL'
+default_options.recalculate_absorption = False
 
 default_options = merge_dicts(default_options, ASC.db_options, PDD.pdd_options, rcwa_options)
 
@@ -67,7 +68,13 @@ def solar_cell_solver(solar_cell, task, user_options=None):
     options.T = solar_cell.T
 
     if task == 'optics':
-        solve_optics(solar_cell, options)
+        calculated = hasattr(solar_cell[0], 'absorbed')
+        recalc = options.recalculate_absorption if 'recalculate_absorption' in options.keys() else False
+        if not calculated or recalc:
+            solve_optics(solar_cell, options)
+        else:
+            print('Already calculated reflection, transmission and absorption profile - not recalculating')
+
     elif task == 'iv':
         solve_iv(solar_cell, options)
     elif task == 'qe':
@@ -117,7 +124,13 @@ def solve_iv(solar_cell, options):
     :param options: Options for the solvers
     :return: None
     """
-    solve_optics(solar_cell, options)
+    calculated = hasattr(solar_cell[0], 'absorbed')
+    recalc = options.recalculate_absorption if 'recalculate_absorption' in options.keys() else False
+    if not calculated or recalc:
+        solve_optics(solar_cell, options)
+    else:
+        print('Already calculated reflection, transmission and absorption profile - not recalculating')
+
     print('Solving IV of the junctions...')
     for j in solar_cell.junction_indices:
 
@@ -165,7 +178,12 @@ def solve_qe(solar_cell, options):
     :return: None
     """
 
-    solve_optics(solar_cell, options)
+    calculated = hasattr(solar_cell[0], 'absorbed')
+    recalc = options.recalculate_absorption if 'recalculate_absorption' in options.keys() else False
+    if not calculated or recalc:
+        solve_optics(solar_cell, options)
+    else:
+        print('Already calculated reflection, transmission and absorption profile - not recalculating')
 
     print('Solving QE of the solar cell...')
     for j in solar_cell.junction_indices:
@@ -208,7 +226,12 @@ def solve_short_circuit(solar_cell, options):
     :param options: Options for the solvers
     :return: None
     """
-    solve_optics(solar_cell, options)
+    calculated = hasattr(solar_cell[0], 'absorbed')
+    recalc = options.recalculate_absorption if 'recalculate_absorption' in options.keys() else False
+    if not calculated or recalc:
+        solve_optics(solar_cell, options)
+    else:
+        print('Already calculated reflection, transmission and absorption profile - not recalculating')
 
     for j in solar_cell.junction_indices:
 
@@ -265,4 +288,4 @@ def prepare_solar_cell(solar_cell, options):
     solar_cell.width = offset
 
     if options.position is None:
-        options.position = np.arange(0, solar_cell.width, 1e-10)
+        options.position = np.arange(0, solar_cell.width, 1e-9)
