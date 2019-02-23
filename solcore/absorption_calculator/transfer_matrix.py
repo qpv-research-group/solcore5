@@ -427,7 +427,7 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflexion=True)
 
 
 def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size=2, dist=None,
-                                   no_back_reflexion=True, angle=0):
+                                   no_back_reflexion=True, angle=0, pol = 'u'):
     """ It calculates the absorbed energy density within the material. From the documentation:
 
     'In principle this has units of [power]/[volume], but we can express it as a multiple of incoming light power
@@ -461,11 +461,25 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
 
     output = {'position': dist, 'absorption': np.zeros((num_wl, len(dist)))}
 
+    if pol in 'sp':
     # print(stack.get_indices(wavelength).shape)
-    out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
-    layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-    data = tmm.position_resolved(layer, d_in_layer, out1)
-    output['absorption'] = data['absor']
+        out1 = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
+
+        layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+        data = tmm.position_resolved(layer, d_in_layer, out1)
+
+        output['absorption'] = data['absor']
+
+    else:
+        out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+        out2 = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+
+        layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+        data_s = tmm.position_resolved(layer, d_in_layer, out1)
+        data_p = tmm.position_resolved(layer, d_in_layer, out2)
+
+
+        output['absorption'] = 0.5*(data_s['absor'] + data_p['absor'])
 
     return output
 
