@@ -2,7 +2,7 @@ from solcore.structure import Layer, Junction, TunnelJunction
 
 import numpy as np
 import types
-from optics_utilities import calculate_absorption, absorbed
+from .optics_utilities import calculate_absorption, absorbed
 
 
 
@@ -43,7 +43,7 @@ def solve_external_optics(solar_cell, options):
     # We try to get the external attributes
     try:
         solar_cell.reflected = solar_cell.external_reflected * initial
-        diff_absorption = solar_cell.external_absorbed
+        diff_absorption = solar_cell.external_absorbed * initial
     except AttributeError as err:
         raise err
 
