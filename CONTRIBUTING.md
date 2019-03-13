@@ -93,7 +93,7 @@ The process described here has several goals:
 
 Please follow these steps to have your contribution considered by the maintainers:
 
-1. **Describe clearly what is the purpose of the pull request**. Refer to the relevant issues on [Bugs](#reporting-bugs) or [Enhancements](#suggesting-enhancements). In general, an issue should be open always *prior* to a pull request, to discuss its contents with a mantainer and make sure it makes sense for Solcore. 
+1. **Describe clearly what is the purpose of the pull request**. Refer to the relevant issues on [Bugs](#reporting-bugs) or [Enhancements](#suggesting-enhancements). In general, an issue should be open always *prior* to a pull request, to discuss its contents with a mantainer and make sure it makes sense for Solcore. If the pull request is a work in progress that will take some time to be ready but still you want to discuss it with the community, open a [draft pull request](https://github.blog/2019-02-14-introducing-draft-pull-requests/). 
 2. **Include relevant unit tests and integration tests, where needed**. Solcore tests suite is quite limited at the moment. We are working to improve this and tests as much features as possible, so any new addition to the code must come with its own set of test to avoid going backwards in this matter.   
 3. **For new features and enhancements, include documentation and examples**. Both in the code, as docstrings in classes, functions and modules, and as proper documentation describing how to use the new feature. 
 4. Follow the [styleguides](#styleguides)
