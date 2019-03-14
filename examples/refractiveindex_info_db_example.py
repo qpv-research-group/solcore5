@@ -22,7 +22,7 @@ opts.wavelength = wl
 
 search_db('Ag', exact = True)
 # This prints out, line by line, matching entries. This shows us entries with
-# "pageid"s 0 to 8 correspond to silver.
+# "pageid"s 0 to 14 correspond to silver.
 
 # Let's compare the optical behaviour of some of those sources:
 # pageid = 0, Johnson

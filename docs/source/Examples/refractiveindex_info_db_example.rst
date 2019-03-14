@@ -1,76 +1,103 @@
-Looking at the effect of substrate and the no_back_reflexion option in the TMM solver
-=====================================================================================
+Searching the refractiveindex.info database and comparing materials
+===================================================================
 
-.. image:: substrate_RAT.png
+.. image:: Ag_n.png
    :width: 40%
-.. image:: substrate_Adepth.png
+.. image:: Ag_k.png
+   :width: 40%
+.. image:: Ag_GaAs_abs.png
    :width: 40%
 
 
 .. code-block:: Python
 
-	# TMM and RCWA solvers can take into account the presence of a substrate if it is specified in the solar_cell object.
-	# This example illustrates this for the TMM solver.
-
+	from solcore.absorption_calculator.nk_db import download_db, search_db
 	from solcore import material
 	from solcore import si
-	import matplotlib.pyplot as plt
+	from solcore.solar_cell import SolarCell
+	from solcore.structure import Layer
+	from solcore.solar_cell_solver import solar_cell_solver, default_options
+
 	import numpy as np
-	from solcore.solar_cell import default_GaAs, SolarCell, Layer, Junction
-	from solcore.solar_cell_solver import solar_cell_solver
-	from solcore.absorption_calculator import OptiStack
+	import matplotlib.pyplot as plt
 
+	wl = si(np.arange(100, 900, 10), 'nm')
 
-	T = 298
+	opts = default_options
+	opts.optics_method = 'TMM'
+	opts.wavelength = wl
+	# Download the database from refractiveindex.info. This only needs to be done once.
+	# Can specify the source URL and number of interpolation points.
+	# download_db()
 
-	GaAs = material('GaAs')(T = T)
+	# Can search the database to select an appropriate entry. Search by element/chemical formula.
+	# In this case, look for silver.
 
-	thin_GaAs = SolarCell([Layer(material = GaAs, width=si('500nm'))])
+	search_db('Ag', exact = True)
+	# This prints out, line by line, matching entries. This shows us entries with
+	# "pageid"s 0 to 14 correspond to silver.
 
-	GaAs_on_substrate = SolarCell([Layer(material = GaAs, width=si('500nm'))], substrate = GaAs)
+	# Let's compare the optical behaviour of some of those sources:
+	# pageid = 0, Johnson
+	# pageid = 2, McPeak
+	# pageid = 8, Hagemann
+	# pageid = 12, Rakic (BB)
 
-	wl = si(np.linspace(300, 900, 200), 'nm')
+	# create instances of materials with the optical constants from the database.
+	# The name (when using Solcore's built-in materials, this would just be the
+	# name of the material or alloy, like 'GaAs') is the pageid, AS A STRING, while
+	# the flag nk_db must be set to True to tell Solcore to look in the previously
+	# downloaded database from refractiveindex.info
+	Ag_Joh = material(name = '0', nk_db=True)()
+	Ag_McP = material(name = '2', nk_db=True)()
+	Ag_Hag = material(name = '8', nk_db=True)()
+	Ag_Rak = material(name = '12', nk_db=True)()
 
-	# Thin solar cell, no substrate - will get significant absorption enhancement from reflection at the GaAs/air interface at the back
-	# MUST specify no_back_reflexion = False, so that Solcore does not automatically suppress reflections from the back
-	# (currently, the default setting in solcore is to suppress reflections from the back, so no_back_reflexion = True
-	solar_cell_solver(thin_GaAs, 'optics', user_options={'wavelength': wl, 'optics_method': 'TMM', 'no_back_reflexion': False})
-	z_pos = np.linspace(0, thin_GaAs.width, 201)
-	profiles_thin = thin_GaAs[0].absorbed(z_pos)
-	# Same thin solar cell, but now on a GaAs substrate. In this case, we get the same result whether or not we specify
-	# no_back_reflexion to be True or False, since with a GaAs on GaAs cell we don't get any reflection at the back interface anyway
-	solar_cell_solver(GaAs_on_substrate, 'optics', user_options={'wavelength': wl, 'optics_method': 'TMM'})
-	profiles_thick = GaAs_on_substrate[0].absorbed(z_pos)
+	Ag_Sol = material(name = 'Ag')() # Solcore built-in (from SOPRA)
+
+	# plot the n and k data. Note that not all the data covers the full wavelength range,
+	# so the n/k value stays flat.
+
+	names = ['Johnson', 'McPeak', 'Hagemann', 'Rakic', 'Solcore built-in']
 
 	plt.figure()
-	plt.plot(wl * 1e9,  thin_GaAs[0].layer_absorption)
-	plt.plot(wl * 1e9,  GaAs_on_substrate[0].layer_absorption)
-
-	# Now we consider the thin solar cell without substrate again but ask Solcore to suppress back reflections. We must also
-	# ask Solcore to recalculate the absorption, otherwise it will just use the results calculated above which are already
-	# in the thin_GaAs object
-	# What no_back_reflexion = True actually does is add a highly absorbing layer based on the final layer in the stack so that
-	# nothing is reflected.
-
-	solar_cell_solver(thin_GaAs, 'optics', user_options={'wavelength': wl, 'optics_method': 'TMM', 'no_back_reflexion': True,
-														 'recalculate_absorption': True})
-
-	plt.plot(wl * 1e9,  thin_GaAs[0].layer_absorption, '--')
-	plt.legend(labels=['No substrate (air below)', 'On GaAs substrate', 'No substrate, suppress back reflection'])
+	plt.plot(wl * 1e9, Ag_Joh.n(wl), wl * 1e9, Ag_McP.n(wl),
+			 wl * 1e9, Ag_Hag.n(wl), wl * 1e9, Ag_Rak.n(wl), wl * 1e9, Ag_Sol.n(wl))
+	plt.legend(labels=names)
 	plt.xlabel("Wavelength (nm)")
-	plt.ylabel("Absorption")
+	plt.ylabel("n")
 	plt.show()
-	# we can see that, correctly, the results for the cell with an explicitly specified GaAs substrate and for the thin
-	# cell purposely suppressing back reflections are the same, while the thin cell with back reflections shows thin-film
-	# oscillations in the absorption spectrum.
 
-	# Let's look at what the absorption profile looks like...
-
-	# absorption profile around 750 nm incident wavelength:
 	plt.figure()
-	plt.plot(z_pos*1e9, profiles_thin[:,150])
-	plt.plot(z_pos*1e9, profiles_thick[:,150])
-	plt.xlabel("Depth in GaAs junction (nm)")
+	plt.plot(wl * 1e9, Ag_Joh.k(wl), wl * 1e9, Ag_McP.k(wl),
+			 wl * 1e9, Ag_Hag.k(wl), wl * 1e9, Ag_Rak.k(wl), wl * 1e9, Ag_Sol.k(wl))
+	plt.legend(labels=names)
+	plt.xlabel("Wavelength (nm)")
+	plt.ylabel("k")
 	plt.show()
 
+	# Compare performance as a back mirror on a GaAs 'cell'
+	# Solid line: absorption in GaAs
+	# Dashed line: absorption in Ag
+
+	GaAs = material('GaAs')()
+
+	colors = ['b', 'r', 'k', 'm', 'y']
+
+	plt.figure()
+	for c, Ag_mat in enumerate([Ag_Joh, Ag_McP, Ag_Hag, Ag_Rak, Ag_Sol]):
+		my_solar_cell = SolarCell([Layer(width=si('50nm'), material = GaAs)] +
+								[Layer(width = si('100nm'), material = Ag_mat)])
+		solar_cell_solver(my_solar_cell, 'optics', opts)
+		GaAs_positions = np.linspace(my_solar_cell[0].offset, my_solar_cell[0].offset + my_solar_cell[0].width, 1000)
+		Ag_positions = np.linspace(my_solar_cell[1].offset, my_solar_cell[1].offset + my_solar_cell[1].width, 1000)
+		GaAs_abs = np.trapz(my_solar_cell[0].diff_absorption(GaAs_positions), GaAs_positions)
+		Ag_abs = np.trapz(my_solar_cell[1].diff_absorption(Ag_positions), Ag_positions)
+		plt.plot(wl*1e9, GaAs_abs, color=colors[c], linestyle='-', label=names[c])
+		plt.plot(wl*1e9, Ag_abs, color=colors[c], linestyle='--')
+
+	plt.legend()
+	plt.xlabel("Wavelength (nm)")
+	plt.ylabel("Absorbed")
+	plt.show()
 
