@@ -1,5 +1,5 @@
-Calculating the bandstructure and local density of states in QWs and MQWs
-=========================================================================
+Setting up the options for and defining custom materials
+========================================================
 
 .. image:: Single_QW.png
    :width: 40%

@@ -18,6 +18,12 @@ Optical methods
 ---------------
 
 - :doc:`Using the TMM solver to calculate the reflextion of a multilayered ARC <example_RAT_of_ARC>`
+- :doc:`Looking at the effect of substrate and the no_back_reflexion option in the TMM solver <substrate_example>`
+
+Custom materials
+----------------
+
+- :doc:`Setting up the options for and defining custom materials <custom_materials_example>`
 
 MJ solar cells
 --------------

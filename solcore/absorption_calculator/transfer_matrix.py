@@ -63,7 +63,9 @@ class OptiStack(object):
         flexibility.
 
         :param structure: A list with one or more layers.
-        :param no_back_reflexion: If reflexion from the back must be supressed. Default=False.
+        :param no_back_reflexion: If reflexion from the back must be suppressed. Default=False.
+        :param substrate: a semi-infinite transmission medium. Note that if no_back_reflexion is set to True,
+        adding a substrate won't make any difference.
         """
 
         self.widths = []
@@ -272,7 +274,8 @@ class OptiStack(object):
             self.k_data.append(interp1d(x=solcore.si(layer[1], 'nm'), y=layer[3], fill_value=layer[3][-1]))
 
 
-def calculate_rat(structure, wavelength, angle=0, pol='u', coherent=True, coherency_list=None, no_back_reflexion=True):
+def calculate_rat(structure, wavelength, angle=0, pol='u',
+                  coherent=True, coherency_list=None, no_back_reflexion=True):
     """ Calculates the reflected, absorbed and transmitted intensity of the structure for the wavelengths and angles
     defined.
 
@@ -280,7 +283,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u', coherent=True, cohere
     :param wavelength: Wavelengths (in nm) in which calculate the data. An array.
     :param angle: Angle (in degrees) of the incident light. Default: 0 (normal incidence).
     :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
-    :param coherent: If the light is coeherent or not. If not, a coherency list must be added.
+    :param coherent: If the light is coherent or not. If not, a coherency list must be added.
     :param coherency_list: A list indicating in which layers light should be treated as coeherent ('c') and in which
     incoherent ('i'). It needs as many elements as layers in the structure.
     :param no_back_reflexion: If reflexion from the back must be supressed. Default=True.
@@ -352,7 +355,7 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflexion=True)
     :param structure: A solcore structure with layers and materials.
     :param wavelength: Wavelengths (in nm) in which calculate the data. An array.
     :param angle: A tupple or list with the angles (in degrees) in which to calculate the data.
-    :param no_back_reflexion: If reflexion from the back must be supressed. Default=True.
+    :param no_back_reflexion: If reflexion from the back must be suppressed. Default=True.
     :return: A dictionary with psi and delta at the specified wavelengths and angles (2D arrays).
     """
 
@@ -442,6 +445,11 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     :param structure: A solcore structure with layers and materials.
     :param wavelength: Wavelengths in which calculate the data (in nm). An array
     :param z_limit: Maximum value in the z direction
+    :param steps_size: if the dist is not specified, the step size in nm to use in the depth-dependent calculation
+    :param dist: the positions (in nm) at which to calculate depth-dependent absorption
+    :param no_back_reflexion: whether to suppress reflections from the back interface (True) or not (False)
+    :param angle: incidence angle in degrees
+    :param pol: polarization of incident light: 's', 'p' or 'u' (unpolarized)
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.
     """

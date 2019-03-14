@@ -14,10 +14,13 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, theta=0, phi=0, pol=
     defined using an RCWA method implemented using the S4 package.
 
     :param structure: A solcore Structure object with layers and materials or a OptiStack object.
-    :param options:
+    :param size: list with 2 entries, size of the unit cell (right now, can only be rectangular
+    :param orders: number of orders to retain in the RCWA calculations.
     :param wavelength: Wavelengths (in nm) in which calculate the data.
-    :param angle: Angle (in degrees) of the incident light. Default: 0 (normal incidence).
+    :param theta: polar incidence angle (in degrees) of the incident light. Default: 0 (normal incidence)
+    :param phi: azimuthal incidence angle in degrees. Default: 0
     :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
+    :param substrate: semi-infinite transmission medium
     :return: A dictionary with the R, A and T at the specified wavelengths and angle.
     """
 
@@ -161,7 +164,17 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
     For now, it only works for normal incident, coherent light.
 
     :param structure: A solcore structure with layers and materials.
-    :param wavelength: Wavelengths in which calculate the data (in nm). An array-like object.
+    :param size: list with 2 entries, size of the unit cell (right now, can only be rectangular
+    :param orders: number of orders to retain in the RCWA calculations.
+    :param wavelength: Wavelengths (in nm) in which calculate the data.
+    :param rat_output: output from calculate_rat_rcwa
+    :param z_limit: Maximum value in the z direction at which to calculate depth-dependent absorption (nm)
+    :param steps_size: if the dist is not specified, the step size in nm to use in the depth-dependent calculation
+    :param dist: the positions (in nm) at which to calculate depth-dependent absorption
+    :param theta: polar incidence angle (in degrees) of the incident light. Default: 0 (normal incidence)
+    :param phi: azimuthal incidence angle in degrees. Default: 0
+    :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
+    :param substrate: semi-infinite transmission medium
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.
     """

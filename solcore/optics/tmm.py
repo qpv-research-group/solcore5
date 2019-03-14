@@ -11,9 +11,22 @@ import matplotlib.pyplot as plt
 
 
 def solve_tmm(solar_cell, options):
-    """ Calculates the reflection, transmission and absorption of a solar cell object using the transfer matrix method. Internally, it creates an OptiStack and then it calculates the optical properties of the whole structure.
+    """ Calculates the reflection, transmission and absorption of a solar cell object using the transfer matrix method.
+    Internally, it creates an OptiStack and then it calculates the optical properties of the whole structure.
+    A substrate can be specified in the SolarCell object, which is treated as a semi-infinite transmission medium.
+    Shading can also be specified (as a fraction).
+    Relevant options are 'wl' (the wavelengths, in m), the incidence angle 'theta' (in degrees), the polarization 'pol' ('s',
+    'p' or 'u'), 'position' (locations in m at which depth-dependent absorption is calculated), 'no_back_reflexion' and 'BL_correction'.
+    'no_back_reflexion' sets whether reflections from the back surface are suppressed (if set to True, the default),
+    or taken into account (if set to False).
+    If 'BL_correction' is set to True, the absorption at very high attenuation
+    (absorption coefficient * width > 150 so attenuation is 1e65 times) is calculated using the Beer-Lambert law.
+    This is to avoid absorption going to infinity at short wavelengths. If 'BL_correction' is set to True, thick layers
+    (thickness > 10*maximum wavelength) are also treated incoherently using the Beer-Lambert law, to avoid the calculation of unphysical
+    oscillations.
 
-    :param solar_cell: A solar_cell object
+
+    :param solar_cell: A SolarCell object
     :param options: Options for the solver
     :return: None
     """

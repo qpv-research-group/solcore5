@@ -59,6 +59,7 @@ plt.figure()
 plt.plot(z_pos*1e9, profiles_thin[:,150])
 plt.plot(z_pos*1e9, profiles_thick[:,150])
 plt.xlabel("Depth in GaAs junction (nm)")
+plt.ylabel('Local absorption')
 plt.show()
 
 
