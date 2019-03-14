@@ -24,6 +24,7 @@ Custom materials
 ----------------
 
 - :doc:`Setting up the options for and defining custom materials <custom_materials_example>`
+- :doc:`Searching the refractiveindex.info database and comparing materials <refractiveindex_info_db_example>`
 
 MJ solar cells
 --------------

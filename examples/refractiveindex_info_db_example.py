@@ -26,9 +26,9 @@ search_db('Ag', exact = True)
 
 # Let's compare the optical behaviour of some of those sources:
 # pageid = 0, Johnson
-# pageid = 1, McPeak
-# pageid = 7, Hagemann
-# pageid = 8, Rakic (BB)
+# pageid = 2, McPeak
+# pageid = 8, Hagemann
+# pageid = 12, Rakic (BB)
 
 # create instances of materials with the optical constants from the database.
 # The name (when using Solcore's built-in materials, this would just be the
@@ -36,9 +36,9 @@ search_db('Ag', exact = True)
 # the flag nk_db must be set to True to tell Solcore to look in the previously
 # downloaded database from refractiveindex.info
 Ag_Joh = material(name = '0', nk_db=True)()
-Ag_McP = material(name = '1', nk_db=True)()
-Ag_Hag = material(name = '7', nk_db=True)()
-Ag_Rak = material(name = '8', nk_db=True)()
+Ag_McP = material(name = '2', nk_db=True)()
+Ag_Hag = material(name = '8', nk_db=True)()
+Ag_Rak = material(name = '12', nk_db=True)()
 
 Ag_Sol = material(name = 'Ag')() # Solcore built-in (from SOPRA)
 
@@ -64,6 +64,8 @@ plt.ylabel("k")
 plt.show()
 
 # Compare performance as a back mirror on a GaAs 'cell'
+# Solid line: absorption in GaAs
+# Dashed line: absorption in Ag
 
 GaAs = material('GaAs')()
 
