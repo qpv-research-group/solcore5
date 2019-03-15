@@ -876,8 +876,9 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     VW_list[-1] = VW
 
     for i in range(num_inc_layers - 2, 0, -1):
-        VW = np.matmul(L_list[i], VW.T[:, :, None])
+        VW = np.matmul(L_list[i], VW_list[i+1].T[:, :, None])
         VW_list[i, :, :] = VW.transpose()
+
 
     # stackFB_list[n]=[F,B] means that F is light traveling forward towards n'th
     # stack and B is light traveling backwards towards n'th stack.
