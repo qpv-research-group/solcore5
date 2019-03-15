@@ -378,7 +378,10 @@ def test_substrate_presence_profile():
 
     assert all([d == approx(o) for d, o in zip(profile, profile_data)])
 
+# TODO: the following tests for custom materials do not work as they require changes to the user config file.
+# It is possible the downloading of the database for test_database_materials is also an issue.
 
+@mark.skip
 def test_define_material():
     home_folder = os.path.expanduser('~')
     custom_nk_path = os.path.join(home_folder, 'Solcore/custommats')
@@ -389,6 +392,7 @@ def test_define_material():
     this_dir = os.path.split(__file__)[0]
     create_new_material('SiGeSn', os.path.join(this_dir, 'SiGeSn_n.txt'), os.path.join(this_dir, 'SiGeSn_k.txt'), os.path.join(this_dir, 'SiGeSn_params.txt'))
 
+@mark.skip
 def test_use_material():
     SiGeSn = material('SiGeSn')()
     assert SiGeSn.n(400e-9) == approx(4.175308391752484)
@@ -440,6 +444,3 @@ def test_database_materials():
                        2.37783305])
 
     assert all([d == approx(o) for d, o in zip(n, n_data)])
-
-# TODO: this is not working because the database needs to be downloaded before we can test the customs material database.
-# I am not sure how to make Travis do this.
