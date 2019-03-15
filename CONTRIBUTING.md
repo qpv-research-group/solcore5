@@ -2,7 +2,7 @@
 
 Thanks for taking the time to contribute to Solcore!
 
-The following is a set of guidelines for contributing to Solcore, a multi-scale, python-based library for the modelling of solar cells and semiconductor materials. The goal of these guidelines is to make an efficient and sustainable development of the package and ensure that every commit makes it better, more readable, more robust and better documented. Please, feel free suggest changes and improvements. 
+The following is a set of guidelines for contributing to Solcore, a multi-scale, Python-based library for the modelling of solar cells and semiconductor materials. The goal of these guidelines is to make the development of the package efficient and sustainable and to ensure that every commit makes it better, more readable, more robust and better documented. Please, feel free suggest changes and improvements. 
 
 (this guide is based on the [Atom editor guide](https://github.com/atom/atom/blob/master/CONTRIBUTING.md))
 
@@ -43,7 +43,7 @@ Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/).
 * **Provide specific examples to demonstrate the steps**. Include links to files or GitHub projects, or copy/pasteable snippets, which you use in those examples. If you're providing snippets in the issue, use [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
 * **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
 * **Explain which behavior you expected to see instead and why.**
-* **If there is any error output in the temrinal, include that output with your report.
+* **If there is any error output in the temrinal, include that output with your report.**
 
 Provide more context by answering these questions:
 
@@ -53,16 +53,16 @@ Provide more context by answering these questions:
 
 Include details about your configuration and environment:
 
-* **Which version of Solocre are you using?** 
+* **Which version of Solcore are you using?** 
 * **What's the name and version of the OS you're using**?
 * **Are you running Solcore in a virtual machine?** If so, which VM software are you using and which operating systems and versions are used for the host and the guest?
-* **If the problem is related with the Poisson-drift-diffusion solver**, which compiler did you use? What were the instalation steps you followed?
+* **If the problem is related with the Poisson-drift-diffusion solver**, which compiler did you use? What were the installation steps you followed?
 
 ### Suggesting Enhancements
 
 This section guides you through submitting an enhancement suggestion for Solcore, including completely new features and minor improvements to existing functionality. Following these guidelines helps maintainers and the community understand your suggestion :pencil: and find related suggestions :mag_right:.
 
-Before creating enhancement suggestions, please check [this list](https://github.com/dalonsoa/solcore5/issues)(including closed issues) as you might find out that you don't need to create one. When you are creating an enhancement suggestion, please [include as many details as possible](#how-do-i-submit-a-good-enhancement-suggestion).
+Before creating enhancement suggestions, please check [this list](https://github.com/dalonsoa/solcore5/issues) (including closed issues) as you might find out that you don't need to create one. When you are creating an enhancement suggestion, please [include as many details as possible](#how-do-i-submit-a-good-enhancement-suggestion).
 
 #### How Do I Submit A (Good) Enhancement Suggestion?
 
@@ -93,8 +93,8 @@ The process described here has several goals:
 
 Please follow these steps to have your contribution considered by the maintainers:
 
-1. **Describe clearly what is the purpose of the pull request**. Refer to the relevant issues on [Bugs](#reporting-bugs) or [Enhancements](#suggesting-enhancements). In general, an issue should be open always *prior* to a pull request, to discuss its contents with a mantainer and make sure it makes sense for Solcore. If the pull request is a work in progress that will take some time to be ready but still you want to discuss it with the community, open a [draft pull request](https://github.blog/2019-02-14-introducing-draft-pull-requests/). 
-2. **Include relevant unit tests and integration tests, where needed**. Solcore tests suite is quite limited at the moment. We are working to improve this and tests as much features as possible, so any new addition to the code must come with its own set of test to avoid going backwards in this matter.   
+1. **Describe clearly what is the purpose of the pull request**. Refer to the relevant issues on [Bugs](#reporting-bugs) or [Enhancements](#suggesting-enhancements). In general, an issue should always be open *prior* to a pull request, to discuss its contents with a maintainer and make sure it makes sense for Solcore. If the pull request is a work in progress that will take some time to be ready but still you want to discuss it with the community, open a [draft pull request](https://github.blog/2019-02-14-introducing-draft-pull-requests/). 
+2. **Include relevant unit tests and integration tests, where needed**. Solcore's test suite is quite limited at the moment. We are working to improve this and tests as many features as possible, so any new addition to the code must come with its own set of tests to avoid going backwards in this matter.   
 3. **For new features and enhancements, include documentation and examples**. Both in the code, as docstrings in classes, functions and modules, and as proper documentation describing how to use the new feature. 
 4. Follow the [styleguides](#styleguides)
 5. After you submit your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you. If we conclude that the failure was a false positive, then we will open an issue to track that problem with our status check suite.</details>
