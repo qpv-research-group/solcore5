@@ -10,6 +10,8 @@ from solcore.absorption_calculator import (
     calculate_ellipsometry,
     calculate_absorption_profile,
 )
+from solcore.state import State
+from solcore.solar_cell_solver import prepare_solar_cell
 from solcore.absorption_calculator.dielectric_constant_models import (
     DielectricConstantModel,
     Drude,
@@ -21,6 +23,7 @@ from solcore.material_system import create_new_material
 from solcore.absorption_calculator import download_db, search_db
 from solcore.absorption_calculator.nk_db import nkdb_load_n
 from solcore.config_tools import add_source
+from solcore.optics import solve_tmm
 
 import os
 
@@ -326,6 +329,53 @@ def test_substrate_presence_A():
                        [0.5209978, 0.62284555, 0.37789382]])
 
     assert all([d == approx(o) for d, o in zip(A, A_data)])
+
+def test_BL_correction():
+    Ge = material('Ge')()
+
+    high_abs_cell = SolarCell([Layer(material=Ge, width=si('1000nm'))])
+    wl = np.linspace(290, 400, 2) * 1e-9
+    opts = State()
+    opts.position = None
+    prepare_solar_cell(high_abs_cell, opts)
+    position = np.arange(0, high_abs_cell.width, 1e-9)
+    opts.position = position
+
+    opts.BL_correction = False
+    opts.wavelength = wl
+    solve_tmm(high_abs_cell, opts)
+
+    no_corr = high_abs_cell.absorbed
+
+    opts.BL_correction = True
+    solve_tmm(high_abs_cell, opts)
+    with_corr = high_abs_cell.absorbed
+    assert with_corr == approx(np.array([0.35522706, 0.49290808]))
+    assert no_corr == approx(np.array([0.29385107, 0.49290808]))
+
+    GaAs = material('GaAs')()
+
+    thick_cell = SolarCell([Layer(material=GaAs, width=si('400nm')), Layer(material=Ge, width=si('50um'))])
+
+    opts = State()
+    opts.position = None
+    prepare_solar_cell(thick_cell, opts)
+    position = np.arange(0, thick_cell.width, 1e-9)
+    opts.position = position
+
+    opts.BL_correction = False
+    opts.wavelength = wl
+    solve_tmm(thick_cell, opts)
+
+    no_corr = thick_cell.absorbed
+
+    opts.BL_correction = True
+
+    solve_tmm(thick_cell, opts)
+    with_corr = thick_cell.absorbed
+    assert with_corr == approx(np.array([0.53991738, 0.52258749]))
+    assert np.isnan(no_corr[0])
+
 
 def test_substrate_presence_profile():
     wavelength = np.linspace(300, 800, 3) * 1e-9
