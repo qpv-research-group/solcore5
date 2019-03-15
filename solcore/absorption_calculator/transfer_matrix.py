@@ -4,6 +4,7 @@ transfer matrix package developed by Steven Byrnes and included in the PyPi repo
 """
 import numpy as np
 import solcore
+import tmm as old_tmm
 from solcore.interpolate import interp1d
 from solcore.structure import ToStructure
 from solcore.absorption_calculator import tmm_core_vec as tmm
@@ -302,7 +303,11 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             assert len(coherency_list) == stack.num_layers, \
                 'Error: The coherency list must have as many elements (now {}) as the ' \
                 'number of layers (now {}).'.format(len(coherency_list), stack.num_layers)
-            coherency_list = ['i'] + coherency_list + ['i']
+            
+            if stack.no_back_reflexion:
+                coherency_list = ['i'] + coherency_list + ['i', 'i']
+            else:
+                coherency_list = ['i'] + coherency_list + ['i']
 
         else:
             raise Exception('Error: For incoherent or partly incoherent calculations you must supply the '
@@ -319,7 +324,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['T'] = out['T']
         else:
             for i, wl in enumerate(wavelength):
-                out = tmm.inc_tmm(pol, stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
+                out = old_tmm.inc_tmm(pol, stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
                 output['R'][i] = out['R']
                 output['A'][i] = 1 - out['R'] - out['T']
                 output['T'][i] = out['T']
@@ -332,8 +337,8 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['T'] = out['T']
         else:
             for i, wl in enumerate(wavelength):
-                out_p = tmm.inc_tmm('p', stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
-                out_s = tmm.inc_tmm('s', stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
+                out_p = old_tmm.inc_tmm('p', stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
+                out_s = old_tmm.inc_tmm('s', stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
 
                 output['R'][i] = 0.5 * (out_p['R'] + out_s['R'])
                 output['T'][i] = 0.5 * (out_p['T'] + out_s['T'])

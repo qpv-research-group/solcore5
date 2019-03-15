@@ -78,8 +78,10 @@ class DBMaterial:
 
                 formula = int((data['type'].split())[1])
                 coefficients = [float(s) for s in data['coefficients'].split()]
+
                 rangeMin = float(data['wavelength_range'].split()[0])
                 rangeMax = float(data['wavelength_range'].split()[1])
+
                 previous_formula = True
                 self.refractiveIndex = RefractiveIndexData.SetupRefractiveIndex(formula=formula,
                                                                                 rangeMin=rangeMin,

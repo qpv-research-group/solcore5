@@ -30,12 +30,14 @@ search_db('Ag', exact = True)
 # pageid = 8, Hagemann
 # pageid = 12, Rakic (BB)
 
+
 # create instances of materials with the optical constants from the database.
 # The name (when using Solcore's built-in materials, this would just be the
 # name of the material or alloy, like 'GaAs') is the pageid, AS A STRING, while
 # the flag nk_db must be set to True to tell Solcore to look in the previously
 # downloaded database from refractiveindex.info
 Ag_Joh = material(name = '0', nk_db=True)()
+
 Ag_McP = material(name = '2', nk_db=True)()
 Ag_Hag = material(name = '8', nk_db=True)()
 Ag_Rak = material(name = '12', nk_db=True)()
@@ -64,6 +66,7 @@ plt.ylabel("k")
 plt.show()
 
 # Compare performance as a back mirror on a GaAs 'cell'
+
 # Solid line: absorption in GaAs
 # Dashed line: absorption in Ag
 
