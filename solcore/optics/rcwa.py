@@ -69,33 +69,3 @@ def solve_rcwa(solar_cell, options):
     solar_cell.reflected = RAT['R'] * initial
     solar_cell.transmitted = (1 - RAT['R'] - all_absorbed) * initial
     solar_cell.absorbed = all_absorbed * initial
-
-
-# def absorbed(self, z):
-    # out = self.diff_absorption(self.offset + z) * (z < self.width)
-    # return out.T
-
-
-# def calculate_absorption_rcwa(tmm_out):
-    # all_z = tmm_out['position'] * 1e-9
-    # all_abs = tmm_out['absorption'] / 1e-9
-
-    # def diff_absorption(z):
-        # idx = all_z.searchsorted(z)
-        # idx = np.where(idx <= len(all_z) - 2, idx, len(all_z) - 2)
-        # try:
-            # z1 = all_z[idx]
-            # z2 = all_z[idx + 1]
-
-            # f = (z - z1) / (z2 - z1)
-
-            # out = f * all_abs[:, idx] + (1 - f) * all_abs[:, idx + 1]
-
-        # except IndexError:
-            # out = all_abs[:, idx]
-
-        # return out
-
-    # all_absorbed = np.trapz(diff_absorption(all_z), all_z)
-
-    # return diff_absorption, all_absorbed
