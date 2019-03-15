@@ -38,8 +38,10 @@ SiGeSn = material('SiGeSn')()
 plt.figure()
 plt.plot(si(np.arange(300, 1700, 5), 'nm')*1e9, SiGeSn.n(si(np.arange(300, 1700, 5), 'nm')))
 plt.plot(si(np.arange(300, 1700, 5), 'nm')*1e9, SiGeSn.k(si(np.arange(300, 1700, 5), 'nm')))
+
 plt.xlabel('Wavelength (nm)')
 plt.ylabel('SiGeSn n / k')
+
 plt.show()
 
 # EXAMPLE 2
@@ -60,6 +62,8 @@ Diamond = material('Diamond')()
 plt.figure()
 plt.plot(si(np.arange(100, 800, 5), 'nm')*1e9, Diamond.n(si(np.arange(100, 800, 5), 'nm')))
 plt.plot(si(np.arange(100, 800, 5), 'nm')*1e9, Diamond.k(si(np.arange(100, 800, 5), 'nm')))
+
 plt.xlabel('Wavelength (nm)')
 plt.ylabel('Diamond n / k')
+
 plt.show()
