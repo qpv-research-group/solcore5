@@ -14,7 +14,8 @@ Book = namedtuple('Book', ['book', 'name'])
 Page = namedtuple('Page', ['page', 'name', 'path'])
 Entry = namedtuple('Entry',['id','shelf','book','page'])
 
-_riiurl = "https://refractiveindex.info/download/database/rii-database-2017-09-05.zip"
+# Check latest available database in https://refractiveindex.info/download.php
+_riiurl = "https://refractiveindex.info/download/database/rii-database-2018-07-01.zip"
 
 class Database:
 
@@ -289,7 +290,8 @@ def extract_entry_list(db_path):
                     if 'DIVIDER' not in p:
                         page = Page(p['PAGE'],
                                     p['name'],
-                                    os.path.join(referencePath, os.path.normpath(p['path'])))
+                                    os.path.join(os.path.join(referencePath, 'data'), os.path.normpath(p['data'])))
+
                         entries.append(Entry(str(idx),shelf,book,page))
                         idx+=1
     return entries
