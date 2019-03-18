@@ -16,10 +16,10 @@ import datetime
 # from tkinter import font
 # from solcore import sunglass
 
-from solcore.sunglass.materials import MaterialsTab
-from solcore.sunglass.solar_cells import SolarCellsTab
-from solcore.sunglass.log import LogTab
-from solcore.sunglass.spectrum import SpectrumTab
+from .materials import MaterialsTab
+from .solar_cells import SolarCellsTab
+from .log import LogTab
+from .spectrum import SpectrumTab
 
 
 class Sunglass(tk.Tk):
