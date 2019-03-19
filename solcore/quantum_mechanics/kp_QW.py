@@ -441,7 +441,6 @@ def solve_electrons_QW_at_kt_parabolic(kt, z, fe, me, num=(10, 10), quasiconfine
 
 def band_sorting(bands, symmetric=False):
     """ Sort the bands in C, HH and LH according to their character at k=0
-    """ Sort the bands in C, HH and LH according to their character at k=0
     :param bands: A dictionary containing the bandstructure as calculated by solve_electrons_QW_at_kt_parabolic and
             solve_holes_QW_at_kt_4x4
     :return: A dictionary with the same input information but arranged in a different way, including labels
