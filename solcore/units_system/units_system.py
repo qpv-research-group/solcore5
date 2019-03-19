@@ -329,7 +329,6 @@ class UnitsSystem(SourceManagedClass):
             negative = "-"
         formatting = "%s%%.%if %%s" % (negative, precision)
         d = self.dimensions[dimension]
-
         possibleUnits = d.keys()
         if value == 0:
             return formatting % (0, "")
