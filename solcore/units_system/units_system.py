@@ -52,7 +52,6 @@ class UnitsSystem(SourceManagedClass):
             self.add_source(name, os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)))
 
         self.read()
-        print (self.dimensions)
 
     def read(self, name=None):
         """ Reads the units file and creates a database with all units and conversion factors. """
