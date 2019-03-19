@@ -29,7 +29,7 @@ for i in range(len(e_inf)):
     plt.plot(x/1000, out['A'], 'r', label='A ' + label[i], ls=ls[i])
     plt.plot(x/1000, out['T'], 'g', label='T ' + label[i], ls=ls[i])
 
-    # And also want to know the n and k.txt data
+    # And also want to know the n and k data
     n = model.n_and_k(x)
 
     plt.figure(2)

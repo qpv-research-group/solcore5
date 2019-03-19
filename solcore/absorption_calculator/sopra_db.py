@@ -159,14 +159,14 @@ class sopra_database:
         return (Wav, ((4 * np.pi) / (Wav * 1E-9)) * k)
 
     def load_temperature(self, Lambda, T=300):
-        """ SOPRA_DB.load_temperature(T, Lambda) :: Loads n and k.txt data for a set of materials with temperature dependent
+        """ SOPRA_DB.load_temperature(T, Lambda) :: Loads n and k data for a set of materials with temperature dependent
                 data sets
             Optional argument T defaults to 300K
             Required argument Lambda specifies a wavelength range and the data is interpolated to fit. This is a
                 required argument here as not all data sets in a group are the same length (will be fixed in a
                 subsequent update).
 
-            Returns: Tuple of (Wavelength, n, k.txt) """
+            Returns: Tuple of (Wavelength, n, k) """
 
         T_degC = T - 273.15  # Convert from Kelvin to degC (units given in the data)...
 
@@ -201,7 +201,7 @@ class sopra_database:
                                           skip_header=3, skip_footer=3, usecols=(2, 3, 4), unpack=True)
 
                 if Lambda is not None:
-                    # Interpolate if the Lambda argument is specified, if not pass loaded Wav, n and k.txt...
+                    # Interpolate if the Lambda argument is specified, if not pass loaded Wav, n and k...
                     n_interp = np.interp(Lambda, Wav, n)
                     k_interp = np.interp(Lambda, Wav, k)
 

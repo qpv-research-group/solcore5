@@ -49,9 +49,9 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
         >>> AlGaAs_2 = AlGaAs(Al=0.7, T=290)     # Different composition and T (the default is T=300K)
 
 
-        The material is created from the parameters in the parameter_system and the n and k.txt data if available. If the
-        n and k.txt data does not exists - at all or for that composition - then n=1 and k.txt=0 at all wavelengths. Keep in
-        mind that the available n and k.txt data is valid only at room temperature.
+        The material is created from the parameters in the parameter_system and the n and k data if available. If the
+        n and k data does not exists - at all or for that composition - then n=1 and k=0 at all wavelengths. Keep in
+        mind that the available n and k data is valid only at room temperature.
 
         :param name: Name of the material
         :param sopra: If a SOPRA material must be used, rather than the normal database material, in case both exist.

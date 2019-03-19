@@ -20,7 +20,7 @@ class WrongDimensionError(Exception):
 
 
 def generateConversionDictForSISuffix(suffix, centi=False, deci=False, non_base_si_factor=1):
-    prefixes = "Y,Z,E,P,T,G,M,k.txt,,m,u,n,p,f,a,z,y".split(",")
+    prefixes = "Y,Z,E,P,T,G,M,k,,m,u,n,p,f,a,z,y".split(",")
     exponents = list(range(8, -9, -1))
 
     if centi:
@@ -52,6 +52,7 @@ class UnitsSystem(SourceManagedClass):
             self.add_source(name, os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)))
 
         self.read()
+        print (self.dimensions)
 
     def read(self, name=None):
         """ Reads the units file and creates a database with all units and conversion factors. """
@@ -119,6 +120,7 @@ class UnitsSystem(SourceManagedClass):
         if unit is None or value is None:
             return value
 
+        print (unit)
         units_list = self.split_units_RE.findall(unit)
         for unit, power in units_list:
             power = float(power) if power != '' else 1
@@ -329,6 +331,7 @@ class UnitsSystem(SourceManagedClass):
             negative = "-"
         formatting = "%s%%.%if %%s" % (negative, precision)
         d = self.dimensions[dimension]
+
         possibleUnits = d.keys()
         if value == 0:
             return formatting % (0, "")
