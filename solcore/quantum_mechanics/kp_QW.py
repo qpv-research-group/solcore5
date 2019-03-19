@@ -263,7 +263,6 @@ def solve_holes_QW_at_kt_4x4(kt, z, fhh, flh, g1, g2, g3, num=(10, 10), quasicon
     flh = (offset - flh) / E0
 
     # Fill the components of the equations based on the effective masses, potential and k value
-    # Fill the components of the equations based on the effective masses, potential and k value
     A1 = 0.5 * (g1 + g2) * kt ** 2 + fhh
     B1 = 0.5 * (g1 - g2) * kt ** 2 + flh
     A2 = 0.5 * (g1 - 2 * g2)
@@ -298,7 +297,6 @@ def solve_holes_QW_at_kt_4x4(kt, z, fhh, flh, g1, g2, g3, num=(10, 10), quasicon
 
     norm1 = [(np.sqrt(np.trapz(p * p, x=z))) for p in Psi_g1]
     norm2 = [(np.sqrt(np.trapz(p * p, x=z))) for p in Psi_g2]
-    # Normalise the wavefunction except if the norm is very small. That's the case for some E at k near 0 only
     # Normalise the wavefunction except if the norm is very small. That's the case for some E at k near 0 only
     for i in range(len(Psi_g1)):
         if norm1[i] > 0.01 * max(norm1):
@@ -577,7 +575,6 @@ def solve_bandstructure_QW(structure, num=10, kpoints=40, krange=5e9, quasiconfi
                                                quasiconfined=quasiconfined))
     bands.append([0.0, new_kpoint])
 
-    # We search only for the solutions corresponding to energy levels confined at k=0
     # We search only for the solutions corresponding to energy levels confined at k=0
     num_e = len(new_kpoint['E_e'])
     num_h = len(new_kpoint['E_U'])
