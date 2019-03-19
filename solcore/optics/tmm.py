@@ -82,18 +82,31 @@ def solve_tmm(solar_cell, options):
     stack = OptiStack(all_layers[0:BL_from], no_back_reflexion=no_back_reflexion, substrate=solar_cell.substrate)
     full_stack = OptiStack(all_layers, no_back_reflexion=no_back_reflexion, substrate=solar_cell.substrate)
 
+    if 'coherency_list' in options.keys():
+        coherency_list = options.coherency_list
+        coherent = False
+        assert len(coherency_list) == full_stack.num_layers, \
+            'Error: The coherency list must have as many elements (now {}) as the ' \
+            'number of layers (now {}).'.format(len(coherency_list), full_stack.num_layers)
+        coherency_list_trunc = coherency_list[0:BL_from]
+    else:
+        coherency_list = None
+        coherency_list_trunc = None
+        coherent = True
+
     position = options.position * 1e9
     profile_position = position[position < sum(stack.widths)]
 
     print('Calculating RAT...')
     RAT = calculate_rat(full_stack, wl * 1e9, angle=theta,
-                        coherent=True, no_back_reflexion=no_back_reflexion,
+                        coherent=coherent, coherency_list=coherency_list, no_back_reflexion=no_back_reflexion,
                         pol=pol)
 
     print('Calculating absorption profile...')
     out = calculate_absorption_profile(stack, wl * 1e9, dist=profile_position,
                                        angle=theta, no_back_reflexion=no_back_reflexion,
-                                       pol=pol)
+                                       pol=pol, coherent=coherent,
+                                       coherency_list=coherency_list_trunc)
 
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_tmm(out, initial)

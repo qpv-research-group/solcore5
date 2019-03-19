@@ -184,6 +184,7 @@ def interface_T(polarization, n_i, n_f, th_i, th_f):
 
 def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     """
+    This function is vectorized.
     Main "coherent transfer matrix method" calc. Given parameters of a stack,
     calculates everything you could ever want to know about how light
     propagates in it. (If performance is an issue, you can delete some of the
@@ -359,6 +360,7 @@ def ellips(n_list, d_list, th_0, lam_vac):
 
 def unpolarized_RT(n_list, d_list, th_0, lam_vac):
     """
+    This function is vectorized.
     Calculates reflected and transmitted power for unpolarized light.
     """
 
@@ -406,6 +408,7 @@ def position_resolved(layer, dist, coh_tmm_data):
 
 def find_in_structure(d_list, dist):
     """
+    This function is vectorized.
     d_list is list of thicknesses of layers, all of which are finite.
 
     dist is the distance from the front of the whole multilayer structure
@@ -708,6 +711,7 @@ def inc_group_layers(n_list, d_list, c_list):
 
 def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     """
+    This function is vectorized.
     Incoherent, or partly-incoherent-partly-coherent, transfer matrix method.
 
     See coh_tmm for definitions of pol, n_list, d_list, th_0, lam_vac.
@@ -994,3 +998,55 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     backfunc.scale(inc_data['stackFB_list'][:, stackindex, 1])
     backfunc.flip()
     return forwardfunc.add(backfunc)
+
+
+def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, widths, alphas):
+    """
+    THIS IS A NEW FUNCTION, NOT FROM STEVEN BYRNES' TMM PACKAGE.
+    Starting with output of inc_tmm(), calculate the Poynting vector
+    and absorbed energy density a distance "dist" into layer number "layer"
+    """
+
+    layers = list(set(layer)) # unique layer indices
+
+    A_per_layer = inc_absorp_in_each_layer(inc_tmm_data) # zero index entry: reflected. final entry: transmitted
+    #print(A_per_layer)
+    fraction_reaching = 1 - np.cumsum(inc_absorp_in_each_layer(inc_tmm_data), axis = 0)
+    A_local = np.zeros((len(alphas[0]), len(dist)))
+    for i, l in enumerate(layers):
+        if coherency_list[l] == 'c':
+            print(l, 'coherent')
+            fn = inc_find_absorp_analytic_fn(l, inc_tmm_data)
+            A_local[:, layer == l] = fn.run(dist[layer == l])
+            #print(fn.run(dist[layer == l]))
+        else:
+            print(l, 'incoherent')
+            A_local[:, layer == l] = beer_lambert(widths[l]*1e-9, alphas[l]*1e9, fraction_reaching[i], dist[layer == l]*1e-9)
+            #print('alphas', alphas[i])
+            #print('width', widths[i])
+            #print(beer_lambert(widths[l], alphas[l], fraction_reaching[i], dist[layer == l]))
+    return A_local
+
+
+def beer_lambert(width, alphas, fraction, dist):
+    # Number of spectral elements
+
+    # everything in metres
+    # At any given position, the absorption per unit length is alpha * exp(-alpha*z) but we have to remove all light
+    # absorbed above it:
+    #print('width', width)
+    # fraction is the same for every depth.
+
+    #print('fraction', fraction)
+
+    #print('alphas', alphas)
+    # After getting al the alphas and widths, we need to create a function that takes as arguments the depth z and
+    # returns the differential fraction of absorbed light at that position.
+
+    expn = np.exp(- alphas[:, None] * dist[None,:])
+
+    output = fraction[:, None]*alphas[:, None]*expn
+
+    # not sure why there's a nm factor (1e9) wrong here...
+    return output/1e9
+

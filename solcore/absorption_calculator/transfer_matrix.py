@@ -432,7 +432,8 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflexion=True)
 
 
 def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size=2, dist=None,
-                                   no_back_reflexion=True, angle=0, pol = 'u'):
+                                   no_back_reflexion=True, angle=0, pol = 'u',
+                                 coherent=True, coherency_list=None):
     """ It calculates the absorbed energy density within the material. From the documentation:
 
     'In principle this has units of [power]/[volume], but we can express it as a multiple of incoming light power
@@ -469,27 +470,64 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
             z_limit = np.sum(np.array(stack.widths))
         dist = np.arange(0, z_limit, steps_size)
 
+    if not coherent:
+        if coherency_list is not None:
+
+            if stack.no_back_reflexion:
+                coherency_list = ['i'] + coherency_list + ['i', 'i']
+            else:
+                coherency_list = ['i'] + coherency_list + ['i']
+
+        else:
+            raise Exception('Error: For incoherent or partly incoherent calculations you must supply the '
+                            'coherency_list parameter with as many elements as the number of layers in the '
+                            'structure')
+
     output = {'position': dist, 'absorption': np.zeros((num_wl, len(dist)))}
 
     if pol in 'sp':
     # print(stack.get_indices(wavelength).shape)
-        out1 = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
+        if coherent:
+            out = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
 
-        layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-        data = tmm.position_resolved(layer, d_in_layer, out1)
+            layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+            data = tmm.position_resolved(layer, d_in_layer, out)
+            output['absorption'] = data['absor']
 
-        output['absorption'] = data['absor']
+        else:
+            out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
+                              wavelength)
+            layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+            data = tmm.inc_position_resolved(layer, d_in_layer, out, coherency_list,
+                                             np.array(stack.get_widths()),
+                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
+            output['absorption'] = data
 
     else:
-        out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-        out2 = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+        if coherent:
+            out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+            out2 = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
 
-        layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-        data_s = tmm.position_resolved(layer, d_in_layer, out1)
-        data_p = tmm.position_resolved(layer, d_in_layer, out2)
+            layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+            data_s = tmm.position_resolved(layer, d_in_layer, out1)
+            data_p = tmm.position_resolved(layer, d_in_layer, out2)
 
+            output['absorption'] = 0.5*(data_s['absor'] + data_p['absor'])
 
-        output['absorption'] = 0.5*(data_s['absor'] + data_p['absor'])
+        else:
+            out1 = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
+                              wavelength)
+            out2 = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
+                              wavelength)
+            layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+            data_s = tmm.inc_position_resolved(layer, d_in_layer, out1, coherency_list,
+                                             np.array(stack.get_widths()),
+                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
+            data_p = tmm.inc_position_resolved(layer, d_in_layer, out2, coherency_list,
+                                             np.array(stack.get_widths()),
+                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
+
+            output['absorption'] = 0.5*(data_s + data_p)
 
     return output
 
