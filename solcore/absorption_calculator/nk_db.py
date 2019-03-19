@@ -20,12 +20,14 @@ def download_db(url = None, interpolation_points = 200, confirm = False):
     """
     NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
 
-    if os.path.isfile(NK_PATH):
+    if os.path.isfile(NK_PATH) and not confirm:
         response = input('There is already a downloaded database file.'
                          'Do you want to download it again (Y/n)?')
 
         if response in 'Yy':
             confirm = True
+    else:
+        confirm = True
 
     if confirm:
         db = DB.Database(NK_PATH)

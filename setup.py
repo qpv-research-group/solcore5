@@ -104,7 +104,8 @@ setup(
         "natsort",
         "regex",
         "cycler",
-        "pyyaml"
+        "pyyaml",
+        "tkcalendar"
     ],
     include_package_data=True,
     test_suite="pytest-runner",
@@ -117,6 +118,7 @@ setup(
         "natsort",
         "regex",
         "cycler",
-        "pyyaml"
+        "pyyaml",
+        "tkcalendar"
     ],
 )

@@ -48,17 +48,18 @@ def solve_rcwa(solar_cell, options):
     # pol = options.pol if 'pol' in options.keys() else 'u'
     # size = options.size if 'size' in options.keys() else [500, 500]
     # orders = options.orders if 'orders' in options.keys() else 4
+    substrate = solar_cell.substrate
 
     print('Calculating RAT...')
     RAT = calculate_rat_rcwa(stack, options.size, options.orders, wl * 1e9, theta=options.theta,
-                             phi=options.phi, pol=options.pol)
+                             phi=options.phi, pol=options.pol, substrate=substrate)
 
     print('Calculating absorption profile...')
     out = calculate_absorption_profile_rcwa(stack, options.size, options.orders, wl * 1e9, RAT,
-                                            dist=position, theta=options.theta, phi=options.phi, pol=options.pol)
+                                            dist=position, theta=options.theta, phi=options.phi, pol=options.pol, substrate=substrate)
 
     # With all this information, we are ready to calculate the differential absorption function
-    diff_absorption, all_absorbed = calculate_absorption_rcwa(out)
+    diff_absorption, all_absorbed = calculate_absorption_rcwa(out, initial)
 
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
@@ -66,9 +67,14 @@ def solve_rcwa(solar_cell, options):
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
 
+        layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
+                options.position < solar_cell[j].offset + solar_cell[j].width)]
+        layer_positions = layer_positions - np.min(layer_positions)
+        solar_cell[j].layer_absorption = np.trapz(solar_cell[j].absorbed(layer_positions), layer_positions, axis=0)
+
     solar_cell.reflected = RAT['R'] * initial
-    solar_cell.transmitted = (1 - RAT['R'] - all_absorbed) * initial
-    solar_cell.absorbed = all_absorbed * initial
+    solar_cell.absorbed = sum([solar_cell[x].layer_absorption for x in np.arange(len(solar_cell))])
+    solar_cell.transmitted = initial - solar_cell.reflected - solar_cell.absorbed
 
 
 def absorbed(self, z):
@@ -76,9 +82,9 @@ def absorbed(self, z):
     return out.T
 
 
-def calculate_absorption_rcwa(tmm_out):
+def calculate_absorption_rcwa(tmm_out, initial=1):
     all_z = tmm_out['position'] * 1e-9
-    all_abs = tmm_out['absorption'] / 1e-9
+    all_abs = initial * tmm_out['absorption'] / 1e-9
 
     def diff_absorption(z):
         idx = all_z.searchsorted(z)

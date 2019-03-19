@@ -9,23 +9,29 @@ except ModuleNotFoundError:
     raise
 
 
-def calculate_rat_rcwa(structure, size, orders, wavelength, theta=0, phi=0, pol='u'):
+def calculate_rat_rcwa(structure, size, orders, wavelength, theta=0, phi=0, pol='u', substrate=None):
     """ Calculates the reflected, absorbed and transmitted intensity of the structure for the wavelengths and angles
     defined using an RCWA method implemented using the S4 package.
 
     :param structure: A solcore Structure object with layers and materials or a OptiStack object.
-    :param options:
+    :param size: list with 2 entries, size of the unit cell (right now, can only be rectangular
+    :param orders: number of orders to retain in the RCWA calculations.
     :param wavelength: Wavelengths (in nm) in which calculate the data.
-    :param angle: Angle (in degrees) of the incident light. Default: 0 (normal incidence).
+    :param theta: polar incidence angle (in degrees) of the incident light. Default: 0 (normal incidence)
+    :param phi: azimuthal incidence angle in degrees. Default: 0
     :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
+    :param substrate: semi-infinite transmission medium
     :return: A dictionary with the R, A and T at the specified wavelengths and angle.
     """
 
     num_wl = len(wavelength)
-    output = {'R': np.zeros(num_wl), 'A': np.zeros(num_wl), 'T': np.zeros(num_wl)}
 
     # write a separate function that makes the OptiStack structure into an S4 object, defined materials etc.
-    S, stack_OS, shape_mats_OS = initialise_S(structure, size, orders)
+    S, stack_OS, shape_mats_OS = initialise_S(structure, size, orders, substrate)
+
+    output = {'R': np.zeros(num_wl), 'A': np.zeros(num_wl), 'T': np.zeros(num_wl),
+              'A_layer': np.zeros((num_wl, len(stack_OS.get_widths())-2))}
+
 
     if pol in 'sp':
         if pol == 's':
@@ -43,6 +49,7 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, theta=0, phi=0, pol=
             output['R'][i] = out['R']
             output['A'][i] = 1 - out['R'] - out['T']
             output['T'][i] = out['T']
+            output['A_layer'][i] = rcwa_absorption_per_layer(S, len(stack_OS.get_widths()))
 
     else:
         for i, wl in enumerate(wavelength):  # set the material values and indices in here
@@ -58,7 +65,7 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, theta=0, phi=0, pol=
             output['A'][i] = 1 - output['R'][i] - output['T'][i]
             # output['all_p'].append(out_p['power_entering_list'])
             # output['all_s'].append(out_s['power_entering_list'])
-
+            output['A_layer'][i] = rcwa_absorption_per_layer(S, len(stack_OS.get_widths()))
     return output
 
 
@@ -71,9 +78,14 @@ def rcwa_rat(S, n_layers):
     return {'R': np.real(R), 'T': np.real(T)}
 
 
-def initialise_S(stack, size, orders):
-    S = S4.New(((size[0], 0), (0, size[1])), orders)
-
+def initialise_S(stack, size, orders, substrate=None):
+    S = S4.New(size, orders)
+    S.SetOptions(  # these are the default
+        LatticeTruncation='Circular',
+        PolarizationDecomposition=False,
+        PolarizationBasis='Default',
+        WeismannFormulation = False
+    )
     geom_list = [layer.geometry for layer in stack]
     geom_list.insert(0, {})  # incidence medium
     geom_list.append({})  # transmission medium
@@ -90,7 +102,7 @@ def initialise_S(stack, size, orders):
         S.SetMaterial('shape_mat_' + str(i1 + 1), 1)
 
     ## Make the layers
-    stack_OS = OptiStack(stack)
+    stack_OS = OptiStack(stack, no_back_reflexion=False, substrate=substrate)
     widths = stack_OS.get_widths()
 
     for i1 in range(len(widths)):  # create 'dummy' materials for base layers including incidence and transmission media
@@ -132,7 +144,6 @@ def necessary_materials(geom_list):
 def update_epsilon(S, stack_OS, shape_mats_OS, wl):
     for i1 in range(len(stack_OS.get_widths())):
         S.SetMaterial('layer_' + str(i1 + 1), stack_OS.get_indices(wl)[i1] ** 2)
-
     for i1 in range(len(shape_mats_OS.widths)):  # initialise the materials needed for all the shapes in S4
         S.SetMaterial('shape_mat_' + str(i1 + 1), shape_mats_OS.get_indices(wl)[i1 + 1] ** 2)
 
@@ -140,7 +151,7 @@ def update_epsilon(S, stack_OS, shape_mats_OS, wl):
 
 
 def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_output,
-                                      z_limit=None, steps_size=2, dist=None, theta=0, phi=0, pol='u'):
+                                      z_limit=None, steps_size=2, dist=None, theta=0, phi=0, pol='u', substrate=None):
     """ It calculates the absorbed energy density within the material. From the documentation:
 
     'In principle this has units of [power]/[volume], but we can express it as a multiple of incoming light power
@@ -153,7 +164,17 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
     For now, it only works for normal incident, coherent light.
 
     :param structure: A solcore structure with layers and materials.
-    :param wavelength: Wavelengths in which calculate the data (in nm). An array-like object.
+    :param size: list with 2 entries, size of the unit cell (right now, can only be rectangular
+    :param orders: number of orders to retain in the RCWA calculations.
+    :param wavelength: Wavelengths (in nm) in which calculate the data.
+    :param rat_output: output from calculate_rat_rcwa
+    :param z_limit: Maximum value in the z direction at which to calculate depth-dependent absorption (nm)
+    :param steps_size: if the dist is not specified, the step size in nm to use in the depth-dependent calculation
+    :param dist: the positions (in nm) at which to calculate depth-dependent absorption
+    :param theta: polar incidence angle (in degrees) of the incident light. Default: 0 (normal incidence)
+    :param phi: azimuthal incidence angle in degrees. Default: 0
+    :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
+    :param substrate: semi-infinite transmission medium
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.
     """
@@ -168,7 +189,7 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
 
     output = {'position': dist, 'absorption': np.zeros((num_wl, len(dist)))}
 
-    S, stack_OS, shape_mats_OS = initialise_S(structure, size, orders)
+    S, stack_OS, shape_mats_OS = initialise_S(structure, size, orders, substrate)
 
     if pol in 'sp':
         if pol == 's':
@@ -192,6 +213,7 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
 
     else:
         for i, wl in enumerate(wavelength):  # set the material values and indices in here
+            print(i)
             update_epsilon(S, stack_OS, shape_mats_OS, wl)
             S.SetFrequency(1 / wl)
             A = rat_output['A'][i]
@@ -217,3 +239,13 @@ def rcwa_position_resolved(S, layer, depth, A):
         return power_difference / (2 * delta)  # absorbed energy density normalised to total absorption
     else:
         return 0
+
+def rcwa_absorption_per_layer(S, n_layers):
+    # layer 1 is incidence medium, layer n is the transmission medium
+    A = np.empty(n_layers-2)
+    for i1, layer in enumerate(np.arange(n_layers-2)+2):
+        A[i1] = np.real(sum(S.GetPowerFlux('layer_' + str(layer))) - sum(S.GetPowerFlux('layer_' + str(layer+1))))
+
+    A = [x if x > 0 else 0 for x in A]
+
+    return A
