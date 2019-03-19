@@ -120,7 +120,6 @@ class UnitsSystem(SourceManagedClass):
         if unit is None or value is None:
             return value
 
-        print (unit)
         units_list = self.split_units_RE.findall(unit)
         for unit, power in units_list:
             power = float(power) if power != '' else 1
