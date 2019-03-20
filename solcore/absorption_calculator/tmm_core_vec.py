@@ -373,6 +373,7 @@ def unpolarized_RT(n_list, d_list, th_0, lam_vac):
 
 def position_resolved(layer, dist, coh_tmm_data):
     """
+    This function is vectorized.
     Starting with output of coh_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """
@@ -469,6 +470,7 @@ def layer_starts(d_list):
 
 class absorp_analytic_fn:
     """
+    This function (specifically, 'run') is vectorized.
     Absorption in a given layer is a pretty simple analytical function:
     The sum of four exponentials.
 
@@ -850,11 +852,17 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
 
     # L is the transfer matrix from the i'th to (i+1)st incoherent layer, see
     # manual
+
+    # For a very opaque layer, reset P to avoid divide-by-0 and similar
+    # errors.
+    T_list[T_list < 1e-30] = 1e-30
+
     L_list = [nan]  # L_0 is not defined because 0'th layer has no beginning.
     Ltilde = (array([[np.ones(len(lam_vac)), -R_list[1, 0]],
                      [R_list[0, 1],
                       T_list[1, 0] * T_list[0, 1] - R_list[1, 0] * R_list[0, 1]]])
               / T_list[0, 1]).transpose(2, 0, 1)
+
     # Ltilde = Ltilde.transpose(2,0,1)
 
     for i in range(1, num_inc_layers - 1):
@@ -1002,6 +1010,7 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
 
 def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, widths, alphas):
     """
+    This function is vectorized.
     THIS IS A NEW FUNCTION, NOT FROM STEVEN BYRNES' TMM PACKAGE.
     Starting with output of inc_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
@@ -1009,22 +1018,17 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, widths, alp
 
     layers = list(set(layer)) # unique layer indices
 
-    A_per_layer = inc_absorp_in_each_layer(inc_tmm_data) # zero index entry: reflected. final entry: transmitted
-    #print(A_per_layer)
     fraction_reaching = 1 - np.cumsum(inc_absorp_in_each_layer(inc_tmm_data), axis = 0)
     A_local = np.zeros((len(alphas[0]), len(dist)))
     for i, l in enumerate(layers):
         if coherency_list[l] == 'c':
-            print(l, 'coherent')
             fn = inc_find_absorp_analytic_fn(l, inc_tmm_data)
             A_local[:, layer == l] = fn.run(dist[layer == l])
-            #print(fn.run(dist[layer == l]))
+
         else:
-            print(l, 'incoherent')
+
             A_local[:, layer == l] = beer_lambert(widths[l]*1e-9, alphas[l]*1e9, fraction_reaching[i], dist[layer == l]*1e-9)
-            #print('alphas', alphas[i])
-            #print('width', widths[i])
-            #print(beer_lambert(widths[l], alphas[l], fraction_reaching[i], dist[layer == l]))
+
     return A_local
 
 
@@ -1034,12 +1038,9 @@ def beer_lambert(width, alphas, fraction, dist):
     # everything in metres
     # At any given position, the absorption per unit length is alpha * exp(-alpha*z) but we have to remove all light
     # absorbed above it:
-    #print('width', width)
+
     # fraction is the same for every depth.
 
-    #print('fraction', fraction)
-
-    #print('alphas', alphas)
     # After getting al the alphas and widths, we need to create a function that takes as arguments the depth z and
     # returns the differential fraction of absorbed light at that position.
 
@@ -1047,6 +1048,7 @@ def beer_lambert(width, alphas, fraction, dist):
 
     output = fraction[:, None]*alphas[:, None]*expn
 
-    # not sure why there's a nm factor (1e9) wrong here...
+    # not sure why there's a nm factor (1e9) wrong here... What are internal units used by Solcore?
+    # this gives correct results, in any case.
     return output/1e9
 

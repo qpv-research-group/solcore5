@@ -87,8 +87,7 @@ def solve_tmm(solar_cell, options):
         solar_cell.byBL = byBL
         if any(widths > 10*np.max(wl)): # assume it's safe to ignore interference effects
             make_incoherent = np.where(np.array(widths) > 10*np.max(wl))[0]
-            print(type(make_incoherent))
-            print('Treating layer(s) ' + str(make_incoherent) + ' incoherently')
+            print('Treating layer(s) ' + str(make_incoherent).strip('[]') + ' incoherently')
             if not 'coherency_list' in options.keys():
                 coherency_list = np.array(len(all_layers)*['c'])
                 coherent = False
