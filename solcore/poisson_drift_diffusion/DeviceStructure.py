@@ -141,7 +141,7 @@ def LoadAbsorption(layer, T, wavelengths, use_Adachi=False):
 
     if use_Adachi:
         try:
-            # 0 = Energy, 1 = n, 2 = k.txt, 3 = Absorption
+            # 0 = Energy, 1 = n, 2 = k, 3 = Absorption
             absorption = adachi_alpha.create_adachi_alpha(InLineComposition(layer), T=T, wl=wavelengths)[3]
         except:
             print("Warning: Using experimental data to estimate the absorption coefficient of material: ",
@@ -170,7 +170,7 @@ def LoadAbsorption(layer, T, wavelengths, use_Adachi=False):
         except Exception as err:
             print("Warning: Using Adachi calculation to estimate the absorption coefficient of material: ",
                   InLineComposition(layer))
-            # 0 = Energy, 1 = n, 2 = k.txt, 3 = Absorption
+            # 0 = Energy, 1 = n, 2 = k, 3 = Absorption
             try:
                 absorption = adachi_alpha.create_adachi_alpha(InLineComposition(layer), T=T, wl=wavelengths)[3]
             except:

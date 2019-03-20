@@ -5,13 +5,13 @@ from solcore.science_tracker import science_reference
 
 
 def create_adachi_alpha(material, Esteps=(1.42, 6, 3000), T=300, wl=None):
-    """ Calculates the n, k.txt and absorption coefficient of a material using Adachi's formalism of critical points.
+    """ Calculates the n, k and absorption coefficient of a material using Adachi's formalism of critical points.
 
     :param material: A solcore material
     :param Esteps: (1.42, 6, 3000) A tuple with the start, end and step energies in which calculating the optical data
     :param T: (300) Temeprature in kelvin
     :param wl: (None) Optional array indicating the wavelengths in which calculating the data
-    :return: A tuple containing 4 arrays: (Energy, n, k.txt, alpha)
+    :return: A tuple containing 4 arrays: (Energy, n, k, alpha)
     """
 
     science_reference("Adachi optical dispersion relations",
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 
     curves = [
         GraphData(E, nn, label="n", linewidth=2, color="red"),
-        GraphData(E, kk, label="k.txt", linewidth=2, color="grey"),
+        GraphData(E, kk, label="k", linewidth=2, color="grey"),
     ]
 
     g = Graph(curves, yscale="log", legend="best", xlim=(0, 6), ylim=(1e-3, 10)).draw()

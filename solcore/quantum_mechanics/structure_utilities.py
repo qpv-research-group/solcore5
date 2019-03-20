@@ -172,9 +172,9 @@ def structure_to_potentials(structure, step_size=None, minimum_step_size=0, smal
         substrate = structure.substrate
 
         # Now we modify the band profile and effective masses according to the chosen mode:
-        # - kp4x4, calculates the bands and effective masses at k.txt=0 coupling the HH and LH bands
-        # - kp6x6, calculates the bands and effective masses at k.txt=0 coupling the HH, LH and SO bands
-        # - kp8x8_bulk, calculates the four bands and fit the effective masses with a parabola around k.txt=0
+        # - kp4x4, calculates the bands and effective masses at k=0 coupling the HH and LH bands
+        # - kp6x6, calculates the bands and effective masses at k=0 coupling the HH, LH and SO bands
+        # - kp8x8_bulk, calculates the four bands and fit the effective masses with a parabola around k=0
         # - strain, just shifts the bands according to the strain
         # - relaxed, do nothing and things are calculated as if we had the bulk, unstrained materials
         if mode == 'kp6x6':
@@ -191,7 +191,7 @@ def structure_to_potentials(structure, step_size=None, minimum_step_size=0, smal
             Vso[positions] = so
 
         elif mode == 'kp4x4':
-            # The band edges are shifted but the effective masses around k.txt=0 are not affected.
+            # The band edges are shifted but the effective masses around k=0 are not affected.
             c, hh, lh, mc_kp, mhh_p_kp, mlh_p_kp, mhh_t_kp, mlh_t_kp = kp4x4(layer.material, substrate)
 
             Ve[positions] = c
