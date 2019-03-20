@@ -5,7 +5,6 @@ from configparser import ConfigParser
 import os
 import shutil
 import solcore
-import glob
 
 home_folder = os.path.expanduser('~')
 user_config = os.path.join(home_folder, '.solcore_config.txt')
@@ -16,7 +15,7 @@ default_config_data = ConfigParser()
 default_config_data.read(solcore.default_config)
 
 
-def reset_defaults(confirm=False):
+def reset_defaults(confirm=False, user_config_file=user_config):
     """ Resets the default Solcore configuration in the user home folder.
 
     :return: None
@@ -30,9 +29,9 @@ def reset_defaults(confirm=False):
             confirm = True
 
     if confirm:
-        shutil.copy2(solcore.default_config, user_config)
+        shutil.copy2(solcore.default_config, user_config_file)
 
-        user_config_data.read(user_config)
+        user_config_data.read(user_config_file)
         user_config_data.remove_option(section='Configuration', option='version')
         save_user_config()
 
@@ -241,15 +240,18 @@ def get_current_config():
         print()
 
 
-def check_user_config():
+def check_user_config(user_config_file=user_config, response=None):
     """ Checks if there's a user configuration file, asking if it needs to be created.
 
     :return: None
     """
+    global user_config_data
+
     if len(user_config_data.sections()) == 0:
-        response = input('No user configuration was detected. Do you want to create one (Y/n)?')
+        if response is None:
+            response = input('No user configuration was detected. Do you want to create one (Y/n)?')
 
         if response in 'Yy':
-            reset_defaults(True)
+            reset_defaults(True, user_config_file=user_config_file)
             user_config_data = ConfigParser()
-            user_config_data.read(user_config)
+            user_config_data.read(user_config_file)

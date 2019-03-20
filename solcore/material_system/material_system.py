@@ -30,6 +30,15 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
         for name, path in sources.items():
             self.sources[name] = os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT))
 
+    def reset(self, sources=None):
+        """ Resets the material system, adding the sources and re-reading them
+
+        :param sources: ConfigParser material sources
+        :return: None
+        """
+        for name, path in sources.items():
+            self.sources[name] = os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT))
+
     def material(self, name, sopra=False, nk_db=False):
         """ This function checks if the requested material exists and creates a class that contains its properties,
         assuming that the material does not exists in the database, yet.

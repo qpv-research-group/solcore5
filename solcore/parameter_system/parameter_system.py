@@ -57,6 +57,17 @@ class ParameterSystem(SourceManagedClass):
 
         self.read()
 
+    def reset(self, sources=None):
+        """ Resets the parameter system, adding the sources and re-reading them
+
+        :param sources: ConfigParser parameter sources
+        :return: none
+        """
+        for name, path in sources.items():
+            self.add_source(name, os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)))
+
+        self.read()
+
     def get_parameter(self, material, parameter, verbose=False, **others):
         """Calculate/look up parameters for materials, returns in SI units
         

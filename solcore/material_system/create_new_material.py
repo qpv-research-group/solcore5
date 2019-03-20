@@ -6,13 +6,14 @@ import os
 
 from shutil import copyfile, move
 from re import sub
-from solcore import config, SOLCORE_ROOT
+from solcore import config, SOLCORE_ROOT, default_config
 from solcore.parameter_system import ParameterSystem
 from solcore.config_tools import add_source
+from solcore.material_system import MaterialSystem
 
 
 
-def create_new_material(mat_name, n_source, k_source, parameter_source = None):
+def create_new_material(mat_name, n_source, k_source, parameter_source = None, user_config_file=None):
     """
     This function adds a new material to Solcore's material_data folder, so that it can be called like a
     built-in material. It needs a name for the new material, and source files for the n and k data and other
@@ -69,12 +70,14 @@ def create_new_material(mat_name, n_source, k_source, parameter_source = None):
 
         # modify the user's config file (in their home folder) to include the relevant paths
         new_entry = mat_name + ' = ' + config['Others']['custom_mats'] + '/' + mat_name + '-Material\n'
-        home_folder = os.path.expanduser('~')
+        home_folder = user_config_file if user_config_file is not None else os.path.expanduser('~')
         user_config = os.path.join(home_folder, '.solcore_config.txt')
-        existing_config = open(user_config, 'r').read()
-        if not new_entry in existing_config:
+        config.read([default_config, user_config])
 
+        if not new_entry in config:
             add_source('Materials', mat_name, config['Others']['custom_mats'] + '/' + mat_name + '-Material')
+            ParameterSystem().reset(config['Parameters'])
+            MaterialSystem().reset(config['Materials'])
 
         else:
             print('A path for this material was already added to the Solcore config file in the home directory.')

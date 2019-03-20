@@ -1,6 +1,7 @@
 """ Absorption calculator related tests
 """
-from pytest import approx, mark
+from pytest import approx, mark, fixture
+from pathlib import Path
 
 from solcore import material, si
 from solcore.structure import Structure, Layer
@@ -429,32 +430,50 @@ def test_substrate_presence_profile():
     assert all([d == approx(o) for d, o in zip(profile, profile_data)])
 
 # TODO: the following tests for custom materials do not work as they require changes to the user config file.
-# It is possible the downloading of the database for test_database_materials is also an issue.
+#  It is possible the downloading of the database for test_database_materials is also an issue.
 
-@mark.skip
-def test_define_material():
-    home_folder = os.path.expanduser('~')
+
+@fixture
+def create_user_settings(tmp_path_factory: Path) -> Path:
+    """ Creates a user config file in a temporal folder
+    """
+    from solcore.config_tools import reset_defaults
+
+    root = tmp_path_factory.getbasetemp()
+    input_file = root / ".solcore_config.txt"
+    reset_defaults(confirm=True, user_config_file=input_file)
+
+    return root
+
+
+@fixture
+def define_material(create_user_settings):
+    home_folder = create_user_settings
     custom_nk_path = os.path.join(home_folder, 'Solcore/custommats')
     param_path = os.path.join(home_folder, 'Solcore/custom_params.txt')
 
     add_source('Others', 'custom_mats', custom_nk_path)
     add_source('Parameters', 'custom', param_path)
     this_dir = os.path.split(__file__)[0]
-    create_new_material('SiGeSn', os.path.join(this_dir, 'SiGeSn_n.txt'), os.path.join(this_dir, 'SiGeSn_k.txt'), os.path.join(this_dir, 'SiGeSn_params.txt'))
+    create_new_material('SiGeSn', os.path.join(this_dir, 'SiGeSn_n.txt'), os.path.join(this_dir, 'SiGeSn_k.txt'), os.path.join(this_dir, 'SiGeSn_params.txt'), user_config_file=home_folder)
 
-@mark.skip
-def test_use_material():
+
+@mark.flaky(reruns=5)
+def test_use_material(define_material):
     SiGeSn = material('SiGeSn')()
     assert SiGeSn.n(400e-9) == approx(4.175308391752484)
     assert SiGeSn.k(400e-9) == approx(2.3037424963866306)
 
-@mark.skip
-def test_database_materials():
-    home_folder = os.path.expanduser('~')
+
+@mark.flaky(reruns=5)
+def test_database_materials(create_user_settings):
+    home_folder = create_user_settings
     nk_db_path = os.path.join(home_folder, 'Solcore/NK.db')
+    os.mkdir(os.path.join(home_folder, 'Solcore'))
 
     add_source('Others', 'nk', nk_db_path)
-    download_db(confirm=True)
+
+    download_db(confirm=True, db_path=nk_db_path, temp_path=home_folder)
     wl, n = nkdb_load_n(2683) # Should be carbon, from Phillip
     n_data = np.array([0.58321493, 0.57867586, 0.57339939, 0.56591405, 0.56065836,
                        0.5563835 , 0.55229037, 0.54790994, 0.54244807, 0.53583666,

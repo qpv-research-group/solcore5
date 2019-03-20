@@ -109,10 +109,10 @@ setup(
     include_package_data=True,
     test_suite="pytest-runner",
     tests_require=[
-        "pytest",
         "numpy",
         "matplotlib",
         "scipy",
+        "Sphinx",
         "tmm",
         "natsort",
         "regex",

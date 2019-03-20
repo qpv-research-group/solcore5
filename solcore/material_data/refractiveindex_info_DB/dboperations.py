@@ -29,9 +29,10 @@ class Database:
     def create_database_from_folder(self, yml_database_path, interpolation_points=100):
         create_sqlite_database(yml_database_path, self.db_path,interpolation_points=interpolation_points)
 
-    def create_database_from_url(self,interpolation_points=100,riiurl=_riiurl):
-        Database.DownloadRIIzip(riiurl=riiurl)
-        self.create_database_from_folder("database", interpolation_points=interpolation_points)
+    def create_database_from_url(self,interpolation_points=100,riiurl=_riiurl,temp_path="database"):
+        downloaded = os.path.join(temp_path, "database")
+        Database.DownloadRIIzip(outputfolder=temp_path, riiurl=riiurl)
+        self.create_database_from_folder(downloaded, interpolation_points=interpolation_points)
         pass
 
     def check_url_version(self):
@@ -268,7 +269,7 @@ class Database:
             print("Downloaded and extracting...")
             z = zipfile.ZipFile(io.BytesIO(r.content))
             z.extractall(path=outputfolder)
-            print("Wrote",outputfolder+"/database","from",riiurl)
+            print("Wrote",str(outputfolder)+"/database","from",riiurl)
             #The destination+database is the result.
             return True
         else:
