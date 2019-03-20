@@ -44,16 +44,19 @@ NP_layer = [Layer(si('50nm'), Air, geometry=[{'type': 'circle', 'mat': TiO2, 'ce
 
 spacer = [Layer(width=si('25nm'), material=GaInP)]
 
-bottom = [Layer(width=si('10um'), material = Ge)]
+bottom = [Layer(width=si('50um'), material = Ge)]
+
+thick_GaAs = [Layer(width = si('100um'), material = GaAs)]
 
 # --------------------------------------------------------------------------
 # solar cell with SiO2 coating
-coherency_list = ['c', 'c', 'c', 'i']
+coherency_list = ['c', 'c', 'c']
 
-solar_cell = SolarCell(spacer + GaAs_junction + bottom)
+solar_cell = SolarCell(spacer + GaAs_junction, substrate = GaAs)
 
 opts.optics_method = 'TMM'
-opts.no_back_reflexion = False
+opts.no_back_reflexion = True
+opts.BL_correction = True
 opts.pol = 'u'
 opts.coherency_list = coherency_list
 solar_cell_solver(solar_cell, 'optics', opts)
@@ -61,7 +64,7 @@ solar_cell_solver(solar_cell, 'optics', opts)
 plt.figure()
 plt.plot(wl*1e9, solar_cell[0].layer_absorption)
 plt.plot(wl*1e9, solar_cell[1].layer_absorption)
-plt.plot(wl*1e9, solar_cell[2].layer_absorption)
+#plt.plot(wl*1e9, solar_cell[2].layer_absorption)
 
 plt.plot(wl*1e9, solar_cell.reflected)
 plt.plot(wl*1e9, solar_cell.transmitted)

@@ -64,22 +64,7 @@ def solve_tmm(solar_cell, options):
 
     # With all the information, we create the optical stack
     no_back_reflexion = options.no_back_reflexion if 'no_back_reflexion' in options.keys() else True
-    attn = np.multiply(np.array(widths), np.array(alphas).T).T
-    #byBL = (attn/np.cos(theta*np.pi/180)) > 150
-    byBL = attn > 150
-    BL_from = len(all_layers)
-    if BL_correction:
-        print('Using Beer-Lambert absorption profile for optically thick layers (exp(-OD) < 1e-65 at normal incidence)')
-        solar_cell.byBL = byBL
-        if any(widths > 10*np.max(wl)): # assume it's safe to ignore interference effects
-            BL_from = np.where(np.array(widths) > si('10um'))[0][0]
-            print('Ignoring layer ' + str(BL_from) + ' and all layers below it in TMM calculation')
-            byBL[BL_from:,:] = True
 
-    else:
-        byBL[:] = False
-
-    stack = OptiStack(all_layers[0:BL_from], no_back_reflexion=no_back_reflexion, substrate=solar_cell.substrate)
     full_stack = OptiStack(all_layers, no_back_reflexion=no_back_reflexion, substrate=solar_cell.substrate)
 
     if 'coherency_list' in options.keys():
@@ -88,14 +73,34 @@ def solve_tmm(solar_cell, options):
         assert len(coherency_list) == full_stack.num_layers, \
             'Error: The coherency list must have as many elements (now {}) as the ' \
             'number of layers (now {}).'.format(len(coherency_list), full_stack.num_layers)
-        coherency_list_trunc = coherency_list[0:BL_from]
     else:
         coherency_list = None
-        coherency_list_trunc = None
         coherent = True
 
+
+    attn = np.multiply(np.array(widths), np.array(alphas).T).T
+    #byBL = (attn/np.cos(theta*np.pi/180)) > 150
+    byBL = attn > 150
+    BL_from = len(all_layers)
+    if BL_correction:
+        print('Using Beer-Lambert absorption profile for optically thick layers (exp(-OD) < 1e-65 at normal incidence)')
+        solar_cell.byBL = byBL
+        if any(widths > 10*np.max(wl)): # assume it's safe to ignore interference effects
+            make_incoherent = np.where(np.array(widths) > 10*np.max(wl))[0]
+            print(type(make_incoherent))
+            print('Treating layer(s) ' + str(make_incoherent) + ' incoherently')
+            if not 'coherency_list' in options.keys():
+                coherency_list = np.array(len(all_layers)*['c'])
+                coherent = False
+            else:
+                coherency_list = np.array(coherency_list)
+            coherency_list[make_incoherent] = 'i'
+            coherency_list = coherency_list.tolist()
+    else:
+        byBL[:] = False
+
     position = options.position * 1e9
-    profile_position = position[position < sum(stack.widths)]
+    profile_position = position[position < sum(full_stack.widths)]
 
     print('Calculating RAT...')
     RAT = calculate_rat(full_stack, wl * 1e9, angle=theta,
@@ -103,10 +108,10 @@ def solve_tmm(solar_cell, options):
                         pol=pol)
 
     print('Calculating absorption profile...')
-    out = calculate_absorption_profile(stack, wl * 1e9, dist=profile_position,
+    out = calculate_absorption_profile(full_stack, wl * 1e9, dist=profile_position,
                                        angle=theta, no_back_reflexion=no_back_reflexion,
                                        pol=pol, coherent=coherent,
-                                       coherency_list=coherency_list_trunc)
+                                       coherency_list=coherency_list)
 
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_tmm(out, initial)
