@@ -16,7 +16,7 @@ class OptiStack(object):
     """ Class that contains an optical structure: a sequence of layers with a thickness and a complex refractive index.
 
     It serves as an intermediate step between solcore layers and materials and the stack of thicknesses and
-    and n and k.txt values necessary to run calculations involving TMM. When creating an OptiStack object, the thicknesses
+    and n and k values necessary to run calculations involving TMM. When creating an OptiStack object, the thicknesses
     of all the layers forming the Solcore structure and the optical data of the materials of the layers are extracted
     and arranged in such a way they can be easily and fastly read by the TMM functions.
 
@@ -59,7 +59,7 @@ class OptiStack(object):
         supressed, usefull for ellipsometry calculations. This is done by creating an artificial highly absorbing but
         not reflecting layer just at the back.
 
-        Alternativelly, it can take simply a list of [thickness, DielectricModel] or [thickness, wavelength, n, k.txt] for
+        Alternativelly, it can take simply a list of [thickness, DielectricModel] or [thickness, wavelength, n, k] for
         each layer accounting for the refractive index of the layers. The three options can be mixed for maximum
         flexibility.
 
@@ -130,21 +130,21 @@ class OptiStack(object):
             return [np.inf] + self.widths + [np.inf]
 
     def _k_absorbing(self, wl):
-        """ k.txt value of the back highly absorbing layer. It is the maximum between the bottom layer of the stack or a
+        """ k value of the back highly absorbing layer. It is the maximum between the bottom layer of the stack or a
         finite, small value that will absorb all light within the absorbing layer thickness.
 
         :param wl: Wavelength of the light in nm.
-        :return: The k.txt value at each wavelength.
+        :return: The k value at each wavelength.
         """
         return np.maximum(wl / 1e-3, self.k_data[-1](wl))
 
     @staticmethod
     def _k_dummy(wl):
-        """ Dummy k.txt value to be used with the dielectric model, which produces the refractive index as a complex
+        """ Dummy k value to be used with the dielectric model, which produces the refractive index as a complex
         number.
 
         :param wl: Wavelength of the light in nm.
-        :return: The k.txt value at each wavelength... set to zero.
+        :return: The k value at each wavelength... set to zero.
         """
         return 0.
 
@@ -212,7 +212,7 @@ class OptiStack(object):
         self.k_data[idx1], self.k_data[idx2] = self.k_data[idx2], self.k_data[idx1]
 
     def _add_solcore_layer(self, layer):
-        """ Adds a Solcore layer to the end (bottom) of the stack, extracting its thickness and n and k.txt data.
+        """ Adds a Solcore layer to the end (bottom) of the stack, extracting its thickness and n and k data.
 
         :param layer: The Solcore layer
         :return: None
