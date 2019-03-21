@@ -40,18 +40,15 @@ def solve_tmm(solar_cell, options):
 
     # Now we calculate the absorbed and transmitted light. We first get all the relevant parameters from the objects
     all_layers = []
-
-    # the next three are for Beer-Lambert correction only
     widths = []
-    alphas = []
     n_layers_junction = []
+
     for j, layer_object in enumerate(solar_cell):
 
         # Attenuation due to absorption in the AR coatings or any layer in the front that is not part of the junction
         if type(layer_object) is Layer:
             all_layers.append(layer_object)
             widths.append(layer_object.width)
-            alphas.append(layer_object.material.alpha(wl))
             n_layers_junction.append(1)
 
         # For each junction, and layer within the junction, we get the absorption coefficient and the layer width.
@@ -60,7 +57,6 @@ def solve_tmm(solar_cell, options):
             for i, layer in enumerate(layer_object):
                 all_layers.append(layer)
                 widths.append(layer.width)
-                alphas.append(layer.material.alpha(wl))
 
     # With all the information, we create the optical stack
     no_back_reflexion = options.no_back_reflexion if 'no_back_reflexion' in options.keys() else True
@@ -77,16 +73,7 @@ def solve_tmm(solar_cell, options):
         coherency_list = None
         coherent = True
 
-
-    attn = np.multiply(np.array(widths), np.array(alphas).T).T
-    #byBL = (attn/np.cos(theta*np.pi/180)) > 150
-    #print(attn)
-    byBL = attn > 150
-    BL_from = len(all_layers)
-    if BL_correction:
-        print('Using Beer-Lambert absorption profile for optically thick layers (exp(-OD) < 1e-65 at normal incidence)')
-        solar_cell.byBL = byBL
-        if any(widths > 10*np.max(wl)): # assume it's safe to ignore interference effects
+    if BL_correction and any(widths > 10*np.max(wl)): # assume it's safe to ignore interference effects
             make_incoherent = np.where(np.array(widths) > 10*np.max(wl))[0]
             print('Treating layer(s) ' + str(make_incoherent).strip('[]') + ' incoherently')
             if not 'coherency_list' in options.keys():
@@ -96,8 +83,6 @@ def solve_tmm(solar_cell, options):
                 coherency_list = np.array(coherency_list)
             coherency_list[make_incoherent] = 'i'
             coherency_list = coherency_list.tolist()
-    else:
-        byBL[:] = False
 
     position = options.position * 1e9
     profile_position = position[position < sum(full_stack.widths)]
@@ -118,28 +103,13 @@ def solve_tmm(solar_cell, options):
 
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
-    previous_abs = 0
     layer = 0
+    A_per_layer = np.array(RAT['A_per_layer'][1:-1]) # first entry is R, last entry is T
     for j in range(len(solar_cell)):
 
-        layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
-                options.position < solar_cell[j].offset + solar_cell[j].width)]
-        layer_positions = layer_positions - np.min(layer_positions)
-        #fraction = initial - RAT['R']*initial - previous_abs
-        fraction = initial*(1-RAT['R']) - previous_abs
-        diff_absorption_BL, transmitted_BL, all_absorbed_BL = calculate_absorption_beer_lambert(widths[layer:layer+n_layers_junction[j]],
-                                                                                                alphas[layer:layer+n_layers_junction[j]],
-                                                                                                fraction)
-        solar_cell[j].diff_absorption_BL = diff_absorption_BL
         solar_cell[j].diff_absorption = diff_absorption
-        # solar_cell[j].where_BL = byBL[(layer[0]-1)]
-        solar_cell[j].where_BL = byBL[layer:(layer + n_layers_junction[j])]
-
-        # print(solar_cell[j].where_BL)
-
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
-        solar_cell[j].layer_absorption = np.trapz(solar_cell[j].absorbed(layer_positions), layer_positions, axis=0)
-        previous_abs = previous_abs + solar_cell[j].layer_absorption
+        solar_cell[j].layer_absorption = initial*np.sum(A_per_layer[layer:(layer+n_layers_junction[j])], axis = 0)
         layer = layer + n_layers_junction[j]
 
     solar_cell.reflected = RAT['R'] * initial
@@ -149,17 +119,6 @@ def solve_tmm(solar_cell, options):
 
 def absorbed(self, z):
     out = self.diff_absorption(self.offset + z) * (z < self.width)
-
-    if type(self) is Layer:
-        replace = np.broadcast_to(self.where_BL[0], (len(z), len(self.where_BL[0]))).T
-
-    else:
-        replace = np.broadcast_to(np.any(self.where_BL, axis=0), (len(z), len(self.where_BL[0]))).T
-
-    out_BL = (self.diff_absorption_BL(z).T) * (z < self.width)
-    out[replace] = 0
-    out_BL[np.logical_not(replace)] = 0
-    out = out + out_BL
 
     return out.T
 

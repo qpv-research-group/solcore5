@@ -333,19 +333,21 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['A_per_layer'] = A_per_layer
     else:
         if coherent:
-            out = tmm.unpolarized_RT(stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-            A_per_layer = tmm.absorp_in_each_layer(out)
-            output['R'] = out['R']
-            output['A'] = 1 - out['R'] - out['T']
-            output['T'] = out['T']
-            output['A_per_layer'] = A_per_layer
-            
+            out_p = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+            out_s = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+            A_per_layer_p = tmm.absorp_in_each_layer(out_p)
+            A_per_layer_s = tmm.absorp_in_each_layer(out_s)
+            output['R'] = 0.5 * (out_p['R'] + out_s['R'])
+            output['T'] = 0.5 * (out_p['T'] + out_s['T'])
+            output['A'] = 1 - output['R'] - output['T']
+            output['A_per_layer'] = 0.5*(A_per_layer_p + A_per_layer_s)
+
         else:
             out_p = tmm.inc_tmm('p', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
             out_s = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
 
-            A_per_layer_p = tmm.inc_absorp_in_each_layer(out_p)
-            A_per_layer_s = tmm.inc_absorp_in_each_layer(out_s)
+            A_per_layer_p = np.array(tmm.inc_absorp_in_each_layer(out_p))
+            A_per_layer_s = np.array(tmm.inc_absorp_in_each_layer(out_s))
 
             output['R'] = 0.5 * (out_p['R'] + out_s['R'])
             output['T'] = 0.5 * (out_p['T'] + out_s['T'])
