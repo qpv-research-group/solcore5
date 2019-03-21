@@ -80,6 +80,7 @@ def solve_tmm(solar_cell, options):
 
     attn = np.multiply(np.array(widths), np.array(alphas).T).T
     #byBL = (attn/np.cos(theta*np.pi/180)) > 150
+    #print(attn)
     byBL = attn > 150
     BL_from = len(all_layers)
     if BL_correction:

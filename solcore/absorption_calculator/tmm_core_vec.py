@@ -261,7 +261,8 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # errors. The criterion imag(delta) > 35 corresponds to single-pass
     # transmission < 1e-30 --- small enough that the exact value doesn't
     # matter.
-    delta[1:num_layers - 1, :] = np.where(delta[1:num_layers - 1, :].imag > 35, delta[1:num_layers - 1, :].real + 35j,
+    # It DOES matter (for depth-dependent calculations!)
+    delta[1:num_layers - 1, :] = np.where(delta[1:num_layers - 1, :].imag > 100, delta[1:num_layers - 1, :].real + 100j,
                                           delta[1:num_layers - 1, :])
 
     # t_list[i,j] and r_list[i,j] are transmission and reflection amplitudes,
@@ -507,14 +508,20 @@ class absorp_analytic_fn:
 
         if pol == 's':
             temp = (n * cos(th) * kz).imag / (n_0 * cos(th_0)).real
+            #print('temp', temp)
             self.A1 = temp * abs(w) ** 2
+            #print('A1', self.A1)
             self.A2 = temp * abs(v) ** 2
+            #print('A2', self.A2)
             self.A3 = temp * v * conj(w)
         else:  # pol=='p'
             temp = (2 * (kz.imag) * (n * cos(conj(th))).real /
                     (n_0 * conj(cos(th_0))).real)
+            #print('temp', temp)
             self.A1 = temp * abs(w) ** 2
+            #print('A1', self.A1)
             self.A2 = temp * abs(v) ** 2
+            #print('A2', self.A2)
             self.A3 = v * conj(w) * (-2 * (kz.real) * (n * cos(conj(th))).imag /
                                      (n_0 * conj(cos(th_0))).real)
         return self
@@ -533,11 +540,20 @@ class absorp_analytic_fn:
         Calculates absorption at a given depth z, where z=0 is the start of the
         layer.
         """
+
         if 'ndarray' in str(type(z)) and z.ndim > 0:
-            return (self.A1[:, None] * exp(self.a1[:, None] * z[None, :]) +
-                    self.A2[:, None] * exp(-self.a1[:, None] * z[None, :]) +
-                    self.A3[:, None] * exp(1j * self.a3[:, None] * z[None, :]) +
-                    conj(self.A3[:, None]) * exp(-1j * self.a3[:, None] * z[None, :]))
+            part1 = self.A1[:, None] * exp(self.a1[:, None] * z[None, :])
+            part2 = self.A2[:, None] * exp(-self.a1[:, None] * z[None, :])
+            part3 = self.A3[:, None] * exp(1j * self.a3[:, None] * z[None, :])
+            part4 = conj(self.A3[:, None]) * exp(-1j * self.a3[:, None] * z[None, :])
+
+            part1[self.A1 < 1e-100, :] = 0
+            #print('part1', part1)
+            #print('part2', part2)
+            #print('part3+4', part3 + part4)
+
+
+            return (part1 + part2 + part3 + part4)
         else:
             return (self.A1 * exp(self.a1 * z) + self.A2 * exp(-self.a1 * z)
                     + self.A3 * exp(1j * self.a3 * z) + conj(self.A3) * exp(-1j * self.a3 * z))
@@ -547,8 +563,12 @@ class absorp_analytic_fn:
         Flip the function front-to-back, to describe a(d-z) instead of a(z),
         where d is layer thickness.
         """
+        expn = exp(self.a1 * self.d)
+        #expn[expn > 1e100] = 1e100
         newA1 = self.A2 * exp(-self.a1 * self.d)
-        newA2 = self.A1 * exp(self.a1 * self.d)
+        newA1[self.A2 == 0] = 0
+        newA2 = self.A1 * expn
+        newA2[self.A1 == 0] = 0
         self.A1, self.A2 = newA1, newA2
         self.A3 = conj(self.A3 * exp(1j * self.a3 * self.d))
         return self
@@ -853,16 +873,13 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     # L is the transfer matrix from the i'th to (i+1)st incoherent layer, see
     # manual
 
-    # For a very opaque layer, reset P to avoid divide-by-0 and similar
-    # errors.
-    T_list[T_list < 1e-30] = 1e-30
 
     L_list = [nan]  # L_0 is not defined because 0'th layer has no beginning.
     Ltilde = (array([[np.ones(len(lam_vac)), -R_list[1, 0]],
                      [R_list[0, 1],
                       T_list[1, 0] * T_list[0, 1] - R_list[1, 0] * R_list[0, 1]]])
               / T_list[0, 1]).transpose(2, 0, 1)
-
+    #print('Ltilde', Ltilde)
     # Ltilde = Ltilde.transpose(2,0,1)
 
     for i in range(1, num_inc_layers - 1):
@@ -927,6 +944,8 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
                 coh_tmm_data_list[prev_stack_index]['T']
                 - stackFB_list[prev_stack_index][1] *
                 coh_tmm_bdata_list[prev_stack_index]['power_entering'])
+
+    #('VWlist', VW_list.transpose(2, 0, 1))
     ans = {'T': T, 'R': R, 'VW_list': VW_list.transpose(2, 0, 1),
            'coh_tmm_data_list': coh_tmm_data_list,
            'coh_tmm_bdata_list': coh_tmm_bdata_list,
@@ -1003,8 +1022,11 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     backfunc = absorp_analytic_fn()
     backfunc.fill_in(inc_data['coh_tmm_bdata_list'][stackindex],
                      -1 - withinstackindex)
+    #print('before scale', backfunc.A2, backfunc.A1)
     backfunc.scale(inc_data['stackFB_list'][:, stackindex, 1])
+    #print('after scale', backfunc.A2, backfunc.A1)
     backfunc.flip()
+    #print('after flip', backfunc.A2, backfunc.A1)
     return forwardfunc.add(backfunc)
 
 
@@ -1017,18 +1039,22 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, widths, alp
     """
 
     layers = list(set(layer)) # unique layer indices
-
-    fraction_reaching = 1 - np.cumsum(inc_absorp_in_each_layer(inc_tmm_data), axis = 0)
+    A_per_layer = np.array(inc_absorp_in_each_layer(inc_tmm_data))
+    fraction_reaching = 1 - np.cumsum(A_per_layer, axis = 0)
     A_local = np.zeros((len(alphas[0]), len(dist)))
     for i, l in enumerate(layers):
         if coherency_list[l] == 'c':
+            #print(l, 'c')
             fn = inc_find_absorp_analytic_fn(l, inc_tmm_data)
             A_local[:, layer == l] = fn.run(dist[layer == l])
 
+            #print('c', A_local[:, layer == l])
         else:
-
+            #print(l, 'i')
             A_local[:, layer == l] = beer_lambert(widths[l]*1e-9, alphas[l]*1e9, fraction_reaching[i], dist[layer == l]*1e-9)
+            #print('i', A_local[:, layer == l])
 
+    #A_local[np.isnan(A_local)] = 0
     return A_local
 
 
@@ -1045,9 +1071,11 @@ def beer_lambert(width, alphas, fraction, dist):
     # returns the differential fraction of absorbed light at that position.
 
     expn = np.exp(- alphas[:, None] * dist[None,:])
-
+    #print('expn', expn)
+    #print('fraction', fraction)
+    #print('alphas', alphas)
     output = fraction[:, None]*alphas[:, None]*expn
-
+    #print('output', output)
     # not sure why there's a nm factor (1e9) wrong here... What are internal units used by Solcore?
     # this gives correct results, in any case.
     return output/1e9
