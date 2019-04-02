@@ -49,13 +49,13 @@ MODULE DriftDiffusion
     REAl(KIND=16), DIMENSION(0:6000) :: Rsrh            ! SRH recombinaiton
     REAl(KIND=16), DIMENSION(0:6000) :: Raug            ! Auger recombinaiton
     REAl(KIND=16), DIMENSION(0:6000) :: G                ! Generation
-    REAl(KIND=16), DIMENSION(6000) :: vpoint            ! Voltage in an IV curve
-    REAl(KIND=16), DIMENSION(6000) :: jpoint            ! Total current in an IV curve
-    REAl(KIND=16), DIMENSION(6000) :: jsrhpoint        ! SRH current in an IV curve
-    REAl(KIND=16), DIMENSION(6000) :: jradpoint        ! Radiative current in an IV curve
-    REAl(KIND=16), DIMENSION(6000) :: jaugpoint        ! Auger current in an IV curve
-    REAl(KIND=16), DIMENSION(6000) :: jsurpoint        ! Surface recombination current in an IV curve
-    REAl(KIND=16), DIMENSION(6000) :: residual        ! residual in an IV curve
+    REAl(KIND=16), DIMENSION(0:6000) :: vpoint            ! Voltage in an IV curve
+    REAl(KIND=16), DIMENSION(0:6000) :: jpoint            ! Total current in an IV curve
+    REAl(KIND=16), DIMENSION(0:6000) :: jsrhpoint        ! SRH current in an IV curve
+    REAl(KIND=16), DIMENSION(0:6000) :: jradpoint        ! Radiative current in an IV curve
+    REAl(KIND=16), DIMENSION(0:6000) :: jaugpoint        ! Auger current in an IV curve
+    REAl(KIND=16), DIMENSION(0:6000) :: jsurpoint        ! Surface recombination current in an IV curve
+    REAl(KIND=16), DIMENSION(0:6000) :: residual        ! residual in an IV curve
     INTEGER :: nvolt = 0
 
     REAl(KIND=16) :: PhotonFlux                        ! Photon flux
@@ -911,19 +911,19 @@ CONTAINS
             CASE ( 'ff' )
                 Get(0) = REAL(FF, 8)            
             CASE ( 'volt' )
-                Get(1:nvolt) = REAL(vpoint(0:nvolt+1), 8)
+                Get(1:nvolt) = REAL(vpoint(0:nvolt-1), 8)
             CASE ( 'jtot' )
-                Get(1:nvolt) = REAL(jpoint(0:nvolt+1), 8)
+                Get(1:nvolt) = REAL(jpoint(0:nvolt-1), 8)
             CASE ( 'jsrh' )
-                Get(1:nvolt) = REAL(jsrhpoint(0:nvolt+1), 8)
+                Get(1:nvolt) = REAL(jsrhpoint(0:nvolt-1), 8)
             CASE ( 'jrad' )
-                Get(1:nvolt) = REAL(jradpoint(0:nvolt+1), 8)
+                Get(1:nvolt) = REAL(jradpoint(0:nvolt-1), 8)
             CASE ( 'jaug' )
-                Get(1:nvolt) = REAL(jaugpoint(0:nvolt+1), 8)
+                Get(1:nvolt) = REAL(jaugpoint(0:nvolt-1), 8)
             CASE ( 'jsur' )
-                Get(1:nvolt) = REAL(jsurpoint(0:nvolt+1), 8)
+                Get(1:nvolt) = REAL(jsurpoint(0:nvolt-1), 8)
             CASE ( 'residual' )
-                Get(1:nvolt) = REAL(residual(0:nvolt+1), 8)
+                Get(1:nvolt) = REAL(residual(0:nvolt-1), 8)
         
         ! Internal quantum efficiency
             CASE ( 'iqe' )
