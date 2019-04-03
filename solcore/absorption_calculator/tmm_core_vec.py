@@ -282,6 +282,7 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # (towards the boundary). Then (v_n,w_n) = M_n (v_{n+1},w_{n+1}). M_n is
     # M_list[n]. M_0 and M_{num_layers-1} are not defined.
     # My M is a bit different than Sernelius's, but Mtilde is the same.
+
     M_list = zeros((num_layers, num_wl, 2, 2), dtype=complex)
     for i in range(1, num_layers - 1):
         A = make_2x2_array(exp(-1j * delta[i]), np.zeros_like(delta[i]), np.zeros_like(delta[i]), exp(1j * delta[i]),
@@ -879,7 +880,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     # For a very opaque layer, reset T to avoid divide-by-0 and similar
     # errors.
     T_list[T_list < 1e-30] = 1e-30
-    
+
     L_list = [nan]  # L_0 is not defined because 0'th layer has no beginning.
     Ltilde = (array([[np.ones(len(lam_vac)), -R_list[1, 0]],
                      [R_list[0, 1],
