@@ -139,7 +139,7 @@ class EllipsometryFitter:
     def set_variables(self, vars):
         """ Sets the variables that will be used during the fitting. The input variable "vars" is a list with as many
         elements as layers in the model. Each of these elemenets is, in turn, a list with the names of the free
-        variables of that layer. If the layers are defined by a dielectric model - rather than experimental n and k.txt data
+        variables of that layer. If the layers are defined by a dielectric model - rather than experimental n and k data
         the variable names other than the thickness and e_inf must be inside a list.
 
         vars =  [   [],

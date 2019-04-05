@@ -15,6 +15,7 @@ from solcore.constants import h, c, q, kb, pi, electron_mass as m0
 from solcore.singleton import Singleton
 from solcore.source_managed_class import SourceManagedClass
 from solcore.absorption_calculator.sopra_db import sopra_database, compounds_info
+from solcore.absorption_calculator.nk_db import nkdb_load_n, nkdb_load_k
 from solcore.material_data import calculate_mobility
 
 
@@ -29,7 +30,7 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
         for name, path in sources.items():
             self.sources[name] = os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT))
 
-    def material(self, name, sopra=False):
+    def material(self, name, sopra=False, nk_db=False):
         """ This function checks if the requested material exists and creates a class that contains its properties,
         assuming that the material does not exists in the database, yet.
 
@@ -47,9 +48,10 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
         >>> AlGaAs_1 = AlGaAs(Al=0.3)            # Instance of the class. For compounds, the variable element MUST be present
         >>> AlGaAs_2 = AlGaAs(Al=0.7, T=290)     # Different composition and T (the default is T=300K)
 
-        The material is created from the parameters in the parameter_system and the n and k.txt data if available. If the
-        n and k.txt data does not exists - at all or for that composition - then n=1 and k.txt=0 at all wavelengths. Keep in
-        mind that the available n and k.txt data is valid only at room temperature.
+
+        The material is created from the parameters in the parameter_system and the n and k data if available. If the
+        n and k data does not exists - at all or for that composition - then n=1 and k=0 at all wavelengths. Keep in
+        mind that the available n and k data is valid only at room temperature.
 
         :param name: Name of the material
         :param sopra: If a SOPRA material must be used, rather than the normal database material, in case both exist.
@@ -62,6 +64,8 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
             if sopra:
                 sopra_database(Material=name)
                 suffix = '_sopra'
+            elif nk_db:
+                suffix = '_nk'
             else:
                 ParameterSystem().database.options(name)
         except configparser.NoSectionError:
@@ -98,6 +102,8 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
             return self.known_materials[name + suffix]
         elif sopra:
             return self.sopra_material(name)
+        elif nk_db:
+            return self.nk_material(name)
         else:
             return self.parameterised_material(name)
 
@@ -173,7 +179,7 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
                 try:
                     self.load_n_data()
                 except:
-                    print('Material "{}" has not n-data defined. Returning "ones"'.format(self.material_string))
+                    print('Material "{}" does not have n-data defined. Returning "ones"'.format(self.material_string))
                     return np.ones_like(x)
 
                 if len(self.composition) == 0:
@@ -190,8 +196,8 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
                 try:
                     self.load_k_data()
                 except:
-                    print('Material "{}" has not k-data defined. Returning "ones"'.format(self.material_string))
-                    return np.ones_like(x)
+                    print('Material "{}" does not have k-data defined. Returning "zeroes"'.format(self.material_string))
+                    return np.zeros_like(x)
 
                 if len(self.composition) == 0:
                     y = np.interp(x, self.k_data[0], self.k_data[1])
@@ -204,6 +210,64 @@ class MaterialSystem(SourceManagedClass, metaclass=Singleton):
         SpecificMaterial.__name__ = name + '_sopra'
 
         self.known_materials[name + '_sopra'] = SpecificMaterial
+        return SpecificMaterial
+
+    def nk_material(self, name):
+        """ Creates an optical material from the refractiveindex.info database. """
+
+        class SpecificMaterial(BaseMaterial):
+
+            def __init__(self, T=300, **kwargs):
+                BaseMaterial.__init__(self, T=T, **kwargs)
+
+            def __getattr__(self, attrname):  # only used for unknown attributes
+                if attrname == "n":
+                    return self.n_interpolated
+                if attrname == "k":
+                    return self.k_interpolated
+
+                raise AttributeError(
+                    'Parameter "{}" not available for this refractiveindex.info material "{}".'.format(attrname, self.material_string))
+
+            @lru_cache(maxsize=1)
+            def load_n_data(self):
+                    wl, n = nkdb_load_n(name)
+                    self.n_data = np.vstack((wl * 1e-6, n))  # wavelengths in DB are in microns
+
+            @lru_cache(maxsize=1)
+            def load_k_data(self):
+                    wl, k = nkdb_load_k(name)
+                    self.k_data = np.vstack((wl * 1e-6, k))
+
+            def n_interpolated(self, x):
+                assert len(self.composition) <= 1, "Can't interpolate 2d spectra yet"
+
+                try:
+                    self.load_n_data()
+                except:
+                    print('Material "{}" does not have n-data defined. Returning "ones"'.format(self.material_string))
+                    return np.ones_like(x)
+
+                y = np.interp(x, self.n_data[0], self.n_data[1])
+
+                return y
+
+            def k_interpolated(self, x):
+                assert len(self.composition) <= 1, "Can't interpolate 2d spectra yet"
+
+                try:
+                    self.load_k_data()
+                except:
+                    print('Material "{}" does not have k-data defined. Returning "zeroes"'.format(self.material_string))
+                    return np.zeros_like(x)
+
+                y = np.interp(x, self.k_data[0], self.k_data[1])
+
+                return y
+
+        SpecificMaterial.__name__ = name + '_nk'
+
+        self.known_materials[name + '_nk'] = SpecificMaterial
         return SpecificMaterial
 
 
@@ -299,7 +363,7 @@ class BaseMaterial:
         try:
             self.load_n_data()
         except:
-            print('Material "{}" has not n-data defined. Returning "ones"'.format(self.material_string))
+            print('Material "{}" does not have n-data defined. Returning "ones"'.format(self.material_string))
             return np.ones_like(x)
 
         if len(self.composition) == 0:
@@ -320,7 +384,7 @@ class BaseMaterial:
         try:
             self.load_k_data()
         except:
-            print('Material "{}" has not k-data defined. Returning "zeros"'.format(self.material_string))
+            print('Material "{}" does not have k-data defined. Returning "zeros"'.format(self.material_string))
             return np.zeros_like(x)
 
         if len(self.composition) == 0:

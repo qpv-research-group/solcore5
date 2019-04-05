@@ -58,14 +58,14 @@ def traverse_brillouin(a, traverse_order=("L", "Gamma", "X", "W", "K", "Gamma"),
 
 
 def kvector(a, t=0, p=np.pi, fraction=0.2, points=50, vin=None):
-    """ Calculates the k.txt points in a direction given by the spheric angles theta (t) and phi (p).
+    """ Calculates the k points in a direction given by the spheric angles theta (t) and phi (p).
     
     The fraction of the Brilluin zone calculated is given by "fraction" and the number of points by "points".
     If "vin" is given, the direction of interest is taken from this vector."""
 
     s3 = np.sqrt(3)
 
-    # Maximum k.txt in the high symmetry directions
+    # Maximum k in the high symmetry directions
     Xkmax = 2 * np.pi / a
     Lkmax = s3 * np.pi / a
 

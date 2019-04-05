@@ -66,7 +66,7 @@ The material class
     :undoc-members:
 
 Accessing parameters
--------------------
+---------------------
 
 .. automodule:: solcore.parameter_system.parameter_system
     :members:

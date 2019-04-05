@@ -1,6 +1,6 @@
 """ Absorption calculator related tests
 """
-from pytest import approx
+from pytest import approx, mark
 
 from solcore import material, si
 from solcore.structure import Structure, Layer
@@ -10,10 +10,23 @@ from solcore.absorption_calculator import (
     calculate_ellipsometry,
     calculate_absorption_profile,
 )
+from solcore.state import State
+from solcore.solar_cell_solver import prepare_solar_cell
 from solcore.absorption_calculator.dielectric_constant_models import (
     DielectricConstantModel,
     Drude,
 )
+
+from solcore.solar_cell_solver import solar_cell_solver
+from solcore.solar_cell import SolarCell
+from solcore.material_system import create_new_material
+from solcore.absorption_calculator import download_db, search_db
+from solcore.absorption_calculator.nk_db import nkdb_load_n
+from solcore.config_tools import add_source
+from solcore.optics import solve_tmm
+
+import os
+
 import numpy as np
 
 
@@ -285,3 +298,199 @@ def test_sopra_absorption():
     data = 163666134.03339368
 
     assert data == approx(out)
+
+def test_substrate_presence_A():
+    wavelength = np.linspace(300, 800, 3) * 1e-9
+
+    GaAs = material("GaAs")(T=300)
+
+    my_structure = SolarCell([Layer(si(700, "nm"), material=GaAs)], substrate=GaAs)
+
+    solar_cell_solver(my_structure, 'optics',
+                      user_options={'wavelength': wavelength, 'optics_method': 'TMM',
+                                    'no_back_reflexion': False})
+
+    z_pos = np.linspace(0, my_structure.width, 10)
+
+    A_subs = my_structure[0].layer_absorption
+
+    my_structure = SolarCell([Layer(si(700, "nm"), material=GaAs)])
+
+    solar_cell_solver(my_structure, 'optics',
+                      user_options={'wavelength': wavelength, 'optics_method': 'TMM',
+                                    'no_back_reflexion': False, })
+
+    A_nosubs = my_structure[0].layer_absorption
+
+
+    A = np.vstack((A_subs, A_nosubs))
+
+    A_data = np.array([[0.5209978, 0.62262739, 0.41829377],
+                       [0.5209978, 0.62284555, 0.37789382]])
+
+    assert all([d == approx(o) for d, o in zip(A, A_data)])
+
+def test_BL_correction():
+    Ge = material('Ge')()
+
+    high_abs_cell = SolarCell([Layer(material=Ge, width=si('1000nm'))])
+    wl = np.linspace(290, 400, 2) * 1e-9
+    opts = State()
+    opts.position = None
+    prepare_solar_cell(high_abs_cell, opts)
+    position = np.arange(0, high_abs_cell.width, 1e-9)
+    opts.position = position
+
+    opts.BL_correction = False
+    opts.wavelength = wl
+    solve_tmm(high_abs_cell, opts)
+
+    no_corr = high_abs_cell.absorbed
+
+    opts.BL_correction = True
+    solve_tmm(high_abs_cell, opts)
+    with_corr = high_abs_cell.absorbed
+    assert with_corr == approx(np.array([0.35522706, 0.49290808]))
+    assert no_corr == approx(np.array([0.29385107, 0.49290808]))
+
+    GaAs = material('GaAs')()
+
+    thick_cell = SolarCell([Layer(material=GaAs, width=si('400nm')), Layer(material=Ge, width=si('50um'))])
+
+    opts = State()
+    opts.position = None
+    prepare_solar_cell(thick_cell, opts)
+    position = np.arange(0, thick_cell.width, 1e-9)
+    opts.position = position
+
+    opts.BL_correction = False
+    opts.wavelength = wl
+    solve_tmm(thick_cell, opts)
+
+    no_corr = thick_cell.absorbed
+
+    opts.BL_correction = True
+
+    solve_tmm(thick_cell, opts)
+    with_corr = thick_cell.absorbed
+    assert with_corr == approx(np.array([0.53991738, 0.52258749]))
+    assert np.isnan(no_corr[0])
+
+
+def test_substrate_presence_profile():
+    wavelength = np.linspace(300, 800, 3) * 1e-9
+
+    GaAs = material("GaAs")(T=300)
+
+    my_structure = SolarCell([Layer(si(700, "nm"), material=GaAs)], substrate=GaAs)
+
+    solar_cell_solver(my_structure, 'optics',
+                      user_options={'wavelength': wavelength, 'optics_method': 'TMM',
+                                    'no_back_reflexion': False})
+
+    z_pos = np.linspace(0, my_structure.width, 10)
+
+    profile_subs = my_structure[0].absorbed(z_pos)
+
+    my_structure = SolarCell([Layer(si(700, "nm"), material=GaAs)])
+
+    solar_cell_solver(my_structure, 'optics',
+                      user_options={'wavelength': wavelength, 'optics_method': 'TMM',
+                                    'no_back_reflexion': False, })
+
+    profile_nosubs = my_structure[0].absorbed(z_pos)
+
+    profile = np.vstack((profile_subs, profile_nosubs))
+
+    profile_data = np.array([[4.35364278e+07, 4.29043895e+06, 9.37889190e+05],
+                             [6.28046841e+04, 2.51407523e+06, 8.40685958e+05],
+                             [9.05652587e+01, 1.47317317e+06, 7.53556838e+05],
+                             [1.30543325e-01, 8.63233564e+05, 6.75457758e+05],
+                             [1.88089178e-04, 5.05826779e+05, 6.05452855e+05],
+                             [3.22944240e-07, 3.00491300e+05, 5.44224778e+05],
+                             [4.65782106e-10, 1.76079153e+05, 4.87821069e+05],
+                             [6.71529364e-13, 1.03177016e+05, 4.37263024e+05],
+                             [9.67758605e-16, 6.04584451e+04, 3.91944804e+05],
+                             [0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
+                             [4.35364278e+07, 4.25691019e+06, 4.84783054e+05],
+                             [6.28046841e+04, 2.52741110e+06, 6.48506623e+05],
+                             [9.05652587e+01, 1.51218752e+06, 9.69894260e+05],
+                             [1.30543325e-01, 8.88603973e+05, 5.31398525e+05],
+                             [1.88089178e-04, 4.92629409e+05, 2.35132516e+05],
+                             [3.22944240e-07, 2.62671365e+05, 6.95243874e+05],
+                             [4.65782107e-10, 1.39173748e+05, 6.70278004e+05],
+                             [6.71530801e-13, 1.01785699e+05, 1.45363256e+05],
+                             [9.69780702e-16, 1.00921869e+05, 2.87066651e+05],
+                             [0.00000000e+00, 0.00000000e+00, 0.00000000e+00]]
+                            )
+
+
+
+    assert all([d == approx(o) for d, o in zip(profile, profile_data)])
+
+# TODO: the following tests for custom materials do not work as they require changes to the user config file.
+# It is possible the downloading of the database for test_database_materials is also an issue.
+
+@mark.skip
+def test_define_material():
+    home_folder = os.path.expanduser('~')
+    custom_nk_path = os.path.join(home_folder, 'Solcore/custommats')
+    param_path = os.path.join(home_folder, 'Solcore/custom_params.txt')
+
+    add_source('Others', 'custom_mats', custom_nk_path)
+    add_source('Parameters', 'custom', param_path)
+    this_dir = os.path.split(__file__)[0]
+    create_new_material('SiGeSn', os.path.join(this_dir, 'SiGeSn_n.txt'), os.path.join(this_dir, 'SiGeSn_k.txt'), os.path.join(this_dir, 'SiGeSn_params.txt'))
+
+@mark.skip
+def test_use_material():
+    SiGeSn = material('SiGeSn')()
+    assert SiGeSn.n(400e-9) == approx(4.175308391752484)
+    assert SiGeSn.k(400e-9) == approx(2.3037424963866306)
+
+@mark.skip
+def test_database_materials():
+    home_folder = os.path.expanduser('~')
+    nk_db_path = os.path.join(home_folder, 'Solcore/NK.db')
+
+    add_source('Others', 'nk', nk_db_path)
+    download_db(confirm=True)
+    wl, n = nkdb_load_n(2683) # Should be carbon, from Phillip
+    n_data = np.array([0.58321493, 0.57867586, 0.57339939, 0.56591405, 0.56065836,
+                       0.5563835 , 0.55229037, 0.54790994, 0.54244807, 0.53583666,
+                       0.52780304, 0.52220281, 0.51743344, 0.5120067 , 0.50729163,
+                       0.5046621 , 0.50166726, 0.49931595, 0.49501672, 0.49060884,
+                       0.48855459, 0.48678095, 0.48522576, 0.48404383, 0.48359425,
+                       0.48357126, 0.48406997, 0.48538076, 0.48643123, 0.48607976,
+                       0.48596997, 0.48630729, 0.48839097, 0.49108562, 0.49244456,
+                       0.49254289, 0.49350922, 0.4974711 , 0.50123933, 0.50465428,
+                       0.50913919, 0.51323753, 0.51583738, 0.51988073, 0.52478609,
+                       0.52834711, 0.53210744, 0.53641754, 0.541486  , 0.54850356,
+                       0.55434881, 0.55925238, 0.56516219, 0.5689907 , 0.57441913,
+                       0.57926509, 0.58287789, 0.58646844, 0.58975747, 0.59105466,
+                       0.58655149, 0.5786466 , 0.56872678, 0.55518287, 0.53712377,
+                       0.51098487, 0.49047403, 0.47911691, 0.45812142, 0.46345176,
+                       0.44772251, 0.45534214, 0.4714259 , 0.48511583, 0.49380479,
+                       0.4982652 , 0.49772907, 0.50612376, 0.51912528, 0.53467711,
+                       0.55029993, 0.56862873, 0.58502876, 0.60229328, 0.61909644,
+                       0.63547993, 0.65545356, 0.67805267, 0.69756522, 0.71659019,
+                       0.73623614, 0.75563388, 0.76949687, 0.78444575, 0.81244567,
+                       0.83941617, 0.86525298, 0.88673291, 0.90652684, 0.92235589,
+                       0.94089495, 0.9708571 , 0.98590931, 1.00269955, 1.02097684,
+                       1.03623883, 1.05626117, 1.08581851, 1.10194641, 1.1354526 ,
+                       1.21260589, 1.34344321, 1.68147323, 2.08187171, 2.55437527,
+                       2.84776234, 3.05673423, 3.27833604, 3.43571649, 3.50768429,
+                       3.49100363, 3.5007246 , 3.49998604, 3.47187414, 3.45372454,
+                       3.42135457, 3.37725267, 3.32462109, 3.29181609, 3.262685  ,
+                       3.24502588, 3.23124178, 3.22611077, 3.22317221, 3.23477168,
+                       3.25217791, 3.28216011, 3.32475433, 3.37108112, 3.42448917,
+                       3.28385656, 3.10966919, 2.98894561, 2.9223206 , 2.86291625,
+                       2.81756759, 2.77148488, 2.727706  , 2.69074153, 2.66695519,
+                       2.63873644, 2.60595664, 2.5817649 , 2.56088461, 2.54132446,
+                       2.5236323 , 2.50581324, 2.48786656, 2.47332368, 2.46498682,
+                       2.45505193, 2.44125173, 2.43147897, 2.42707643, 2.42085729,
+                       2.41142904, 2.40654316, 2.4062024 , 2.40003542, 2.39052295,
+                       2.38812479, 2.38778349, 2.38324149, 2.37852055, 2.37817577,
+                       2.37783305])
+
+    assert all([d == approx(o) for d, o in zip(n, n_data)])

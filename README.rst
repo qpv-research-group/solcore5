@@ -39,7 +39,7 @@ its research in solar cells and photovoltaics. The list of original contributors
 -  Thomas Wilson
 -  Phoebe Pearce
 -  Markus Führer
--  Daniel Farrel
+-  Daniel Farrell
 -  Tomos Thomas
 -  Alvin Chan
 -  Ned Ekins-Daukes

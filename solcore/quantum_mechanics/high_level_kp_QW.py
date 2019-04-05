@@ -21,7 +21,7 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
 
     :param structure: The strucutre to solve
     :param plot_bands: (False) If the bands should be plotted
-    :param kpoints: (30) The number of points in the k.txt space
+    :param kpoints: (30) The number of points in the k space
     :param krange: (1e-9) The range in the k space
     :param num_eigenvalues: (10) Maximum number of eigenvalues to calculate
     :param symmetric: (True) If the structure is symmetric, in which case the calculation can be speed up
