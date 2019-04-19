@@ -326,7 +326,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['A_per_layer'] = A_per_layer
         else:
             out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
-            A_per_layer = tmm.inc_absorp_in_each_layer(out)
+            A_per_layer = np.array(tmm.inc_absorp_in_each_layer(out))
             output['R'] = out['R']
             output['A'] = 1 - out['R'] - out['T']
             output['T'] = out['T']
