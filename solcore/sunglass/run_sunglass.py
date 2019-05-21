@@ -1,3 +1,0 @@
-import sunglass
-
-sunglass.Sunglass()

@@ -1,3 +1,6 @@
+.. image:: https://mybinder.org/badge_logo.svg
+   :target: https://mybinder.org/v2/gh/qpv-research-group/solcore5/sunglass
+
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg
    :target: https://doi.org/10.5281/zenodo.1185316
 
