@@ -7,4 +7,3 @@ natsort
 regex
 cycler
 pyyaml
-tkcalendar

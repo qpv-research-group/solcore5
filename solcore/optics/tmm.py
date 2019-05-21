@@ -31,7 +31,6 @@ def solve_tmm(solar_cell, options):
     :return: None
     """
     wl = options.wavelength
-    solar_cell.wavelength = options.wavelength
     BL_correction = options.BL_correction if 'BL_correction' in options.keys() else True
     theta = options.theta if 'theta' in options.keys() else 0 # angle IN DEGREES
     pol = options.pol if 'pol' in options.keys() else 'u' # angle IN DEGREES
