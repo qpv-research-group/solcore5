@@ -13,7 +13,7 @@ install:
   - pip install pytest
   - pip install pytest-cov
   - pip install coveralls
-  - pip install --no-deps --install-option="--with_pdd" .
+  - pip install --no-deps --install-option="--with_pdd" -e .
 script:
   - pytest --cov=solcore/
 after_success:
