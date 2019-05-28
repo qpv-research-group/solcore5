@@ -33,7 +33,7 @@ DefaultProperties = {'band_gap': DefaultMaterial.band_gap,  # J
                      'Nv': DefaultMaterial.Nv,  # m-3
                      'electron_minority_lifetime': 3e-6,  # s
                      'hole_minority_lifetime': 2.5e-7,  # s
-                     'permittivity': 12.9,  # relative to epsilon0
+                     'relative_permittivity': DefaultMaterial.relative_permittivity,  # relative to epsilon0
                      'electron_auger_recombination': 1e-42,  # m6 s-1,
                      'hole_auger_recombination': 1e-42,  # m6 s-1
                      # 'radiative_recombination': 7.2e-16,  # m3 s-1

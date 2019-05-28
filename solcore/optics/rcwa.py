@@ -21,6 +21,7 @@ def solve_rcwa(solar_cell, options):
     :return: None
     """
     wl = options.wavelength
+    solar_cell.wavelength = options.wavelength
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1

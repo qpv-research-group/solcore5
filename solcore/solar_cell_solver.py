@@ -14,7 +14,8 @@ except AttributeError:
     PDD.pdd_options = {}
 
 default_options = State()
-
+pdd_options = PDD.pdd_options
+asc_options = ASC.db_options
 
 def merge_dicts(*dict_args):
     """
@@ -180,15 +181,15 @@ def solve_qe(solar_cell, options):
 
     print('Solving QE of the solar cell...')
     for j in solar_cell.junction_indices:
-        if solar_cell[j].kind is 'PDD':
+        if solar_cell[j].kind == 'PDD':
             PDD.qe_pdd(solar_cell[j], options)
-        elif solar_cell[j].kind is 'DA':
+        elif solar_cell[j].kind == 'DA':
             ASC.qe_depletion(solar_cell[j], options)
-        elif solar_cell[j].kind is '2D':
+        elif solar_cell[j].kind == '2D':
             # We solve this case as if it were DB. Therefore, to work it needs the same inputs in the Junction object
             wl = options.wavelength
             ASC.qe_detailed_balance(solar_cell[j], wl)
-        elif solar_cell[j].kind is 'DB':
+        elif solar_cell[j].kind == 'DB':
             wl = options.wavelength
             ASC.qe_detailed_balance(solar_cell[j], wl)
         else:
@@ -206,7 +207,7 @@ def solve_equilibrium(solar_cell, options):
     """
     for j in solar_cell.junction_indices:
 
-        if solar_cell[j].kind is 'PDD':
+        if solar_cell[j].kind == 'PDD':
             PDD.equilibrium_pdd(solar_cell[j], options)
         else:
             print('WARNING: Only PDD junctions can be solved in "equilibrium".')
@@ -224,7 +225,7 @@ def solve_short_circuit(solar_cell, options):
 
     for j in solar_cell.junction_indices:
 
-        if solar_cell[j].kind is 'PDD':
+        if solar_cell[j].kind == 'PDD':
             PDD.short_circuit_pdd(solar_cell[j], options)
         else:
             print('WARNING: Only PDD junctions can be solved in "short_circuit".')

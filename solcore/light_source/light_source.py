@@ -30,10 +30,9 @@ class LightSource:
     """ This is a common interface to access all types of light sources supported by Solcore: standard solar spectra (AM0, AM1.5g, and AM1.5d), blackbody radiation, laser light or spectra created from atmospheric data using SPECTRAL2 or SMARTS. Aditionally, it can also use experimentally measured spectra.
     """
     type_of_source = ['laser', 'black body', 'standard', 'SMARTS', 'SPECTRAL2', 'custom']
-    output_units = ['power_density_per_eV', 'power_density_per_nm', 'power_density_per_J', 'power_density_per_m'
-                                                                                           'photon_flux_per_eV',
-                    'photon_flux_per_nm', 'photon_flux_per_J', 'power_density_per_hz',
-                    'photon_flux_per_hz', 'photon_flux_per_m']
+    output_units = ['power_density_per_eV', 'power_density_per_nm', 'power_density_per_J',
+                    'power_density_per_m', 'power_density_per_hz', 'photon_flux_per_eV', 'photon_flux_per_nm',
+                    'photon_flux_per_J', 'photon_flux_per_hz', 'photon_flux_per_m']
 
     def __init__(self, source_type, x=None, **kwargs):
         """
@@ -43,6 +42,7 @@ class LightSource:
         """
         self.source_type = source_type
         self.x = x
+        self.x_internal = x
         self.power_density = 0
 
         self.options = {'output_units': 'power_density_per_nm', 'concentration': 1}
@@ -162,7 +162,7 @@ class LightSource:
         :param wavelength: Array with the wavelengths at which to calculate the spectrum (in m)
         :return: The spectrum in the chosen units.
         """
-        output = self._spectrum(wavelength*1e-9) * 1e9
+        output = self._spectrum(wavelength * 1e-9) * 1e9
         return output
 
     def _get_photon_flux_per_m(self, wavelength):
@@ -171,7 +171,7 @@ class LightSource:
         :param wavelength: Array with the wavelengths at which to calculate the spectrum (in m)
         :return: The spectrum in the chosen units.
         """
-        output = self._spectrum(wavelength*1e9)
+        output = self._spectrum(wavelength * 1e9)
         output = output / (c * h / wavelength) * 1e9
         return output
 
@@ -295,6 +295,7 @@ class LightSource:
                 raise KeyError('ERROR when creating a standard light source. Input parameters must include "version" '
                                'which can be equal to "AM0", "AM1.5g" or "AM1.5d" only.')
 
+            self.x_internal = wl
             self.power_density = np.trapz(y=spectrum, x=wl) * self.options['concentration']
             output = interp1d(x=wl, y=spectrum, bounds_error=False, fill_value=0, assume_sorted=True)
             return output
@@ -317,6 +318,8 @@ class LightSource:
                 out = power / np.sqrt(2 * np.pi * sigma2) * np.exp(- (x - center) ** 2 / 2 / sigma2)
                 return out
 
+            self.x_internal = np.arange(center - 5 * options['linewidth'], center + 5 * options['linewidth'],
+                                        options['linewidth'] / 20)
             self.power_density = power * self.options['concentration']
             return output
 
@@ -352,6 +355,8 @@ class LightSource:
                 out = 2 * entendue * h * c ** 2 / x ** 5 / (np.exp(h * c / (x * kb * T)) - 1)
                 return out * 1e-9
 
+            wl_max = 2.8977729e6/T
+            self.x_internal = np.arange(0, wl_max*10, wl_max/100)
             sigma = 5.670367e-8
             self.power_density = sigma * T ** 4 * entendue / np.pi * self.options['concentration']
 
@@ -378,6 +383,7 @@ class LightSource:
 
         wl, irradiance = calculate_spectrum_spectral2(options, power_density_in_nm=True)
 
+        self.x_internal = wl
         self.power_density = np.trapz(y=irradiance, x=wl) * self.options['concentration']
         output = interp1d(x=wl, y=irradiance, bounds_error=False, fill_value=0, assume_sorted=True)
         return output
@@ -407,6 +413,7 @@ class LightSource:
 
             out = calculate_spectrum_smarts(options)
 
+            self.x_internal = out[0]
             self.power_density = np.trapz(y=out[output], x=out[0]) * self.options['concentration']
             output = interp1d(x=out[0], y=out[output], bounds_error=False, fill_value=0, assume_sorted=True)
             return output
@@ -456,6 +463,7 @@ class LightSource:
             else:
                 raise ValueError('Unknown units: {0}.\nValid units are: {1}.'.format(units, self.output_units))
 
+            self.x_internal = wl
             self.power_density = np.trapz(y=spectrum, x=wl) * self.options['concentration']
             output = interp1d(x=wl, y=spectrum, bounds_error=False, fill_value=0, assume_sorted=True)
             return output
@@ -465,7 +473,6 @@ class LightSource:
 
 
 if __name__ == '__main__':
-
     import matplotlib.pyplot as plt
 
     plt.figure(figsize=(6, 4.5))
@@ -480,10 +487,10 @@ if __name__ == '__main__':
     spectral = LightSource(source_type='SPECTRAL2', x=wl)
 
     plt.plot(*gauss.spectrum(), label='Gauss')
-    plt.plot(*bb.spectrum(),  label='Black body')
-    plt.plot(*am15g.spectrum(),  label='AM1.5G')
-    plt.plot(*smarts.spectrum(),  label='SMARTS')
-    plt.plot(*spectral.spectrum(),  label='SPECTRAL2')
+    plt.plot(*bb.spectrum(), label='Black body')
+    plt.plot(*am15g.spectrum(), label='AM1.5G')
+    plt.plot(*smarts.spectrum(), label='SMARTS')
+    plt.plot(*spectral.spectrum(), label='SPECTRAL2')
 
     plt.xlim(300, 3000)
     plt.xlabel('Wavelength (nm)')

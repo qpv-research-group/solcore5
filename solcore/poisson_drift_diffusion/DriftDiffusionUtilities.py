@@ -76,14 +76,13 @@ def ProcessStructure(device, meshpoints, wavelengths=None):
                      layer['Nv'],
                      layer['electron_minority_lifetime'],
                      layer['hole_minority_lifetime'],
-                     layer['permittivity'] * Epsi0,
+                     layer['relative_permittivity'] * Epsi0,
                      layer['radiative_recombination'],
                      layer['electron_auger_recombination'],
                      layer['hole_auger_recombination'],
                      layer['Na'],
                      layer['Nd']]
         dd.addlayer(args=args_list)
-
         i = i + device['layers'][i]['numlayers']
 
     # We set the surface recombination velocities. This needs to be improved at some point
@@ -265,9 +264,14 @@ def qe_pdd(junction, options):
 
     output = {}
     output['QE'] = DumpQE()
-    output['QE']['wavelengths'] = options.wavelength
+    output['QE']['WL'] = options.wavelength
 
-    junction.qe_data = State(**output['QE'])
+    z = junction.short_circuit_data['Bandstructure']['x']
+    absorbed_per_wl = np.trapz(junction.absorbed(z), z, axis=0)
+
+    # This is redundant but useful to keep the same format than the other solvers
+    junction.qe = State(**output['QE'])
+    junction.qe['IQE'] = junction.qe['EQE']/np.maximum(absorbed_per_wl, 0.00001)
 
     # The EQE is actually the IQE inside the fortran solver due to an error in the naming --> to be changed
     junction.eqe = interp1d(options.wavelength, output['QE']['EQE'], kind='linear', bounds_error=False,
