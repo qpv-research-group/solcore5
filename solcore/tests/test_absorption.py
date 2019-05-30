@@ -416,6 +416,45 @@ def test_substrate_presence_profile():
 # TODO: the following tests for custom materials do not work as they require changes to the user config file.
 # It is possible the downloading of the database for test_database_materials is also an issue.
 
+def test_inc_coh_tmm():
+    GaInP = material('GaInP')(In=0.5)
+    GaAs = material('GaAs')()
+    Ge = material('Ge')()
+
+    optical_struct = SolarCell([Layer(material=GaInP, width=si('5000nm')),
+                                Layer(material=GaAs, width=si('200nm')),
+                                Layer(material=GaAs, width=si('5um')),
+                                Layer(material=Ge, width=si('50um'))
+                                ])
+
+    wl = np.linspace(400, 1200, 5) * 1e-9
+
+    options = State()
+    options.wavelength = wl
+    options.optics_method = 'TMM'
+    options.no_back_reflexion = False
+    options.BL_correction = True
+    options.recalculate_absorption = True
+
+    c_list = [['c', 'c', 'c', 'c'],
+              ['c', 'c', 'c', 'i'],
+              ['c', 'i', 'i', 'c'],
+              ['i', 'i', 'i', 'i']]
+
+    results = []
+    for i1, cl in enumerate(c_list):
+        options.coherency_list = cl
+        solar_cell_solver(optical_struct, 'optics', options)
+        results.append(optical_struct.absorbed)
+
+    A_calc = np.stack(results)
+    A_data = np.array([[0.5742503, 0.67956899, 0.73481357, 0.72746507, 0.77037936],
+       [0.5742503 , 0.67956899, 0.73481357, 0.72746507, 0.77037936],
+       [0.5742503 , 0.67956899, 0.73474943, 0.7046269 , 0.70311501],
+       [0.5742503 , 0.67956899, 0.70927724, 0.71477549, 0.71541325]])
+    assert A_calc == approx(A_data)
+
+
 @mark.skip
 def test_define_material():
     home_folder = os.path.expanduser('~')
