@@ -15,13 +15,18 @@ def solve_tmm(solar_cell, options):
     Internally, it creates an OptiStack and then it calculates the optical properties of the whole structure.
     A substrate can be specified in the SolarCell object, which is treated as a semi-infinite transmission medium.
     Shading can also be specified (as a fraction).
+
     Relevant options are 'wl' (the wavelengths, in m), the incidence angle 'theta' (in degrees), the polarization 'pol' ('s',
     'p' or 'u'), 'position' (locations in m at which depth-dependent absorption is calculated), 'no_back_reflexion' and 'BL_correction'.
     'no_back_reflexion' sets whether reflections from the back surface are suppressed (if set to True, the default),
     or taken into account (if set to False).
-    If 'BL_correction' is set to True, thick layers(thickness > 10*maximum wavelength) are also treated incoherently using
+
+    If 'BL_correction' is set to True, thick layers (thickness > 10*maximum wavelength) are treated incoherently using
     the Beer-Lambert law, to avoid the calculation of unphysical interference oscillations in the R/A/T spectra.
 
+    A coherency_list option can be provided: this should have elements equal to the total number of layers (if a Junction
+    contains multiple Layers, each should have its own entry in the coherency list). Each element is either 'c' for coherent
+    treatment of that layer or 'i' for incoherent treatment.
 
     :param solar_cell: A SolarCell object
     :param options: Options for the solver
@@ -30,7 +35,7 @@ def solve_tmm(solar_cell, options):
     wl = options.wavelength
     BL_correction = options.BL_correction if 'BL_correction' in options.keys() else True
     theta = options.theta if 'theta' in options.keys() else 0 # angle IN DEGREES
-    pol = options.pol if 'pol' in options.keys() else 'u' # angle IN DEGREES
+    pol = options.pol if 'pol' in options.keys() else 'u'
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1

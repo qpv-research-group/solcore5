@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-This module is a (partly) vectorised version of the code written by Steven Byrnes.
-All credit of the algorithm, testing, etc. goes to him. For more details, visit:
+This is mostly based on Steven Byrnes' tmm package, with modifications to vectorize the code
+over wavelengths (by Diego Alonso-Alvarez), and to include depth-dependent absorption calculations
+in incoherent layers using the Beer-Lambert law (by Phoebe Pearce).
+
+All credit of the algorithm, testing, etc. goes to Steven Byrnes. For more details, visit:
 
 - https://arxiv.org/abs/1603.02720
 
@@ -16,7 +19,7 @@ case (i.e. thin films)
 
 inc_tmm(...) -- the transfer-matrix-method calculation in the incoherent
 case (i.e. films tens or hundreds of wavelengths thick, or whose
-thickness is not very uniform. --> THIS FUNCTION IS NOT VECTORISED, YET
+thickness is not very uniform.
 
 These functions are all imported into the main package (tmm) namespace,
 so you can call them with tmm.coh_tmm(...) etc.
@@ -953,11 +956,15 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
                 - stackFB_list[prev_stack_index][1] *
                 coh_tmm_bdata_list[prev_stack_index]['power_entering'])
 
+    if len(stackFB_list) > 0:
+        stackFB_list_ans = np.stack(stackFB_list).transpose(2, 0, 1)
+    else:
+        stackFB_list_ans = []
     #('VWlist', VW_list.transpose(2, 0, 1))
     ans = {'T': T, 'R': R, 'VW_list': VW_list.transpose(2, 0, 1),
            'coh_tmm_data_list': coh_tmm_data_list,
            'coh_tmm_bdata_list': coh_tmm_bdata_list,
-           'stackFB_list': np.stack(stackFB_list).transpose(2, 0, 1),
+           'stackFB_list': stackFB_list_ans,
            'power_entering_list': np.stack(power_entering_list).T}
     ans.update(group_layers_data)
     return ans
@@ -1040,8 +1047,9 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
 
 def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, widths, alphas):
     """
-    This function is vectorized.
-    THIS IS A NEW FUNCTION, NOT FROM STEVEN BYRNES' TMM PACKAGE.
+    This function is vectorized. Analogous to position_resolved, but
+    for layers (incoherent or coherent) in (partly) incoherent stacks.
+    This is a new function, not from Steven Byrnes' tmm package.
     Starting with output of inc_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """

@@ -4,7 +4,7 @@ Defining new materials
 .. toctree::
     :maxdepth: 1
 
-    materials
+    Materials
 
 There are two main ways to use a material which is not built in
 to the Solcore database, which can also be connected. They are:

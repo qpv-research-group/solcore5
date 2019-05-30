@@ -46,6 +46,7 @@ def search_db(term="", exact=False):
     :return: A list of tuples of with one tuple per database entry matching the search term.
     The first entry of each tuple is the pageid of the database entry.
     """
+
     NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
 
     db = DB.Database(NK_PATH)
@@ -102,6 +103,7 @@ def create_nk_txt(pageid, file, folder=""):
     :param folder: folder where the files should be saved
     :return: parameter_source: file with list of other parameters for the new material
     """
+
     NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
 
     db = DB.Database(NK_PATH)

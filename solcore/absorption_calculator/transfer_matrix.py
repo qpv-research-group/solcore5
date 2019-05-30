@@ -454,9 +454,7 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
 
     Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
     calculate_rat as long as the spacial mesh (controlled by steps_thinest_layer) is fine enough. If the structure is
-    very thick and the mesh not thin enough, the calculation might diverege at short wavelengths.
-
-    For now, it only works for normal incident, coherent light.
+    very thick and the mesh not thin enough, the calculation might diverge at short wavelengths.
 
     :param structure: A solcore structure with layers and materials.
     :param wavelength: Wavelengths in which calculate the data (in nm). An array
@@ -466,6 +464,8 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     :param no_back_reflexion: whether to suppress reflections from the back interface (True) or not (False)
     :param angle: incidence angle in degrees
     :param pol: polarization of incident light: 's', 'p' or 'u' (unpolarized)
+    :param coherent: True if all the layers are to be treated coherently, False otherwise
+    :param coherency_list: if coherent is False, a list of 'c' (coherent) or 'i' (incoherent) for each layer
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.
     """
