@@ -19,11 +19,8 @@ def solve_tmm(solar_cell, options):
     'p' or 'u'), 'position' (locations in m at which depth-dependent absorption is calculated), 'no_back_reflexion' and 'BL_correction'.
     'no_back_reflexion' sets whether reflections from the back surface are suppressed (if set to True, the default),
     or taken into account (if set to False).
-    If 'BL_correction' is set to True, the absorption at very high attenuation
-    (absorption coefficient * width > 150 so attenuation is 1e65 times) is calculated using the Beer-Lambert law.
-    This is to avoid absorption going to infinity at short wavelengths. If 'BL_correction' is set to True, thick layers
-    (thickness > 10*maximum wavelength) are also treated incoherently using the Beer-Lambert law, to avoid the calculation of unphysical
-    oscillations.
+    If 'BL_correction' is set to True, thick layers(thickness > 10*maximum wavelength) are also treated incoherently using
+    the Beer-Lambert law, to avoid the calculation of unphysical interference oscillations in the R/A/T spectra.
 
 
     :param solar_cell: A SolarCell object

@@ -899,7 +899,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
         L_list.append(L)
         Ltilde = np.matmul(Ltilde, L)
 
-    print('Ltilde', Ltilde)
+    #print('Ltilde', Ltilde)
     T = 1 / Ltilde[:, 0, 0]
     R = Ltilde[:, 1, 0] / Ltilde[:, 0, 0]
 
@@ -1052,13 +1052,13 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, widths, alp
     A_local = np.zeros((len(alphas[0]), len(dist)))
     for i, l in enumerate(layers):
         if coherency_list[l] == 'c':
-            print(l, 'c')
+            #print(l, 'c')
             fn = inc_find_absorp_analytic_fn(l, inc_tmm_data)
             A_local[:, layer == l] = fn.run(dist[layer == l])
 
             #print('c', A_local[:, layer == l])
         else:
-            print(l, 'i')
+            #print(l, 'i')
             A_local[:, layer == l] = beer_lambert(widths[l]*1e-9, alphas[l]*1e9, fraction_reaching[i], dist[layer == l]*1e-9)
             #print('i', A_local[:, layer == l])
 

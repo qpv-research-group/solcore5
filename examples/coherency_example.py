@@ -17,21 +17,21 @@ optical_struct = SolarCell([Layer(material=GaInP, width=si('5000nm')),
                             Layer(material=Ge, width=si('50um'))
                             ])
 
-wl = np.linspace(250, 1700, 100)*1e-9
-
+wl = np.linspace(250, 1700, 500)*1e-9
 
 options = State()
-options.position = None
-prepare_solar_cell(optical_struct, options)
-position = np.arange(0, optical_struct.width, 1e-10)
-options.position = position
+#options.position = None
+#prepare_solar_cell(optical_struct, options)
+#position = np.arange(0, optical_struct.width, 1e-10)
+#options.position = position
 options.wavelength = wl
 options.optics_method = 'TMM'
 options.no_back_reflexion = False
-options.pol = 'p'
+#options.pol = 'u'
 options.BL_correction = True
-options.coherency_list = ['c', 'c', 'c', 'c']
-options.theta = 30
+#options.coherency_list = ['c', 'c', 'c', 'c']
+options.theta = 0
+
 solar_cell_solver(optical_struct, 'optics', options)
 
 plt.figure(1)
@@ -42,7 +42,7 @@ plt.plot(wl*1e9, optical_struct.reflected, '--')
 plt.plot(wl*1e9, optical_struct.transmitted, '--')
 plt.plot(wl*1e9, optical_struct[0].layer_absorption+optical_struct[1].layer_absorption +
          optical_struct[2].layer_absorption + optical_struct.reflected + optical_struct.transmitted)
-plt.legend(['GaInP', 'GaAs', 'Ge', 'R', 'T'])
+plt.legend(['GaInP', 'GaAs', 'Ge', 'R', 'T', 'R+A+T'])
 plt.show()
 
 #plt.figure(1)
