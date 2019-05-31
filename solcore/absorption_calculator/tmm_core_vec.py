@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-This module is a (partly) vectorised version of the code written by Steven Byrnes.
-All credit of the algorithm, testing, etc. goes to him. For more details, visit:
+This is mostly based on Steven Byrnes' tmm package, with modifications to vectorize the code
+over wavelengths (by Diego Alonso-Alvarez), and to include depth-dependent absorption calculations
+in incoherent layers using the Beer-Lambert law (by Phoebe Pearce).
+
+All credit of the algorithm, testing, etc. goes to Steven Byrnes. For more details, visit:
 
 - https://arxiv.org/abs/1603.02720
 
@@ -16,7 +19,7 @@ case (i.e. thin films)
 
 inc_tmm(...) -- the transfer-matrix-method calculation in the incoherent
 case (i.e. films tens or hundreds of wavelengths thick, or whose
-thickness is not very uniform. --> THIS FUNCTION IS NOT VECTORISED, YET
+thickness is not very uniform.
 
 These functions are all imported into the main package (tmm) namespace,
 so you can call them with tmm.coh_tmm(...) etc.
@@ -37,7 +40,7 @@ EPSILON = sys.float_info.epsilon  # typical floating-point calculation error
 def make_2x2_array(a, b, c, d, dtype=float):
     """
     Makes a 2x2 numpy array of [[a,b],[c,d]]
-    
+
     Same as "numpy.array([[a,b],[c,d]], dtype=float)", but ten times faster
     """
     my_array = np.empty((len(a), 2, 2), dtype=dtype)
@@ -184,30 +187,31 @@ def interface_T(polarization, n_i, n_f, th_i, th_f):
 
 def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     """
+    This function is vectorized.
     Main "coherent transfer matrix method" calc. Given parameters of a stack,
     calculates everything you could ever want to know about how light
     propagates in it. (If performance is an issue, you can delete some of the
     calculations without affecting the rest.)
-    
+
     pol is light polarization, "s" or "p".
-    
+
     n_list is the list of refractive indices, in the order that the light would
     pass through them. The 0'th element of the list should be the semi-infinite
     medium from which the light enters, the last element should be the semi-
     infinite medium to which the light exits (if any exits).
-    
+
     th_0 is the angle of incidence: 0 for normal, pi/2 for glancing.
     Remember, for a dissipative incoming medium (n_list[0] is not real), th_0
     should be complex so that n0 sin(th0) is real (intensity is constant as
     a function of lateral position).
-    
+
     d_list is the list of layer thicknesses (front to back). Should correspond
     one-to-one with elements of n_list. First and last elements should be "inf".
-    
+
     lam_vac is vacuum wavelength of the light.
-    
+
     Outputs the following as a dictionary (see manual for details)
-    
+
     * r--reflection amplitude
     * t--transmission amplitude
     * R--reflected wave power (as fraction of incident)
@@ -260,7 +264,8 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # errors. The criterion imag(delta) > 35 corresponds to single-pass
     # transmission < 1e-30 --- small enough that the exact value doesn't
     # matter.
-    delta[1:num_layers - 1, :] = np.where(delta[1:num_layers - 1, :].imag > 35, delta[1:num_layers - 1, :].real + 35j,
+    # It DOES matter (for depth-dependent calculations!)
+    delta[1:num_layers - 1, :] = np.where(delta[1:num_layers - 1, :].imag > 100, delta[1:num_layers - 1, :].real + 100j,
                                           delta[1:num_layers - 1, :])
 
     # t_list[i,j] and r_list[i,j] are transmission and reflection amplitudes,
@@ -280,6 +285,7 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # (towards the boundary). Then (v_n,w_n) = M_n (v_{n+1},w_{n+1}). M_n is
     # M_list[n]. M_0 and M_{num_layers-1} are not defined.
     # My M is a bit different than Sernelius's, but Mtilde is the same.
+
     M_list = zeros((num_layers, num_wl, 2, 2), dtype=complex)
     for i in range(1, num_layers - 1):
         A = make_2x2_array(exp(-1j * delta[i]), np.zeros_like(delta[i]), np.zeros_like(delta[i]), exp(1j * delta[i]),
@@ -329,7 +335,6 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
             'pol': pol, 'n_list': n_list, 'd_list': d_list, 'th_0': th_0,
             'lam_vac': lam_vac}
 
-
     # return {'r': r, 't': t, 'R': R, 'T': T, 'power_entering': power_entering,
     #         'kz_list': kz_list, 'th_list': th_list,
     #         'pol': pol, 'n_list': n_list, 'd_list': d_list, 'th_0': th_0,
@@ -360,6 +365,7 @@ def ellips(n_list, d_list, th_0, lam_vac):
 
 def unpolarized_RT(n_list, d_list, th_0, lam_vac):
     """
+    This function is vectorized.
     Calculates reflected and transmitted power for unpolarized light.
     """
 
@@ -372,6 +378,7 @@ def unpolarized_RT(n_list, d_list, th_0, lam_vac):
 
 def position_resolved(layer, dist, coh_tmm_data):
     """
+    This function is vectorized.
     Starting with output of coh_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """
@@ -384,8 +391,9 @@ def position_resolved(layer, dist, coh_tmm_data):
     pol = coh_tmm_data['pol']
 
     # amplitude of forward-moving wave is Ef, backwards is Eb
-    Ef = (vw[:, :, 0].T * exp(1j * kz.T * dist)).T
-    Eb = (vw[:, :, 1].T * exp(-1j * kz.T * dist)).T
+
+    Ef = (vw.T[0] * exp(1j * kz.T * dist)).T
+    Eb = (vw.T[1] * exp(-1j * kz.T * dist)).T
 
     # Poynting vector
     if (pol == 's'):
@@ -406,6 +414,7 @@ def position_resolved(layer, dist, coh_tmm_data):
 
 def find_in_structure(d_list, dist):
     """
+    This function is vectorized.
     d_list is list of thicknesses of layers, all of which are finite.
 
     dist is the distance from the front of the whole multilayer structure
@@ -466,6 +475,7 @@ def layer_starts(d_list):
 
 class absorp_analytic_fn:
     """
+    This function (specifically, 'run') is vectorized.
     Absorption in a given layer is a pretty simple analytical function:
     The sum of four exponentials.
 
@@ -475,7 +485,7 @@ class absorp_analytic_fn:
     where a(z) is absorption at depth z, with z=0 being the start of the layer,
     and A1,A2,a1,a3 are real numbers, with a1>0, a3>0, and A3 is complex.
     The class stores these five parameters, as well as d, the layer thickness.
-    
+
     This gives absorption as a fraction of intensity coming towards the first
     layer of the stack.
     """
@@ -486,9 +496,10 @@ class absorp_analytic_fn:
         (the output of coh_tmm), for absorption in the layer with index
         "layer".
         """
+
         pol = coh_tmm_data['pol']
-        v = coh_tmm_data['vw_list'][layer][0]
-        w = coh_tmm_data['vw_list'][layer][1]
+        v = coh_tmm_data['vw_list'][layer, :, 0]
+        w = coh_tmm_data['vw_list'][layer, :, 1]
         kz = coh_tmm_data['kz_list'][layer]
         n = coh_tmm_data['n_list'][layer]
         n_0 = coh_tmm_data['n_list'][0]
@@ -501,14 +512,20 @@ class absorp_analytic_fn:
 
         if pol == 's':
             temp = (n * cos(th) * kz).imag / (n_0 * cos(th_0)).real
+            #print('temp', temp)
             self.A1 = temp * abs(w) ** 2
+            #print('A1', self.A1)
             self.A2 = temp * abs(v) ** 2
+            #print('A2', self.A2)
             self.A3 = temp * v * conj(w)
         else:  # pol=='p'
             temp = (2 * (kz.imag) * (n * cos(conj(th))).real /
                     (n_0 * conj(cos(th_0))).real)
+            #print('temp', temp)
             self.A1 = temp * abs(w) ** 2
+            #print('A1', self.A1)
             self.A2 = temp * abs(v) ** 2
+            #print('A2', self.A2)
             self.A3 = v * conj(w) * (-2 * (kz.real) * (n * cos(conj(th))).imag /
                                      (n_0 * conj(cos(th_0))).real)
         return self
@@ -527,16 +544,35 @@ class absorp_analytic_fn:
         Calculates absorption at a given depth z, where z=0 is the start of the
         layer.
         """
-        return (self.A1 * exp(self.a1 * z) + self.A2 * exp(-self.a1 * z)
-                + self.A3 * exp(1j * self.a3 * z) + conj(self.A3) * exp(-1j * self.a3 * z))
+
+        if 'ndarray' in str(type(z)) and z.ndim > 0:
+            part1 = self.A1[:, None] * exp(self.a1[:, None] * z[None, :])
+            part2 = self.A2[:, None] * exp(-self.a1[:, None] * z[None, :])
+            part3 = self.A3[:, None] * exp(1j * self.a3[:, None] * z[None, :])
+            part4 = conj(self.A3[:, None]) * exp(-1j * self.a3[:, None] * z[None, :])
+
+            part1[self.A1 < 1e-100, :] = 0
+            #print('part1', part1)
+            #print('part2', part2)
+            #print('part3+4', part3 + part4)
+
+
+            return (part1 + part2 + part3 + part4)
+        else:
+            return (self.A1 * exp(self.a1 * z) + self.A2 * exp(-self.a1 * z)
+                    + self.A3 * exp(1j * self.a3 * z) + conj(self.A3) * exp(-1j * self.a3 * z))
 
     def flip(self):
         """
         Flip the function front-to-back, to describe a(d-z) instead of a(z),
         where d is layer thickness.
         """
+        expn = exp(self.a1 * self.d)
+        #expn[expn > 1e100] = 1e100
         newA1 = self.A2 * exp(-self.a1 * self.d)
-        newA2 = self.A1 * exp(self.a1 * self.d)
+        newA1[self.A2 == 0] = 0
+        newA2 = self.A1 * expn
+        newA2[self.A1 == 0] = 0
         self.A1, self.A2 = newA1, newA2
         self.A3 = conj(self.A3 * exp(1j * self.a3 * self.d))
         return self
@@ -548,13 +584,16 @@ class absorp_analytic_fn:
         self.A1 *= factor
         self.A2 *= factor
         self.A3 *= factor
+        self.A1[np.isnan(self.A1)] = 0
+        self.A2[np.isnan(self.A2)] = 0
+        self.A3[np.isnan(self.A3)] = 0
         return self
 
     def add(self, b):
         """
         adds another compatible absorption analytical function
         """
-        if (b.a1 != self.a1) or (b.a3 != self.a3):
+        if all(b.a1 != self.a1) or all(b.a3 != self.a3):
             raise ValueError('Incompatible absorption analytical functions!')
         self.A1 += b.A1
         self.A2 += b.A2
@@ -575,14 +614,15 @@ def absorp_in_each_layer(coh_tmm_data):
     coh_tmm_data is output of coh_tmm()
     """
     num_layers = len(coh_tmm_data['d_list'])
-    power_entering_each_layer = zeros(num_layers)
+    num_lam_vec = len(coh_tmm_data['lam_vac'])
+    power_entering_each_layer = zeros((num_layers, num_lam_vec))
     power_entering_each_layer[0] = 1
     power_entering_each_layer[1] = coh_tmm_data['power_entering']
     power_entering_each_layer[-1] = coh_tmm_data['T']
     for i in range(2, num_layers - 1):
         power_entering_each_layer[i] = position_resolved(i, 0, coh_tmm_data)['poyn']
-    final_answer = zeros(num_layers)
-    final_answer[0:-1] = -np.diff(power_entering_each_layer)
+    final_answer = zeros((num_layers, num_lam_vec))
+    final_answer[0:-1] = -np.diff(power_entering_each_layer, axis=0)
     final_answer[-1] = power_entering_each_layer[-1]
     return final_answer
 
@@ -630,13 +670,13 @@ def inc_group_layers(n_list, d_list, c_list):
     * num_layers = number of layers total
     """
 
-    if (n_list.ndim != 1) or (d_list.ndim != 1):
+    if (d_list.ndim != 1):
         raise ValueError("Problem with n_list or d_list!")
     if (d_list[0] != inf) or (d_list[-1] != inf):
         raise ValueError('d_list must start and end with inf!')
     if (c_list[0] != 'i') or (c_list[-1] != 'i'):
         raise ValueError('c_list should start and end with "i"')
-    if not n_list.size == d_list.size == len(c_list):
+    if not len(n_list) == d_list.size == len(c_list):
         raise ValueError('List sizes do not match!')
     inc_index = 0
     stack_index = 0
@@ -649,7 +689,7 @@ def inc_group_layers(n_list, d_list, c_list):
     inc_from_stack = []
     stack_from_inc = []
     stack_in_progress = False
-    for alllayer_index in range(n_list.size):
+    for alllayer_index in range(len(n_list)):
         if c_list[alllayer_index] == 'c':  # coherent layer
             inc_from_all.append(nan)
             if not stack_in_progress:  # this layer is starting new stack
@@ -700,6 +740,7 @@ def inc_group_layers(n_list, d_list, c_list):
 
 def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     """
+    This function is vectorized.
     Incoherent, or partly-incoherent-partly-coherent, transfer matrix method.
 
     See coh_tmm for definitions of pol, n_list, d_list, th_0, lam_vac.
@@ -740,10 +781,12 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     d_list = array(d_list, dtype=float)
 
     # Input tests
-    if hasattr(n_list[0], 'size'):
-        raise ValueError(
-            'This function is not vectorized, yet; you need to run one calculation at a time (one wavelength, one angle).')
-    if (np.real_if_close(n_list[0] * np.sin(th_0))).imag != 0:
+    # =============================================================================
+    #     if hasattr(n_list[0], 'size') and 'complex' not in str(type(n_list[0])):
+    #         raise ValueError(
+    #             'This function is not vectorized, yet; you need to run one calculation at a time (one wavelength, one angle).')
+    # =============================================================================
+    if any((np.real_if_close(n_list[0] * np.sin(th_0))).imag != 0):
         raise ValueError('Error in n0 or th0!')
 
     group_layers_data = inc_group_layers(n_list, d_list, c_list)
@@ -766,6 +809,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     coh_tmm_data_list = []
     # coh_tmm_bdata_list[i] is the same stack as coh_tmm_data_list[i] but
     # with order of layers reversed
+
     coh_tmm_bdata_list = []
     for i in range(num_stacks):
         # print(th_list[all_from_stack[i][0]])
@@ -781,22 +825,24 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
 
     # P_list[i] is fraction not absorbed in a single pass through i'th incoherent
     # layer.
-    P_list = zeros(num_inc_layers)
+
+    P_list = zeros((num_inc_layers, len(lam_vac)))
     for inc_index in range(1, num_inc_layers - 1):  # skip 0'th and last (infinite)
         i = all_from_inc[inc_index]
         P_list[inc_index] = exp(-4 * np.pi * d_list[i]
                                 * (n_list[i] * cos(th_list[i])).imag / lam_vac)
-        # For a very opaque layer, reset P to avoid divide-by-0 and similar
-        # errors.
-        if P_list[inc_index] < 1e-30:
-            P_list[inc_index] = 1e-30
+
+    # For a very opaque layer, reset P to avoid divide-by-0 and similar
+    # errors.
+    P_list[P_list < 1e-30] = 1e-30
+
     # T_list[i,j] and R_list[i,j] are transmission and reflection powers,
     # respectively, coming from the i'th incoherent layer, going to the j'th
     # incoherent layer. Only need to calculate this when j=i+1 or j=i-1.
     # (2D array is overkill but helps avoid confusion.)
     # initialize these arrays
-    T_list = zeros((num_inc_layers, num_inc_layers))
-    R_list = zeros((num_inc_layers, num_inc_layers))
+    T_list = zeros((num_inc_layers, num_inc_layers, len(lam_vac)))
+    R_list = zeros((num_inc_layers, num_inc_layers, len(lam_vac)))
     for inc_index in range(num_inc_layers - 1):  # looking at interface i -> i+1
         alllayer_index = all_from_inc[inc_index]
         nextstack_index = stack_from_inc[inc_index + 1]
@@ -833,58 +879,72 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
 
     # L is the transfer matrix from the i'th to (i+1)st incoherent layer, see
     # manual
+
+    # For a very opaque layer, reset T to avoid divide-by-0 and similar
+    # errors.
+    T_list[T_list < 1e-30] = 1e-30
+
     L_list = [nan]  # L_0 is not defined because 0'th layer has no beginning.
-    Ltilde = (array([[1, -R_list[1, 0]],
+    Ltilde = (array([[np.ones_like(lam_vac), -R_list[1, 0]],
                      [R_list[0, 1],
                       T_list[1, 0] * T_list[0, 1] - R_list[1, 0] * R_list[0, 1]]])
-              / T_list[0, 1])
+              / T_list[0, 1]).transpose(2, 0, 1)
+
+    # Ltilde = Ltilde.transpose(2,0,1)
+
     for i in range(1, num_inc_layers - 1):
-        L = np.dot(
-            array([[1 / P_list[i], 0], [0, P_list[i]]]),
-            array([[1, -R_list[i + 1, i]],
+        L = np.matmul(
+            array([[1 / P_list[i], np.zeros(len(lam_vac))], [np.zeros(len(lam_vac)), P_list[i]]]).transpose(2, 0, 1),
+            array([[np.ones_like(lam_vac), -R_list[i + 1, i]],
                    [R_list[i, i + 1],
-                    T_list[i + 1, i] * T_list[i, i + 1] - R_list[i + 1, i] * R_list[i, i + 1]]])
-        ) / T_list[i, i + 1]
+                    T_list[i + 1, i] * T_list[i, i + 1] - R_list[i + 1, i] * R_list[i, i + 1]]]).transpose(2, 0, 1)
+        ) / T_list[i, i + 1][:, None, None]
         L_list.append(L)
-        Ltilde = np.dot(Ltilde, L)
-    T = 1 / Ltilde[0, 0]
-    R = Ltilde[1, 0] / Ltilde[0, 0]
+        Ltilde = np.matmul(Ltilde, L)
+
+    #print('Ltilde', Ltilde)
+    T = 1 / Ltilde[:, 0, 0]
+    R = Ltilde[:, 1, 0] / Ltilde[:, 0, 0]
 
     # VW_list[n] = [V_n, W_n], the forward- and backward-moving intensities
     # at the beginning of the n'th incoherent layer. VW_list[0] is undefined
     # because 0'th layer has no beginning.
-    VW_list = zeros((num_inc_layers, 2))
-    VW_list[0, :] = [nan, nan]
-    VW = array([[T], [0]])
-    VW_list[-1, :] = np.transpose(VW)
+
+    VW_list = zeros((num_inc_layers, 2, len(lam_vac)))
+    VW_list[0, :, :] = nan
+    VW = array([T, zeros(len(lam_vac))])
+    VW_list[-1] = VW
+
     for i in range(num_inc_layers - 2, 0, -1):
-        VW = np.dot(L_list[i], VW)
-        VW_list[i, :] = np.transpose(VW)
+        VW = np.matmul(L_list[i], VW_list[i+1].T[:, :, None])
+        VW_list[i, :, :] = VW.transpose()
+
 
     # stackFB_list[n]=[F,B] means that F is light traveling forward towards n'th
     # stack and B is light traveling backwards towards n'th stack.
     # Reminder: inc_from_stack[i] = j means that the i'th stack comes after the
     # layer with incoherent index j.
+
     stackFB_list = []
     for stack_index, prev_inc_index in enumerate(inc_from_stack):
         if prev_inc_index == 0:  # stack starts right after semi-infinite layer.
-            F = 1
+            F = np.ones_like(lam_vac)
         else:
-            F = VW_list[prev_inc_index][0] * P_list[prev_inc_index]
-        B = VW_list[prev_inc_index + 1][1]
+            F = VW_list[prev_inc_index, 0] * P_list[prev_inc_index]
+        B = VW_list[prev_inc_index + 1, 1]
         stackFB_list.append([F, B])
 
     # power_entering_list[i] is the normalized Poynting vector crossing the
     # interface into the i'th incoherent layer from the previous (coherent or
     # incoherent) layer. See manual.
-    power_entering_list = [1]  # "1" by convention for infinite 0th layer.
+    power_entering_list = [np.ones_like(lam_vac)]  # "1" by convention for infinite 0th layer.
     for i in range(1, num_inc_layers):
         prev_stack_index = stack_from_inc[i]
         if isnan(prev_stack_index):
             # case where this layer directly follows another incoherent layer
             if i == 1:  # special case because VW_list[0] & A_list[0] are undefined
                 power_entering_list.append(T_list[0, 1]
-                                           - VW_list[1][1] * T_list[1, 0])
+                                           - VW_list[1, 1] * T_list[1, 0])
             else:
                 power_entering_list.append(
                     VW_list[i - 1][0] * P_list[i - 1] * T_list[i - 1, i]
@@ -895,11 +955,17 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
                 coh_tmm_data_list[prev_stack_index]['T']
                 - stackFB_list[prev_stack_index][1] *
                 coh_tmm_bdata_list[prev_stack_index]['power_entering'])
-    ans = {'T': T, 'R': R, 'VW_list': VW_list,
+
+    if len(stackFB_list) > 0:
+        stackFB_list_ans = np.stack(stackFB_list).transpose(2, 0, 1)
+    else:
+        stackFB_list_ans = []
+    #('VWlist', VW_list.transpose(2, 0, 1))
+    ans = {'T': T, 'R': R, 'VW_list': VW_list.transpose(2, 0, 1),
            'coh_tmm_data_list': coh_tmm_data_list,
            'coh_tmm_bdata_list': coh_tmm_bdata_list,
-           'stackFB_list': stackFB_list,
-           'power_entering_list': power_entering_list}
+           'stackFB_list': stackFB_list_ans,
+           'power_entering_list': np.stack(power_entering_list).T}
     ans.update(group_layers_data)
     return ans
 
@@ -913,7 +979,7 @@ def inc_absorp_in_each_layer(inc_data):
 
     Returns a list [layer0absorp, layer1absorp, ...]. Entries should sum to 1.
 
-    inc_data is output of incoherent_main()
+    inc_data is output of inc_tmm()
     """
     # Reminder: inc_from_stack[i] = j means that the i'th stack comes after the
     # layer with incoherent index j.
@@ -922,7 +988,7 @@ def inc_absorp_in_each_layer(inc_data):
     # if it's not immediately following a stack).
 
     stack_from_inc = inc_data['stack_from_inc']
-    power_entering_list = inc_data['power_entering_list']
+    power_entering_list = inc_data['power_entering_list'].T
     # stackFB_list[n]=[F,B] means that F is light traveling forward towards n'th
     # stack and B is light traveling backwards towards n'th stack.
     stackFB_list = inc_data['stackFB_list']
@@ -939,13 +1005,13 @@ def inc_absorp_in_each_layer(inc_data):
             coh_tmm_bdata = inc_data['coh_tmm_bdata_list'][j]
             # First, power in the incoherent layer...
             power_exiting = (
-                stackFB_list[j][0] * coh_tmm_data['power_entering']
-                - stackFB_list[j][1] * coh_tmm_bdata['T'])
+                    stackFB_list[:, j, 0] * coh_tmm_data['power_entering']
+                    - stackFB_list[:, j, 1] * coh_tmm_bdata['T'])
             absorp_list.append(power_entering_list[i] - power_exiting)
             # Next, power in the coherent stack...
-            stack_absorp = ((stackFB_list[j][0] *
+            stack_absorp = ((stackFB_list[:, j, 0] *
                              absorp_in_each_layer(coh_tmm_data))[1:-1]
-                            + (stackFB_list[j][1] *
+                            + (stackFB_list[:, j, 1] *
                                absorp_in_each_layer(coh_tmm_bdata))[-2:0:-1])
             absorp_list.extend(stack_absorp)
     # final semi-infinite layer
@@ -958,19 +1024,64 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     Outputs an absorp_analytic_fn object for a coherent layer within a
     partly-incoherent stack.
 
-    inc_data is output of incoherent_main()
+    inc_data is output of inc_tmm()
     """
     j = inc_data['stack_from_all'][layer]
-    if isnan(j):
+    if any(isnan(j)):
         raise ValueError('layer must be coherent for this function!')
     [stackindex, withinstackindex] = j
     forwardfunc = absorp_analytic_fn()
     forwardfunc.fill_in(inc_data['coh_tmm_data_list'][stackindex],
                         withinstackindex)
-    forwardfunc.scale(inc_data['stackFB_list'][stackindex][0])
+    forwardfunc.scale(inc_data['stackFB_list'][:, stackindex, 0])
     backfunc = absorp_analytic_fn()
     backfunc.fill_in(inc_data['coh_tmm_bdata_list'][stackindex],
                      -1 - withinstackindex)
-    backfunc.scale(inc_data['stackFB_list'][stackindex][1])
+    #print('before scale', backfunc.A2, backfunc.A1)
+    backfunc.scale(inc_data['stackFB_list'][:, stackindex, 1])
+    #print('after scale', backfunc.A2, backfunc.A1)
     backfunc.flip()
+    #print('after flip', backfunc.A2, backfunc.A1)
     return forwardfunc.add(backfunc)
+
+
+def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas):
+    """
+    This function is vectorized. Analogous to position_resolved, but
+    for layers (incoherent or coherent) in (partly) incoherent stacks.
+    This is a new function, not from Steven Byrnes' tmm package.
+    Starting with output of inc_tmm(), calculate the Poynting vector
+    and absorbed energy density a distance "dist" into layer number "layer"
+    """
+
+    layers = list(set(layer)) # unique layer indices
+    A_per_layer = np.array(inc_absorp_in_each_layer(inc_tmm_data))
+    fraction_reaching = 1 - np.cumsum(A_per_layer, axis = 0)
+    A_local = np.zeros((len(alphas[0]), len(dist)))
+    for i, l in enumerate(layers):
+        if coherency_list[l] == 'c':
+
+            fn = inc_find_absorp_analytic_fn(l, inc_tmm_data)
+            A_local[:, layer == l] = fn.run(dist[layer == l])
+
+        else:
+
+            A_local[:, layer == l] = beer_lambert(alphas[l]*1e9, fraction_reaching[i], dist[layer == l]*1e-9)
+
+    return A_local
+
+
+def beer_lambert(alphas, fraction, dist):
+    """
+    Calculates absorption profile according to the Beer-Lambert law given alphas (in m-1)
+    and a vector of distance into the layer (in m) and the fraction of incident light
+    reaching the front of the layer. This is used to calculate the absorption profile in
+    incoherent layers within (partly) incoherent stacks. Vectorized over wavelengths.
+    """
+
+    expn = np.exp(- alphas[:, None] * dist[None,:])
+
+    output = fraction[:, None]*alphas[:, None]*expn
+
+    return output/1e9
+

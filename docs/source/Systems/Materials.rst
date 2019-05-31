@@ -4,7 +4,7 @@ The Material System
 .. toctree::
     :maxdepth: 1
 
-    materials
+    Materials
 
 The parameters database contains the basic properties of many
 semiconductor materials, including silicon, germanium and many III-V

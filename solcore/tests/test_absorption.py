@@ -318,50 +318,33 @@ def test_substrate_presence_A():
 
     solar_cell_solver(my_structure, 'optics',
                       user_options={'wavelength': wavelength, 'optics_method': 'TMM',
-                                    'no_back_reflexion': False, })
+                                    'no_back_reflexion': False})
 
     A_nosubs = my_structure[0].layer_absorption
 
 
     A = np.vstack((A_subs, A_nosubs))
 
-    A_data = np.array([[0.5209978, 0.62262739, 0.41829377],
-                       [0.5209978, 0.62284555, 0.37789382]])
+    A_data = np.array([[0.56610281, 0.62692985, 0.41923175],
+                       [0.56610281, 0.62711355, 0.37837737]])
 
     assert all([d == approx(o) for d, o in zip(A, A_data)])
 
 def test_BL_correction():
-    Ge = material('Ge')()
 
-    high_abs_cell = SolarCell([Layer(material=Ge, width=si('1000nm'))])
-    wl = np.linspace(290, 400, 2) * 1e-9
-    opts = State()
-    opts.position = None
-    prepare_solar_cell(high_abs_cell, opts)
-    position = np.arange(0, high_abs_cell.width, 1e-9)
-    opts.position = position
-
-    opts.BL_correction = False
-    opts.wavelength = wl
-    solve_tmm(high_abs_cell, opts)
-
-    no_corr = high_abs_cell.absorbed
-
-    opts.BL_correction = True
-    solve_tmm(high_abs_cell, opts)
-    with_corr = high_abs_cell.absorbed
-    assert with_corr == approx(np.array([0.35522706, 0.49290808]))
-    assert no_corr == approx(np.array([0.29385107, 0.49290808]))
+    wl = np.linspace(800, 950, 4) * 1e-9
 
     GaAs = material('GaAs')()
 
-    thick_cell = SolarCell([Layer(material=GaAs, width=si('400nm')), Layer(material=Ge, width=si('50um'))])
+    thick_cell = SolarCell([Layer(material=GaAs, width=si('20um'))])
 
     opts = State()
     opts.position = None
     prepare_solar_cell(thick_cell, opts)
     position = np.arange(0, thick_cell.width, 1e-9)
     opts.position = position
+    opts.recalculate_absorption = True
+    opts.no_back_reflexion = False
 
     opts.BL_correction = False
     opts.wavelength = wl
@@ -372,9 +355,11 @@ def test_BL_correction():
     opts.BL_correction = True
 
     solve_tmm(thick_cell, opts)
+
     with_corr = thick_cell.absorbed
-    assert with_corr == approx(np.array([0.53991738, 0.52258749]))
-    assert np.isnan(no_corr[0])
+
+    assert with_corr == approx(np.array([ 6.71457872e-01,  6.75496354e-01,  2.09738887e-01, 0]))
+    assert no_corr == approx(np.array([ 6.71457872e-01,  6.75496071e-01,  2.82306407e-01, 0]))
 
 
 def test_substrate_presence_profile():
@@ -396,31 +381,31 @@ def test_substrate_presence_profile():
 
     solar_cell_solver(my_structure, 'optics',
                       user_options={'wavelength': wavelength, 'optics_method': 'TMM',
-                                    'no_back_reflexion': False, })
+                                    'no_back_reflexion': False})
 
     profile_nosubs = my_structure[0].absorbed(z_pos)
 
     profile = np.vstack((profile_subs, profile_nosubs))
 
-    profile_data = np.array([[4.35364278e+07, 4.29043895e+06, 9.37889190e+05],
-                             [6.28046841e+04, 2.51407523e+06, 8.40685958e+05],
-                             [9.05652587e+01, 1.47317317e+06, 7.53556838e+05],
-                             [1.30543325e-01, 8.63233564e+05, 6.75457758e+05],
-                             [1.88089178e-04, 5.05826779e+05, 6.05452855e+05],
-                             [3.22944240e-07, 3.00491300e+05, 5.44224778e+05],
-                             [4.65782106e-10, 1.76079153e+05, 4.87821069e+05],
-                             [6.71529364e-13, 1.03177016e+05, 4.37263024e+05],
-                             [9.67758605e-16, 6.04584451e+04, 3.91944804e+05],
-                             [0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
-                             [4.35364278e+07, 4.25691019e+06, 4.84783054e+05],
-                             [6.28046841e+04, 2.52741110e+06, 6.48506623e+05],
-                             [9.05652587e+01, 1.51218752e+06, 9.69894260e+05],
-                             [1.30543325e-01, 8.88603973e+05, 5.31398525e+05],
-                             [1.88089178e-04, 4.92629409e+05, 2.35132516e+05],
-                             [3.22944240e-07, 2.62671365e+05, 6.95243874e+05],
-                             [4.65782107e-10, 1.39173748e+05, 6.70278004e+05],
-                             [6.71530801e-13, 1.01785699e+05, 1.45363256e+05],
-                             [9.69780702e-16, 1.00921869e+05, 2.87066651e+05],
+    profile_data = np.array([[4.69390061e+07, 4.31690443e+06, 9.39070619e+05],
+       [7.00847453e+04, 2.53652234e+06, 8.42216253e+05],
+       [1.04643340e+02, 1.49040720e+06, 7.55351304e+05],
+       [1.56242133e-01, 8.75731920e+05, 6.77445478e+05],
+       [2.33283058e-04, 5.14561641e+05, 6.07574744e+05],
+       [3.54211961e-07, 3.02759196e+05, 5.45062846e+05],
+       [5.28873825e-10, 1.77894940e+05, 4.88845864e+05],
+       [7.89658664e-13, 1.04527326e+05, 4.38427018e+05],
+       [1.17903096e-15, 6.14180570e+04, 3.93208298e+05],
+       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
+                             [4.69390061e+07, 4.28007419e+06, 4.79821200e+05],
+                             [7.00847453e+04, 2.54503334e+06, 6.73708148e+05],
+                             [1.04643340e+02, 1.52813445e+06, 9.69600309e+05],
+                             [1.56242133e-01, 9.06948301e+05, 4.94806809e+05],
+                             [2.33283058e-04, 5.11344674e+05, 2.57215183e+05],
+                             [3.54211961e-07, 2.67269785e+05, 7.11553179e+05],
+                             [5.28873827e-10, 1.38657803e+05, 6.48896832e+05],
+                             [7.89660581e-13, 9.55930119e+04, 1.30180135e+05],
+                             [1.18135121e-15, 9.46668507e+04, 3.29375923e+05],
                              [0.00000000e+00, 0.00000000e+00, 0.00000000e+00]]
                             )
 
@@ -430,6 +415,45 @@ def test_substrate_presence_profile():
 
 # TODO: the following tests for custom materials do not work as they require changes to the user config file.
 # It is possible the downloading of the database for test_database_materials is also an issue.
+
+def test_inc_coh_tmm():
+    GaInP = material('GaInP')(In=0.5)
+    GaAs = material('GaAs')()
+    Ge = material('Ge')()
+
+    optical_struct = SolarCell([Layer(material=GaInP, width=si('5000nm')),
+                                Layer(material=GaAs, width=si('200nm')),
+                                Layer(material=GaAs, width=si('5um')),
+                                Layer(material=Ge, width=si('50um'))
+                                ])
+
+    wl = np.linspace(400, 1200, 5) * 1e-9
+
+    options = State()
+    options.wavelength = wl
+    options.optics_method = 'TMM'
+    options.no_back_reflexion = False
+    options.BL_correction = True
+    options.recalculate_absorption = True
+
+    c_list = [['c', 'c', 'c', 'c'],
+              ['c', 'c', 'c', 'i'],
+              ['c', 'i', 'i', 'c'],
+              ['i', 'i', 'i', 'i']]
+
+    results = []
+    for i1, cl in enumerate(c_list):
+        options.coherency_list = cl
+        solar_cell_solver(optical_struct, 'optics', options)
+        results.append(optical_struct.absorbed)
+
+    A_calc = np.stack(results)
+    A_data = np.array([[0.5742503, 0.67956899, 0.73481357, 0.72746507, 0.77037936],
+       [0.5742503 , 0.67956899, 0.73481357, 0.72746507, 0.77037936],
+       [0.5742503 , 0.67956899, 0.73474943, 0.7046269 , 0.70311501],
+       [0.5742503 , 0.67956899, 0.70927724, 0.71477549, 0.71541325]])
+    assert A_calc == approx(A_data)
+
 
 @mark.skip
 def test_define_material():

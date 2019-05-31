@@ -319,32 +319,42 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
     if pol in 'sp':
         if coherent:
             out = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+            A_per_layer =  tmm.absorp_in_each_layer(out)
             output['R'] = out['R']
             output['A'] = 1 - out['R'] - out['T']
             output['T'] = out['T']
+            output['A_per_layer'] = A_per_layer
         else:
-            for i, wl in enumerate(wavelength):
-                out = old_tmm.inc_tmm(pol, stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
-                output['R'][i] = out['R']
-                output['A'][i] = 1 - out['R'] - out['T']
-                output['T'][i] = out['T']
-
+            out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
+            A_per_layer = np.array(tmm.inc_absorp_in_each_layer(out))
+            output['R'] = out['R']
+            output['A'] = 1 - out['R'] - out['T']
+            output['T'] = out['T']
+            output['A_per_layer'] = A_per_layer
     else:
         if coherent:
-            out = tmm.unpolarized_RT(stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-            output['R'] = out['R']
-            output['A'] = 1 - out['R'] - out['T']
-            output['T'] = out['T']
-        else:
-            for i, wl in enumerate(wavelength):
-                out_p = old_tmm.inc_tmm('p', stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
-                out_s = old_tmm.inc_tmm('s', stack.get_indices(wl), stack.get_widths(), coherency_list, angle * degree, wl)
+            out_p = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+            out_s = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+            A_per_layer_p = tmm.absorp_in_each_layer(out_p)
+            A_per_layer_s = tmm.absorp_in_each_layer(out_s)
+            output['R'] = 0.5 * (out_p['R'] + out_s['R'])
+            output['T'] = 0.5 * (out_p['T'] + out_s['T'])
+            output['A'] = 1 - output['R'] - output['T']
+            output['A_per_layer'] = 0.5*(A_per_layer_p + A_per_layer_s)
 
-                output['R'][i] = 0.5 * (out_p['R'] + out_s['R'])
-                output['T'][i] = 0.5 * (out_p['T'] + out_s['T'])
-                output['A'][i] = 1 - output['R'][i] - output['T'][i]
-                output['all_p'].append(out_p['power_entering_list'])
-                output['all_s'].append(out_s['power_entering_list'])
+        else:
+            out_p = tmm.inc_tmm('p', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
+            out_s = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
+
+            A_per_layer_p = np.array(tmm.inc_absorp_in_each_layer(out_p))
+            A_per_layer_s = np.array(tmm.inc_absorp_in_each_layer(out_s))
+
+            output['R'] = 0.5 * (out_p['R'] + out_s['R'])
+            output['T'] = 0.5 * (out_p['T'] + out_s['T'])
+            output['A'] = 1 - output['R'] - output['T']
+            output['all_p'] = out_p['power_entering_list']
+            output['all_s'] = out_s['power_entering_list']
+            output['A_per_layer'] = 0.5*(A_per_layer_p + A_per_layer_s)
 
     return output
 
@@ -435,7 +445,8 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflexion=True)
 
 
 def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size=2, dist=None,
-                                   no_back_reflexion=True, angle=0, pol = 'u'):
+                                   no_back_reflexion=True, angle=0, pol = 'u',
+                                 coherent=True, coherency_list=None):
     """ It calculates the absorbed energy density within the material. From the documentation:
 
     'In principle this has units of [power]/[volume], but we can express it as a multiple of incoming light power
@@ -443,9 +454,7 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
 
     Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
     calculate_rat as long as the spacial mesh (controlled by steps_thinest_layer) is fine enough. If the structure is
-    very thick and the mesh not thin enough, the calculation might diverege at short wavelengths.
-
-    For now, it only works for normal incident, coherent light.
+    very thick and the mesh not thin enough, the calculation might diverge at short wavelengths.
 
     :param structure: A solcore structure with layers and materials.
     :param wavelength: Wavelengths in which calculate the data (in nm). An array
@@ -455,6 +464,8 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     :param no_back_reflexion: whether to suppress reflections from the back interface (True) or not (False)
     :param angle: incidence angle in degrees
     :param pol: polarization of incident light: 's', 'p' or 'u' (unpolarized)
+    :param coherent: True if all the layers are to be treated coherently, False otherwise
+    :param coherency_list: if coherent is False, a list of 'c' (coherent) or 'i' (incoherent) for each layer
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.
     """
@@ -472,27 +483,61 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
             z_limit = np.sum(np.array(stack.widths))
         dist = np.arange(0, z_limit, steps_size)
 
+    if not coherent:
+        if coherency_list is not None:
+
+            if stack.no_back_reflexion:
+                coherency_list = ['i'] + coherency_list + ['i', 'i']
+            else:
+                coherency_list = ['i'] + coherency_list + ['i']
+
+        else:
+            raise Exception('Error: For incoherent or partly incoherent calculations you must supply the '
+                            'coherency_list parameter with as many elements as the number of layers in the '
+                            'structure')
+
     output = {'position': dist, 'absorption': np.zeros((num_wl, len(dist)))}
 
     if pol in 'sp':
     # print(stack.get_indices(wavelength).shape)
-        out1 = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
+        if coherent:
+            out = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
 
-        layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-        data = tmm.position_resolved(layer, d_in_layer, out1)
+            layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+            data = tmm.position_resolved(layer, d_in_layer, out)
+            output['absorption'] = data['absor']
 
-        output['absorption'] = data['absor']
+        else:
+            out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
+                              wavelength)
+            layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+            data = tmm.inc_position_resolved(layer, d_in_layer, out, coherency_list,
+                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
+            output['absorption'] = data
 
     else:
-        out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-        out2 = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+        if coherent:
+            out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+            out2 = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
 
-        layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-        data_s = tmm.position_resolved(layer, d_in_layer, out1)
-        data_p = tmm.position_resolved(layer, d_in_layer, out2)
+            layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+            data_s = tmm.position_resolved(layer, d_in_layer, out1)
+            data_p = tmm.position_resolved(layer, d_in_layer, out2)
 
+            output['absorption'] = 0.5*(data_s['absor'] + data_p['absor'])
 
-        output['absorption'] = 0.5*(data_s['absor'] + data_p['absor'])
+        else:
+            out1 = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
+                              wavelength)
+            out2 = tmm.inc_tmm('p', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
+                              wavelength)
+            layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
+            data_s = tmm.inc_position_resolved(layer, d_in_layer, out1, coherency_list,
+                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
+            data_p = tmm.inc_position_resolved(layer, d_in_layer, out2, coherency_list,
+                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
+
+            output['absorption'] = 0.5*(data_s + data_p)
 
     return output
 

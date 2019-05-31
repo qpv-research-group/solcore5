@@ -278,4 +278,4 @@ def prepare_solar_cell(solar_cell, options):
     solar_cell.width = offset
 
     if options.position is None:
-        options.position = np.arange(0, solar_cell.width, 1e-9)
+        options.position = np.arange(0, solar_cell.width, 1e-10)
