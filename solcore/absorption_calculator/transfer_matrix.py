@@ -512,7 +512,6 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
                               wavelength)
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
             data = tmm.inc_position_resolved(layer, d_in_layer, out, coherency_list,
-                                             np.array(stack.get_widths()),
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
             output['absorption'] = data
 
@@ -534,10 +533,8 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
                               wavelength)
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
             data_s = tmm.inc_position_resolved(layer, d_in_layer, out1, coherency_list,
-                                             np.array(stack.get_widths()),
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
             data_p = tmm.inc_position_resolved(layer, d_in_layer, out2, coherency_list,
-                                             np.array(stack.get_widths()),
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
 
             output['absorption'] = 0.5*(data_s + data_p)

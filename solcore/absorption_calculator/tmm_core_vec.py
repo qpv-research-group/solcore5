@@ -885,7 +885,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     T_list[T_list < 1e-30] = 1e-30
 
     L_list = [nan]  # L_0 is not defined because 0'th layer has no beginning.
-    Ltilde = (array([[np.ones(len(lam_vac)), -R_list[1, 0]],
+    Ltilde = (array([[np.ones_like(lam_vac), -R_list[1, 0]],
                      [R_list[0, 1],
                       T_list[1, 0] * T_list[0, 1] - R_list[1, 0] * R_list[0, 1]]])
               / T_list[0, 1]).transpose(2, 0, 1)
@@ -895,7 +895,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     for i in range(1, num_inc_layers - 1):
         L = np.matmul(
             array([[1 / P_list[i], np.zeros(len(lam_vac))], [np.zeros(len(lam_vac)), P_list[i]]]).transpose(2, 0, 1),
-            array([[np.ones(len(lam_vac)), -R_list[i + 1, i]],
+            array([[np.ones_like(lam_vac), -R_list[i + 1, i]],
                    [R_list[i, i + 1],
                     T_list[i + 1, i] * T_list[i, i + 1] - R_list[i + 1, i] * R_list[i, i + 1]]]).transpose(2, 0, 1)
         ) / T_list[i, i + 1][:, None, None]
@@ -928,7 +928,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     stackFB_list = []
     for stack_index, prev_inc_index in enumerate(inc_from_stack):
         if prev_inc_index == 0:  # stack starts right after semi-infinite layer.
-            F = np.ones(len(lam_vac))
+            F = np.ones_like(lam_vac)
         else:
             F = VW_list[prev_inc_index, 0] * P_list[prev_inc_index]
         B = VW_list[prev_inc_index + 1, 1]
@@ -937,7 +937,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     # power_entering_list[i] is the normalized Poynting vector crossing the
     # interface into the i'th incoherent layer from the previous (coherent or
     # incoherent) layer. See manual.
-    power_entering_list = [np.ones(len(lam_vac))]  # "1" by convention for infinite 0th layer.
+    power_entering_list = [np.ones_like(lam_vac)]  # "1" by convention for infinite 0th layer.
     for i in range(1, num_inc_layers):
         prev_stack_index = stack_from_inc[i]
         if isnan(prev_stack_index):
@@ -979,7 +979,7 @@ def inc_absorp_in_each_layer(inc_data):
 
     Returns a list [layer0absorp, layer1absorp, ...]. Entries should sum to 1.
 
-    inc_data is output of incoherent_main()
+    inc_data is output of inc_tmm()
     """
     # Reminder: inc_from_stack[i] = j means that the i'th stack comes after the
     # layer with incoherent index j.
@@ -1024,7 +1024,7 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     Outputs an absorp_analytic_fn object for a coherent layer within a
     partly-incoherent stack.
 
-    inc_data is output of incoherent_main()
+    inc_data is output of inc_tmm()
     """
     j = inc_data['stack_from_all'][layer]
     if any(isnan(j)):
@@ -1045,7 +1045,7 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     return forwardfunc.add(backfunc)
 
 
-def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, widths, alphas):
+def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas):
     """
     This function is vectorized. Analogous to position_resolved, but
     for layers (incoherent or coherent) in (partly) incoherent stacks.
@@ -1060,39 +1060,28 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, widths, alp
     A_local = np.zeros((len(alphas[0]), len(dist)))
     for i, l in enumerate(layers):
         if coherency_list[l] == 'c':
-            #print(l, 'c')
+
             fn = inc_find_absorp_analytic_fn(l, inc_tmm_data)
             A_local[:, layer == l] = fn.run(dist[layer == l])
 
-            #print('c', A_local[:, layer == l])
         else:
-            #print(l, 'i')
-            A_local[:, layer == l] = beer_lambert(widths[l]*1e-9, alphas[l]*1e9, fraction_reaching[i], dist[layer == l]*1e-9)
-            #print('i', A_local[:, layer == l])
 
-    #A_local[np.isnan(A_local)] = 0
+            A_local[:, layer == l] = beer_lambert(alphas[l]*1e9, fraction_reaching[i], dist[layer == l]*1e-9)
+
     return A_local
 
 
-def beer_lambert(width, alphas, fraction, dist):
-    # Number of spectral elements
-
-    # everything in metres
-    # At any given position, the absorption per unit length is alpha * exp(-alpha*z) but we have to remove all light
-    # absorbed above it:
-
-    # fraction is the same for every depth.
-
-    # After getting al the alphas and widths, we need to create a function that takes as arguments the depth z and
-    # returns the differential fraction of absorbed light at that position.
+def beer_lambert(alphas, fraction, dist):
+    """
+    Calculates absorption profile according to the Beer-Lambert law given alphas (in m-1)
+    and a vector of distance into the layer (in m) and the fraction of incident light
+    reaching the front of the layer. This is used to calculate the absorption profile in
+    incoherent layers within (partly) incoherent stacks. Vectorized over wavelengths.
+    """
 
     expn = np.exp(- alphas[:, None] * dist[None,:])
-    #print('expn', expn)
-    #print('fraction', fraction)
-    #print('alphas', alphas)
+
     output = fraction[:, None]*alphas[:, None]*expn
-    #print('output', output)
-    # not sure why there's a nm factor (1e9) wrong here... What are internal units used by Solcore?
-    # this gives correct results, in any case.
+
     return output/1e9
 
