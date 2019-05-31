@@ -11,7 +11,7 @@ import configparser
 import solcore
 from solcore.material_system import critical_point_interpolate
 from solcore.parameter_system import ParameterSystem
-from solcore.constants import h, c, q, kb, pi, electron_mass as m0
+from solcore.constants import h, c, q, kb, pi, electron_mass as m0, vacuum_permittivity
 from solcore.singleton import Singleton
 from solcore.source_managed_class import SourceManagedClass
 from solcore.absorption_calculator.sopra_db import sopra_database, compounds_info
@@ -324,7 +324,9 @@ class BaseMaterial:
             except:
                 return calculate_mobility(self.material_string, True, self.Na, self.main_fraction)
         if attrname == "Nc":
-            return 2 * (2 * pi * self.eff_mass_electron_Gamma * m0 * kb * self.T / h ** 2) ** 1.5
+            # return 2 * (2 * pi * self.eff_mass_electron_Gamma * m0 * kb * self.T / h ** 2) ** 1.5
+            # Changed by Diego 22/10/18: some materials dont have _Gamma but all have the normal electron effective mass
+            return 2 * (2 * pi * self.eff_mass_electron * m0 * kb * self.T / h ** 2) ** 1.5
         if attrname == "Nv":
             # Strictly speaking, this is valid only for III-V, zinc-blend semiconductors
             mhh = self.eff_mass_hh_z
@@ -338,6 +340,8 @@ class BaseMaterial:
             inter = lambda E: self.n(E) ** 2 * self.alphaE(E) * np.exp(-E / (kb * self.T)) * E ** 2
             upper = self.band_gap + 10 * kb * self.T
             return 1.0 / self.ni ** 2 * 2 * pi / (h ** 3 * c ** 2) * quad(inter, 0, upper)[0]
+        if attrname == "permittivity":
+            return self.relative_permittivity * vacuum_permittivity
 
         kwargs = {element: getattr(self, element) for element in self.composition}
         kwargs["T"] = self.T

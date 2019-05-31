@@ -100,6 +100,8 @@ def qe_detailed_balance(junction, wl):
     except AttributeError:
         junction.eqe = junction.absorptance
 
+    junction.qe = State({'WL': wl, 'IQE': junction.iqe(wl), 'EQE': junction.eqe(wl)})
+
 
 def absorptance_detailed_balance(junction):
     """ Calculates the absorptance of the junction in the detailed balanced case. If it has not been calculated before, provided as input, it uses a "top hat" absorptance with the absorption edge at Eg and magnitude A.

@@ -28,9 +28,10 @@ def iv_depletion(junction, options):
     # We search for the emitter and check if it is n-type or p-type
     idx = 0
     pn_or_np = 'pn'
+    homojunction = True
 
     for layer in junction:
-        if layer.role is not 'emitter':
+        if layer.role.lower() != 'emitter':
             idx += 1
         else:
             Na = 0
@@ -48,10 +49,10 @@ def iv_depletion(junction, options):
             break
 
     # Now we check for an intrinsic region and, if there is, for the base.
-    if junction[idx + 1].role is 'intrinsic':
+    if junction[idx + 1].role.lower() == 'intrinsic':
         iRegion = junction[idx + 1]
 
-        if junction[idx + 2].role is 'base':
+        if junction[idx + 2].role.lower() == 'base':
             if pn_or_np == "pn":
                 nRegion = junction[idx + 2]
                 nidx = idx + 2
@@ -60,6 +61,8 @@ def iv_depletion(junction, options):
                 pidx = idx + 2
 
             id_bottom = idx + 2
+            homojunction = homojunction and nRegion.material.material_string == pRegion.material.material_string
+            homojunction = homojunction and nRegion.material.material_string == iRegion.material.material_string
 
         else:
             raise RuntimeError(
@@ -67,7 +70,7 @@ def iv_depletion(junction, options):
                 '"base".')
 
     # If there is no intrinsic region, we check directly the base
-    elif junction[idx + 1].role is 'base':
+    elif junction[idx + 1].role.lower() == 'base':
         if pn_or_np == "pn":
             nRegion = junction[idx + 1]
             nidx = idx + 1
@@ -77,15 +80,18 @@ def iv_depletion(junction, options):
         iRegion = None
 
         id_bottom = idx + 1
+        homojunction = homojunction and nRegion.material.material_string == pRegion.material.material_string
 
     else:
         raise RuntimeError(
             'ERROR processing junctions: A layer following the "emitter" must be defined as "intrinsic"'
             'or "base".')
 
+    # We assert that we are really working with an homojunction
+    assert homojunction, 'ERROR: The DA solver only works with homojunctions, for now.'
+
     # With all regions identified, it's time to start doing calculations
     kbT = kb * T
-    Egap = nRegion.material.band_gap
     R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, 'R_shunt') else 1e14
 
     xp = pRegion.width
@@ -93,12 +99,12 @@ def iv_depletion(junction, options):
     xi = 0 if iRegion is None else iRegion.width
 
     # Now we have to get all the material parameters needed for the calculation
-    if hasattr(junction, "dielectric_constant"):
-        es = junction.dielectric_constant
+    if hasattr(junction, "permittivity"):
+        es = junction.permittivity
     else:
-        es = nRegion.material.permittivity * vacuum_permittivity  # equal for n and p.  I hope.
+        es = nRegion.material.permittivity  # equal for n and p.  I hope.
 
-    # For the diffusion lenght, subscript n and p refer to the carriers, electrons and holes
+    # For the diffusion length, subscript n and p refer to the carriers, electrons and holes
     if hasattr(junction, "ln"):
         ln = junction.ln
     else:
@@ -120,14 +126,19 @@ def iv_depletion(junction, options):
     else:
         dn = nRegion.material.hole_mobility * kbT / q
 
-    # Effective masses and effective density of states
-    mEff_h = nRegion.material.eff_mass_hh_z * electron_mass
-    mEff_e = pRegion.material.eff_mass_electron * electron_mass
+    # As the DA solver is only valid for homojunctions, ni is the same in both
+    ni = nRegion.material.ni
+    niSquared = ni**2
 
-    Nv = 2 * (mEff_h * kb * T / (2 * pi * hbar ** 2)) ** 1.5  # Jenny p58
-    Nc = 2 * (mEff_e * kb * T / (2 * pi * hbar ** 2)) ** 1.5
-    niSquared = Nc * Nv * np.exp(-Egap / (kb * T))
-    ni = np.sqrt(niSquared)
+    # Effective masses and effective density of states
+    # mEff_h = nRegion.material.eff_mass_hh_z * electron_mass
+    # mEff_e = pRegion.material.eff_mass_electron * electron_mass
+    # Egap = nRegion.material.band_gap
+    #
+    # Nv = 2 * (mEff_h * kb * T / (2 * pi * hbar ** 2)) ** 1.5  # Jenny p58
+    # Nc = 2 * (mEff_e * kb * T / (2 * pi * hbar ** 2)) ** 1.5
+    # niSquared = Nc * Nv * np.exp(-Egap / (kb * T))
+    # ni = np.sqrt(niSquared)
 
     Na = pRegion.material.Na
     Nd = nRegion.material.Nd
@@ -391,9 +402,10 @@ def qe_depletion(junction, options):
     # We search for the emitter and check if it is n-type or p-type
     idx = 0
     pn_or_np = 'pn'
+    homojunction = True
 
     for layer in junction:
-        if layer.role is not 'emitter':
+        if layer.role.lower() != 'emitter':
             idx += 1
         else:
             Na = 0
@@ -411,10 +423,10 @@ def qe_depletion(junction, options):
             break
 
     # Now we check for an intrinsic region and, if there is, for the base.
-    if junction[idx + 1].role is 'intrinsic':
+    if junction[idx + 1].role.lower() == 'intrinsic':
         iRegion = junction[idx + 1]
 
-        if junction[idx + 2].role is 'base':
+        if junction[idx + 2].role.lower() == 'base':
             if pn_or_np == "pn":
                 nRegion = junction[idx + 2]
                 nidx = idx + 2
@@ -423,6 +435,8 @@ def qe_depletion(junction, options):
                 pidx = idx + 2
 
             id_bottom = idx + 2
+            homojunction = homojunction and nRegion.material.material_string == pRegion.material.material_string
+            homojunction = homojunction and nRegion.material.material_string == iRegion.material.material_string
 
         else:
             raise RuntimeError(
@@ -430,7 +444,7 @@ def qe_depletion(junction, options):
                 '"base".')
 
     # If there is no intrinsic region, we check directly the base
-    elif junction[idx + 1].role is 'base':
+    elif junction[idx + 1].role.lower() == 'base':
         if pn_or_np == "pn":
             nRegion = junction[idx + 1]
             nidx = idx + 1
@@ -440,11 +454,15 @@ def qe_depletion(junction, options):
         iRegion = None
 
         id_bottom = idx + 1
+        homojunction = homojunction and nRegion.material.material_string == pRegion.material.material_string
 
     else:
         raise RuntimeError(
             'ERROR processing junctions: A layer following the "emitter" must be defined as "intrinsic"'
             'or "base".')
+
+    # We assert that we are really working with an homojunction
+    assert homojunction, 'ERROR: The DA solver only works with homojunctions, for now.'
 
     # With all regions identified, it's time to start doing calculations
     kbT = kb * T
@@ -459,7 +477,7 @@ def qe_depletion(junction, options):
     if hasattr(junction, "dielectric_constant"):
         es = junction.dielectric_constant
     else:
-        es = nRegion.material.permittivity * vacuum_permittivity  # equal for n and p.  I hope.
+        es = nRegion.material.permittivity  # equal for n and p.  I hope.
 
     # For the diffusion lenght, subscript n and p refer to the carriers, electrons and holes
     if hasattr(junction, "ln"):
@@ -484,13 +502,16 @@ def qe_depletion(junction, options):
         dn = nRegion.material.hole_mobility * kbT / q
 
     # Effective masses and effective density of states
-    mEff_h = nRegion.material.eff_mass_hh_z * electron_mass
-    mEff_e = pRegion.material.eff_mass_electron * electron_mass
+    # mEff_h = nRegion.material.eff_mass_hh_z * electron_mass
+    # mEff_e = pRegion.material.eff_mass_electron * electron_mass
+    #
+    # Nv = 2 * (mEff_h * kb * T / (2 * pi * hbar ** 2)) ** 1.5  # Jenny p58
+    # Nc = 2 * (mEff_e * kb * T / (2 * pi * hbar ** 2)) ** 1.5
+    # niSquared = Nc * Nv * np.exp(-Egap / (kb * T))
+    # ni = np.sqrt(niSquared)
 
-    Nv = 2 * (mEff_h * kb * T / (2 * pi * hbar ** 2)) ** 1.5  # Jenny p58
-    Nc = 2 * (mEff_e * kb * T / (2 * pi * hbar ** 2)) ** 1.5
-    niSquared = Nc * Nv * np.exp(-Egap / (kb * T))
-    ni = np.sqrt(niSquared)
+    ni = nRegion.material.ni
+    niSquared = ni**2
 
     Na = pRegion.material.Na
     Nd = nRegion.material.Nd
@@ -583,6 +604,8 @@ def qe_depletion(junction, options):
     junction.eqe_scr = interp1d(wl, eqe_scr, kind='linear', bounds_error=False, assume_sorted=True,
                                 fill_value=(eqe_scr[0], eqe_scr[-1]))
 
+    junction.qe = State({'WL': wl, 'IQE': junction.iqe(wl), 'EQE': junction.eqe(wl), 'EQE_emitter': junction.eqe_emitter(wl),
+                         'EQE_base': junction.eqe_base(wl), 'EQE_scr': junction.eqe_scr(wl)})
 
 def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
     zz = np.linspace(xa, xb, 1001)
