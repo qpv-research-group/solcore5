@@ -510,6 +510,9 @@ class absorp_analytic_fn:
         self.a1 = 2 * kz.imag
         self.a3 = 2 * kz.real
 
+        self.a1[self.a1 < 1e-30] = 0
+        self.a3[self.a3 < 1e-30] = 0
+
         if pol == 's':
             temp = (n * cos(th) * kz).imag / (n_0 * cos(th_0)).real
             #print('temp', temp)

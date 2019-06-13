@@ -21,29 +21,29 @@ light_source = LightSource(source_type='standard', version='AM1.5d', x=default_o
 
 all_materials = []
 
-Al2O3 = material('Al2O3J')
-TiO2 = material('TiO2J')
-AlInP = material("AlInPJ")
-GaInP = material("GaInPJ")
-GaInAs = material('GaIn001AsJ')
-Ge = material("GeJ")
-Al02Ga08As = material('Al02Ga08AsJ')
-Al08Ga02As = material('Al08Ga02AsJ')
+Al2O3 = material('Al2O3')
+TiO2 = material('TiO2')
+AlInP = material("AlInP")
+GaInP = material("GaInP")
+GaAs = material('GaAs')
+Ge = material("Ge")
+Al02Ga08As = material('AlGaAs')
+Al08Ga02As = material('AlGaAs')
 
 # TOP CELL - GaInP
 ARC1= Al2O3()
 ARC2 = TiO2()
 
-top_window_material = AlInP()
-top_cell_n_material = GaInP(Nd=siUnits(2e18, "cm-3"), hole_diffusion_length=si("300nm"))
-top_cell_p_material = GaInP(Na=siUnits(1.5e17, "cm-3"), electron_diffusion_length=si("2um"))
-top_cell_TJ_material = Al08Ga02As()
+top_window_material = AlInP(Al=0.5)
+top_cell_n_material = GaInP(In=0.51,Nd=siUnits(2e18, "cm-3"), hole_diffusion_length=si("300nm"))
+top_cell_p_material = GaInP(In=0.51,Na=siUnits(1.5e17, "cm-3"), electron_diffusion_length=si("2um"))
+top_cell_TJ_material = Al08Ga02As(Al=0.8)
 
-for mat in [top_cell_n_material, top_cell_p_material]:
-    mat.band_gap = material('GaInP')(In=0.51).band_gap
-    mat.eff_mass_hh_z = material('GaInP')(In=0.51).eff_mass_hh_z
-    mat.eff_mass_electron = material('GaInP')(In=0.51).eff_mass_electron
-    mat.permittivity = 11.75
+#for mat in [top_cell_n_material, top_cell_p_material]:
+    #mat.band_gap = material('GaInP')(In=0.51).band_gap
+    #mat.eff_mass_hh_z = material('GaInP')(In=0.51).eff_mass_hh_z
+    #mat.eff_mass_electron = material('GaInP')(In=0.51).eff_mass_electron
+    #mat.permittivity = 11.75
 
 all_materials.append(ARC1)
 all_materials.append(ARC2)
@@ -53,17 +53,17 @@ all_materials.append(top_cell_p_material)
 all_materials.append(top_cell_TJ_material)
 
 # MID CELL  - InGaAs
-mid_window_material = GaInP()
-mid_cell_n_material = GaInAs(Nd=siUnits(2e18, "cm-3"), hole_diffusion_length=si("300nm"))
-mid_cell_p_material = GaInAs(Na=siUnits(1.5e17, "cm-3"), electron_diffusion_length=si("3um"))
-mid_BSF_material = GaInP()
-mid_cell_TJ_material = Al08Ga02As()
+mid_window_material = GaInP(In=0.51)
+mid_cell_n_material = GaAs(Nd=siUnits(2e18, "cm-3"), hole_diffusion_length=si("300nm"))
+mid_cell_p_material = GaAs(Na=siUnits(1.5e17, "cm-3"), electron_diffusion_length=si("3um"))
+mid_BSF_material = GaInP(In=0.51)
+mid_cell_TJ_material = Al08Ga02As(Al=0.8)
 
-for mat in [mid_cell_n_material, mid_cell_p_material]:
-    mat.band_gap = material('GaInAs')(In=0.01).band_gap
-    mat.eff_mass_hh_z = material('GaInAs')(In=0.01).eff_mass_hh_z
-    mat.eff_mass_electron = material('GaInAs')(In=0.01).eff_mass_electron
-    mat.permittivity = 13.1
+#for mat in [mid_cell_n_material, mid_cell_p_material]:
+#    mat.band_gap = material('GaAs')(In=0.01).band_gap
+#    mat.eff_mass_hh_z = material('GaAs')(In=0.01).eff_mass_hh_z
+#   mat.eff_mass_electron = material('GaAs')(In=0.01).eff_mass_electron
+#    mat.permittivity = 13.1
 
 all_materials.append(mid_window_material)
 all_materials.append(mid_cell_n_material)
@@ -71,24 +71,24 @@ all_materials.append(mid_cell_p_material)
 all_materials.append(mid_BSF_material)
 all_materials.append(mid_cell_TJ_material)
 
-DBR1 = Al02Ga08As()
-DBR2 = Al08Ga02As()
+DBR1 = Al02Ga08As(Al=0.2)
+DBR2 = Al08Ga02As(Al=0.8)
 
 all_materials.append(DBR1)
 all_materials.append(DBR2)
 
 # BOTTOM CELL - Ge
 
-bot_buffer_material = GaInAs()
-bot_nucleation_material = GaInP()
+bot_buffer_material = GaAs()
+bot_nucleation_material = GaInP(In=0.51)
 bot_cell_n_material = Ge(Nd=siUnits(2e18, "cm-3"), hole_diffusion_length=si("800nm"))
 bot_cell_p_material = Ge(Na=siUnits(1e17, "cm-3"), electron_diffusion_length=si("50um"))
 
-for mat in [bot_cell_n_material, bot_cell_p_material]:
-    mat.band_gap = material('Ge')().band_gap
-    mat.eff_mass_hh_z = material('Ge')().eff_mass_hh_z
-    mat.eff_mass_electron = material('Ge')().eff_mass_electron
-    mat.permittivity = 16
+#for mat in [bot_cell_n_material, bot_cell_p_material]:
+#    mat.band_gap = material('Ge')().band_gap
+#    mat.eff_mass_hh_z = material('Ge')().eff_mass_hh_z
+#   mat.eff_mass_electron = material('Ge')().eff_mass_electron
+#    mat.permittivity = 16
 
 all_materials.append(bot_buffer_material)
 all_materials.append(bot_nucleation_material)
@@ -98,16 +98,12 @@ all_materials.append(bot_cell_p_material)
 
 # We add some other properties to the materials, assumed the same in all cases, for simplicity.
 # If different, we should have added them above in the definition of the materials.
-#plt.figure()
-#i1 = 1
+
 for mat in all_materials:
-    #plt.plot(wl*1e9, mat.n(wl), label = str(i1))
+
     mat.hole_mobility = 3.4e-3
     mat.electron_mobility = 5e-2
-    #i1 = i1 + 1
 
-#plt.legend()
-#plt.show()
 
 ARC = [Layer(si('80nm'), material = ARC1), Layer(si('33nm'), material = ARC2)]
 
@@ -133,17 +129,14 @@ bottom_junction = [Junction([Layer(si("405.048nm"), material=bot_buffer_material
                  ], sn=1, sp=1, kind='DA')]
 # And, finally, we put everything together, adding also the surface recombination velocities sn and sp.
 # setting kind = 'DA' in the Junction definition tells the electrical solver later to use the depletion approximation
-optical_struct = SolarCell(ARC + top_junction + middle_junction + DBRa + DBRb + DBRc + bottom_junction, shading = 0.3)
+optical_struct = SolarCell(ARC + top_junction + middle_junction + DBRa + DBRb + DBRc + bottom_junction,
+                           shading = 0.05)
 
 
 wl = np.linspace(250, 1700, 400)*1e-9
 
 
 options = State()
-options.position = None
-prepare_solar_cell(optical_struct, options)
-position = np.arange(0, optical_struct.width, 1e-9)
-options.position = position
 options.wavelength = wl
 options.optics_method = 'TMM'
 options.no_back_reflexion = False
