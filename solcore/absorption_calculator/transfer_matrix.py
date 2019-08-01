@@ -381,7 +381,11 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflexion=True)
         stack = structure
         stack.no_back_reflexion = no_back_reflexion
     else:
-        stack = OptiStack(structure, no_back_reflexion=no_back_reflexion)
+        if hasattr(structure, 'substrate'):
+            substrate = structure.substrate
+        else:
+            substrate = None
+        stack = OptiStack(structure, no_back_reflexion=no_back_reflexion, substrate=substrate)
 
     output = {'psi': np.zeros((num_wl, num_ang)), 'Delta': np.zeros((num_wl, num_ang))}
 

@@ -4,7 +4,7 @@ import solcore.analytic_solar_cells as ASC
 import numpy as np
 import types
 from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 def solve_beer_lambert(solar_cell, options):

@@ -7,7 +7,7 @@ from solcore import si
 import numpy as np
 import types
 from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 def solve_tmm(solar_cell, options):
