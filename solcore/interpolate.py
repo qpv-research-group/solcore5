@@ -1,5 +1,6 @@
 # from scipy import interpolate as I
 import numpy as np
+from scipy.interpolate import make_interp_spline, splev
 
 
 class interp1d(object):
@@ -105,7 +106,7 @@ class interp1d(object):
             minval = order + 1
             len_y = oriented_y.shape[0]
             self._call = self._call_spline
-            self._spline = np.splmake(x, oriented_y, order=order)
+            self._spline = make_interp_spline(x, oriented_y, k=order)
 
         len_x = len(x)
         if len_x != len_y:
@@ -166,7 +167,7 @@ class interp1d(object):
 
     def _call_spline(self, x_new):
         x_new = np.asarray(x_new)
-        result = np.spleval(self._spline, x_new.ravel())
+        result = splev(x_new.ravel(), self._spline)
         return result.reshape(x_new.shape + result.shape[1:])
 
     def __call__(self, x_new):
