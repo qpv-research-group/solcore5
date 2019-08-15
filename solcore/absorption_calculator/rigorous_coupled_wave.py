@@ -83,8 +83,8 @@ def initialise_S(stack, size, orders, substrate=None):
     S.SetOptions(  # these are the default
         LatticeTruncation='Circular',
         PolarizationDecomposition=False,
-        PolarizationBasis='Default',
-        WeismannFormulation = False
+        PolarizationBasis='Default'#,
+        #WeismannFormulation = False
     )
     geom_list = [layer.geometry for layer in stack]
     geom_list.insert(0, {})  # incidence medium
