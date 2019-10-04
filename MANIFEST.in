@@ -32,10 +32,13 @@ include solcore/spice/quasi_3D_solver.py
 include solcore/tests/MgF-ZnS_AR.csv
 include solcore/tests/test_basics.py
 include solcore/tests/test_qm.py
+include solcore/tests/SiGeSn_params.txt
 include solcore/tests/in048ga052p.csv
 include solcore/tests/__init__.py
 include solcore/tests/Ge-Palik.csv
 include solcore/tests/in01gaas.csv
+include solcore/tests/SiGeSn_n.txt
+include solcore/tests/SiGeSn_k.txt
 include solcore/tests/test_absorption.py
 include solcore/tests/test_pdd.py
 include solcore/tests/alinp.csv
@@ -44,6 +47,7 @@ include solcore/absorption_calculator/rigorous_coupled_wave.py
 include solcore/absorption_calculator/kramers_kronig.py
 include solcore/absorption_calculator/absorption_QW.py
 include solcore/absorption_calculator/__init__.py
+include solcore/absorption_calculator/nk_db.py
 include solcore/absorption_calculator/tmm_core_vec.py
 include solcore/absorption_calculator/adachi_alpha.py
 include solcore/absorption_calculator/dielectric_constant_models.py
@@ -80,9 +84,6 @@ include solcore/poisson_drift_diffusion/DeviceStructure.py
 include solcore/poisson_drift_diffusion/QWunit.py
 include solcore/poisson_drift_diffusion/__init__.py
 include solcore/poisson_drift_diffusion/DDmodel-current.f95
-include solcore/poisson_drift_diffusion/ddModel.cpython-36m-darwin.so
-include solcore/poisson_drift_diffusion/ddModel.cpython-36m-darwin.so.dSYM/Contents/Info.plist
-include solcore/poisson_drift_diffusion/ddModel.cpython-36m-darwin.so.dSYM/Contents/Resources/DWARF/ddModel.cpython-36m-darwin.so
 include solcore/material_data/mobility.py
 include solcore/material_data/__init__.py
 include solcore/material_data/mobility_parameters.json
@@ -95,6 +96,9 @@ include solcore/material_data/GaAsP-Material/k/0.000_GaAsP_k.txt
 include solcore/material_data/GaAsP-Material/k/critical_points.txt
 include solcore/material_data/AlAs-Material/k.txt
 include solcore/material_data/AlAs-Material/n.txt
+include solcore/material_data/refractiveindex_info_DB/dboperations.py
+include solcore/material_data/refractiveindex_info_DB/__init__.py
+include solcore/material_data/refractiveindex_info_DB/dbmaterial.py
 include solcore/material_data/SOPRA_DB/VSI2-A.MAT
 include solcore/material_data/SOPRA_DB/WSI2-A.MAT
 include solcore/material_data/SOPRA_DB/GAAS634T.MAT
@@ -518,6 +522,7 @@ include solcore/material_data/InGaAs-Material/k/critical_points.txt
 include solcore/material_data/InGaAs-Material/k/0.100_Strained_InGaAs_k.txt
 include solcore/material_data/InGaAs-Material/k/0.240_Strained_InGaAs_k.txt
 include solcore/material_data/InGaAs-Material/k/0.200_Strained_InGaAs_k.txt
+include solcore/material_system/create_new_material.py
 include solcore/material_system/__init__.py
 include solcore/material_system/critical_point_interpolate.py
 include solcore/material_system/material_system.py
@@ -527,8 +532,3 @@ include solcore/optics/__init__.py
 include solcore/optics/rcwa.py
 include solcore/optics/beer_lambert.py
 include solcore/optics/external_optics.py
-include solcore/material_system/create_new_material.py
-include solcore/absorption_calculator/nk_db.py
-include solcore/material_data/refractive_index_DB/__init__.py
-include solcore/material_data/refractive_index_DB/dbmaterial.py
-include solcore/material_data/refractive_index_DB/dboperations.py
