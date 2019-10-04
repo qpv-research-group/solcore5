@@ -1,18 +1,17 @@
 language: python
 python:
-  - "3.6"
+  - "3.7"
 matrix:
   include:
     - python: 3.7
-      dist: xenial
+      dist: bionic
       sudo: true
 before_install:
-  - sudo apt-get install -y gfortran
+  - sudo apt install -y gfortran
 install:
+  - pip install -U setuptools wheel pip
   - pip install -r requirements.txt
-  - pip install pytest
-  - pip install pytest-cov
-  - pip install coveralls
+  - pip install pytest pytest-cov coveralls
   - pip install --no-deps --install-option="--with_pdd" -e .
 script:
   - pytest --cov=solcore/
