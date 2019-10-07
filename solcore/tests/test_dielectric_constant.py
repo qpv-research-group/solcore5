@@ -5,6 +5,7 @@ import numpy as np
 import random
 
 from solcore.absorption_calculator.dielectric_constant_models import Cauchy, Drude, Gauss, Lorentz, Poles, PolySegment
+from solcore.absorption_calculator.dielectric_constant_models import DielectricConstantModel
 from solcore.interpolate import interp1d
 
 def test_poles():
@@ -98,3 +99,15 @@ def test_poly_segment():
     interp_value = random.uniform(1, 100)
     assert poly1.epsi2(interp_value) == interp_value # linear interpolation
     assert poly1.dielectric(1240) == approx(1.008422827635958+1j)
+
+def test_dielectric_constant_model(mocker):
+    mocker.patch('builtins.input', return_value="Y")
+    cauchy = Cauchy()
+    model = DielectricConstantModel(e_inf=0, oscillators=[cauchy])
+    assert model.dielectric_constants(1000) == 0
+    model.add_oscillator('drude', An=2, Brn=1)
+    assert model.dielectric_constants(1240) == (-1+1j)
+    model.add_oscillator('lorentz', An=3, En=2, Brn=3)
+    assert model.dielectric_constants(1240) == (1+3j)
+    model.remove_oscillator(2)
+    assert model.dielectric_constants(1240) == (2+2j)
