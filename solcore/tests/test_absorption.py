@@ -26,6 +26,7 @@ from solcore.config_tools import add_source
 from solcore.optics import solve_tmm
 
 import os
+from pathlib import Path
 
 import numpy as np
 
@@ -76,8 +77,8 @@ def test_TMM_absorption_profile():
         my_structure, np.array([800]), z_limit=3000, steps_size=20
     )
 
-    this_dir = os.path.split(__file__)[0]
-    data = tuple(np.loadtxt(os.path.join(this_dir, 'data/absorption_profile.txt')))
+    data_path = Path(__file__).parent / "data" / "absorption_profile.txt"
+    data = tuple(np.loadtxt(data_path))
 
     assert all([d == approx(o) for d, o in zip(data, out["absorption"][0])])
 
@@ -237,8 +238,8 @@ def test_substrate_presence_profile():
 
     profile = np.vstack((profile_subs, profile_nosubs))
 
-    this_dir = os.path.split(__file__)[0]
-    profile_data = np.genfromtxt(os.path.join(this_dir, 'data/substrate_presence_profile.csv'), delimiter=',')\
+    data_path = Path(__file__).parent / "data" / "substrate_presence_profile.csv"
+    profile_data = np.genfromtxt(data_path, delimiter=',')
 
     assert all([d == approx(o) for d, o in zip(profile, profile_data)])
 
@@ -310,7 +311,7 @@ def test_database_materials():
     download_db(confirm=True)
     wl, n = nkdb_load_n(2683) # Should be carbon, from Phillip
 
-    this_dir = os.path.split(__file__)[0]
-    n_data = np.loadtxt(os.path.join(this_dir, 'data/database_materials.txt'))
+    data_path = Path(__file__).parent / "data" / "database_materials.txt"
+    n_data = np.loadtxt(data_path)
 
     assert all([d == approx(o) for d, o in zip(n, n_data)])
