@@ -7,6 +7,8 @@ from solcore.light_source import LightSource
 from solcore.solar_cell_solver import solar_cell_solver
 from solcore.graphing.Custom_Colours import colours
 
+# TODO This needs some explanations/descriptions
+
 T = 298
 
 Vin = np.linspace(-6, 2, 600)
