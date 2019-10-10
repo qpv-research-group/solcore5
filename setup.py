@@ -119,6 +119,7 @@ setup(
         "natsort",
         "regex",
         "cycler",
-        "pyyaml"
+        "pyyaml",
+        "pytest-mock"
     ],
 )
