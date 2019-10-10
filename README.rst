@@ -1,5 +1,5 @@
 .. image:: https://mybinder.org/badge_logo.svg
-   :target: https://mybinder.org/v2/gh/qpv-research-group/solcore5/sunglass
+   :target: https://mybinder.org/v2/gh/qpv-research-group/solcore5/devel
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg
    :target: https://doi.org/10.5281/zenodo.1185316
@@ -11,11 +11,11 @@
    :target: http://solcore5.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
    
-.. image:: https://travis-ci.com/dalonsoa/solcore5.svg?branch=master
-   :target: https://travis-ci.com/dalonsoa/solcore5
+.. image:: https://travis-ci.org/qpv-research-group/solcore5.svg?branch=devel
+   :target: https://travis-ci.org/qpv-research-group/solcore5
 
-.. image:: https://coveralls.io/repos/github/dalonsoa/solcore5/badge.svg
-   :target: https://coveralls.io/github/dalonsoa/solcore5
+.. image:: https://coveralls.io/repos/github/qpv-research-group/solcore5/badge.svg?branch=devel
+   :target: https://coveralls.io/github/qpv-research-group/solcore5?branch=devel
 
 
 Solcore
