@@ -84,7 +84,7 @@ Example of a 2J solar cell calculated with the PDD solver
         mat.electron_mobility = 3.4e-3
         mat.hole_mobility = 3.4e-3
         mat.electron_mobility = 5e-2
-        mat.permittivity = 9
+        mat.relative_permittivity = 9
 
     # And, finally, we put everything together, adding also the surface recombination velocities. We also add some shading
     # due to the metallisation of the cell = 8%, and indicate it has an area of 0.7x0.7 mm2 (converted to m2)
