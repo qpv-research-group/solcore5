@@ -2,8 +2,9 @@
 Calculates the k-points of the Brillouin zone in a given direction
 """
 import numpy as np
+from typing import List, Dict, Tuple
 
-label_map = {
+label_map: Dict[str, str] = {
     "Gamma": "$\Gamma$",
     "X": "X",
     "K": "K",
@@ -12,7 +13,8 @@ label_map = {
     "U": "U",
 }
 
-def brillouin_critical_points(a):
+
+def brillouin_critical_points(a: float) -> Dict[str, np.ndarray]:
     return {
         "Gamma": np.array((0, 0, 0)),
         "X": np.pi / a * np.array((0, 2, 0)),
@@ -23,7 +25,11 @@ def brillouin_critical_points(a):
     }
 
 
-def traverse_brillouin(a, traverse_order=("L", "Gamma", "X", "W", "K", "Gamma"), steps=30):
+def traverse_brillouin(a: float,
+                       traverse_order: tuple = ("L", "Gamma", "X",
+                                                "W", "K", "Gamma"),
+                       steps: int = 30) -> Tuple[np.ndarray, float,
+                                                 List[Tuple[float, str]]]:
 
     critical_points = brillouin_critical_points(a)
     traverse_list = list(traverse_order)
@@ -57,9 +63,11 @@ def traverse_brillouin(a, traverse_order=("L", "Gamma", "X", "W", "K", "Gamma"),
     return np.array(coords), graph_cords / scale, list(zip(xticks / scale, [label_map[s] for s in traverse_order]))
 
 
-def kvector(a, t=0, p=np.pi, fraction=0.2, points=50, vin=None):
+def kvector(a: float, t: float = 0, p: float = np.pi,
+            fraction: float = 0.2, points: int = 50,
+            vin: np.ndarray = None) -> np.ndarray:
     """ Calculates the k points in a direction given by the spheric angles theta (t) and phi (p).
-    
+
     The fraction of the Brilluin zone calculated is given by "fraction" and the number of points by "points".
     If "vin" is given, the direction of interest is taken from this vector."""
 
