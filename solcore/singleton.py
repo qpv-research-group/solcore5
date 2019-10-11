@@ -27,7 +27,7 @@ class Singleton(type):  # META!
             standalone function.
         """
 
-        def __init__(self, cls: 'Singleton', function: str) -> None:
+        def __init__(self, cls: 'Singleton', function: Callable) -> None:
             self.singleton_class = cls  # LABEL COME_BACK_HERE; here instead.;RETURN;
             self.function = function
 
