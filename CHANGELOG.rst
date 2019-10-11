@@ -1,3 +1,8 @@
+**New in Solcore 5.6.0**
+- Add automatic deployment to PyPi
+- Add adding custom materials and access to the refractive index database
+- Add an alternative formulation for the detail balance calculation
+
 **New in Solcore 5.6.0.dev1**
 - Parameters "relative_dielectric_constant" and "dielectric_constant" have been renamed "relative_permittivity" and "permittivity" in the parameter system and solar cell solvers. Changed also in the examples.
 - Light holes density of states are now considered in the Depletion Approximation solver by using the ni calculated in the materials system

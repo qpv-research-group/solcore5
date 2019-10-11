@@ -39,11 +39,11 @@ top_cell_n_material = GaInP(In=0.51,Nd=siUnits(2e18, "cm-3"), hole_diffusion_len
 top_cell_p_material = GaInP(In=0.51,Na=siUnits(1.5e17, "cm-3"), electron_diffusion_length=si("2um"))
 top_cell_TJ_material = Al08Ga02As(Al=0.8)
 
-#for mat in [top_cell_n_material, top_cell_p_material]:
-    #mat.band_gap = material('GaInP')(In=0.51).band_gap
-    #mat.eff_mass_hh_z = material('GaInP')(In=0.51).eff_mass_hh_z
-    #mat.eff_mass_electron = material('GaInP')(In=0.51).eff_mass_electron
-    #mat.permittivity = 11.75
+for mat in [top_cell_n_material, top_cell_p_material]:
+    mat.band_gap = material('GaInP')(In=0.51).band_gap
+    mat.eff_mass_hh_z = material('GaInP')(In=0.51).eff_mass_hh_z
+    mat.eff_mass_electron = material('GaInP')(In=0.51).eff_mass_electron
+    mat.relative_permittivity = 11.75
 
 all_materials.append(ARC1)
 all_materials.append(ARC2)
@@ -59,11 +59,11 @@ mid_cell_p_material = GaAs(Na=siUnits(1.5e17, "cm-3"), electron_diffusion_length
 mid_BSF_material = GaInP(In=0.51)
 mid_cell_TJ_material = Al08Ga02As(Al=0.8)
 
-#for mat in [mid_cell_n_material, mid_cell_p_material]:
-#    mat.band_gap = material('GaAs')(In=0.01).band_gap
-#    mat.eff_mass_hh_z = material('GaAs')(In=0.01).eff_mass_hh_z
-#   mat.eff_mass_electron = material('GaAs')(In=0.01).eff_mass_electron
-#    mat.permittivity = 13.1
+for mat in [mid_cell_n_material, mid_cell_p_material]:
+    mat.band_gap = material('GaAs')(In=0.01).band_gap
+    mat.eff_mass_hh_z = material('GaAs')(In=0.01).eff_mass_hh_z
+    mat.eff_mass_electron = material('GaAs')(In=0.01).eff_mass_electron
+    mat.relative_permittivity = 13.1
 
 all_materials.append(mid_window_material)
 all_materials.append(mid_cell_n_material)
@@ -84,11 +84,11 @@ bot_nucleation_material = GaInP(In=0.51)
 bot_cell_n_material = Ge(Nd=siUnits(2e18, "cm-3"), hole_diffusion_length=si("800nm"))
 bot_cell_p_material = Ge(Na=siUnits(1e17, "cm-3"), electron_diffusion_length=si("50um"))
 
-#for mat in [bot_cell_n_material, bot_cell_p_material]:
-#    mat.band_gap = material('Ge')().band_gap
-#    mat.eff_mass_hh_z = material('Ge')().eff_mass_hh_z
-#   mat.eff_mass_electron = material('Ge')().eff_mass_electron
-#    mat.permittivity = 16
+for mat in [bot_cell_n_material, bot_cell_p_material]:
+    mat.band_gap = material('Ge')().band_gap
+    mat.eff_mass_hh_z = material('Ge')().eff_mass_hh_z
+    mat.eff_mass_electron = material('Ge')().eff_mass_electron
+    mat.relative_permittivity = 16
 
 all_materials.append(bot_buffer_material)
 all_materials.append(bot_nucleation_material)
@@ -144,9 +144,9 @@ options.pol = 'p'
 options.BL_correction = True
 options.coherency_list = 111*['c']
 options.theta = 30
-solar_cell_solver(optical_struct, 'optics', options)
+solar_cell_solver(optical_struct, 'qe', options)
 
-plt.figure(3)
+plt.figure()
 plt.plot(wl*1e9, optical_struct[0].layer_absorption+optical_struct[1].layer_absorption)
 plt.plot(wl*1e9, optical_struct[2].layer_absorption)
 plt.plot(wl*1e9, optical_struct[3].layer_absorption)
@@ -156,6 +156,18 @@ plt.plot(wl*1e9, optical_struct.transmitted, '--')
 plt.plot(wl*1e9, optical_struct.reflected, '--')
 plt.legend(['ARC', 'top', 'middle', 'bottom', 'A', 'T', 'R'])
 plt.ylim(0,1)
+plt.ylabel('Absorption/Transmission/Reflection')
+plt.xlabel('Wavelength (nm)')
+plt.show()
+
+plt.figure()
+plt.plot(wl*1e9, 100*optical_struct[2].eqe(wl))
+plt.plot(wl*1e9, 100*optical_struct[3].eqe(wl))
+plt.plot(wl*1e9, 100*optical_struct[100].eqe(wl))
+plt.plot(wl*1e9, 100*optical_struct.absorbed, '--')
+plt.legend(['top', 'middle', 'bottom', 'A'])
+plt.ylim(0,100)
+plt.ylabel('EQE (%)')
 plt.xlabel('Wavelength (nm)')
 plt.show()
 

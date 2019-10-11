@@ -1,5 +1,5 @@
 [Configuration]
-version: 5.6.0.dev0
+version: 5.6.0
 welcome_message: 1
 verbose_loading: 1
 

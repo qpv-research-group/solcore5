@@ -54,7 +54,6 @@ light_source = LightSource(
 )
 
 
-# @mark.skip("PDD not working in Travis. Problem finding the compiled fortran library")
 def test_light_iv():
     answer = [
         142.68025180227374,
@@ -104,7 +103,6 @@ def test_light_iv():
         assert output[i] == approx(answer[i], rel=1e-2)
 
 
-# @mark.skip("PDD not working in Travis. Problem finding the compiled fortran library")
 def test_quantum_efficiency():
     answer = [
         0.9866334968497021,

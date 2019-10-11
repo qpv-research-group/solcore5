@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+# TODO Add detailed instrucctions on how to setup the environment to run this example
+#  as it is now, it fails and is unclear how to make it work.
 # first we need to tell Solcore some things about where to put custom materials. for this,
 # we use the add_source function from config_tools, although we could also manually edit
 # the solcore configuration file (which should be in your home directory).

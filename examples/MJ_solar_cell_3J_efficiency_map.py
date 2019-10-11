@@ -7,6 +7,8 @@ from solcore.solar_cell import SolarCell
 from solcore.solar_cell_solver import solar_cell_solver
 from solcore.structure import Junction
 
+# TODO this example is way to long and complex --> Downscale
+
 # Illumination spectrum
 wl = np.linspace(300, 4000, 4000) * 1e-9
 light = LightSource(source_type='standard', version='AM1.5g', x=wl, output_units='photon_flux_per_m')

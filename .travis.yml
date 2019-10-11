@@ -1,20 +1,28 @@
 language: python
 python:
-  - "3.6"
+- '3.7'
 matrix:
   include:
-    - python: 3.7
-      dist: xenial
-      sudo: true
+  - python: 3.7
+    dist: bionic
+    sudo: true
 before_install:
-  - sudo apt-get install -y gfortran
+- sudo apt install -y gfortran
 install:
-  - pip install -r requirements.txt
-  - pip install pytest
-  - pip install pytest-cov
-  - pip install coveralls
-  - pip install --no-deps --install-option="--with_pdd" -e .
+- pip install -U setuptools wheel pip
+- pip install -r requirements.txt
+- pip install pytest pytest-cov pytest-mock coveralls
+- pip install --no-deps --install-option="--with_pdd" -e .
 script:
-  - pytest --cov=solcore/
+- pytest --cov=solcore/
 after_success:
-  - coveralls
+- coveralls
+deploy:
+  provider: pypi
+  user: __token__
+  password:
+    secure: UBsE3gs2Ti97hHlm9szH+MAsRpB7noFCjyJPhmr90XVGsOd+q8S0a0gWdeZS5pd0naKe3PcurV/qr5B7bAATSACwBg8qXqAN9JbxNf0+sMwjDGU0wbj1SXERY6x2zT0dhmQZI1sWPURm9VVBujktbOj+oktIMF3PV0U9JgQnminrJVEFFYg2IP/KuZh9EZpGWHgr/KUGYfuqYutJLvIiOQUxeNrj0pllb45j8lDXrgvG0o1MJnaQgSvEe7f+W5gypr0u0BpMzTd8dusTZFdls5Tbd4IqSoLn59mQG0l1c3ZFaDwxFNQOEMZllpUOWf8mt2Qlj253KudxfIGICqxo84qTGxf6uzLIwUub6Iev+IH1TkEBMndTdVV/tkr/CI98nqE9Ln5HOvfwVwMDVx6+ugySdWVqMyfYrcDQAKF2IRjwoQJQGqE3QgstABjagZVeZwc9b2s2eTHmUeI33Zz0DfLSpUsfxbwtelAx2nKKSfCGmNgPLBazTu8c0jMvnAAgUy0WEaQFrk6vF0aqUvpIF4Dwrko/w2pK6cgBgYK3XIjagp41e84jlSoyzXqdeTDvxsIscWVSNl8A3dU//ucR98FUmthaKerQ/4foonshxo/0mlVjG1KXWCxwQA2El7dQne+5pnzPciDzTuE2j9MhmErldXSw2rO5hS/up50b8So=
+  skip_existing: true
+  on:
+    tags: true
+    branch: master
