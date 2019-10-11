@@ -1,6 +1,7 @@
 # from scipy import interpolate as I
 import numpy as np
 from scipy.interpolate import make_interp_spline, splev
+from typing import Union
 
 
 class interp1d(object):
@@ -260,8 +261,8 @@ class interp1d(object):
 class BilinearInterpolation(object):
     """docstring for BilinearInterpolation"""
 
-    def __init__(self, x: list = None, y: list = None,
-                 z: list = None, fill_value: float = 0.):
+    def __init__(self, x: Union[list, np.ndarray], y: Union[list, np.ndarray],
+                 z: Union[list, np.ndarray], fill_value: float = 0.):
         super(BilinearInterpolation, self).__init__()
         self.x = np.array(x)
         self.y = np.array(y)
