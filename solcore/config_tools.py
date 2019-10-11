@@ -198,7 +198,7 @@ def welcome_message(show: bool) -> None:
     user_config_data['Configuration']['welcome_message'] = int(show)
 
 
-def verbose_loading(show: bool) -> str:
+def verbose_loading(show: bool) -> None:
     """ Sets if the loading messages (besides the welcome message) must be shown or not
 
     :param show: True/False for showing/hiding the loading messages
