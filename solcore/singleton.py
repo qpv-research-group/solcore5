@@ -1,5 +1,5 @@
 from solcore import verbose
-from typing import Any, Dict
+from typing import Any, Dict, Callable
 
 
 class Singleton(type):  # META!
