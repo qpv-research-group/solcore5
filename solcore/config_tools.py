@@ -7,8 +7,8 @@ import shutil
 import solcore
 import glob
 
-home_folder = os.path.expanduser('~')
-user_config = os.path.join(home_folder, '.solcore_config.txt')
+home_folder: str = os.path.expanduser('~')
+user_config: str = os.path.join(home_folder, '.solcore_config.txt')
 user_config_data = ConfigParser()
 user_config_data.read(user_config)
 
@@ -16,7 +16,7 @@ default_config_data = ConfigParser()
 default_config_data.read(solcore.default_config)
 
 
-def reset_defaults(confirm=False):
+def reset_defaults(confirm: bool = False) -> None:
     """ Resets the default Solcore configuration in the user home folder.
 
     :return: None
@@ -39,7 +39,7 @@ def reset_defaults(confirm=False):
         print('Default Solcore configuration has been restored!')
 
 
-def save_user_config():
+def save_user_config() -> None:
     """ Saves the current user configuration
 
     :return: None
@@ -48,7 +48,7 @@ def save_user_config():
         user_config_data.write(fp)
 
 
-def remove_source(section, name):
+def remove_source(section: str, name: str) -> None:
     """ General function to remove sources from the configuration files. It checks if the source exists and, if so, if
     it is a default Solcore source. In the later case, it disable the source by setting it to an empty string rather
     than removing it.
@@ -72,7 +72,7 @@ def remove_source(section, name):
     print('{}:{} source removed!'.format(section, name))
 
 
-def add_source(section, name, location):
+def add_source(section: str, name: str, location: str) -> None:
     """ General function to add sources to the configuration files. If the source already exists, its value will be
     replaced by the new one.
 
@@ -86,7 +86,7 @@ def add_source(section, name, location):
     print('{}:{} source added!'.format(section, name))
 
 
-def restore_default_source(section, name):
+def restore_default_source(section: str, name: str) -> None:
     """ Restores the default value of a source, assuming the source has a default value.
 
     :param section: The section of the source.
@@ -104,7 +104,7 @@ def restore_default_source(section, name):
     print('Default Solcore value for {} source {} has been restored!'.format(section, name))
 
 
-def add_units_source(name, location):
+def add_units_source(name: str, location: str) -> None:
     """ Adds a Units source to Solcore.
 
     :param name: The name of the source.
@@ -114,7 +114,7 @@ def add_units_source(name, location):
     add_source('Units', name, location=location)
 
 
-def add_parameters_source(name, location):
+def add_parameters_source(name: str, location: str) -> None:
     """ Adds a Parameters source to Solcore.
 
     :param name: The name of the source.
@@ -124,7 +124,7 @@ def add_parameters_source(name, location):
     add_source('Parameters', name, location=location)
 
 
-def add_materials_source(name, location):
+def add_materials_source(name: str, location: str) -> None:
     """ Adds a Materials source to Solcore.
 
     :param name: The name of the source.
@@ -135,7 +135,7 @@ def add_materials_source(name, location):
     add_source('Materials', name, location=location)
 
 
-def remove_units_source(name):
+def remove_units_source(name: str) -> None:
     """ Removes a Units source from Solcore.
 
     :param name: The name of the source.
@@ -144,7 +144,7 @@ def remove_units_source(name):
     remove_source('Units', name)
 
 
-def remove_parameters_source(name):
+def remove_parameters_source(name: str) -> None:
     """ Removes a Parameters source from Solcore.
 
     :param name: The name of the source.
@@ -153,7 +153,7 @@ def remove_parameters_source(name):
     remove_source('Parameters', name)
 
 
-def remove_materials_source(name):
+def remove_materials_source(name: str) -> None:
     """ Removes a Materials source from Solcore.
 
     :param name: The name of the source.
@@ -162,7 +162,7 @@ def remove_materials_source(name):
     remove_source('Materials', name)
 
 
-def restore_default_units_source(name):
+def restore_default_units_source(name: str) -> None:
     """ Restores the default value of a Units source from Solcore.
 
     :param name: The name of the source.
@@ -171,7 +171,7 @@ def restore_default_units_source(name):
     restore_default_source('Units', name)
 
 
-def restore_default_parameters_source(name):
+def restore_default_parameters_source(name: str) -> None:
     """ Restores the default value of a Parameters source from Solcore.
 
     :param name: The name of the source.
@@ -180,7 +180,7 @@ def restore_default_parameters_source(name):
     restore_default_source('Parameters', name)
 
 
-def restore_default_materials_source(name):
+def restore_default_materials_source(name: str) -> None:
     """ Restores the default value of a Materials source from Solcore.
 
     :param name: The name of the source.
@@ -189,7 +189,7 @@ def restore_default_materials_source(name):
     restore_default_source('Materials', name)
 
 
-def welcome_message(show):
+def welcome_message(show: bool) -> None:
     """ Sets if the welcome message must be shown or not
 
     :param show: True/False for showing/hiding the welcome message
@@ -198,7 +198,7 @@ def welcome_message(show):
     user_config_data['Configuration']['welcome_message'] = int(show)
 
 
-def verbose_loading(show):
+def verbose_loading(show: bool) -> None:
     """ Sets if the loading messages (besides the welcome message) must be shown or not
 
     :param show: True/False for showing/hiding the loading messages
@@ -207,7 +207,7 @@ def verbose_loading(show):
     user_config_data['Configuration']['verbose_loading'] = int(show)
 
 
-def set_location_of_spice(location):
+def set_location_of_spice(location: str) -> None:
     """ Sets the location of the spice executable. It does not test if it works.
 
     :param location: The location of the spice executable.
@@ -217,7 +217,7 @@ def set_location_of_spice(location):
     save_user_config()
 
 
-def set_location_of_smarts(location):
+def set_location_of_smarts(location: str) -> None:
     """ Sets the location of the SMARTS distribution (the root folder). It does not test if it works.
 
     :param location: The location of the SMARTS distribution.
@@ -227,7 +227,7 @@ def set_location_of_smarts(location):
     save_user_config()
 
 
-def get_current_config():
+def get_current_config() -> None:
     """ Prints the current Solcore configuration
 
     :return: None
@@ -241,7 +241,7 @@ def get_current_config():
         print()
 
 
-def check_user_config():
+def check_user_config() -> None:
     """ Checks if there's a user configuration file, asking if it needs to be created.
 
     :return: None
