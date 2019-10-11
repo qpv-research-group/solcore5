@@ -7,3 +7,4 @@ natsort
 regex
 cycler
 pyyaml
+pre-commit
