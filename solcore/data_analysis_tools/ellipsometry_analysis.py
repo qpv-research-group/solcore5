@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import codecs
+from solcore.absorption_calculator import OptiStack
 from solcore.absorption_calculator import calculate_ellipsometry
 from scipy.optimize import minimize
-from typing import List, Dict, Collection
+from typing import Optional, List, Dict, Collection
 
 
 class EllipsometryData:
@@ -130,14 +131,15 @@ class EllipsometryData:
 class EllipsometryFitter:
     """ Class that contains all the tools to fit the properties of a OptiStack model to ellipsometry data."""
 
-    def __init__(self, data, stack=None, vars=None, wavelength_range=None) -> None:
+    def __init__(self, data: EllipsometryData, stack: Optional[OptiStack] = None,
+                 vars: Optional[Collection] = None, wavelength_range: Optional[np.ndarray] = None) -> None:
 
-        self.data: EllipsometryData = data
-        self.stack: OptiStack = stack
-        self.vars: Collection = vars
-        self.range: np.array = wavelength_range
+        self.data = data
+        self.stack = stack
+        self.vars = vars
+        self.range = wavelength_range
 
-    def set_variables(self, vars: Collection):
+    def set_variables(self, vars: Collection) -> None:
         """ Sets the variables that will be used during the fitting. The input variable "vars" is a list with as many
         elements as layers in the model. Each of these elemenets is, in turn, a list with the names of the free
         variables of that layer. If the layers are defined by a dielectric model - rather than experimental n and k data
@@ -234,7 +236,7 @@ class EllipsometryFitter:
 
         self.range = wavelength_range
 
-    def mse(self, v: List[float] = None) -> np.array:
+    def mse(self, v: List[float] = None) -> np.ndarray:
         """ Calculates the mean-squared error between the experimental data and the modelled one. If the vars input
         is given, the variables are first updated and then the MSE is calculated.
 
@@ -390,7 +392,7 @@ class EllipsometryFitter:
 if __name__ == '__main__':
     from solcore.absorption_calculator.dielectric_constant_models import Poles, Lorentz, Drude, Gauss, Cauchy
     from solcore.absorption_calculator import DielectricConstantModel
-    from solcore.absorption_calculator import OptiStack
+
     import matplotlib.pyplot as plt
 
     # Experimental data
