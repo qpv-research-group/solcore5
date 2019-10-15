@@ -8,7 +8,7 @@
 
 import os
 import re
-from cycler import cycler
+from cycler import cycler, Cycler
 from typing import List, Tuple, Dict, Union
 
 # define the file path to the Colours.csv file, which sits within the Graphing Package
