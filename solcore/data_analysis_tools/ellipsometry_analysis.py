@@ -1,30 +1,32 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import codecs
+from solcore.absorption_calculator import OptiStack
 from solcore.absorption_calculator import calculate_ellipsometry
 from scipy.optimize import minimize
+from typing import Optional, List, Dict, Collection
 
 
 class EllipsometryData:
     """ This class is used to open and arrange in a sensible way ellipsometry datafiles created with the WVASE
     software."""
 
-    def __init__(self, path):
+    def __init__(self, path: str) -> None:
         """ Creates an ellipsometry data object and loads data into it the ellipsometry data from a file.
 
         :param path: Path to the file
         """
 
-        self.comment = ''
-        self.meas_setup = ''
-        self.units = ''
-        self.angles = []
+        self.comment: str = ''
+        self.meas_setup: str = ''
+        self.units: str = ''
+        self.angles: List[float] = []
 
-        self.data = {}
-        self.dpol = {}
+        self.data: Dict = {}
+        self.dpol: Dict = {}
         self._load_data(path)
 
-    def _load_data(self, path):
+    def _load_data(self, path: str) -> None:
         """ This is the function that actually loads the data
 
         :param path: Path to the file
@@ -80,7 +82,7 @@ class EllipsometryData:
 
         self.units = 'um'
 
-    def append_data(self, path):
+    def append_data(self, path: str) -> None:
         """ Ellipsometry data from more than one source can be combined in a single object. This function does that.
 
         :param path: Path to the file with data we want to add to the current object.
@@ -103,7 +105,7 @@ class EllipsometryData:
                 except:
                     pass
 
-    def plot(self, log=True):
+    def plot(self, log: bool = True):
         """ Plots the ellipsometry data contained in this object in a sensible way.
 
         :param log: True/False for ploting logarithmic X scale.
@@ -129,14 +131,15 @@ class EllipsometryData:
 class EllipsometryFitter:
     """ Class that contains all the tools to fit the properties of a OptiStack model to ellipsometry data."""
 
-    def __init__(self, data, stack=None, vars=None, wavelength_range=None):
+    def __init__(self, data: EllipsometryData, stack: Optional[OptiStack] = None,
+                 vars: Optional[Collection] = None, wavelength_range: Optional[np.ndarray] = None) -> None:
 
         self.data = data
         self.stack = stack
         self.vars = vars
         self.range = wavelength_range
 
-    def set_variables(self, vars):
+    def set_variables(self, vars: Collection) -> None:
         """ Sets the variables that will be used during the fitting. The input variable "vars" is a list with as many
         elements as layers in the model. Each of these elemenets is, in turn, a list with the names of the free
         variables of that layer. If the layers are defined by a dielectric model - rather than experimental n and k data
@@ -164,7 +167,7 @@ class EllipsometryFitter:
                                                     'of layers in the stack = {}'.format(self.stack.num_layers)
         self.vars = vars
 
-    def update_variables(self, v):
+    def update_variables(self, v: List[float]) -> None:
         """ Updates the stack with the values of the variables contained in v. The meaning of each of the elements in v
         is given by the definitions in self.vars.
 
@@ -195,7 +198,7 @@ class EllipsometryFitter:
                             k += 1
                         model += 1
 
-    def get_variables(self):
+    def get_variables(self) -> List[float]:
         """ Provides a list with the current values of the free variables.
 
         :return: The values of the free variables, in the order they appear in self.vars.
@@ -223,7 +226,7 @@ class EllipsometryFitter:
 
         return out
 
-    def set_range(self, wavelength_range):
+    def set_range(self, wavelength_range: List[float]) -> None:
         """ Set the wavelengths in which to make the ellipsometry calculations. Ideally, it should be dense enought to
         capture all the features of the dielectric functions but sparse enought so the calculations are fast.
 
@@ -233,7 +236,7 @@ class EllipsometryFitter:
 
         self.range = wavelength_range
 
-    def mse(self, v=None):
+    def mse(self, v: List[float] = None) -> np.ndarray:
         """ Calculates the mean-squared error between the experimental data and the modelled one. If the vars input
         is given, the variables are first updated and then the MSE is calculated.
 
@@ -273,7 +276,7 @@ class EllipsometryFitter:
 
         return np.array(out)
 
-    def fit(self, show=True):
+    def fit(self, show: bool = True) -> None:
         """ Calculate the best fit of the model to the data by minimising the mean-squared error using as free varaibles
          those defined in self.vars. The hessian matrix is used to calculate the 90% confident limits and the
          correlation matrix.
@@ -294,7 +297,7 @@ class EllipsometryFitter:
         if show:
             print(self.fit_information)
 
-    def calculate_uncertainties(self):
+    def calculate_uncertainties(self) -> None:
         """ Calculates the uncertainties in the calculated optimum parameters. For that, it uses the inverse of the
          hessian (or curvature matrix) C provided by the fitting algorithm. Two quantities are defined:
 
@@ -323,7 +326,7 @@ class EllipsometryFitter:
             for j in range(len(C[0])):
                 self.correlations[i, j] = C[i, j] / (np.sqrt(C[i, i]) * np.sqrt(C[j, j]))
 
-    def plot(self, log=True):
+    def plot(self, log: bool = True) -> None:
         """ Plots the expeirmental and the modelled data.
 
         :param log: If the X scale should be log.
@@ -374,7 +377,7 @@ class EllipsometryFitter:
         ax[1].set_ylabel(r'$\Delta$ (º)')
         plt.show()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
 
         out = ''
         for i, layer in enumerate(self.stack.models):
@@ -389,7 +392,7 @@ class EllipsometryFitter:
 if __name__ == '__main__':
     from solcore.absorption_calculator.dielectric_constant_models import Poles, Lorentz, Drude, Gauss, Cauchy
     from solcore.absorption_calculator import DielectricConstantModel
-    from solcore.absorption_calculator import OptiStack
+
     import matplotlib.pyplot as plt
 
     # Experimental data

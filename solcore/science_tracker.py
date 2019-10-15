@@ -1,23 +1,23 @@
 import inspect
 
-bibliography = []
-bibliography_id = []
-science_tracking = []
-track_science_references = False
-track_each_reference_call = False
+bibliography: list = []
+bibliography_id: list = []
+science_tracking: list = []
+track_science_references: bool = False
+track_each_reference_call: bool = False
 
 
-def hexID(obj):
+def hexID(obj: str) -> str:
     return "{}".format(id(obj))
 
 
-def science_reference(short_purpose, reference):
+def science_reference(short_purpose: str, reference: str) -> None:
     """Marker acting as a reference for the origin of specific information
-    
+
     Acts as a marker in code where particular alogrithms/data/... originates. General execution of code silently passes
     these markers, but remembers how and where they were called. Which markers were passed in a particular program run
     can be recalled with print_references().
-    
+
     Arguments:
     short_purpose: Identify the thing being referenced (string)
     reference: The reference itself, in any sensible format.
@@ -49,7 +49,7 @@ def science_reference(short_purpose, reference):
         science_tracking.append((call_record, short_purpose, bibliography_id.index(identifier) + 1))
 
 
-def print_references():
+def print_references() -> None:
     """ recall the science_reference markers passed, print out the referenes."""
     global bibliography, bibliography_id, science_tracking, track_each_reference_call
 
@@ -64,7 +64,7 @@ def print_references():
         print("[{}] - {}".format(i + 1, b))
 
 
-def track_science(track_each_call=False):
+def track_science(track_each_call: bool = False):
     """configure science references -- determine whether or not each call separately or only the first for each
     reference."""
     global track_science_references, track_each_reference_call
@@ -73,11 +73,11 @@ def track_science(track_each_call=False):
 
 
 if __name__ == "__main__":
-    def myRandomFunctionA():
+    def myRandomFunctionA() -> None:
         myRandomFunctionB(d=1)
 
 
-    def myRandomFunctionB(d):
+    def myRandomFunctionB(d) -> None:
         a = 1
 
         science_reference("doing something smart", "My Awesome Book, by me.")
