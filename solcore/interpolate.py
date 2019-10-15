@@ -1,6 +1,7 @@
 # from scipy import interpolate as I
 import numpy as np
 from scipy.interpolate import make_interp_spline, splev
+from typing import Union
 
 
 class interp1d(object):
@@ -12,8 +13,9 @@ class interp1d(object):
     UnivariateSpline - a more recent wrapper of the FITPACK routines
     """
 
-    def __init__(self, x, y, kind='linear', axis=-1,
-                 copy=True, bounds_error=False, fill_value=np.nan):
+    def __init__(self, x: np.ndarray, y: np.ndarray, kind: str = 'linear',
+                 axis: int = -1, copy: bool = True, bounds_error: bool = False,
+                 fill_value: float = np.nan):
         """ Initialize a 1D linear interpolation class.
 
         Description
@@ -118,7 +120,7 @@ class interp1d(object):
         self.x = x
         self.y = oriented_y
 
-    def _call_linear(self, x_new):
+    def _call_linear(self, x_new: np.ndarray) -> np.ndarray:
 
         # 2. Find where in the orignal data, the values to interpolate
         #    would be inserted.
@@ -148,7 +150,7 @@ class interp1d(object):
 
         return y_new
 
-    def _call_nearest(self, x_new):
+    def _call_nearest(self, x_new: np.ndarray) -> np.ndarray:
         """ Find nearest neighbour interpolated y_new = f(x_new)."""
 
         # 2. Find where in the averaged data the values to interpolate
@@ -165,12 +167,12 @@ class interp1d(object):
 
         return y_new
 
-    def _call_spline(self, x_new):
+    def _call_spline(self, x_new: np.ndarray) -> np.ndarray:
         x_new = np.asarray(x_new)
         result = splev(x_new.ravel(), self._spline)
         return result.reshape(x_new.shape + result.shape[1:])
 
-    def __call__(self, x_new):
+    def __call__(self, x_new: np.ndarray) -> np.ndarray:
         """Find interpolated y_new = f(x_new).
 
         Parameters
@@ -223,7 +225,7 @@ class interp1d(object):
             axes[self.axis:self.axis] = list(range(nx))
             return y_new.transpose(axes)
 
-    def _check_bounds(self, x_new):
+    def _check_bounds(self, x_new: np.ndarray) -> np.ndarray:
         """Check the inputs for being in the bounds of the interpolated data.
 
         Parameters
@@ -259,7 +261,8 @@ class interp1d(object):
 class BilinearInterpolation(object):
     """docstring for BilinearInterpolation"""
 
-    def __init__(self, x=None, y=None, z=None, fill_value=0.):
+    def __init__(self, x: Union[list, np.ndarray], y: Union[list, np.ndarray],
+                 z: Union[list, np.ndarray], fill_value: float = 0.):
         super(BilinearInterpolation, self).__init__()
         self.x = np.array(x)
         self.y = np.array(y)
@@ -278,7 +281,7 @@ class BilinearInterpolation(object):
             1], "The number of columns in z (which is %s), must be the same as number of elements in y (which is %s)" % (
         y_s[0], z_s[1])
 
-    def __call__(self, xvalue, yvalue):
+    def __call__(self, xvalue: float, yvalue: float) -> np.ndarray:
         """The intepolated value of the surface."""
         try:
             x_i = 0
@@ -362,7 +365,7 @@ if __name__ == "__main__":
     y = np.array([0., np.pi / 4, np.pi / 2])
 
     # Some reflectivity values
-    #             rads @ 400nm,    rads @ 600nm,        rads @ 601m,             rads @ 1000nm     
+    #             rads @ 400nm,    rads @ 600nm,        rads @ 601m,             rads @ 1000nm
     z = np.array([[0., 0., 0.], [1e-9, 1e-9, 1e-9], [1 - 1e-9, 1 - 1e-9, 1 - 1e-9], [1., 1., 1.]])
     # print z.shape
 
