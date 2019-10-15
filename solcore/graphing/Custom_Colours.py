@@ -69,7 +69,7 @@ def colours(colour: str, type: str = 'hex') -> Union[str, Tuple[float, ...]]:
         raise ValueError("Invalid 'type' selection... Choose either 'hex' or 'rgb'.")
 
 
-def colour_cycle(name: str) -> cycler:
+def colour_cycle(name: str) -> Cycler:
     """colour_cycle(name, type) :: Function returns a cycler instance of a list of colours (in HEX) that can be used
         when plotting multi-plots.
 
