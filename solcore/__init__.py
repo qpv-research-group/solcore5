@@ -15,7 +15,7 @@ verbose = bool(int(config.get('Configuration', 'verbose_loading')))
 
 if welcome_message:
     print("""\n\tWelcome to Solcore - version {}
-\tCopyright (c) 2018, Imperial College London. All rights reserved.
+\tCopyright (c) 2019, Imperial College London. All rights reserved.
 \tSoftware released under the GNU Lesser General Public License.\n""".format(version))
 
 # Now we load the Units system, making available in the solcore scope some functions internal to the system
