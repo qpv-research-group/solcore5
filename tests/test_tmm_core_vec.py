@@ -1092,6 +1092,22 @@ def test_inc_tmm_s_R():
 
     assert result['R'] == approx(np.array([0.06513963, 0.09735299]))
 
+def test_inc_tmm_s_R_incfirst():
+    # testing the case where the coherent stack DOES NOT start right after the semi-infinite layer
+    n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
+                       [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
+    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+
+    th_0 = [0.3]
+
+    lam_vac = np.array([400, 1770])
+
+    c_list = ['i', 'i', 'c', 'i', 'i']
+
+    result = inc_tmm('s', n_list, d_list, c_list, th_0, lam_vac)
+
+    assert result['R'] == approx(np.array([0.08254069, 0.07335674]))
+
 
 def test_inc_tmm_s_T():
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 1 * 1j, 5, 4 + 1 * 1j],
