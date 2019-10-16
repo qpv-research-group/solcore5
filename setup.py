@@ -63,6 +63,20 @@ if "update_manifest" in sys.argv:
 with open(os.path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
+
+install_requires = [
+    "matplotlib",
+    "scipy",
+    "tmm",
+    "natsort",
+    "regex",
+    "cycler",
+    "pyyaml",
+]
+tests_require = ["pytest", "pytest-cov", "pytest-mock"]
+extras_require = {"dev": tests_require + ["Sphinx", "pre-commit"]}
+
+
 setup(
     name="solcore",
     version=config.get("Configuration", "version"),
@@ -79,7 +93,7 @@ setup(
     author="The Quantum Photovoltaics Group",
     author_email="d.alonso-alvarez@imperial.ac.uk",
     license="GNU LGPL",
-    python_requires=">=3.4",
+    python_requires=">=3.7",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
@@ -97,29 +111,9 @@ setup(
     packages=find_packages(exclude=[]),
     package_data={"": ["*.*"]},
     data_files=gen_data_files("solcore"),
-    install_requires=[
-        "numpy",
-        "matplotlib",
-        "scipy",
-        "Sphinx",
-        "tmm",
-        "natsort",
-        "regex",
-        "cycler",
-        "pyyaml"
-    ],
     include_package_data=True,
-    test_suite="pytest-runner",
-    tests_require=[
-        "pytest",
-        "numpy",
-        "matplotlib",
-        "scipy",
-        "tmm",
-        "natsort",
-        "regex",
-        "cycler",
-        "pyyaml",
-        "pytest-mock"
-    ],
+    setup_requires="pytest-runner",
+    install_requires=install_requires,
+    tests_require=tests_require,
+    extras_require=extras_require,
 )
