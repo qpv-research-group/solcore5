@@ -3,14 +3,15 @@ from copy import copy
 
 from matplotlib import font_manager
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_pdf import FigureCanvasPdf
 from matplotlib.colors import Normalize  # ColorConverter
 import matplotlib.cm as cmx
+from typing import List, Tuple, Dict, Union, Any
+from .graph_support import flatten, open_with_os
 
-from solcore.graphing.graph_support import flatten, open_with_os
-
-graph_defaults = {
+graph_defaults: Dict[str, Any] = {
     "format": "pdf",
     "linetype": "-",
     "dpi": 100,
@@ -22,45 +23,45 @@ graph_defaults = {
     "grid": {"dash_capstyle": "round", "zorder": 1, "alpha": 0.5}
 }
 
-mpl_simple_properties = (
+mpl_simple_properties: Tuple[str, ...] = (
 "title", "xlabel", "ylabel", "zlabel", "xlim", "ylim", "zlim3d", "xticks", "xticklabels", "yticks", "yticklabels",
 "yscale", "xscale",)
-directions = ("left", "right", "top", "bottom")
+directions: Tuple[str, ...] = ("left", "right", "top", "bottom")
 
 
-def make_square(fig, ax):
-    bb = ax.get_position()
-    fwidth = fig.get_figwidth()
-    fheight = fig.get_figheight()
-    axwidth = fwidth * (bb.x1 - bb.x0)
-    axheight = fheight * (bb.y1 - bb.y0)
+def make_square(fig: Figure, ax: Axes) -> None:
+    bb: Any = ax.get_position()
+    fwidth: float = fig.get_figwidth()
+    fheight: float = fig.get_figheight()
+    axwidth: float = fwidth * (bb.x1 - bb.x0)
+    axheight: float = fheight * (bb.y1 - bb.y0)
 
     # square_edge = min((axwidth, axheight))
     if axwidth > axheight:
-        narrow_by = (axwidth - axheight) / fwidth
+        narrow_by: float = (axwidth - axheight) / fwidth
         bb.x0 += narrow_by / 2
         bb.x1 -= narrow_by / 2
     elif axheight > axwidth:
-        shrink_by = (axheight - axwidth) / fheight
+        shrink_by: float = (axheight - axwidth) / fheight
         bb.y0 += shrink_by / 2
         bb.y1 -= shrink_by / 2
     ax.set_position(bb)
 
 
 class Graph:
-    suppress_show = False
+    suppress_show: bool = False
     plotted = 0
 
-    def __init__(self, *data, **options):
-        self.axis = None
+    def __init__(self, *data: Any, **options: Any) -> None:
+        self.axis: Any = None
         self.options = copy(graph_defaults)
         self.options.update(options)
         self.data = list(flatten(data))
-        self.extra_artists = []
-        self.subplots = []
+        self.extra_artists: List = []
+        self.subplots: List = []
         self.create_figure()
 
-    def main_drawing_flow(self, figure):
+    def main_drawing_flow(self, figure: Figure) -> None:
         # print ("mdf")
         for subplot in self.subplots:
             subplot.main_drawing_flow(figure)
@@ -82,7 +83,7 @@ class Graph:
         if "square" in self.options and self.options["square"]:
             make_square(self.figure, self.axis)
 
-    def add_subplot(self, *data, **options):
+    def add_subplot(self, *data: Any, **options: Any) -> None:
         self.subplots.append(Graph(*data, figure=self.figure, **options))
 
     def create_figure(self):
@@ -94,7 +95,7 @@ class Graph:
             self.figure = Figure()
         self.figure.subplots_adjust(**{k: self.options[k] for k in self.options.keys() if k in directions})
 
-    def create_axis(self, figure):
+    def create_axis(self, figure: Figure) -> None:
         if "axis" in self.options:
             self.axis = self.options["axis"]
         elif self.axis is not None:
@@ -107,7 +108,7 @@ class Graph:
                 **subplot_args
             )
 
-    def setup_matplotlib(self):
+    def setup_matplotlib(self) -> None:
         simple_setters = {k: self.options[k] for k in mpl_simple_properties if k in self.options}
         for key, value in simple_setters.items():
             getattr(self.axis, "set_{}".format(key))(value)
@@ -136,7 +137,7 @@ class Graph:
             for tl in self.axis.get_xticklabels():
                 tl.set_color(self.options["xticklabelcolor"])
 
-    def render_data(self):
+    def render_data(self) -> None:
 
         all_color_indexes = [d.color_index if (
             hasattr(d, "color_index")
@@ -152,7 +153,7 @@ class Graph:
         cNorm = Normalize(vmin=0, vmax=unique_color_indexes)
         scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=self.options["colormap"])
 
-        self.legend_additions = []
+        self.legend_additions: List = []
 
         for i, datum in enumerate(self.data):
             if "color" not in datum.line_format and "edgecolor" not in datum.line_format and "facecolor" not in datum.line_format:
@@ -170,7 +171,7 @@ class Graph:
                 self.legend_additions.append((i, legend_entry[0], legend_entry[1])
                                              )
 
-    def draw_legend(self):
+    def draw_legend(self) -> None:
         font_args = {}
 
         if "legend_font_size" in self.options:
@@ -216,7 +217,7 @@ class Graph:
 
         self.legend = self.axis.legend(*legend_args, **legend_kwargs)
 
-    def draw(self, path=None, show=True):
+    def draw(self, path: str = None, show: bool = True) -> None:
         self.main_drawing_flow(self.figure)
 
         if path is None:
@@ -233,19 +234,19 @@ class Graph:
         if show and not self.suppress_show:
             open_with_os(path)
 
-    def show(self):
+    def show(self) -> None:
         import pylab
         self.main_drawing_flow(pylab.gcf())
         pylab.show()
 
 
 class TwinnedAxisGraph(Graph):
-    def __init__(self, *args, twin="x", **kwargs):
+    def __init__(self, *args: Any, twin:str = "x", **kwargs: Any) -> None:
         self.twin = twin
-        self.line_format = {}
+        self.line_format: Any = {}
         Graph.__init__(self, *args, **kwargs)
 
-    def draw(self, axis):
+    def draw(self, axis: Axes) -> None:
         # print ("Td")
         if self.twin == "x":
             self.axis = axis.twinx()
