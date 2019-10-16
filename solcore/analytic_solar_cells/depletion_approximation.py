@@ -531,6 +531,9 @@ def qe_depletion(junction, options):
             wn = (-xi + np.sqrt(xi ** 2 + 2. * es * Vbi / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
             wp = (-xi + np.sqrt(xi ** 2 + 2. * es * Vbi / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
 
+            #print('w params', xi, es, Vbi, Na, Nd)
+
+
     wn = wn if not hasattr(junction, "wn") else junction.wn
     wp = wp if not hasattr(junction, "wp") else junction.wp
 
@@ -565,6 +568,7 @@ def qe_depletion(junction, options):
     # The contribution from the Emitter (top side).
     xa = cum_widths[id_top]
     xb = cum_widths[id_top + 1] - w_top
+    #print('xa, xb, wtop', xa, xb, w_top)
     deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
     j_sc_top = d_top * abs(deriv)
 
@@ -642,7 +646,7 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
         guess = y0 * np.ones((2, zz.size))
         guess[1] = np.zeros_like(guess[0])
-
+        #print(zz)
         solution = solve_bvp(fun, bc, zz, guess)
 
         if side == 'top':

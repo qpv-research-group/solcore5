@@ -87,7 +87,7 @@ solar_cell = SolarCell(
     ], reflectivity=ref, shading=0.08, cell_area=0.7 * 0.7 / 1e4)
 
 wl = np.linspace(300, 1800, 700) * 1e-9
-solar_cell_solver(solar_cell, 'qe', user_options={'wavelength': wl})
+solar_cell_solver(solar_cell, 'qe', user_options={'wavelength': wl, 'optics_method': 'TMM'})
 
 plt.figure(1)
 plt.plot(wl * 1e9, solar_cell[0].eqe(wl) * 100, 'b', label='GaInP')

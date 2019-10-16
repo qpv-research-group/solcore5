@@ -250,7 +250,7 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # complex!
     th_list = list_snell(n_list, th_0)
 
-    # kz is the z-component of (complex) angular wavevector for forward-moving
+    # kz is the z-component of (complex) angular waveve ctor for forward-moving
     # wave. Positive imaginary part means decaying.
     kz_list = 2 * np.pi * n_list * cos(th_list) / lam_vac
 
@@ -1030,7 +1030,7 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     inc_data is output of inc_tmm()
     """
     j = inc_data['stack_from_all'][layer]
-    if any(isnan(j)):
+    if np.any(isnan(j)):
         raise ValueError('layer must be coherent for this function!')
     [stackindex, withinstackindex] = j
     forwardfunc = absorp_analytic_fn()
@@ -1056,7 +1056,10 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas):
     Starting with output of inc_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """
-
+    print(layer.shape)
+    print(dist.shape)
+    #print(coherency_list.shape)
+    print(alphas.shape)
     layers = list(set(layer)) # unique layer indices
     A_per_layer = np.array(inc_absorp_in_each_layer(inc_tmm_data))
     fraction_reaching = 1 - np.cumsum(A_per_layer, axis = 0)
