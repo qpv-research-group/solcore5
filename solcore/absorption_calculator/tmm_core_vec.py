@@ -250,7 +250,7 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # complex!
     th_list = list_snell(n_list, th_0)
 
-    # kz is the z-component of (complex) angular wavevector for forward-moving
+    # kz is the z-component of (complex) angular waveve ctor for forward-moving
     # wave. Positive imaginary part means decaying.
     kz_list = 2 * np.pi * n_list * cos(th_list) / lam_vac
 
@@ -1030,7 +1030,7 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     inc_data is output of inc_tmm()
     """
     j = inc_data['stack_from_all'][layer]
-    if any(isnan(j)):
+    if np.any(isnan(j)):
         raise ValueError('layer must be coherent for this function!')
     [stackindex, withinstackindex] = j
     forwardfunc = absorp_analytic_fn()
