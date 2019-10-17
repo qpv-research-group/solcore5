@@ -8,7 +8,7 @@ def test_make_2x2_array():
     o = np.ones(3)
     result = make_2x2_array(z, o, z, o, dtype=float)
 
-    assert np.all(result == np.array([[[0., 1.], [0., 1.]],
+    assert result == approx(np.array([[[0., 1.], [0., 1.]],
                               [[0., 1.], [0., 1.]],
                               [[0., 1.], [0., 1.]]]))
 
