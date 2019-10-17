@@ -1028,7 +1028,7 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     inc_data is output of inc_tmm()
     """
     j = inc_data['stack_from_all'][layer]
-    if any(np.isnan(j)):
+    if np.any(np.isnan(j)):
         raise ValueError('layer must be coherent for this function!')
     [stackindex, withinstackindex] = j
     forwardfunc = absorp_analytic_fn()
