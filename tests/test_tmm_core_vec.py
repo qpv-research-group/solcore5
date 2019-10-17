@@ -1105,9 +1105,9 @@ def test_inc_group_layers():
     assert result['all_from_inc'] == [0, 3, 4]
     assert result['inc_from_all'] == [0, np.nan, np.nan, 1, 2]
     assert result['all_from_stack'] == [[0, 1, 2, 3]]
-    assert result['stack_from_all'] == [np.np.nan, [0, 1], [0, 2], np.np.nan, np.np.nan]
+    assert result['stack_from_all'] == [np.nan, [0, 1], [0, 2], np.nan, np.nan]
     assert result['inc_from_stack'] == [0]
-    assert result['stack_from_inc'] == [np.np.nan, 0, np.np.nan]
+    assert result['stack_from_inc'] == [np.nan, 0, np.nan]
     assert result['num_stacks'] == 1
     assert result['num_inc_layers'] == 3
     assert result['num_layers'] == 5
