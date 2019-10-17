@@ -1,6 +1,7 @@
 import numpy as np
 from solcore.state import State
 
+
 def test_state():
     array1 = np.array([1, 2, 3])
     array2 = np.array([2, 3, 4])
