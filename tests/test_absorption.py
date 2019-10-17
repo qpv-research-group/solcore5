@@ -150,6 +150,7 @@ def test_sopra_absorption():
 
     assert data == approx(out)
 
+
 def test_substrate_presence_A():
     wavelength = np.linspace(300, 800, 3) * 1e-9
 
@@ -157,9 +158,15 @@ def test_substrate_presence_A():
 
     my_structure = SolarCell([Layer(si(700, "nm"), material=GaAs)], substrate=GaAs)
 
-    solar_cell_solver(my_structure, 'optics',
-                      user_options={'wavelength': wavelength, 'optics_method': 'TMM',
-                                    'no_back_reflexion': False})
+    solar_cell_solver(
+        my_structure,
+        "optics",
+        user_options={
+            "wavelength": wavelength,
+            "optics_method": "TMM",
+            "no_back_reflexion": False,
+        },
+    )
 
     z_pos = np.linspace(0, my_structure.width, 10)
 
@@ -167,27 +174,34 @@ def test_substrate_presence_A():
 
     my_structure = SolarCell([Layer(si(700, "nm"), material=GaAs)])
 
-    solar_cell_solver(my_structure, 'optics',
-                      user_options={'wavelength': wavelength, 'optics_method': 'TMM',
-                                    'no_back_reflexion': False})
+    solar_cell_solver(
+        my_structure,
+        "optics",
+        user_options={
+            "wavelength": wavelength,
+            "optics_method": "TMM",
+            "no_back_reflexion": False,
+        },
+    )
 
     A_nosubs = my_structure[0].layer_absorption
 
-
     A = np.vstack((A_subs, A_nosubs))
 
-    A_data = np.array([[0.56610281, 0.62692985, 0.41923175],
-                       [0.56610281, 0.62711355, 0.37837737]])
+    A_data = np.array(
+        [[0.56610281, 0.62692985, 0.41923175], [0.56610281, 0.62711355, 0.37837737]]
+    )
 
     assert all([d == approx(o) for d, o in zip(A, A_data)])
+
 
 def test_BL_correction():
 
     wl = np.linspace(800, 950, 4) * 1e-9
 
-    GaAs = material('GaAs')()
+    GaAs = material("GaAs")()
 
-    thick_cell = SolarCell([Layer(material=GaAs, width=si('20um'))])
+    thick_cell = SolarCell([Layer(material=GaAs, width=si("20um"))])
 
     opts = State()
     opts.position = None
@@ -209,8 +223,12 @@ def test_BL_correction():
 
     with_corr = thick_cell.absorbed
 
-    assert with_corr == approx(np.array([ 6.71457872e-01,  6.75496354e-01,  2.09738887e-01, 0]))
-    assert no_corr == approx(np.array([ 6.71457872e-01,  6.75496071e-01,  2.82306407e-01, 0]))
+    assert with_corr == approx(
+        np.array([6.71457872e-01, 6.75496354e-01, 2.09738887e-01, 0])
+    )
+    assert no_corr == approx(
+        np.array([6.71457872e-01, 6.75496071e-01, 2.82306407e-01, 0])
+    )
 
 
 def test_substrate_presence_profile():
@@ -220,9 +238,15 @@ def test_substrate_presence_profile():
 
     my_structure = SolarCell([Layer(si(700, "nm"), material=GaAs)], substrate=GaAs)
 
-    solar_cell_solver(my_structure, 'optics',
-                      user_options={'wavelength': wavelength, 'optics_method': 'TMM',
-                                    'no_back_reflexion': False})
+    solar_cell_solver(
+        my_structure,
+        "optics",
+        user_options={
+            "wavelength": wavelength,
+            "optics_method": "TMM",
+            "no_back_reflexion": False,
+        },
+    )
 
     z_pos = np.linspace(0, my_structure.width, 10)
 
@@ -230,86 +254,110 @@ def test_substrate_presence_profile():
 
     my_structure = SolarCell([Layer(si(700, "nm"), material=GaAs)])
 
-    solar_cell_solver(my_structure, 'optics',
-                      user_options={'wavelength': wavelength, 'optics_method': 'TMM',
-                                    'no_back_reflexion': False})
+    solar_cell_solver(
+        my_structure,
+        "optics",
+        user_options={
+            "wavelength": wavelength,
+            "optics_method": "TMM",
+            "no_back_reflexion": False,
+        },
+    )
 
     profile_nosubs = my_structure[0].absorbed(z_pos)
 
     profile = np.vstack((profile_subs, profile_nosubs))
 
     data_path = Path(__file__).parent / "data" / "substrate_presence_profile.csv"
-    profile_data = np.genfromtxt(data_path, delimiter=',')
+    profile_data = np.genfromtxt(data_path, delimiter=",")
 
     assert all([d == approx(o) for d, o in zip(profile, profile_data)])
+
 
 # TODO: the following tests for custom materials do not work as they require changes to the user config file.
 # It is possible the downloading of the database for test_database_materials is also an issue.
 
-def test_inc_coh_tmm():
-    GaInP = material('GaInP')(In=0.5)
-    GaAs = material('GaAs')()
-    Ge = material('Ge')()
 
-    optical_struct = SolarCell([Layer(material=GaInP, width=si('5000nm')),
-                                Layer(material=GaAs, width=si('200nm')),
-                                Layer(material=GaAs, width=si('5um')),
-                                Layer(material=Ge, width=si('50um'))
-                                ])
+def test_inc_coh_tmm():
+    GaInP = material("GaInP")(In=0.5)
+    GaAs = material("GaAs")()
+    Ge = material("Ge")()
+
+    optical_struct = SolarCell(
+        [
+            Layer(material=GaInP, width=si("5000nm")),
+            Layer(material=GaAs, width=si("200nm")),
+            Layer(material=GaAs, width=si("5um")),
+            Layer(material=Ge, width=si("50um")),
+        ]
+    )
 
     wl = np.linspace(400, 1200, 5) * 1e-9
 
     options = State()
     options.wavelength = wl
-    options.optics_method = 'TMM'
+    options.optics_method = "TMM"
     options.no_back_reflexion = False
     options.BL_correction = True
     options.recalculate_absorption = True
 
-    c_list = [['c', 'c', 'c', 'c'],
-              ['c', 'c', 'c', 'i'],
-              ['c', 'i', 'i', 'c'],
-              ['i', 'i', 'i', 'i']]
+    c_list = [
+        ["c", "c", "c", "c"],
+        ["c", "c", "c", "i"],
+        ["c", "i", "i", "c"],
+        ["i", "i", "i", "i"],
+    ]
 
     results = []
     for i1, cl in enumerate(c_list):
         options.coherency_list = cl
-        solar_cell_solver(optical_struct, 'optics', options)
+        solar_cell_solver(optical_struct, "optics", options)
         results.append(optical_struct.absorbed)
 
     A_calc = np.stack(results)
-    A_data = np.array([[0.5742503, 0.67956899, 0.73481357, 0.72746507, 0.77037936],
-       [0.5742503 , 0.67956899, 0.73481357, 0.72746507, 0.77037936],
-       [0.5742503 , 0.67956899, 0.73474943, 0.7046269 , 0.70311501],
-       [0.5742503 , 0.67956899, 0.70927724, 0.71477549, 0.71541325]])
+    A_data = np.array(
+        [
+            [0.5742503, 0.67956899, 0.73481357, 0.72746507, 0.77037936],
+            [0.5742503, 0.67956899, 0.73481357, 0.72746507, 0.77037936],
+            [0.5742503, 0.67956899, 0.73474943, 0.7046269, 0.70311501],
+            [0.5742503, 0.67956899, 0.70927724, 0.71477549, 0.71541325],
+        ]
+    )
     assert A_calc == approx(A_data)
 
 
 @mark.skip
 def test_define_material():
-    home_folder = os.path.expanduser('~')
-    custom_nk_path = os.path.join(home_folder, 'Solcore/custommats')
-    param_path = os.path.join(home_folder, 'Solcore/custom_params.txt')
+    home_folder = os.path.expanduser("~")
+    custom_nk_path = os.path.join(home_folder, "Solcore/custommats")
+    param_path = os.path.join(home_folder, "Solcore/custom_params.txt")
 
-    add_source('Others', 'custom_mats', custom_nk_path)
-    add_source('Parameters', 'custom', param_path)
+    add_source("Others", "custom_mats", custom_nk_path)
+    add_source("Parameters", "custom", param_path)
     this_dir = os.path.split(__file__)[0]
-    create_new_material('SiGeSn', os.path.join(this_dir, 'SiGeSn_n.txt'), os.path.join(this_dir, 'SiGeSn_k.txt'), os.path.join(this_dir, 'SiGeSn_params.txt'))
+    create_new_material(
+        "SiGeSn",
+        os.path.join(this_dir, "SiGeSn_n.txt"),
+        os.path.join(this_dir, "SiGeSn_k.txt"),
+        os.path.join(this_dir, "SiGeSn_params.txt"),
+    )
+
 
 @mark.skip
 def test_use_material():
-    SiGeSn = material('SiGeSn')()
+    SiGeSn = material("SiGeSn")()
     assert SiGeSn.n(400e-9) == approx(4.175308391752484)
     assert SiGeSn.k(400e-9) == approx(2.3037424963866306)
 
+
 @mark.skip
 def test_database_materials():
-    home_folder = os.path.expanduser('~')
-    nk_db_path = os.path.join(home_folder, 'Solcore/NK.db')
+    home_folder = os.path.expanduser("~")
+    nk_db_path = os.path.join(home_folder, "Solcore/NK.db")
 
-    add_source('Others', 'nk', nk_db_path)
+    add_source("Others", "nk", nk_db_path)
     download_db(confirm=True)
-    wl, n = nkdb_load_n(2683) # Should be carbon, from Phillip
+    wl, n = nkdb_load_n(2683)  # Should be carbon, from Phillip
 
     data_path = Path(__file__).parent / "data" / "database_materials.txt"
     n_data = np.loadtxt(data_path)
