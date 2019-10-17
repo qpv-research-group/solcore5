@@ -1,9 +1,9 @@
-from solcore.absorption_calculator.tmm_core_vec import *
 import numpy as np
 from pytest import approx, raises
 
 
 def test_make_2x2_array():
+    from solcore.absorption_calculator.tmm_core_vec import make_2x2_array
     z = np.zeros(3)
     o = np.ones(3)
     result = make_2x2_array(z, o, z, o, dtype=float)
@@ -14,14 +14,17 @@ def test_make_2x2_array():
 
 
 def test_snell():
+    from solcore.absorption_calculator.tmm_core_vec import snell
     assert snell(3, 2, 0.7) == approx(1.3105496419558818)
 
 
 def test_list_snell():
+    from solcore.absorption_calculator.tmm_core_vec import list_snell
     assert list_snell(np.array([2, 3, 4]), 0.3) == approx(np.array([0.3, 0.19831075, 0.14830313]))
 
 
 def test_interface_r():
+    from solcore.absorption_calculator.tmm_core_vec import interface_r
     th1 = 0.2
     n1 = 2
     n2 = 3
@@ -37,6 +40,7 @@ def test_interface_r():
 
 
 def test_interface_t():
+    from solcore.absorption_calculator.tmm_core_vec import interface_t
     th1 = 0.2
     n1 = 2
     n2 = 3
@@ -52,10 +56,12 @@ def test_interface_t():
 
 
 def test_R_from_r():
+    from solcore.absorption_calculator.tmm_core_vec import R_from_r
     assert R_from_r(np.sqrt(2) + 1j*np.sqrt(2)) == 4.0
 
 
 def test_T_from_t():
+    from solcore.absorption_calculator.tmm_core_vec import T_from_t
     th1 = 0.2
     n1 = 2
     n2 = 3
@@ -69,6 +75,7 @@ def test_T_from_t():
 
 
 def test_power_entering_from_r():
+    from solcore.absorption_calculator.tmm_core_vec import power_entering_from_r
     rs = -0.20541108217641596
     rp = 0.19457669033430525
 
@@ -83,6 +90,7 @@ def test_power_entering_from_r():
 
 
 def test_interface_R():
+    from solcore.absorption_calculator.tmm_core_vec import interface_R
     th1 = 0.2
     n1 = 2
     n2 = 3
@@ -93,6 +101,7 @@ def test_interface_R():
 
 
 def test_interface_T():
+    from solcore.absorption_calculator.tmm_core_vec import interface_T
     th1 = 0.2
     n1 = 2
     n2 = 3
@@ -103,9 +112,10 @@ def test_interface_T():
 
 ### Test for coh_tmm
 def test_coh_tmm_exceptions():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4*1j, 2 + 3*1j, 5, 4+1*1j],
                       [1.3, 1.2 + 0.2*1j, 1.5 + 0.3*1j, 4, 3+0.1*1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -118,16 +128,17 @@ def test_coh_tmm_exceptions():
         coh_tmm('s', n_list[0], d_list, th_0, lam_vac)
 
     with raises(ValueError):
-        coh_tmm('s', n_list, np.array([10, 200, 187.3, 1973.5, inf]), th_0, lam_vac)
+        coh_tmm('s', n_list, np.array([10, 200, 187.3, 1973.5, np.inf]), th_0, lam_vac)
 
     with raises(ValueError):
         coh_tmm('s', n_list, d_list, 0.2+0.2*1j, lam_vac)
 
 
 def test_coh_tmm_s_r():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4*1j, 2 + 3*1j, 5, 4+1*1j],
                       [1.3, 1.2 + 0.2*1j, 1.5 + 0.3*1j, 4, 3+0.1*1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -139,9 +150,10 @@ def test_coh_tmm_s_r():
 
 
 def test_coh_tmm_s_t():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -153,9 +165,10 @@ def test_coh_tmm_s_t():
 
 
 def test_coh_tmm_s_R():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -167,9 +180,10 @@ def test_coh_tmm_s_R():
 
 
 def test_coh_tmm_s_T():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -181,9 +195,10 @@ def test_coh_tmm_s_T():
 
 
 def test_coh_tmm_s_power_entering():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -195,9 +210,10 @@ def test_coh_tmm_s_power_entering():
 
 
 def test_coh_tmm_s_vw_list():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -228,9 +244,10 @@ def test_coh_tmm_s_vw_list():
 
 
 def test_coh_tmm_p_r():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4*1j, 2 + 3*1j, 5, 4+1*1j],
                       [1.3, 1.2 + 0.2*1j, 1.5 + 0.3*1j, 4, 3+0.1*1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -242,9 +259,10 @@ def test_coh_tmm_p_r():
 
 
 def test_coh_tmm_p_t():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -256,9 +274,10 @@ def test_coh_tmm_p_t():
 
 
 def test_coh_tmm_p_R():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -270,9 +289,10 @@ def test_coh_tmm_p_R():
 
 
 def test_coh_tmm_p_T():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -284,9 +304,10 @@ def test_coh_tmm_p_T():
 
 
 def test_coh_tmm_p_power_entering():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -298,9 +319,10 @@ def test_coh_tmm_p_power_entering():
 
 
 def test_coh_tmm_p_vw_list():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -331,9 +353,10 @@ def test_coh_tmm_p_vw_list():
 
 
 def test_coh_tmm_kz_list():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -348,9 +371,10 @@ def test_coh_tmm_kz_list():
        [0.06246792+0.01579948j, 0.01056188+0.00035793j]]), rel=1e-5)
 
 def test_coh_tmm_th_list():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -366,9 +390,10 @@ def test_coh_tmm_th_list():
 
 
 def test_coh_tmm_inputs():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -385,9 +410,10 @@ def test_coh_tmm_inputs():
 ## end of tests for coh_tmm
 
 def test_coh_tmm_reverse():
+    from solcore.absorption_calculator.tmm_core_vec import coh_tmm_reverse
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -434,9 +460,10 @@ def test_coh_tmm_reverse():
 
 
 def test_ellips_psi():
+    from solcore.absorption_calculator.tmm_core_vec import ellips
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -446,10 +473,11 @@ def test_ellips_psi():
 
 
 def test_ellips_Delta():
+    from solcore.absorption_calculator.tmm_core_vec import ellips
 
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -459,9 +487,10 @@ def test_ellips_Delta():
 
 
 def test_unpolarized_RT_R():
+    from solcore.absorption_calculator.tmm_core_vec import unpolarized_RT
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -471,9 +500,10 @@ def test_unpolarized_RT_R():
 
 
 def test_unpolarized_RT_T():
+    from solcore.absorption_calculator.tmm_core_vec import unpolarized_RT
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -483,6 +513,7 @@ def test_unpolarized_RT_T():
 
 
 def test_position_resolved_s_poyn():
+    from solcore.absorption_calculator.tmm_core_vec import position_resolved
     coh_tmm_data = {'r': np.array([0.14017645-0.2132843j , 0.22307786-0.10704008j]),
                     't': np.array([ 1.78669633e-05-9.79824244e-06j, -8.86075993e-02-4.05953564e-01j]),
                     'R': np.array([0.06513963, 0.06122131]),
@@ -508,25 +539,25 @@ def test_position_resolved_s_poyn():
                                           0.00000000e+00+0.00000000e+00j],
                                         [-8.86075993e-02-4.05953564e-01j,
                                           0.00000000e+00+0.00000000e+00j]]]),
-                    'kz_list': array([[0.02250959+0.j        , 0.00440866+0.j        ],
+                    'kz_list':np.array([[0.02250959+0.j        , 0.00440866+0.j        ],
                                        [0.01435451+0.00687561j, 0.00404247+0.00074813j],
                                        [0.03118008+0.04748033j, 0.00515452+0.00110011j],
                                        [0.07823055+0.j        , 0.01413365+0.j        ],
                                        [0.06246792+0.01579948j, 0.01056188+0.00035793j]]),
-                    'th_list': array([[0.3       +0.j        , 0.3       +0.j        ],
+                    'th_list':np.array([[0.3       +0.j        , 0.3       +0.j        ],
                                        [0.38659626-0.16429512j, 0.3162772 -0.05459799j],
                                        [0.06789345-0.10235287j, 0.24849917-0.0507924j ],
                                        [0.08877261+0.j        , 0.09619234+0.j        ],
                                        [0.10445527-0.02621521j, 0.12826687-0.00429919j]]),
                     'pol': 's',
-                    'n_list': array([[1.5+0.j , 1.3+0.j ],
+                    'n_list':np.array([[1.5+0.j , 1.3+0.j ],
                                    [1. +0.4j, 1.2+0.2j],
                                    [2. +3.j , 1.5+0.3j],
                                    [5. +0.j , 4. +0.j ],
                                    [4. +1.j , 3. +0.1j]]),
-                    'd_list': array([[inf], [ 200. ], [ 187.3], [1973.5], [inf]]),
+                    'd_list':np.array([[np.inf], [ 200. ], [ 187.3], [1973.5], [np.inf]]),
                     'th_0': [0.3],
-                    'lam_vac': array([400, 1770])}
+                    'lam_vac':np.array([400, 1770])}
 
     result = position_resolved([0, 1, 1, 2, 2, 3, 3, 4, 4], np.array([20, 10, 200, 20, 50.8, 10, 2000, 0, 200]), coh_tmm_data)
 
@@ -539,6 +570,7 @@ def test_position_resolved_s_poyn():
 
 
 def test_position_resolved_s_absor():
+    from solcore.absorption_calculator.tmm_core_vec import position_resolved
     coh_tmm_data = {'r': np.array([0.14017645-0.2132843j , 0.22307786-0.10704008j]),
                     't': np.array([ 1.78669633e-05-9.79824244e-06j, -8.86075993e-02-4.05953564e-01j]),
                     'R': np.array([0.06513963, 0.06122131]),
@@ -564,25 +596,25 @@ def test_position_resolved_s_absor():
                                           0.00000000e+00+0.00000000e+00j],
                                         [-8.86075993e-02-4.05953564e-01j,
                                           0.00000000e+00+0.00000000e+00j]]]),
-                    'kz_list': array([[0.02250959+0.j        , 0.00440866+0.j        ],
+                    'kz_list':np.array([[0.02250959+0.j        , 0.00440866+0.j        ],
                                        [0.01435451+0.00687561j, 0.00404247+0.00074813j],
                                        [0.03118008+0.04748033j, 0.00515452+0.00110011j],
                                        [0.07823055+0.j        , 0.01413365+0.j        ],
                                        [0.06246792+0.01579948j, 0.01056188+0.00035793j]]),
-                    'th_list': array([[0.3       +0.j        , 0.3       +0.j        ],
+                    'th_list':np.array([[0.3       +0.j        , 0.3       +0.j        ],
                                        [0.38659626-0.16429512j, 0.3162772 -0.05459799j],
                                        [0.06789345-0.10235287j, 0.24849917-0.0507924j ],
                                        [0.08877261+0.j        , 0.09619234+0.j        ],
                                        [0.10445527-0.02621521j, 0.12826687-0.00429919j]]),
                     'pol': 's',
-                    'n_list': array([[1.5+0.j , 1.3+0.j ],
+                    'n_list':np.array([[1.5+0.j , 1.3+0.j ],
                                    [1. +0.4j, 1.2+0.2j],
                                    [2. +3.j , 1.5+0.3j],
                                    [5. +0.j , 4. +0.j ],
                                    [4. +1.j , 3. +0.1j]]),
-                    'd_list': array([[inf], [ 200. ], [ 187.3], [1973.5], [inf]]),
+                    'd_list':np.array([[np.inf], [ 200. ], [ 187.3], [1973.5], [np.inf]]),
                     'th_0': [0.3],
-                    'lam_vac': array([400, 1770])}
+                    'lam_vac':np.array([400, 1770])}
 
     result = position_resolved([0, 1, 1, 2, 2, 3, 3, 4, 4], np.array([20, 10, 200, 20, 50.8, 10, 2000, 0, 200]),
                                coh_tmm_data)
@@ -595,16 +627,14 @@ def test_position_resolved_s_absor():
         2.56594499e-04]]))
 
 
-
-
-
 def test_position_resolved_p_poyn():
-    coh_tmm_data = {'r': array([-0.12140058+0.15103645j, -0.21104259+0.07430242j]),
-                    't': array([ 1.82536479e-05-1.06422631e-05j, -9.02947159e-02-4.09448171e-01j]),
-                    'R': array([0.03755011, 0.05005982]),
-                    'T': array([1.24068740e-09, 4.21184461e-01]),
-                    'power_entering': array([0.96244989, 0.94994018]),
-                    'vw_list': array([[[ 0.00000000e+00+0.00000000e+00j,
+    from solcore.absorption_calculator.tmm_core_vec import position_resolved
+    coh_tmm_data = {'r':np.array([-0.12140058+0.15103645j, -0.21104259+0.07430242j]),
+                    't':np.array([ 1.82536479e-05-1.06422631e-05j, -9.02947159e-02-4.09448171e-01j]),
+                    'R':np.array([0.03755011, 0.05005982]),
+                    'T':np.array([1.24068740e-09, 4.21184461e-01]),
+                    'power_entering':np.array([0.96244989, 0.94994018]),
+                    'vw_list':np.array([[[ 0.00000000e+00+0.00000000e+00j,
                                           0.00000000e+00+0.00000000e+00j],
                                         [ 0.00000000e+00+0.00000000e+00j,
                                           0.00000000e+00+0.00000000e+00j]],
@@ -624,25 +654,25 @@ def test_position_resolved_p_poyn():
                                           0.00000000e+00+0.00000000e+00j],
                                         [-9.02947159e-02-4.09448171e-01j,
                                         0.00000000e+00+0.00000000e+00j]]]),
-                    'kz_list': array([[0.02250959+0.j        , 0.00440866+0.j        ],
+                    'kz_list':np.array([[0.02250959+0.j        , 0.00440866+0.j        ],
                                        [0.01435451+0.00687561j, 0.00404247+0.00074813j],
                                        [0.03118008+0.04748033j, 0.00515452+0.00110011j],
                                        [0.07823055+0.j        , 0.01413365+0.j        ],
                                        [0.06246792+0.01579948j, 0.01056188+0.00035793j]]),
-                    'th_list': array([[0.3       +0.j        , 0.3       +0.j        ],
+                    'th_list':np.array([[0.3       +0.j        , 0.3       +0.j        ],
                                        [0.38659626-0.16429512j, 0.3162772 -0.05459799j],
                                        [0.06789345-0.10235287j, 0.24849917-0.0507924j ],
                                        [0.08877261+0.j        , 0.09619234+0.j        ],
                                        [0.10445527-0.02621521j, 0.12826687-0.00429919j]]),
                     'pol': 'p',
-                    'n_list': array([[1.5+0.j , 1.3+0.j ],
+                    'n_list':np.array([[1.5+0.j , 1.3+0.j ],
                                        [1. +0.4j, 1.2+0.2j],
                                        [2. +3.j , 1.5+0.3j],
                                        [5. +0.j , 4. +0.j ],
                                        [4. +1.j , 3. +0.1j]]),
-                    'd_list': array([[inf], [ 200. ], [ 187.3], [1973.5], [inf]]),
+                    'd_list':np.array([[np.inf], [ 200. ], [ 187.3], [1973.5], [np.inf]]),
                     'th_0': [0.3],
-                    'lam_vac': array([ 400, 1770])}
+                    'lam_vac':np.array([ 400, 1770])}
 
     result = position_resolved([0, 1, 1, 2, 2, 3, 3, 4, 4], np.array([20, 10, 200, 20, 50.8, 10, 2000, 0, 200]), coh_tmm_data)
 
@@ -655,12 +685,13 @@ def test_position_resolved_p_poyn():
 
 
 def test_position_resolved_p_absor():
-    coh_tmm_data = {'r': array([-0.12140058 + 0.15103645j, -0.21104259 + 0.07430242j]),
-                    't': array([1.82536479e-05 - 1.06422631e-05j, -9.02947159e-02 - 4.09448171e-01j]),
-                    'R': array([0.03755011, 0.05005982]),
-                    'T': array([1.24068740e-09, 4.21184461e-01]),
-                    'power_entering': array([0.96244989, 0.94994018]),
-                    'vw_list': array([[[0.00000000e+00 + 0.00000000e+00j,
+    from solcore.absorption_calculator.tmm_core_vec import position_resolved
+    coh_tmm_data = {'r':np.array([-0.12140058 + 0.15103645j, -0.21104259 + 0.07430242j]),
+                    't':np.array([1.82536479e-05 - 1.06422631e-05j, -9.02947159e-02 - 4.09448171e-01j]),
+                    'R':np.array([0.03755011, 0.05005982]),
+                    'T':np.array([1.24068740e-09, 4.21184461e-01]),
+                    'power_entering':np.array([0.96244989, 0.94994018]),
+                    'vw_list':np.array([[[0.00000000e+00 + 0.00000000e+00j,
                                         0.00000000e+00 + 0.00000000e+00j],
                                        [0.00000000e+00 + 0.00000000e+00j,
                                         0.00000000e+00 + 0.00000000e+00j]],
@@ -680,25 +711,25 @@ def test_position_resolved_p_absor():
                                         0.00000000e+00 + 0.00000000e+00j],
                                        [-9.02947159e-02 - 4.09448171e-01j,
                                         0.00000000e+00 + 0.00000000e+00j]]]),
-                    'kz_list': array([[0.02250959 + 0.j, 0.00440866 + 0.j],
+                    'kz_list':np.array([[0.02250959 + 0.j, 0.00440866 + 0.j],
                                       [0.01435451 + 0.00687561j, 0.00404247 + 0.00074813j],
                                       [0.03118008 + 0.04748033j, 0.00515452 + 0.00110011j],
                                       [0.07823055 + 0.j, 0.01413365 + 0.j],
                                       [0.06246792 + 0.01579948j, 0.01056188 + 0.00035793j]]),
-                    'th_list': array([[0.3 + 0.j, 0.3 + 0.j],
+                    'th_list':np.array([[0.3 + 0.j, 0.3 + 0.j],
                                       [0.38659626 - 0.16429512j, 0.3162772 - 0.05459799j],
                                       [0.06789345 - 0.10235287j, 0.24849917 - 0.0507924j],
                                       [0.08877261 + 0.j, 0.09619234 + 0.j],
                                       [0.10445527 - 0.02621521j, 0.12826687 - 0.00429919j]]),
                     'pol': 'p',
-                    'n_list': array([[1.5 + 0.j, 1.3 + 0.j],
+                    'n_list':np.array([[1.5 + 0.j, 1.3 + 0.j],
                                      [1. + 0.4j, 1.2 + 0.2j],
                                      [2. + 3.j, 1.5 + 0.3j],
                                      [5. + 0.j, 4. + 0.j],
                                      [4. + 1.j, 3. + 0.1j]]),
-                    'd_list': array([[inf], [200.], [187.3], [1973.5], [inf]]),
+                    'd_list':np.array([[np.inf], [200.], [187.3], [1973.5], [np.inf]]),
                     'th_0': [0.3],
-                    'lam_vac': array([400, 1770])}
+                    'lam_vac':np.array([400, 1770])}
 
     result = position_resolved([0, 1, 1, 2, 2, 3, 3, 4, 4], np.array([20, 10, 200, 20, 50.8, 10, 2000, 0, 200]),
                                coh_tmm_data)
@@ -712,32 +743,35 @@ def test_position_resolved_p_absor():
 
 
 def test_find_in_structure_exception():
+    from solcore.absorption_calculator.tmm_core_vec import find_in_structure
     with raises(ValueError):
-        find_in_structure([inf, 100, 200, inf], [0, 100, 200])
+        find_in_structure([np.inf, 100, 200, np.inf], [0, 100, 200])
 
 
 def test_find_in_structure():
-
+    from solcore.absorption_calculator.tmm_core_vec import find_in_structure
     assert find_in_structure([200, 187.3,1973.5], np.linspace(0, 700, 10))[0] == approx(np.array([1, 1, 1, 2, 2, 3, 3, 3, 3, 3]))
     assert find_in_structure([200, 187.3,1973.5], np.linspace(0, 700, 10))[1] == approx(np.array([ 0., 77.77777778, 155.55555556, 33.33333333, 111.11111111,
                                                        1.58888889, 79.36666667,157.14444444, 234.92222222, 312.7]))
 
 
 def test_find_in_structure_with_inf():
-
-    assert find_in_structure_with_inf([inf, 200, 187.3,1973.5, inf], np.linspace(0, 700, 10))[0] == approx(np.array([1, 1, 1, 2, 2, 3, 3, 3, 3, 3]))
-    assert find_in_structure_with_inf([inf, 200, 187.3,1973.5, inf], np.linspace(0, 700, 10))[1] == approx(np.array([ 0., 77.77777778, 155.55555556, 33.33333333, 111.11111111,
+    from solcore.absorption_calculator.tmm_core_vec import find_in_structure_with_inf
+    assert find_in_structure_with_inf([np.inf, 200, 187.3,1973.5, np.inf], np.linspace(0, 700, 10))[0] == approx(np.array([1, 1, 1, 2, 2, 3, 3, 3, 3, 3]))
+    assert find_in_structure_with_inf([np.inf, 200, 187.3,1973.5, np.inf], np.linspace(0, 700, 10))[1] == approx(np.array([ 0., 77.77777778, 155.55555556, 33.33333333, 111.11111111,
                                                        1.58888889, 79.36666667,157.14444444, 234.92222222, 312.7]))
 
 
 
 def test_layer_starts():
-    assert layer_starts([inf, 200, 187.3,1973.5, inf]) == approx(np.array([  -inf,    0. ,  200. ,  387.3, 2360.8]))
+    from solcore.absorption_calculator.tmm_core_vec import layer_starts
+    assert layer_starts([np.inf, 200, 187.3,1973.5, np.inf]) == approx(np.array([  -np.inf,    0. ,  200. ,  387.3, 2360.8]))
 
 
 ### tests for absorp_analytic_fn
 
 def test_fill_in_s():
+    from solcore.absorption_calculator.tmm_core_vec import absorp_analytic_fn
     coh_tmm_data = {'r': np.array([0.14017645-0.2132843j , 0.22307786-0.10704008j]),
                     't': np.array([ 1.78669633e-05-9.79824244e-06j, -8.86075993e-02-4.05953564e-01j]),
                     'R': np.array([0.06513963, 0.06122131]),
@@ -763,25 +797,25 @@ def test_fill_in_s():
                                           0.00000000e+00+0.00000000e+00j],
                                         [-8.86075993e-02-4.05953564e-01j,
                                           0.00000000e+00+0.00000000e+00j]]]),
-                    'kz_list': array([[0.02250959+0.j        , 0.00440866+0.j        ],
+                    'kz_list': np.array([[0.02250959+0.j        , 0.00440866+0.j        ],
                                        [0.01435451+0.00687561j, 0.00404247+0.00074813j],
                                        [0.03118008+0.04748033j, 0.00515452+0.00110011j],
                                        [0.07823055+0.j        , 0.01413365+0.j        ],
                                        [0.06246792+0.01579948j, 0.01056188+0.00035793j]]),
-                    'th_list': array([[0.3       +0.j        , 0.3       +0.j        ],
+                    'th_list': np.array([[0.3       +0.j        , 0.3       +0.j        ],
                                        [0.38659626-0.16429512j, 0.3162772 -0.05459799j],
                                        [0.06789345-0.10235287j, 0.24849917-0.0507924j ],
                                        [0.08877261+0.j        , 0.09619234+0.j        ],
                                        [0.10445527-0.02621521j, 0.12826687-0.00429919j]]),
                     'pol': 's',
-                    'n_list': array([[1.5+0.j , 1.3+0.j ],
+                    'n_list': np.array([[1.5+0.j , 1.3+0.j ],
                                    [1. +0.4j, 1.2+0.2j],
                                    [2. +3.j , 1.5+0.3j],
                                    [5. +0.j , 4. +0.j ],
                                    [4. +1.j , 3. +0.1j]]),
-                    'd_list': array([[inf], [ 200. ], [ 187.3], [1973.5], [inf]]),
+                    'd_list': np.array([[np.inf], [ 200. ], [ 187.3], [1973.5], [np.inf]]),
                     'th_0': [0.3],
-                    'lam_vac': array([400, 1770])}
+                    'lam_vac': np.array([400, 1770])}
 
     a = absorp_analytic_fn().fill_in(coh_tmm_data, [1, 2])
 
@@ -800,12 +834,13 @@ def test_fill_in_s():
 
 
 def test_fill_in_p():
-    coh_tmm_data = {'r': array([-0.12140058 + 0.15103645j, -0.21104259 + 0.07430242j]),
-                    't': array([1.82536479e-05 - 1.06422631e-05j, -9.02947159e-02 - 4.09448171e-01j]),
-                    'R': array([0.03755011, 0.05005982]),
-                    'T': array([1.24068740e-09, 4.21184461e-01]),
-                    'power_entering': array([0.96244989, 0.94994018]),
-                    'vw_list': array([[[0.00000000e+00 + 0.00000000e+00j,
+    from solcore.absorption_calculator.tmm_core_vec import absorp_analytic_fn
+    coh_tmm_data = {'r': np.array([-0.12140058 + 0.15103645j, -0.21104259 + 0.07430242j]),
+                    't': np.array([1.82536479e-05 - 1.06422631e-05j, -9.02947159e-02 - 4.09448171e-01j]),
+                    'R': np.array([0.03755011, 0.05005982]),
+                    'T': np.array([1.24068740e-09, 4.21184461e-01]),
+                    'power_entering': np.array([0.96244989, 0.94994018]),
+                    'vw_list': np.array([[[0.00000000e+00 + 0.00000000e+00j,
                                         0.00000000e+00 + 0.00000000e+00j],
                                        [0.00000000e+00 + 0.00000000e+00j,
                                         0.00000000e+00 + 0.00000000e+00j]],
@@ -825,25 +860,25 @@ def test_fill_in_p():
                                         0.00000000e+00 + 0.00000000e+00j],
                                        [-9.02947159e-02 - 4.09448171e-01j,
                                         0.00000000e+00 + 0.00000000e+00j]]]),
-                    'kz_list': array([[0.02250959 + 0.j, 0.00440866 + 0.j],
+                    'kz_list': np.array([[0.02250959 + 0.j, 0.00440866 + 0.j],
                                       [0.01435451 + 0.00687561j, 0.00404247 + 0.00074813j],
                                       [0.03118008 + 0.04748033j, 0.00515452 + 0.00110011j],
                                       [0.07823055 + 0.j, 0.01413365 + 0.j],
                                       [0.06246792 + 0.01579948j, 0.01056188 + 0.00035793j]]),
-                    'th_list': array([[0.3 + 0.j, 0.3 + 0.j],
+                    'th_list': np.array([[0.3 + 0.j, 0.3 + 0.j],
                                       [0.38659626 - 0.16429512j, 0.3162772 - 0.05459799j],
                                       [0.06789345 - 0.10235287j, 0.24849917 - 0.0507924j],
                                       [0.08877261 + 0.j, 0.09619234 + 0.j],
                                       [0.10445527 - 0.02621521j, 0.12826687 - 0.00429919j]]),
                     'pol': 'p',
-                    'n_list': array([[1.5 + 0.j, 1.3 + 0.j],
+                    'n_list': np.array([[1.5 + 0.j, 1.3 + 0.j],
                                      [1. + 0.4j, 1.2 + 0.2j],
                                      [2. + 3.j, 1.5 + 0.3j],
                                      [5. + 0.j, 4. + 0.j],
                                      [4. + 1.j, 3. + 0.1j]]),
-                    'd_list': array([[inf], [200.], [187.3], [1973.5], [inf]]),
+                    'd_list': np.array([[np.inf], [200.], [187.3], [1973.5], [np.inf]]),
                     'th_0': [0.3],
-                    'lam_vac': array([400, 1770])}
+                    'lam_vac': np.array([400, 1770])}
 
     a = absorp_analytic_fn().fill_in(coh_tmm_data, [1, 2])
 
@@ -861,6 +896,7 @@ def test_fill_in_p():
 
 
 def test_copy():
+    from solcore.absorption_calculator.tmm_core_vec import absorp_analytic_fn
     a = absorp_analytic_fn()
     a.a1, a.a3, a.A1, a.A2, a.A3, a.d = 1, 0.5, 2, 7, 5+3*1j, [7, 3]
     b = a.copy()
@@ -871,6 +907,7 @@ def test_copy():
 
 
 def test_run_array():
+    from solcore.absorption_calculator.tmm_core_vec import absorp_analytic_fn
     a = absorp_analytic_fn()
     a.a1, a.a3, a.A1, a.A2, a.A3, a.d = np.array([0.01375122, 0.00149626]), \
                                         np.array([0.02870902, 0.00808494]),\
@@ -886,6 +923,7 @@ def test_run_array():
 
 
 def test_run():
+    from solcore.absorption_calculator.tmm_core_vec import absorp_analytic_fn
     a = absorp_analytic_fn()
     a.a1, a.a3, a.A1, a.A2, a.A3, a.d = np.array([0.01375122, 0.00149626]), \
                                         np.array([0.02870902, 0.00808494]),\
@@ -898,6 +936,7 @@ def test_run():
 
 
 def test_scale():
+    from solcore.absorption_calculator.tmm_core_vec import absorp_analytic_fn
     a = absorp_analytic_fn()
     a.a1, a.a3, a.A1, a.A2, a.A3, a.d = np.array([0.01375122, 0.00149626]), \
                                         np.array([0.02870902, 0.00808494]),\
@@ -917,6 +956,7 @@ def test_scale():
 
 
 def test_add():
+    from solcore.absorption_calculator.tmm_core_vec import absorp_analytic_fn
     a = absorp_analytic_fn()
     a.a1, a.a3, a.A1, a.A2, a.A3, a.d = np.array([0.01375122, 0.00149626]), \
                                         np.array([0.02870902, 0.00808494]),\
@@ -946,6 +986,7 @@ def test_add():
                                                      )])
 
 def test_add_exception():
+    from solcore.absorption_calculator.tmm_core_vec import absorp_analytic_fn
     a = absorp_analytic_fn()
     a.a1, a.a3, a.A1, a.A2, a.A3, a.d = np.array([0.01375122, 0.00149626]), \
                                         np.array([0.02870902, 0.00808494]),\
@@ -967,6 +1008,7 @@ def test_add_exception():
 
 
 def test_absorp_in_each_layer():
+    from solcore.absorption_calculator.tmm_core_vec import absorp_in_each_layer
     coh_tmm_data = {'r': np.array([0.14017645-0.2132843j , 0.22307786-0.10704008j]),
                     't': np.array([ 1.78669633e-05-9.79824244e-06j, -8.86075993e-02-4.05953564e-01j]),
                     'R': np.array([0.06513963, 0.06122131]),
@@ -992,25 +1034,25 @@ def test_absorp_in_each_layer():
                                           0.00000000e+00+0.00000000e+00j],
                                         [-8.86075993e-02-4.05953564e-01j,
                                           0.00000000e+00+0.00000000e+00j]]]),
-                    'kz_list': array([[0.02250959+0.j        , 0.00440866+0.j        ],
+                    'kz_list':np.array([[0.02250959+0.j        , 0.00440866+0.j        ],
                                        [0.01435451+0.00687561j, 0.00404247+0.00074813j],
                                        [0.03118008+0.04748033j, 0.00515452+0.00110011j],
                                        [0.07823055+0.j        , 0.01413365+0.j        ],
                                        [0.06246792+0.01579948j, 0.01056188+0.00035793j]]),
-                    'th_list': array([[0.3       +0.j        , 0.3       +0.j        ],
+                    'th_list':np.array([[0.3       +0.j        , 0.3       +0.j        ],
                                        [0.38659626-0.16429512j, 0.3162772 -0.05459799j],
                                        [0.06789345-0.10235287j, 0.24849917-0.0507924j ],
                                        [0.08877261+0.j        , 0.09619234+0.j        ],
                                        [0.10445527-0.02621521j, 0.12826687-0.00429919j]]),
                     'pol': 's',
-                    'n_list': array([[1.5+0.j , 1.3+0.j ],
+                    'n_list':np.array([[1.5+0.j , 1.3+0.j ],
                                    [1. +0.4j, 1.2+0.2j],
                                    [2. +3.j , 1.5+0.3j],
                                    [5. +0.j , 4. +0.j ],
                                    [4. +1.j , 3. +0.1j]]),
-                    'd_list': array([[inf], [ 200. ], [ 187.3], [1973.5], [inf]]),
+                    'd_list':np.array([[np.inf], [ 200. ], [ 187.3], [1973.5], [np.inf]]),
                     'th_0': [0.3],
-                    'lam_vac': array([400, 1770])}
+                    'lam_vac':np.array([400, 1770])}
 
     assert absorp_in_each_layer(coh_tmm_data) == approx(np.array([[ 6.51396300e-02,  6.12213100e-02],
        [ 9.08895166e-01,  3.25991032e-01],
@@ -1020,9 +1062,10 @@ def test_absorp_in_each_layer():
 
 
 def test_inc_group_layers_exceptions():
+    from solcore.absorption_calculator.tmm_core_vec import inc_group_layers
     n_list = np.array([[1.5, 1 + 0.4*1j, 2 + 3*1j, 5, 4+1*1j],
                       [1.3, 1.2 + 0.2*1j, 1.5 + 0.3*1j, 4, 3+0.1*1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     c_list = ['i', 'c', 'c', 'i', 'i']
 
@@ -1043,27 +1086,28 @@ def test_inc_group_layers_exceptions():
 
 
 def test_inc_group_layers():
+    from solcore.absorption_calculator.tmm_core_vec import inc_group_layers
     n_list = np.array([[1.5, 1 + 0.4*1j, 2 + 3*1j, 5, 4+1*1j],
                       [1.3, 1.2 + 0.2*1j, 1.5 + 0.3*1j, 4, 3+0.1*1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     c_list = ['i', 'c', 'c', 'i', 'i']
 
     result = inc_group_layers(n_list, d_list, c_list)
 
-    correct = [[inf, 200.0, 187.3, inf],
+    correct = [[np.inf, 200.0, 187.3, np.inf],
                np.array([[np.array([1.5+0.j, 1.3+0.j]), np.array([1. +0.4j, 1.2+0.2j]), np.array([2. +3.j , 1.5+0.3j]), np.array([5.+0.j, 4.+0.j])]]),
-               [0, 3, 4], [0, nan, nan, 1, 2], [[0, 1, 2, 3]], [nan, [0, 1], [0, 2], nan, nan], [0],
-               [nan, 0, nan], 1,  3,  5]
+               [0, 3, 4], [0, np.nan, np.nan, 1, 2], [[0, 1, 2, 3]], [np.nan, [0, 1], [0, 2], np.nan, np.nan], [0],
+               [np.nan, 0, np.nan], 1,  3,  5]
 
-    assert result['stack_d_list'] == [[inf, 200.0, 187.3, inf]]
-    assert result['stack_n_list'] == approx(np.array([[np.array([1.5+0.j, 1.3+0.j]), np.array([1. +0.4j, 1.2+0.2j]), np.array([2. +3.j , 1.5+0.3j]), np.array([5.+0.j, 4.+0.j])]]))
+    assert result['stack_d_list'] == [[np.inf, 200.0, 187.3, np.inf]]
+    assert result['stack_n_list'] == approx(np.array([[[1.5+0.j, 1.3+0.j], [1. +0.4j, 1.2+0.2j], [2. +3.j , 1.5+0.3j], [5.+0.j, 4.+0.j]]]))
     assert result['all_from_inc'] == [0, 3, 4]
-    assert result['inc_from_all'] == [0, nan, nan, 1, 2]
+    assert result['inc_from_all'] == [0, np.nan, np.nan, 1, 2]
     assert result['all_from_stack'] == [[0, 1, 2, 3]]
-    assert result['stack_from_all'] == [nan, [0, 1], [0, 2], nan, nan]
+    assert result['stack_from_all'] == [np.np.nan, [0, 1], [0, 2], np.np.nan, np.np.nan]
     assert result['inc_from_stack'] == [0]
-    assert result['stack_from_inc'] == [nan, 0, nan]
+    assert result['stack_from_inc'] == [np.np.nan, 0, np.np.nan]
     assert result['num_stacks'] == 1
     assert result['num_inc_layers'] == 3
     assert result['num_layers'] == 5
@@ -1072,15 +1116,17 @@ def test_inc_group_layers():
 ## tests for inc_tmm
 
 def test_inc_tmm_exception():
+    from solcore.absorption_calculator.tmm_core_vec import inc_tmm
 
     with raises(ValueError):
-        inc_tmm('s', [1+0.5*1j, 2, 3], [inf, 20, inf], ['i', 'i', 'i'], [0.5], 500)
+        inc_tmm('s', [1+0.5*1j, 2, 3], [np.inf, 20, np.inf], ['i', 'i', 'i'], [0.5], 500)
 
 
 def test_inc_tmm_s_R():
+    from solcore.absorption_calculator.tmm_core_vec import inc_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -1093,10 +1139,11 @@ def test_inc_tmm_s_R():
     assert result['R'] == approx(np.array([0.06513963, 0.09735299]))
 
 def test_inc_tmm_s_R_incfirst():
+    from solcore.absorption_calculator.tmm_core_vec import inc_tmm
     # testing the case where the coherent stack DOES NOT start right after the semi-infinite layer
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -1110,9 +1157,10 @@ def test_inc_tmm_s_R_incfirst():
 
 
 def test_inc_tmm_s_T():
+    from solcore.absorption_calculator.tmm_core_vec import inc_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 1 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 100.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 100.5, np.inf])
 
     th_0 = [0.3]
 
@@ -1126,9 +1174,10 @@ def test_inc_tmm_s_T():
 
 
 def test_inc_tmm_s_power_entering_list():
+    from solcore.absorption_calculator.tmm_core_vec import inc_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 3 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 1973.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 1973.5, np.inf])
 
     th_0 = [0.3]
 
@@ -1143,9 +1192,10 @@ def test_inc_tmm_s_power_entering_list():
 
 
 def test_inc_tmm_s_VW_list():
+    from solcore.absorption_calculator.tmm_core_vec import inc_tmm
     n_list = np.array([[1.5, 1 + 0.4 * 1j, 2 + 1 * 1j, 5, 4 + 1 * 1j],
                        [1.3, 1.2 + 0.2 * 1j, 1.5 + 0.3 * 1j, 4, 3 + 0.1 * 1j]]).T
-    d_list = np.array([inf, 200, 187.3, 100.5, inf])
+    d_list = np.array([np.inf, 200, 187.3, 100.5, np.inf])
 
     th_0 = [0.3]
 
@@ -1155,11 +1205,11 @@ def test_inc_tmm_s_VW_list():
 
     result = inc_tmm('s', n_list, d_list, c_list, th_0, lam_vac)
 
-    assert result['VW_list'] == approx(np.array([[[nan,            nan],
+    assert result['VW_list'] == approx(np.array([[[np.nan,            np.nan],
         [4.99455825e-02, 6.91491754e-08],
         [1.25191080e-04, 3.11067761e-06],
         [1.22080402e-04, 0.00000000e+00]],
-       [[nan,            nan],
+       [[np.nan,            np.nan],
         [7.30898359e-01, 7.46196606e-02],
         [3.96967199e-01, 8.38554284e-03],
         [3.88581656e-01, 0.00000000e+00]]]), nan_ok=True)
@@ -1167,12 +1217,13 @@ def test_inc_tmm_s_VW_list():
 
 
 def test_inc_absorp_in_each_layer():
+    from solcore.absorption_calculator.tmm_core_vec import inc_absorp_in_each_layer
 
-    inc_data = {'T': np.array([1.22080402e-04, 3.88581656e-01]), 'R': np.array([0.0691011, 0.0934006]), 'VW_list': np.array([[[           nan,            nan],
+    inc_data = {'T': np.array([1.22080402e-04, 3.88581656e-01]), 'R': np.array([0.0691011, 0.0934006]), 'VW_list': np.array([[[           np.nan,            np.nan],
         [4.99455825e-02, 6.91491754e-08],
         [1.25191080e-04, 3.11067761e-06],
         [1.22080402e-04, 0.00000000e+00]],
-       [[           nan,            nan],
+       [[           np.nan,            np.nan],
         [7.30898359e-01, 7.46196606e-02],
         [3.96967199e-01, 8.38554284e-03],
         [3.88581656e-01, 0.00000000e+00]]]), 'coh_tmm_data_list': [{'r': np.array([0.15815358-0.2099727j , 0.05062109-0.18394307j]), 't': np.array([-0.16908171+0.0889725j,  0.59979328+0.5149352j]), 'R': np.array([0.06910109, 0.03639755]), 'T': np.array([0.04994557, 0.73063361]), 'power_entering': np.array([0.93089891, 0.96360245]), 'vw_list': np.array([[[ 0.        +0.j        ,  0.        +0.j        ],
@@ -1186,9 +1237,9 @@ def test_inc_absorp_in_each_layer():
        [0.38659626-0.16429512j, 0.3162772 -0.05459799j],
        [0.17752825-0.08995035j, 0.24849917-0.0507924j ]]), 'pol': 's', 'n_list': np.array([[1.5+0.j , 1.3+0.j ],
        [1. +0.4j, 1.2+0.2j],
-       [2. +1.j , 1.5+0.3j]]), 'd_list': np.array([[ inf],
+       [2. +1.j , 1.5+0.3j]]), 'd_list': np.array([[ np.inf],
        [200.],
-       [ inf]]), 'th_0': np.array([0.3+0.j, 0.3+0.j]), 'lam_vac': np.array([ 400, 1770])}], 'coh_tmm_bdata_list': [{'r': np.array([0.36942774+0.02981787j, 0.05747204-0.01565208j]), 't': np.array([-0.29467151+0.00137131j,  0.57277308+0.75172209j]), 'R': np.array([0.13736596, 0.00354802]), 'T': np.array([0.06346552, 0.76391471]), 'power_entering': np.array([0.89366146, 0.98977083]), 'vw_list': np.array([[[ 0.        +0.j        ,  0.        +0.j        ],
+       [ np.inf]]), 'th_0': np.array([0.3+0.j, 0.3+0.j]), 'lam_vac': np.array([ 400, 1770])}], 'coh_tmm_bdata_list': [{'r': np.array([0.36942774+0.02981787j, 0.05747204-0.01565208j]), 't': np.array([-0.29467151+0.00137131j,  0.57277308+0.75172209j]), 'R': np.array([0.13736596, 0.00354802]), 'T': np.array([0.06346552, 0.76391471]), 'power_entering': np.array([0.89366146, 0.98977083]), 'vw_list': np.array([[[ 0.        +0.j        ,  0.        +0.j        ],
         [ 0.        +0.j        ,  0.        +0.j        ]],
        [[ 1.37311562+0.0051288j , -0.00368788+0.02468907j],
         [ 1.13241606+0.01868049j, -0.07494402-0.03433257j]],
@@ -1199,11 +1250,11 @@ def test_inc_absorp_in_each_layer():
        [0.38659626-1.64295119e-01j, 0.3162772 -5.45979936e-02j],
        [0.3       -1.93687955e-17j, 0.3       +1.11743051e-17j]]), 'pol': 's', 'n_list': np.array([[2. +1.j , 1.5+0.3j],
        [1. +0.4j, 1.2+0.2j],
-       [1.5+0.j , 1.3+0.j ]]), 'd_list': np.array([[ inf],
+       [1.5+0.j , 1.3+0.j ]]), 'd_list': np.array([[ np.inf],
        [200.],
-       [ inf]]), 'th_0': np.array([0.17752825-0.08995035j, 0.24849917-0.0507924j ]), 'lam_vac': np.array([ 400, 1770])}], 'stackFB_list': np.array([[[1.00000000e+00, 6.91491754e-08]],
+       [ np.inf]]), 'th_0': np.array([0.17752825-0.08995035j, 0.24849917-0.0507924j ]), 'lam_vac': np.array([ 400, 1770])}], 'stackFB_list': np.array([[[1.00000000e+00, 6.91491754e-08]],
        [[1.00000000e+00, 7.46196606e-02]]]), 'power_entering_list': np.array([[1.00000000e+00, 4.99455112e-02, 1.22080402e-04, 1.22080402e-04],
-       [1.00000000e+00, 6.56777243e-01, 3.88581656e-01, 3.88581656e-01]]), 'stack_d_list': [[inf, 200.0, inf]], 'stack_n_list': [[np.array([1.5+0.j, 1.3+0.j]), np.array([1. +0.4j, 1.2+0.2j]), np.array([2. +1.j , 1.5+0.3j])]], 'all_from_inc': [0, 2, 3, 4], 'inc_from_all': [0, nan, 1, 2, 3], 'all_from_stack': [[0, 1, 2]], 'stack_from_all': [nan, [0, 1], nan, nan, nan], 'inc_from_stack': [0], 'stack_from_inc': [nan, 0, nan, nan], 'num_stacks': 1, 'num_inc_layers': 4, 'num_layers': 5}
+       [1.00000000e+00, 6.56777243e-01, 3.88581656e-01, 3.88581656e-01]]), 'stack_d_list': [[np.inf, 200.0, np.inf]], 'stack_n_list': [[np.array([1.5+0.j, 1.3+0.j]), np.array([1. +0.4j, 1.2+0.2j]), np.array([2. +1.j , 1.5+0.3j])]], 'all_from_inc': [0, 2, 3, 4], 'inc_from_all': [0, np.nan, 1, 2, 3], 'all_from_stack': [[0, 1, 2]], 'stack_from_all': [np.nan, [0, 1], np.nan, np.nan, np.nan], 'inc_from_stack': [0], 'stack_from_inc': [np.nan, 0, np.nan, np.nan], 'num_stacks': 1, 'num_inc_layers': 4, 'num_layers': 5}
 
     assert np.array(inc_absorp_in_each_layer(inc_data)) == approx(np.array([[6.91010944e-02, 9.34006064e-02],
        [8.80953397e-01, 2.49822147e-01],
@@ -1214,16 +1265,20 @@ def test_inc_absorp_in_each_layer():
 
 
 def test_inc_find_absorp_analytic_fn_exception():
-    inc_data = {'stack_from_all': [nan, [0, 1], nan, nan, nan]}
+    from solcore.absorption_calculator.tmm_core_vec import inc_find_absorp_analytic_fn
+
+    inc_data = {'stack_from_all': [np.nan, [0, 1], np.nan, np.nan, np.nan]}
 
     with raises(ValueError):
         inc_find_absorp_analytic_fn(2, inc_data)
 
 
 def test_inc_find_absorp_analytic_fn():
+    from solcore.absorption_calculator.tmm_core_vec import inc_find_absorp_analytic_fn, inc_tmm
+
     n_list = np.array([[1, 2, 2, 1],
                       [1, 3, 3, 1]]).T
-    d_list = np.array([inf, 100, 1000, inf])
+    d_list = np.array([np.inf, 100, 1000, np.inf])
 
     th_0 = [0.3]
 
@@ -1244,9 +1299,11 @@ def test_inc_find_absorp_analytic_fn():
 
 
 def test_inc_position_resolved():
+    from solcore.absorption_calculator.tmm_core_vec import inc_position_resolved, inc_tmm, find_in_structure_with_inf
+
     n_list = np.array([[1, 2 + 0.5*1j, 2, 1],
                       [1, 3, 3 + 1*1j, 1]]).T
-    d_list = np.array([inf, 100, 1000, inf])
+    d_list = np.array([np.inf, 100, 1000, np.inf])
 
     th_0 = [0.3]
 
@@ -1273,6 +1330,8 @@ def test_inc_position_resolved():
 
 
 def test_beer_lambert():
+    from solcore.absorption_calculator.tmm_core_vec import beer_lambert
+
     alphas = np.linspace(0, 1, 5)
     fraction = np.linspace(0.2, 1, 5)
     dist = np.linspace(0, 100e-9, 4)
