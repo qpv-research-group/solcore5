@@ -6,7 +6,7 @@ Installing Solcore
 
 Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient. The following instructions are expected to work in most systems, but check the sections below for OS specific instructions and caveats. In order to install Solcore in your computer, you will need the following:
 
-- Python >3.4
+- Python >3.7
 - pip
 - setuptools
 - numpy
@@ -31,20 +31,20 @@ And that's all!! Solcore should be available to be used as with any Python packa
 
     >>> import solcore
 
-        Welcome to Solcore - version 5.5.2
+        Welcome to Solcore - version 5.6.0
         Copyright (c) 2018, Imperial College, London All rights reserved.
         Software released under the GNU Lesser General Public License.
 
 Alternative installation method
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Alternatively, you can `download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_, either using 'git' or as a zip file using one of the links on the right. This let you test other branches or play with it and help to develop it further. If you want to install it, unpack it and run from the directory where *setup.py* is located::
+Alternatively, you can `download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_, either using 'git' or as a zip file using one of the links on the right. If you want to install it, unpack it and run from the directory where *setup.py* is located (you still need *pip*, *setuptools* and *numpy* installed; see above)::
 
-    python setup.py install
+    pip install .
 
 or::
 
-    python setup.py install --with_pdd
+    pip install . --install-option="--with_pdd"
 
 If you want to test first if Solcore will work in your computer, without actually installing it, or if you want to become a developer and therefore you need to have it in a more accessible place, you can test if Solcore works with::
 
@@ -53,6 +53,23 @@ If you want to test first if Solcore will work in your computer, without actuall
 This will also install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore's functionality, but it will be expanded with time. The tests related to the PDD solver will fail, of course, since the PDD solver will not be compiled. If you want to test everything, compiling the the PDD solver, just run::
 
     python setup.py test --with_pdd
+
+Install in development mode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are planning to develop Solcore further, you would want to have all the files in an accessible place but still being able to use the package from other places and examples, behaving as if it were truly installed. For this, install Solcore in development mode. `Download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_ as above and then::
+
+    pip install -e .[dev]
+
+or::
+
+    pip install -e .[dev] --install-option="--with_pdd"
+    
+Solcore uses *pre-commit* to do a few things before commiting the changes (for example, clearing the output of Jupyter Notebooks). The *pre-commit* package is installed automatically with the above commands, but each user needs to be initialise it before it can work. This can be done with::
+
+    pre-commit install
+   
+Check the `pre-commit webpage <https://pre-commit.com/#3-install-the-git-hook-scripts>`_ for more information on how it works. 
 
 Getting started
 ^^^^^^^^^^^^^^^

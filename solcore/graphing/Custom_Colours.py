@@ -8,7 +8,8 @@
 
 import os
 import re
-from cycler import cycler
+from cycler import cycler, Cycler
+from typing import List, Tuple, Dict, Union
 
 # define the file path to the Colours.csv file, which sits within the Graphing Package
 this_dir, this_fname = os.path.split(__file__)
@@ -16,41 +17,41 @@ file_path = os.path.join(this_dir, 'Colours.txt')
 
 # Need to read the file in as text, declare
 # opens .txt as file object
-raw_txt = []
+raw_txt: List[str] = []
 
 with open(file_path) as file:
 
     raw_txt = file.read().splitlines()
 
 
-def colours(colour, type='hex'):
+def colours(colour: str, type: str = 'hex') -> Union[str, Tuple[float, ...]]:
     """colours(colour, type) :: Function identifies the name of the colour and returns the correct HEX or RGB key.
         Default return is in HEX.
 
-    :param name: string variable, name of colour as listed in the table of colours at;
+    :param colour: string variable, name of colour as listed in the table of colours at;
                     http://www.rapidtables.com/web/color/RGB_Color.htm
     :param type: string variable, choices of "hex or "rgb". If colour is not found an error is returned.
     :return: HEX string or RGB tuple
     """
 
     # Initialise variables
-    Cols = {}
+    Cols: Dict[str, Union[str, Tuple[float, ...]]] = {}
     Cols.setdefault("Colour", colour)
-    HEX2DEC = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
+    HEX2DEC: List[str] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
 
     for Lines in raw_txt:
         # Using regular expressions package, matching the material name with the correct section of the file.
         # If the name is found, ID is switched to True.
-        split_line = Lines.split(" = ")
+        split_line: List[str] = Lines.split(" = ")
 
         if re.fullmatch(colour.lower(), split_line[0]) != None:
 
             Cols["HEX"] = split_line[1]
-            HEX = split_line[1]
+            HEX: str = split_line[1]
 
-            R = HEX2DEC.index(HEX[1]) * 16 ** 1 + HEX2DEC.index(HEX[2]) * 16 ** 0
-            G = HEX2DEC.index(HEX[3]) * 16 ** 1 + HEX2DEC.index(HEX[4]) * 16 ** 0
-            B = HEX2DEC.index(HEX[5]) * 16 ** 1 + HEX2DEC.index(HEX[6]) * 16 ** 0
+            R: int = HEX2DEC.index(HEX[1]) * 16 ** 1 + HEX2DEC.index(HEX[2]) * 16 ** 0
+            G: int = HEX2DEC.index(HEX[3]) * 16 ** 1 + HEX2DEC.index(HEX[4]) * 16 ** 0
+            B: int = HEX2DEC.index(HEX[5]) * 16 ** 1 + HEX2DEC.index(HEX[6]) * 16 ** 0
 
             Cols["RGB"] = (R/255, G/255, B/255)
 
@@ -67,7 +68,8 @@ def colours(colour, type='hex'):
     else:
         raise ValueError("Invalid 'type' selection... Choose either 'hex' or 'rgb'.")
 
-def colour_cycle(name):
+
+def colour_cycle(name: str) -> Cycler:
     """colour_cycle(name, type) :: Function returns a cycler instance of a list of colours (in HEX) that can be used
         when plotting multi-plots.
 
@@ -76,7 +78,7 @@ def colour_cycle(name):
     :return: colour cycle instance
     """
 
-    Arg_Out = []
+    Arg_Out : List[Union[str, Tuple[float, ...]]] = []
 
     if name.lower() == 'rainbow': # 29 colours in shades of the rainbow...
 
