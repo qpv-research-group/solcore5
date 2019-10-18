@@ -354,3 +354,162 @@ def test_get_J_sc_SCR():
 
 ## QE
 
+# no need to pass wl to this function
+def test_get_J_sc_SCR_vs_WL():
+    from solcore.light_source import LightSource
+    from solcore.interpolate import interp1d
+    from solcore.analytic_solar_cells.depletion_approximation import get_J_sc_SCR_vs_WL
+
+    light_source = LightSource(source_type="standard", version="AM1.5g")
+    wl = np.linspace(300, 1800, 50)*1e-9
+    wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+
+    xa_nm = randrange(1, 1000)
+    xa = xa_nm*1e-9
+    xb = randrange(xa_nm+1, 1100)*1e-9
+
+    ## make a simple Beer-Lambert profile
+    dist = np.linspace(0, xb, 1000)
+    alphas = np.linspace(1e5, 10, len(wl))
+
+    expn = np.exp(- alphas[:, None] * dist[None,:])
+
+    output = alphas[:, None]*expn
+    output = output.T
+    gen_prof = interp1d(dist, output, axis = 0)
+
+    #plt.figure()
+    #plt.imshow(output)
+    #plt.show()
+
+    zz = np.linspace(xa, xb, 1001)
+    gg = gen_prof(zz) * phg
+    expected = np.trapz(gg, zz, axis=0)
+
+    result = get_J_sc_SCR_vs_WL(xa, xb, gen_prof, wl, phg)
+    # think the units might be wrong (factor of 1e9?) but it doesn't really matter
+
+    assert  expected == approx(result)
+
+
+def test_get_J_sc_diffusion_vs_WL_top():
+    from solcore.analytic_solar_cells.depletion_approximation import get_J_sc_diffusion_vs_WL
+    from scipy.integrate import solve_bvp
+    from solcore.interpolate import interp1d
+    from solcore.light_source import LightSource
+
+    D = randrange(1, 1e5)*1e-5 # Diffusion coefficient
+    L = randrange(5, 10000)*1e-9 # Diffusion length
+    minority = randrange(1, 70)# minority carrier density
+    s = randrange(1, 1000) # surface recombination velocity
+
+
+    light_source = LightSource(source_type="standard", version="AM1.5g")
+    wl = np.linspace(300, 1800, 50)*1e-9
+    wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+
+    xa_nm = randrange(1, 1000)
+    xa = xa_nm*1e-9
+    xb = randrange(xa_nm+1, 1100)*1e-9
+
+    ## make a simple Beer-Lambert profile
+    dist = np.linspace(0, xb, 1000)
+    alphas = np.linspace(1e8, 10, len(wl))
+
+    expn = np.exp(- alphas[:, None] * dist[None,:])
+
+    output = alphas[:, None]*expn
+    output = output.T
+    gen_prof = interp1d(dist, output, axis = 0)
+
+
+    zz = np.linspace(xa, xb, 1001)
+    gg = gen_prof(zz) * phg
+
+    expected = np.zeros_like(wl)
+
+    for i in range(len(wl)):
+        A = lambda x: np.interp(x, zz, gg[:, i]) / D + minority / L ** 2
+
+        def fun(x, y):
+            out1 = y[1]
+            out2 = y[0] / L ** 2 - A(x)
+            return np.vstack((out1, out2))
+
+        def bc(ya, yb):
+            left = ya[1] - s / D * (ya[0] - minority)
+            right = yb[0]
+            return np.array([left, right])
+
+        guess = minority * np.ones((2, zz.size))
+        guess[1] = np.zeros_like(guess[0])
+        #print(zz)
+        solution = solve_bvp(fun, bc, zz, guess)
+
+        expected[i] = solution.y[1][-1]
+
+    result = get_J_sc_diffusion_vs_WL(xa, xb, gen_prof, D, L, minority, s, wl, phg, side='top')
+
+
+    assert result == approx(expected)
+
+
+# very similar to just get_J_sc_diffusion.
+
+def test_get_J_sc_diffusion_vs_WL_bottom():
+    from solcore.analytic_solar_cells.depletion_approximation import get_J_sc_diffusion_vs_WL
+    from scipy.integrate import solve_bvp
+    from solcore.interpolate import interp1d
+    from solcore.light_source import LightSource
+
+    D = randrange(1, 1e5) * 1e-5  # Diffusion coefficient
+    L = randrange(5, 10000) * 1e-9  # Diffusion length
+    minority = randrange(1, 70)  # minority carrier density
+    s = randrange(1, 1000)  # surface recombination velocity
+
+    light_source = LightSource(source_type="standard", version="AM1.5g")
+    wl = np.linspace(300, 1800, 50) * 1e-9
+    wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+
+    xa_nm = randrange(1, 1000)
+    xa = xa_nm * 1e-9
+    xb = randrange(xa_nm + 1, 1100) * 1e-9
+
+    ## make a simple Beer-Lambert profile
+    dist = np.linspace(0, xb, 1000)
+    alphas = np.linspace(1e8, 10, len(wl))
+
+    expn = np.exp(- alphas[:, None] * dist[None, :])
+
+    output = alphas[:, None] * expn
+    output = output.T
+    gen_prof = interp1d(dist, output, axis=0)
+
+    zz = np.linspace(xa, xb, 1001)
+    gg = gen_prof(zz) * phg
+
+    expected = np.zeros_like(wl)
+
+    for i in range(len(wl)):
+        A = lambda x: np.interp(x, zz, gg[:, i]) / D + minority / L ** 2
+
+        def fun(x, y):
+            out1 = y[1]
+            out2 = y[0] / L ** 2 - A(x)
+            return np.vstack((out1, out2))
+
+        def bc(ya, yb):
+            left = ya[0]
+            right = yb[1] - s / D * (yb[0] - minority)
+            return np.array([left, right])
+
+        guess = minority * np.ones((2, zz.size))
+        guess[1] = np.zeros_like(guess[0])
+        # print(zz)
+        solution = solve_bvp(fun, bc, zz, guess)
+
+        expected[i] = solution.y[1][0]
+
+    result = get_J_sc_diffusion_vs_WL(xa, xb, gen_prof, D, L, minority, s, wl, phg, side='bottom')
+
+    assert result == approx(expected)
