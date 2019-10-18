@@ -157,7 +157,7 @@ def test_factor():
 
     result = factor(V, Vbi, tp, tn, kT, dEt)
 
-    assert result == approx(expected)
+    assert result == approx(expected, nan_ok=True)
 
 
 def test_forward():
@@ -587,6 +587,8 @@ def test_qe_depletion():
 
     qe_depletion(test_junc[0], options)
 
+    print('CHECK', test_junc[0].eqe(options.wavelength)[0], 6.28783762e-02)
+
     assert test_junc[0].eqe(options.wavelength) == approx(np.array([6.28783762e-02, 6.56312772e-02, 6.77987661e-02, 6.92704234e-02,
        7.02852937e-02, 7.07563896e-02, 7.09991841e-02, 7.12213622e-02,
        7.15543586e-02, 7.22625861e-02, 7.35141632e-02, 7.56851451e-02,
@@ -828,6 +830,7 @@ def test_iv_depletion():
     #plt.xlim(0, 1.5)
     #plt.ylim(-125, 0)
     #plt.show()
+    print('CHECK', test_junc[0].iv(Vs), -108.58213025)
 
     assert test_junc[0].iv(Vs) == approx(np.array([-108.58213025, -108.58213025, -108.58213025, -108.58213025,
        -108.58213025, -108.58213025, -108.58213025, -108.58213025,

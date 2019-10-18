@@ -118,7 +118,7 @@ def process_junction(junction, options):
     # As the DA solver is only valid for homojunctions, ni is the same in both
     ni = nRegion.material.ni
     niSquared = ni**2
-    print(lp, ln)
+
     # Effective masses and effective density of states
     # mEff_h = nRegion.material.eff_mass_hh_z * electron_mass
     # mEff_e = pRegion.material.eff_mass_electron * electron_mass
@@ -209,7 +209,7 @@ def iv_depletion(junction, options):
 
     # Here we use the full version of the SRH recombination term as calculated by Sah et al. Works for positive bias
     # and moderately negative ones.
-    print('w', w)
+
     science_reference('SRH current term.',
                       'C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and Recombination in P-N Junctions and P-N Junction Characteristics,” presented at the Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.')
     Jrec = get_Jsrh(ni, V, Vbi, lifetime_p, lifetime_n, w, kbT)
@@ -235,7 +235,6 @@ def iv_depletion(junction, options):
         xa = cum_widths[id_top]
         xb = cum_widths[id_top + 1] - w_top[id_v0]
 
-        print('xa, xb', xa, xb)
         deriv = get_J_sc_diffusion(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
         J_sc_top = q * d_top * abs(deriv)
 
@@ -272,7 +271,7 @@ def get_j_dark(x, w, l, s, d, V, minority, T):
     :return: J_top_dark
     """
     # We calculate some fractions
-    print('minority', minority)
+
     harg = (x - w) / l
     sinh_harg = np.sinh(harg)
     cosh_harg = np.cosh(harg)
@@ -281,7 +280,6 @@ def get_j_dark(x, w, l, s, d, V, minority, T):
     # And then we are ready to calculate the different currents
     # Missing the voltage dependent part of these equations.
     # They should be 6.34 and 6.39, not 6.62 and 6.63
-    print('q, V, kb, T', q, V, kb, T)
 
     J_dark = (q * d * minority / l) * (np.exp(q * V / kb / T) - 1) * \
                  ((lsod * cosh_harg + sinh_harg) / (lsod * sinh_harg + cosh_harg))
@@ -303,7 +301,7 @@ def get_Jsrh(ni, V, Vbi, tp, tn, w, kbT, dEt=0):
 
 def forward(ni, V, Vbi, tp, tn, w, kbT, dEt=0):
     """ Equation 27 of Sah's paper. Strictly speaking, it is not valid for intermediate negative bias. """
-    print('ni', ni)
+
     J0 = 2 * q * ni * w / np.sqrt(tn * tp)
     f = factor(V, Vbi, tp, tn, kbT, dEt)
     out = J0 * np.sinh(q * V / (2 * kbT)) / (q * (Vbi - V) / kbT) * f
@@ -405,7 +403,6 @@ def get_J_sc_SCR(xa, xb, g, wl, ph):
     zz = np.linspace(xa, xb, 1001)
     gg = g(zz) * ph
     out = np.trapz(np.trapz(gg, wl, axis=1), zz)
-    print('out', out)
 
     return out
 
