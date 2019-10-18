@@ -129,7 +129,7 @@ def iv_depletion(junction, options):
     # As the DA solver is only valid for homojunctions, ni is the same in both
     ni = nRegion.material.ni
     niSquared = ni**2
-
+    print(lp, ln)
     # Effective masses and effective density of states
     # mEff_h = nRegion.material.eff_mass_hh_z * electron_mass
     # mEff_e = pRegion.material.eff_mass_electron * electron_mass
@@ -146,6 +146,7 @@ def iv_depletion(junction, options):
 
     # And now we account for the possible applied voltage, which can be, at most, equal to Vbi
     V = np.where(junction.voltage < Vbi - 0.001, junction.voltage, Vbi - 0.001)
+    print('Vbi, V', Vbi, V)
 
     # It's time to calculate the depletion widths
     if not hasattr(junction, "wp") or not hasattr(junction, "wn"):
@@ -182,6 +183,7 @@ def iv_depletion(junction, options):
         d_bottom, d_top = dp, dn
         min_bot, min_top = niSquared / Na, niSquared / Nd
 
+    print(min_bot, min_top)
     JtopDark = get_j_top(x_top, w_top, l_top, s_top, d_top, V, min_top, T)
     JbotDark = get_j_bot(x_bottom, w_bottom, l_bottom, s_bottom, d_bottom, V, min_bot, T)
 
@@ -198,6 +200,7 @@ def iv_depletion(junction, options):
 
     # Here we use the full version of the SRH recombination term as calculated by Sah et al. Works for positive bias
     # and moderately negative ones.
+    print('w', w)
     science_reference('SRH current term.',
                       'C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and Recombination in P-N Junctions and P-N Junction Characteristics,” presented at the Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.')
     Jrec = get_Jsrh(ni, V, Vbi, lifetime_p, lifetime_n, w, kbT)
@@ -222,6 +225,8 @@ def iv_depletion(junction, options):
         # The contribution from the Emitter (top side).
         xa = cum_widths[id_top]
         xb = cum_widths[id_top + 1] - w_top[id_v0]
+
+        print('xa, xb', xa, xb)
         deriv = get_J_sc_diffusion(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
         J_sc_top = q * d_top * abs(deriv)
 
@@ -245,7 +250,20 @@ def iv_depletion(junction, options):
 
 
 def get_j_top(x, w, l, s, d, V, minority, T):
+    """
+    :param x: width of top junction
+    :param w: depletion width in top junction
+    :param l: diffusion length
+    :param s: surface recombination velocity
+    :param d: diffusion coefficient
+    :param V: voltage
+    :param minority: minority carrier density
+    :param T: Temperature
+
+    :return: J_top_dark
+    """
     # We calculate some fractions
+    print('minority', minority)
     harg = (x - w) / l
     sinh_harg = np.sinh(harg)
     cosh_harg = np.cosh(harg)
@@ -254,6 +272,7 @@ def get_j_top(x, w, l, s, d, V, minority, T):
     # And then we are ready to calculate the different currents
     # Missing the voltage dependent part of these equations.
     # They should be 6.34 and 6.39, not 6.62 and 6.63
+    print('q, V, kb, T', q, V, kb, T)
 
     J_top_dark = (q * d * minority / l) * (np.exp(q * V / kb / T) - 1) * \
                  ((lsod * cosh_harg + sinh_harg) / (lsod * sinh_harg + cosh_harg))
@@ -292,6 +311,7 @@ def get_Jsrh(ni, V, Vbi, tp, tn, w, kbT, dEt=0):
 
 def forward(ni, V, Vbi, tp, tn, w, kbT, dEt=0):
     """ Equation 27 of Sah's paper. Strictly speaking, it is not valid for intermediate negative bias. """
+    print('ni', ni)
     J0 = 2 * q * ni * w / np.sqrt(tn * tp)
     f = factor(V, Vbi, tp, tn, kbT, dEt)
     out = J0 * np.sinh(q * V / (2 * kbT)) / (q * (Vbi - V) / kbT) * f
@@ -339,8 +359,28 @@ def factor(V, Vbi, tp, tn, kbT, dEt=0):
 
 
 def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
+    """
+    :param xa:
+    :param xb:
+    :param g:
+    :param D:
+    :param L:
+    :param y0:
+    :param S:
+    :param wl:
+    :param ph:
+    :param side:
+
+    :return: out
+    """
     zz = np.linspace(xa, xb, 1001)
     gg = g(zz) * ph
+
+    print('max/min gg', np.max(gg), np.min(gg))
+    print('wl', np.min(wl), np.max(wl))
+    print('ph', np.max(ph), np.min(ph))
+
+
     g_vs_z = np.trapz(gg, wl, axis=1)
 
     A = lambda x: np.interp(x, zz, g_vs_z) / D + y0 / L ** 2
@@ -371,6 +411,8 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
     else:
         out = solution.y[1][0]
 
+    print('xa, xb, g, D, L, y0, S, Jsc diffusion', xa, xb, g, D, L, y0, S, out)
+
     return out
 
 
@@ -378,6 +420,7 @@ def get_J_sc_SCR(xa, xb, g, wl, ph):
     zz = np.linspace(xa, xb, 1001)
     gg = g(zz) * ph
     out = np.trapz(np.trapz(gg, wl, axis=1), zz)
+    print('out', out)
 
     return out
 
@@ -531,6 +574,9 @@ def qe_depletion(junction, options):
             wn = (-xi + np.sqrt(xi ** 2 + 2. * es * Vbi / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
             wp = (-xi + np.sqrt(xi ** 2 + 2. * es * Vbi / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
 
+            #print('w params', xi, es, Vbi, Na, Nd)
+
+
     wn = wn if not hasattr(junction, "wn") else junction.wn
     wp = wp if not hasattr(junction, "wp") else junction.wp
 
@@ -565,6 +611,7 @@ def qe_depletion(junction, options):
     # The contribution from the Emitter (top side).
     xa = cum_widths[id_top]
     xb = cum_widths[id_top + 1] - w_top
+    #print('xa, xb, wtop', xa, xb, w_top)
     deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
     j_sc_top = d_top * abs(deriv)
 
@@ -642,7 +689,7 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
         guess = y0 * np.ones((2, zz.size))
         guess[1] = np.zeros_like(guess[0])
-
+        #print(zz)
         solution = solve_bvp(fun, bc, zz, guess)
 
         if side == 'top':
@@ -651,3 +698,20 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
             out[i] = solution.y[1][0]
 
     return out
+
+
+def get_depletion_widths(es, Vbi, V, Na, Nd, xi, one_sided=False):
+    # It's time to calculate the depletion widths
+
+    if one_sided:
+        print("using one-sided abrupt junction approximation for depletion width")
+        science_reference("Sze abrupt junction approximation",
+                          "Sze: The Physics of Semiconductor Devices, 2nd edition, John Wiley & Sons, Inc (2007)")
+        wn = np.sqrt(2 * es * (Vbi - V) / (q * Nd))
+        wp = np.sqrt(2 * es * (Vbi - V) / (q * Na))
+
+    else:
+        wn = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
+        wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
+
+    return wn, wp
