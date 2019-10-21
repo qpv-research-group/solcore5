@@ -1,6 +1,6 @@
 import random
 from solcore import material
-from solcore.structure import Layer, SolcoreMaterialToStr, Structure, ToLayer, ToSolcoreMaterial
+from solcore.structure import Junction, Layer, SolcoreMaterialToStr, Structure, ToLayer, ToSolcoreMaterial, TunnelJunction
 
 T = 300
 QWmat_material_name = 'InGaAs'
@@ -19,7 +19,7 @@ available_roles = ['Barrier', 'Base', 'BSF', 'Emitter', 'Intrinsic', 'Window']
 
 wkt_box = 'POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'
 
-def test_layer():
+def test_layer_and_junction():
     width1 = random.uniform(1e-9, 1e-8)
     role1 = random.choice(available_roles)
     layer1 = Layer(width1, QWmat, role1, wkt_box, new_property='new_property')
@@ -49,6 +49,24 @@ def test_layer():
     assert layer3.role == role3
     assert layer3.material == i_GaAs
     assert layer3.geometry == wkt_box
+
+    sn = random.uniform(1e6, 1e7)
+    sp = random.uniform(1e6, 1e7)
+    junction1 = Junction([layer1, layer2, layer3], sn=sn, sp=sp, T=T, kind='PDD')
+
+    assert junction1.__len__() == 3
+    assert junction1.__dict__ == {'sn': sn, 'sp': sp, 'T': T, 'kind': 'PDD'}
+    assert junction1[0] == layer1
+    assert junction1[1] == layer2
+    assert junction1[2] == layer3
+
+    tunnel1 = TunnelJunction([layer1, layer2, layer3], sn=sn, sp=sp, T=T, kind='PDD')
+
+    assert tunnel1.__len__() == 3
+    assert tunnel1.__dict__ == {'sn': sn, 'sp': sp, 'T': T, 'kind': 'PDD', 'R': 1e-16, 'pn': True}
+    assert tunnel1[0] == layer1
+    assert tunnel1[1] == layer2
+    assert tunnel1[2] == layer3
 
 def test_material_to_str():
     assert SolcoreMaterialToStr(QWmat) == QWmat_structure
