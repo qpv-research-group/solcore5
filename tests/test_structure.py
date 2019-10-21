@@ -20,12 +20,12 @@ available_roles = ['Barrier', 'Base', 'BSF', 'Emitter', 'Intrinsic', 'Window']
 def test_layer():
     width1 = random.uniform(1e-9, 1e-8)
     role1 = random.choice(available_roles)
-    layer1 = Layer(width1, QWmat, role1, new_property='newProperty')
+    layer1 = Layer(width1, QWmat, role1, new_property='new_property')
 
     assert layer1.width == width1
     assert layer1.role == role1
     assert layer1.material == QWmat
-    assert layer1.__dict__['newProperty'] == 'newProperty'
+    assert layer1.__dict__['new_property'] == 'new_property'
     # TODO: see if the following can work:
     #  assert layer1 == ToLayer(width1, {'material': 'InGaAs', 'element': 'In', 'fraction': 0.2}, role1)
 
