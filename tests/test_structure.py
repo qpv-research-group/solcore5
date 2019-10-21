@@ -17,33 +17,38 @@ i_GaAs_structure = {'material': i_GaAs_material_name}
 
 available_roles = ['Barrier', 'Base', 'BSF', 'Emitter', 'Intrinsic', 'Window']
 
+wkt_box = 'POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'
+
 def test_layer():
     width1 = random.uniform(1e-9, 1e-8)
     role1 = random.choice(available_roles)
-    layer1 = Layer(width1, QWmat, role1, new_property='new_property')
+    layer1 = Layer(width1, QWmat, role1, wkt_box, new_property='new_property')
 
     assert layer1.width == width1
     assert layer1.role == role1
     assert layer1.material == QWmat
+    assert layer1.geometry == wkt_box
     assert layer1.__dict__['new_property'] == 'new_property'
     # TODO: see if the following can work:
     #  assert layer1 == ToLayer(width1, {'material': 'InGaAs', 'element': 'In', 'fraction': 0.2}, role1)
 
     width2 = random.uniform(1e-9, 1e-8)
     role2 = random.choice(available_roles)
-    layer2 = Layer(width2, Bmat, role2)
+    layer2 = Layer(width2, Bmat, role2, wkt_box)
 
     assert layer2.width == width2
     assert layer2.role == role2
     assert layer2.material == Bmat
+    assert layer2.geometry == wkt_box
 
     width3 = random.uniform(1e-9, 1e-8)
     role3 = random.choice(available_roles)
-    layer3 = Layer(width3, i_GaAs, role3)
+    layer3 = Layer(width3, i_GaAs, role3, wkt_box)
 
     assert layer3.width == width3
     assert layer3.role == role3
     assert layer3.material == i_GaAs
+    assert layer3.geometry == wkt_box
 
 def test_material_to_str():
     assert SolcoreMaterialToStr(QWmat) == QWmat_structure
