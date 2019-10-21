@@ -2,7 +2,7 @@ import random
 from solcore import material
 from solcore.poisson_drift_diffusion.DeviceStructure import CreateDeviceStructure
 from solcore.structure import Junction, Layer, SolcoreMaterialToStr, Structure, ToSolcoreMaterial, TunnelJunction
-from solcore.structure import ToLayer, ToStructure
+from solcore.structure import InLineComposition, ToLayer, ToStructure
 
 # Materials
 T = 300
@@ -139,6 +139,11 @@ def test_to_material():
     i_GaAs_material = ToSolcoreMaterial(i_GaAs_structure, T, True)
     assert i_GaAs_material.__class__.__name__ == i_GaAs_material_name
     assert i_GaAs_material.__dict__ == i_GaAs.__dict__
+
+def test_inline_composition():
+    assert InLineComposition(device['layers'][0]) == 'In0.2GaAs'
+    assert InLineComposition(device['layers'][1]) == 'GaAsP0.1'
+    assert InLineComposition(device['layers'][2]) == 'GaAs'
 
 def test_to_layer():
     device_layer = device['layers'][0]
