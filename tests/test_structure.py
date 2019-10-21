@@ -40,8 +40,6 @@ def test_layer_and_junction():
     assert layer1.material == QWmat
     assert layer1.geometry == wkt_box
     assert layer1.__dict__['new_property'] == 'new_property'
-    # TODO: see if the following can work:
-    #  assert layer1 == ToLayer(width1, {'material': 'InGaAs', 'element': 'In', 'fraction': 0.2}, role1)
 
     assert layer2.width == width2
     assert layer2.role == role2
@@ -141,6 +139,15 @@ def test_to_material():
     i_GaAs_material = ToSolcoreMaterial(i_GaAs_structure, T, True)
     assert i_GaAs_material.__class__.__name__ == i_GaAs_material_name
     assert i_GaAs_material.__dict__ == i_GaAs.__dict__
+
+def test_to_layer():
+    device_layer = device['layers'][0]
+    composition = device_layer['properties']['composition']
+    layer = ToLayer(width1, ToSolcoreMaterial(composition, T), role1)
+
+    assert layer.width == width1
+    assert layer.role == role1
+    assert layer.material.__str__() == QWmat.__str__()
 
 def test_to_structure():
     structure = ToStructure(device)
