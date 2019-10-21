@@ -500,6 +500,7 @@ def test_process_junction_exceptions():
     GaAs_n = material("GaAs")(Nd = Nd, hole_diffusion_length=Ln)
     GaAs_p = material("GaAs")(Na = Na, electron_diffusion_length=Lp)
     GaAs_i = material("GaAs")()
+    Ge_n = material("Ge")(Nd = Nd, hole_diffusion_length=Ln)
 
     n_width = randrange(500, 1000)*1e-9
     p_width = randrange(3000, 5000)*1e-9
@@ -518,6 +519,12 @@ def test_process_junction_exceptions():
     with raises(RuntimeError):
         results = process_junction(test_junc, options)
 
+    test_junc  = Junction([Layer(n_width, Ge_n,role="emitter"),
+                           Layer(p_width, GaAs_p, role="base")])
+
+    with raises(AssertionError):
+        results = process_junction(test_junc, options)
+
 
 def test_process_junction_np():
     from solcore.analytic_solar_cells.depletion_approximation import process_junction
@@ -534,13 +541,17 @@ def test_process_junction_np():
     Lp = randrange(5, 10000)*1e-9 # Diffusion length
     Ln = randrange(5, 10000)*1e-9 # Diffusion length
 
+    GaAs_window = material("GaAs")()
     GaAs_n = material("GaAs")(Nd = Nd, hole_diffusion_length=Ln)
     GaAs_p = material("GaAs")(Na = Na, electron_diffusion_length=Lp)
 
     n_width = randrange(500, 1000)*1e-9
     p_width = randrange(3000, 5000)*1e-9
+    window_width = randrange(25, 200)*1e-9
 
-    test_junc  = Junction([Layer(n_width, GaAs_n,role="emitter"), Layer(p_width, GaAs_p, role="base")])
+    test_junc  = Junction([Layer(window_width, GaAs_window, role="window"),
+                           Layer(n_width, GaAs_n,role="emitter"),
+                           Layer(p_width, GaAs_p, role="base")])
 
     results = process_junction(test_junc, options)
 
@@ -553,7 +564,7 @@ def test_process_junction_np():
                              Lp, Ln, n_width, p_width,
                              0, 0, GaAs_n.hole_mobility * kb*options.T / q,
                                     GaAs_p.electron_mobility * kb * options.T / q,
-                              GaAs_n.permittivity, 0, 1, Vbi_expect))
+                              GaAs_n.permittivity, 1, 2, Vbi_expect))
 
     assert results[17] == 'np'
 
@@ -965,4 +976,131 @@ def test_dark_iv_depletion_np():
     #print(test_junc.iv(options.internal_voltages))
     assert test_junc.iv(options.internal_voltages) == approx(iv(options.internal_voltages), nan_ok=True)
 
+
+## check for qe:
+# - array sizes
+# - QE < 100% everywhere
+# - QE(wl) < A(wl)
+
+def test_qe_depletion_np():
+    from solcore.structure import Junction, Layer
+    from solcore import si, material
+    from solcore.solar_cell import SolarCell
+    from solcore.solar_cell_solver import prepare_solar_cell
+    from solcore.state import State
+    from solcore.light_source import LightSource
+    from solcore.analytic_solar_cells import qe_depletion
+    from solcore.optics import solve_beer_lambert
+
+    Nd = randrange(1, 100)*1e24
+    Na = randrange(1, 100)*1e23
+
+    Lp = randrange(5, 3000) * 1e-9  # Diffusion length
+    Ln = randrange(5, 3000) * 1e-9  # Diffusion length
+
+    AlInP = material("AlInP")
+    InGaP = material("GaInP")
+    window_material = AlInP(Al=0.52)
+    top_cell_n_material = InGaP(In=0.48, Nd=Nd,
+                                hole_diffusion_length=Lp)
+    top_cell_p_material = InGaP(In=0.48, Na=Na,
+                                electron_diffusion_length=Ln)
+
+    rel_perm = randrange(8, 20)
+    for mat in [top_cell_n_material, top_cell_p_material]:
+        mat.permittivity = rel_perm * vacuum_permittivity
+
+    n_width = randrange(500, 1000)*1e-9
+    p_width = randrange(3000, 5000)*1e-9
+
+    test_junc = SolarCell([Junction([Layer(si("25nm"), material=window_material, role='window'),
+                  Layer(n_width, material=top_cell_n_material, role='emitter'),
+                  Layer(p_width, material=top_cell_p_material, role='base'),
+                 ], sn=1, sp=1, kind='DA')])
+
+    light_source = LightSource(source_type="standard", version="AM1.5g")
+
+    options = State()
+    wl = np.linspace(290, 700, 150) * 1e-9
+    options.T = randrange(10, 350)
+    options.wavelength = wl
+    options.light_source = light_source
+    options.position = None
+    prepare_solar_cell(test_junc, options)
+
+    solve_beer_lambert(test_junc, options)
+
+    qe_depletion(test_junc[0], options)
+
+    assert np.all(test_junc[0].eqe(wl) < 1)
+    assert np.all(test_junc[0].eqe_emitter(wl) < 1)
+    assert np.all(test_junc[0].eqe_base(wl) < 1)
+    assert np.all(test_junc[0].eqe_scr(wl) < 1)
+    assert np.all(test_junc[0].eqe(wl)[test_junc[0].eqe(wl) > 1e-3]
+                  <= test_junc.absorbed[test_junc[0].eqe(wl) > 1e-3])
+    assert np.all(test_junc[0].eqe_emitter(wl) + test_junc[0].eqe_base(wl) +
+                  test_junc[0].eqe_scr(wl) == approx(test_junc[0].eqe(wl)))
+    assert np.all(test_junc[0].iqe(wl) >= test_junc[0].eqe(wl))
+
+
+
+def test_qe_depletion_pn():
+    from solcore.structure import Junction, Layer
+    from solcore import si, material
+    from solcore.solar_cell import SolarCell
+    from solcore.solar_cell_solver import prepare_solar_cell
+    from solcore.state import State
+    from solcore.light_source import LightSource
+    from solcore.analytic_solar_cells import qe_depletion
+    from solcore.optics import solve_beer_lambert
+
+    Na = randrange(1, 100)*1e24
+    Nd = randrange(1, 100)*1e23
+
+    Lp = randrange(5, 3000) * 1e-9  # Diffusion length
+    Ln = randrange(5, 3000) * 1e-9  # Diffusion length
+
+    AlInP = material("AlInP")
+    InGaP = material("GaInP")
+    window_material = AlInP(Al=0.52)
+    top_cell_n_material = InGaP(In=0.48, Nd=Nd,
+                                hole_diffusion_length=Lp)
+    top_cell_p_material = InGaP(In=0.48, Na=Na,
+                                electron_diffusion_length=Ln)
+
+    rel_perm = randrange(8, 20)
+    for mat in [top_cell_n_material, top_cell_p_material]:
+        mat.permittivity = rel_perm * vacuum_permittivity
+
+    p_width = randrange(500, 1000)*1e-9
+    n_width = randrange(3000, 5000)*1e-9
+
+    test_junc = SolarCell([Junction([Layer(si("25nm"), material=window_material, role='window'),
+                  Layer(p_width, material=top_cell_p_material, role='emitter'),
+                  Layer(n_width, material=top_cell_n_material, role='base'),
+                 ], sn=1, sp=1, kind='DA')])
+
+    light_source = LightSource(source_type="standard", version="AM1.5g")
+
+    options = State()
+    wl = np.linspace(290, 700, 150) * 1e-9
+    options.T = randrange(10, 350)
+    options.wavelength = wl
+    options.light_source = light_source
+    options.position = None
+    prepare_solar_cell(test_junc, options)
+
+    solve_beer_lambert(test_junc, options)
+
+    qe_depletion(test_junc[0], options)
+
+    assert np.all(test_junc[0].eqe(wl) < 1)
+    assert np.all(test_junc[0].eqe_emitter(wl) < 1)
+    assert np.all(test_junc[0].eqe_base(wl) < 1)
+    assert np.all(test_junc[0].eqe_scr(wl) < 1)
+    assert np.all(test_junc[0].eqe(wl)[test_junc[0].eqe(wl) > 1e-3]
+                  <= test_junc.absorbed[test_junc[0].eqe(wl) > 1e-3])
+    assert np.all(test_junc[0].eqe_emitter(wl) + test_junc[0].eqe_base(wl) +
+                  test_junc[0].eqe_scr(wl) == approx(test_junc[0].eqe(wl)))
+    assert np.all(test_junc[0].iqe(wl) >= test_junc[0].eqe(wl))
 
