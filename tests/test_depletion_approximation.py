@@ -4,81 +4,9 @@ import numpy as np
 
 from solcore.constants import kb, q, vacuum_permittivity
 
-# get_j_top and get_j_bot can be one function
-# separate function which calculates the depletion widths
-
-# w is not a constant but has the same length as V! because it's a function of V
-
-# pre-processing for both qe and iv done in separate function
-
-
-## IV
-
-@mark.skip
-def test_get_j_top():
-    from solcore.analytic_solar_cells.depletion_approximation import get_j_top, get_depletion_widths
-
-    xnm = randrange(2, 1000)
-    x = xnm*1e-9
-
-    xi  = randrange(0, 1000)*1e-9
-
-    es = randrange(1, 20)*vacuum_permittivity
-    l = randrange(5, 10000)*1e-9
-    s = randrange(1, 1000)
-    d = randrange(1, 1e5)*1e-5
-    Vbi = randrange(1, 50)*1e-1
-    minor = randrange(1, 1e6)*1e8
-    T = randrange(1, 300)
-    Na = randrange(1, 1e5)*1e19
-    Nd = randrange(1, 1e5)*1e19
-
-    V = np.linspace(-6, 4, 20)
-    V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
-
-    wn, wp = get_depletion_widths(es, Vbi, V, Na, Nd, xi, one_sided=False)
-    w = wn + wp + xi
-
-    expected = (q*d*minor/l)*(np.exp(q*V/(kb*T))-1)*((((s*l)/d)*np.cosh((x-w)/l)+np.sinh((x-w)/l))/
-                                                  (((s*l)/d)*np.sinh((x-w)/l)+np.cosh((x-w)/l)))
-
-    result = get_j_top(x, w, l, s, d, V, minor, T)
-
-    assert result == approx(expected)
-
-@mark.skip
-def test_get_j_bot():
-    from solcore.analytic_solar_cells.depletion_approximation import get_j_bot, get_depletion_widths
-
-    xnm = randrange(2, 1000)
-    x = xnm*1e-9
-    xi  = randrange(0, 1000)*1e-9
-
-    l = randrange(5, 10000)*1e-9
-    s = randrange(1, 1000)
-    d = randrange(1, 1e5)*1e-5
-    Vbi = randrange(1, 50)*1e-1
-    minor = randrange(1, 1e6)*1e-8
-    T = randrange(1, 300)
-    es = randrange(1, 20)*vacuum_permittivity
-    Na = randrange(1, 1e5)*1e19
-    Nd = randrange(1, 1e5)*1e19
-
-    V = np.linspace(-6, 4, 20)
-    V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
-
-    wn, wp = get_depletion_widths(es, Vbi, V, Na, Nd, xi, one_sided=False)
-    w = wn + wp + xi
-
-    expected = (q*d*minor/l)*(np.exp(q*V/(kb*T))-1)*((((s*l)/d)*np.cosh((x-w)/l)+np.sinh((x-w)/l))/
-                                                  (((s*l)/d)*np.sinh((x-w)/l)+np.cosh((x-w)/l)))
-
-    result = get_j_bot(x, w, l, s, d, V, minor, T)
-
-    assert result == approx(expected)
 
 def test_get_j_dark():
-    from solcore.analytic_solar_cells.depletion_approximation import get_j_dark, get_depletion_widths
+    from solcore.analytic_solar_cells.depletion_approximation import get_j_dark
 
     xnm = randrange(2, 1000)
     x = xnm*1e-9
@@ -97,7 +25,9 @@ def test_get_j_dark():
     V = np.linspace(-6, 4, 20)
     V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
 
-    wn, wp = get_depletion_widths(es, Vbi, V, Na, Nd, xi, one_sided=False)
+    wn = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
+    wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
+
     w = wn + wp + xi
 
     expected = (q*d*minor/l)*(np.exp(q*V/(kb*T))-1)*((((s*l)/d)*np.cosh((x-w)/l)+np.sinh((x-w)/l))/
@@ -161,7 +91,7 @@ def test_factor():
 
 
 def test_forward():
-    from solcore.analytic_solar_cells.depletion_approximation import factor, forward, get_depletion_widths
+    from solcore.analytic_solar_cells.depletion_approximation import factor, forward
 
     T = randrange(1, 300)
     kT = kb*T
@@ -180,7 +110,9 @@ def test_forward():
     m = V >= -1120 * kT / q
     V = V[m]
 
-    wn, wp = get_depletion_widths(es, Vbi, V, Na, Nd, xi, one_sided=False)
+    wn = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
+    wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
+
     w = wn + wp + xi
     w = w[m]
 
@@ -195,7 +127,7 @@ def test_forward():
 
 # this test failed one, not sure on conditions (rng)
 def test_get_J_srh():
-    from solcore.analytic_solar_cells.depletion_approximation import forward, get_Jsrh, get_depletion_widths
+    from solcore.analytic_solar_cells.depletion_approximation import forward, get_Jsrh
     T = randrange(1, 300)
     kT = kb*T
     V = np.linspace(-6, 4, 20)
@@ -210,7 +142,9 @@ def test_get_J_srh():
     Nd = randrange(1, 1e5)*1e19
     xi  = randrange(0, 1000)*1e-9
 
-    wn, wp = get_depletion_widths(es, Vbi, V, Na, Nd, xi, one_sided=False)
+    wn = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
+    wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
+
     w = wn + wp + xi
 
     expected = np.zeros(V.shape)
@@ -1123,3 +1057,68 @@ def test_process_junction_set_in_junction():
                               se, 0, 2, Vbi))
 
     assert results[17] == 'pn'
+
+
+def test_get_depletion_widths():
+    from solcore.analytic_solar_cells.depletion_approximation import get_depletion_widths
+    from solcore.structure import Junction
+
+    xnm = randrange(2, 1000)
+    xi  = randrange(0, 1000)*1e-9
+
+    Vbi = randrange(1, 50)*1e-1
+    es = randrange(1, 20)*vacuum_permittivity
+    Na = randrange(1, 1e5)*1e19
+    Nd = randrange(1, 1e5)*1e19
+
+    V = np.linspace(-6, 4, 20)
+    V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
+
+    test_junc = Junction()
+
+    wn_e = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
+    wp_e = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
+
+    wn_r, wp_r = get_depletion_widths(test_junc, es, Vbi, V, Na, Nd, xi)
+
+    assert wn_r == approx(wn_e)
+    assert wp_r == approx(wp_e)
+
+
+def test_get_depletion_widths_onesided():
+    from solcore.analytic_solar_cells.depletion_approximation import get_depletion_widths
+    from solcore.structure import Junction
+
+    xi  = randrange(0, 1000)*1e-9
+
+    Vbi = randrange(1, 50)*1e-1
+    es = randrange(1, 20)*vacuum_permittivity
+    Na = randrange(1, 1e5)*1e19
+    Nd = randrange(1, 1e5)*1e19
+
+    V = np.linspace(-6, 4, 20)
+    V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
+
+    test_junc = Junction(depletion_approximation="one-sided abrupt")
+
+    wn_e = np.sqrt(2 * es * (Vbi - V) / (q * Nd))
+    wp_e = np.sqrt(2 * es * (Vbi - V) / (q * Na))
+
+    wn_r, wp_r = get_depletion_widths(test_junc, es, Vbi, V, Na, Nd, xi)
+
+    assert wn_r == approx(wn_e)
+    assert wp_r == approx(wp_e)
+
+
+def test_get_depletion_widths_set_in_junction():
+    from solcore.analytic_solar_cells.depletion_approximation import get_depletion_widths
+    from solcore.structure import Junction
+
+    wn = randrange(1,100)
+    wp = randrange(1,100)
+    test_junc = Junction(wn=wn, wp=wp)
+
+    wn_r, wp_r = get_depletion_widths(test_junc, 0, 0, 0, 0, 0, 0)
+
+    assert wn_r == approx(wn)
+    assert wp_r == approx(wp)
