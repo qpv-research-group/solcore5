@@ -102,6 +102,7 @@ def test_structure():
     assert structure3[0] == layer1
     assert structure3[1] == layer1
     assert structure3.width() == width1*2
+    # Below currently fails due to a bug when specifying labels and repeating more than once
     # assert structure3.relative_widths()['layer1'] == width1 / structure3.width()
 
     structure4 = Structure([])
@@ -114,6 +115,7 @@ def test_structure():
     assert structure4[2] == layer1
     assert structure4[3] == layer2
     assert structure4.width() == width1*2 + width2*2
+    # Below currently fails due to a bug when specifying labels and repeating more than once
     # assert structure4.relative_widths()['layer1'] == width1 / structure4.width()
     # assert structure4.relative_widths()['layer2'] == width2 / structure4.width()
 
