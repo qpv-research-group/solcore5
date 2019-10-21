@@ -44,10 +44,10 @@ def process_junction(junction, options):
         if junction[idx + 2].role.lower() == 'base':
             if pn_or_np == "pn":
                 nRegion = junction[idx + 2]
-                nidx = idx + 2
+                #nidx = idx + 2
             else:
                 pRegion = junction[idx + 2]
-                pidx = idx + 2
+                #pidx = idx + 2
 
             id_bottom = idx + 2
             homojunction = homojunction and nRegion.material.material_string == pRegion.material.material_string
@@ -62,10 +62,10 @@ def process_junction(junction, options):
     elif junction[idx + 1].role.lower() == 'base':
         if pn_or_np == "pn":
             nRegion = junction[idx + 1]
-            nidx = idx + 1
+            #nidx = idx + 1
         else:
             pRegion = junction[idx + 1]
-            pidx = idx + 1
+            #pidx = idx + 1
         iRegion = None
 
         id_bottom = idx + 1
@@ -81,7 +81,6 @@ def process_junction(junction, options):
 
     # With all regions identified, it's time to start doing calculations
     kbT = kb * T
-    R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, 'R_shunt') else 1e14
 
     xp = pRegion.width
     xn = nRegion.width
@@ -134,7 +133,7 @@ def process_junction(junction, options):
 
     Vbi = (kbT / q) * np.log(Nd * Na / niSquared) if not hasattr(junction, "Vbi") else junction.Vbi  # Jenny p146
 
-    return Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, pn_or_np, es, id_top, id_bottom, Vbi
+    return Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, Vbi, pn_or_np
 
 
 def iv_depletion(junction, options):
@@ -151,7 +150,7 @@ def iv_depletion(junction, options):
     junction.voltage = options.internal_voltages
     T = options.T
 
-    Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, pn_or_np, es, id_top, id_bottom, Vbi = process_junction(junction, options)
+    Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, Vbi, pn_or_np = process_junction(junction, options)
 
     kbT = kb * T
     R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, 'R_shunt') else 1e14
@@ -422,7 +421,7 @@ def qe_depletion(junction, options):
     T = options.T
 
     # First we have to figure out if we are talking about a PN, NP, PIN or NIP junction
-    Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, pn_or_np, es, id_top, id_bottom, Vbi = process_junction(junction, options)
+    Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, Vbi, pn_or_np = process_junction(junction, options)
 
     # It's time to calculate the depletion widths
 

@@ -908,3 +908,218 @@ def test_iv_depletion():
         5.19416018e+08,  5.19416018e+08,  5.19416018e+08,  5.19416018e+08,
         5.19416018e+08,  5.19416018e+08,  5.19416018e+08,  5.19416018e+08,
         5.19416018e+08,  5.19416018e+08,  5.19416018e+08,  5.19416018e+08]), rel=1e-4)
+
+
+def test_process_junction_np():
+    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore import material
+    from solcore.structure import Layer, Junction
+    from solcore.state import State
+
+    Nd = randrange(1, 10)*1e18
+    Na = randrange(1, 9)*1e17
+
+    options = State()
+    options.T = randrange(1, 350)
+
+    Lp = randrange(5, 10000)*1e-9 # Diffusion length
+    Ln = randrange(5, 10000)*1e-9 # Diffusion length
+
+    GaAs_n = material("GaAs")(Nd = Nd, hole_diffusion_length=Ln)
+    GaAs_p = material("GaAs")(Na = Na, electron_diffusion_length=Lp)
+
+    n_width = randrange(500, 1000)*1e-9
+    p_width = randrange(3000, 5000)*1e-9
+
+    test_junc  = Junction([Layer(n_width, GaAs_n,role="emitter"), Layer(p_width, GaAs_p, role="base")])
+
+    results = process_junction(test_junc, options)
+
+    ni_expect = GaAs_n.ni
+    niSquared_expect = ni_expect**2
+
+    Vbi_expect = (kb*options.T / q) * np.log(Nd * Na / niSquared_expect)
+
+    assert results[0:17] == approx((Na, Nd, ni_expect, niSquared_expect, 0,
+                             Lp, Ln, n_width, p_width,
+                             0, 0, GaAs_n.hole_mobility * kb*options.T / q,
+                                    GaAs_p.electron_mobility * kb * options.T / q,
+                              GaAs_n.permittivity, 0, 1, Vbi_expect))
+
+    assert results[17] == 'np'
+
+
+def test_process_junction_pn():
+    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore import material
+    from solcore.structure import Layer, Junction
+    from solcore.state import State
+
+    Nd = randrange(1, 9) * 1e17
+    Na = randrange(1, 10) * 1e18
+
+    options = State()
+    options.T = randrange(1, 350)
+
+    Lp = randrange(5, 10000) * 1e-9  # Diffusion length
+    Ln = randrange(5, 10000) * 1e-9  # Diffusion length
+
+    GaAs_n = material("GaAs")(Nd=Nd, hole_diffusion_length=Ln)
+    GaAs_p = material("GaAs")(Na=Na, electron_diffusion_length=Lp)
+
+    p_width = randrange(500, 1000)*1e-9
+    n_width = randrange(3000, 5000)*1e-9
+
+    test_junc = Junction([Layer(p_width, GaAs_p, role="emitter"), Layer(n_width, GaAs_n, role="base")])
+
+    results = process_junction(test_junc, options)
+
+    ni_expect = GaAs_n.ni
+    niSquared_expect = ni_expect ** 2
+
+    Vbi_expect = (kb * options.T / q) * np.log(Nd * Na / niSquared_expect)
+
+    assert results[0:17] == approx((Na, Nd, ni_expect, niSquared_expect, 0,
+                                    Lp, Ln, n_width, p_width,
+                                    0, 0, GaAs_n.hole_mobility * kb * options.T / q,
+                                    GaAs_p.electron_mobility * kb * options.T / q,
+                                    GaAs_n.permittivity, 0, 1, Vbi_expect))
+
+    assert results[17] == 'pn'
+
+
+def test_process_junction_nip():
+    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore import material
+    from solcore.structure import Layer, Junction
+    from solcore.state import State
+
+    Nd = randrange(1, 10)*1e18
+    Na = randrange(1, 9)*1e17
+
+    options = State()
+    options.T = randrange(1, 350)
+
+    Lp = randrange(5, 10000)*1e-9 # Diffusion length
+    Ln = randrange(5, 10000)*1e-9 # Diffusion length
+
+    GaAs_n = material("GaAs")(Nd = Nd, hole_diffusion_length=Ln)
+    GaAs_p = material("GaAs")(Na = Na, electron_diffusion_length=Lp)
+    GaAs_i = material("GaAs")()
+
+    n_width = randrange(500, 1000)*1e-9
+    p_width = randrange(3000, 5000)*1e-9
+    i_width = randrange(100, 300)*1e-9
+
+    test_junc  = Junction([Layer(n_width, GaAs_n,role="emitter"),
+                           Layer(i_width, GaAs_i, role="intrinsic"),
+                           Layer(p_width, GaAs_p, role="base")])
+
+    results = process_junction(test_junc, options)
+
+    ni_expect = GaAs_n.ni
+    niSquared_expect = ni_expect**2
+
+    Vbi_expect = (kb*options.T / q) * np.log(Nd * Na / niSquared_expect)
+
+    assert results[0:17] == approx((Na, Nd, ni_expect, niSquared_expect, i_width,
+                             Lp, Ln, n_width, p_width,
+                             0, 0, GaAs_n.hole_mobility * kb*options.T / q,
+                                    GaAs_p.electron_mobility * kb * options.T / q,
+                              GaAs_n.permittivity, 0, 2, Vbi_expect))
+
+    assert results[17] == 'np'
+
+
+def test_process_junction_pin():
+    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore import material
+    from solcore.structure import Layer, Junction
+    from solcore.state import State
+
+    Nd = randrange(1, 9) * 1e17
+    Na = randrange(1, 10) * 1e18
+
+    options = State()
+    options.T = randrange(1, 350)
+
+    Lp = randrange(5, 10000) * 1e-9  # Diffusion length
+    Ln = randrange(5, 10000) * 1e-9  # Diffusion length
+
+    GaAs_n = material("GaAs")(Nd=Nd, hole_diffusion_length=Ln)
+    GaAs_p = material("GaAs")(Na=Na, electron_diffusion_length=Lp)
+    GaAs_i = material("GaAs")()
+
+    p_width = randrange(500, 1000)
+    n_width = randrange(3000, 5000)
+    i_width = randrange(100, 300)*1e-9
+
+    test_junc = Junction([Layer(p_width, GaAs_p, role="emitter"),
+                          Layer(i_width, GaAs_i, role="intrinsic"),
+                          Layer(n_width, GaAs_n, role="base")])
+
+    results = process_junction(test_junc, options)
+
+    ni_expect = GaAs_n.ni
+    niSquared_expect = ni_expect ** 2
+
+    Vbi_expect = (kb * options.T / q) * np.log(Nd * Na / niSquared_expect)
+
+    assert results[0:17] == approx((Na, Nd, ni_expect, niSquared_expect, i_width,
+                             Lp, Ln, n_width, p_width,
+                             0, 0, GaAs_n.hole_mobility * kb*options.T / q,
+                                    GaAs_p.electron_mobility * kb * options.T / q,
+                              GaAs_n.permittivity, 0, 2, Vbi_expect))
+
+    assert results[17] == 'pn'
+
+
+
+def test_process_junction_set_in_junction():
+    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore import material
+    from solcore.structure import Layer, Junction
+    from solcore.state import State
+
+    options = State()
+    options.T = randrange(1, 350)
+
+    Lp = randrange(5, 10000) * 1e-9  # Diffusion length
+    Ln = randrange(5, 10000) * 1e-9  # Diffusion length
+
+    sn = randrange(1, 1000)
+    sp = randrange(1, 1000)
+
+    se = randrange(1, 20)*vacuum_permittivity
+
+    GaAs_n = material("GaAs")()
+    GaAs_p = material("GaAs")()
+    GaAs_i = material("GaAs")()
+
+    p_width = randrange(500, 1000)
+    n_width = randrange(3000, 5000)
+    i_width = randrange(100, 300)*1e-9
+
+    mun = randrange(1, 1e5)*1e-5
+    mup = randrange(1, 1e5)*1e-5
+
+    Vbi = randrange(0,3)
+
+    test_junc = Junction([Layer(p_width, GaAs_p, role="emitter"),
+                          Layer(i_width, GaAs_i, role="intrinsic"),
+                          Layer(n_width, GaAs_n, role="base")],
+                         sn = sn, sp = sp, permittivity = se,
+                         ln = Ln, lp= Lp,
+                         mup = mup, mun = mun, Vbi = Vbi)
+
+    results = process_junction(test_junc, options)
+
+    ni_expect = GaAs_n.ni
+    niSquared_expect = ni_expect ** 2
+
+    assert results[0:17] == approx((GaAs_n.Na, GaAs_p.Nd, ni_expect, niSquared_expect, i_width,
+                             Ln, Lp, n_width, p_width,
+                             sn, sp, mun* kb*options.T / q, mup* kb*options.T / q,
+                              se, 0, 2, Vbi))
+
+    assert results[17] == 'pn'
