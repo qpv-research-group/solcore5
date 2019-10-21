@@ -15,21 +15,22 @@ i_GaAs_material_name = 'GaAs'
 i_GaAs = material(i_GaAs_material_name)(T=T)
 i_GaAs_structure = {'material': i_GaAs_material_name}
 
-availableRoles = ['Barrier', 'Base', 'BSF', 'Emitter', 'Intrinsic', 'Window']
+available_roles = ['Barrier', 'Base', 'BSF', 'Emitter', 'Intrinsic', 'Window']
 
 def test_layer():
     width1 = random.uniform(1e-9, 1e-8)
-    role1 = random.choice(availableRoles)
-    layer1 = Layer(width1, QWmat, role1)
+    role1 = random.choice(available_roles)
+    layer1 = Layer(width1, QWmat, role1, new_property='newProperty')
 
     assert layer1.width == width1
     assert layer1.role == role1
     assert layer1.material == QWmat
+    assert layer1.__dict__['newProperty'] == 'newProperty'
     # TODO: see if the following can work:
     #  assert layer1 == ToLayer(width1, {'material': 'InGaAs', 'element': 'In', 'fraction': 0.2}, role1)
 
     width2 = random.uniform(1e-9, 1e-8)
-    role2 = random.choice(availableRoles)
+    role2 = random.choice(available_roles)
     layer2 = Layer(width2, Bmat, role2)
 
     assert layer2.width == width2
@@ -37,7 +38,7 @@ def test_layer():
     assert layer2.material == Bmat
 
     width3 = random.uniform(1e-9, 1e-8)
-    role3 = random.choice(availableRoles)
+    role3 = random.choice(available_roles)
     layer3 = Layer(width3, i_GaAs, role3)
 
     assert layer3.width == width3
