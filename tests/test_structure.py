@@ -1,6 +1,8 @@
 import random
 from solcore import material
+from solcore.poisson_drift_diffusion.DeviceStructure import CreateDeviceStructure
 from solcore.structure import Junction, Layer, SolcoreMaterialToStr, Structure, ToSolcoreMaterial, TunnelJunction
+from solcore.structure import ToLayer, ToStructure
 
 # Materials
 T = 300
@@ -28,6 +30,9 @@ layer2 = Layer(width2, Bmat, role2, wkt_box)
 width3 = random.uniform(1e-9, 1e-8)
 role3 = random.choice(available_roles)
 layer3 = Layer(width3, i_GaAs, role3, wkt_box)
+
+# Device
+device = CreateDeviceStructure(layers=[layer1, layer2, layer3])
 
 def test_layer_and_junction():
     assert layer1.width == width1
@@ -136,3 +141,9 @@ def test_to_material():
     i_GaAs_material = ToSolcoreMaterial(i_GaAs_structure, T, True)
     assert i_GaAs_material.__class__.__name__ == i_GaAs_material_name
     assert i_GaAs_material.__dict__ == i_GaAs.__dict__
+
+def test_to_structure():
+    structure = ToStructure(device)
+
+    assert structure.__len__() == 3
+    assert structure.width() == width1 + width2 + width3
