@@ -114,7 +114,7 @@ def test_forward():
     wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
 
     w = wn + wp + xi
-    w = w[m]
+    #w = w[m]
 
     f_b = factor(V, Vbi, tp, tn, kT, dEt)
     expected = 2 * q * ni * w / np.sqrt(tn * tp) * \
