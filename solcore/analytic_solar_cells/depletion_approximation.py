@@ -158,20 +158,7 @@ def iv_depletion(junction, options):
     # And now we account for the possible applied voltage, which can be, at most, equal to Vbi
     V = np.where(junction.voltage < Vbi - 0.001, junction.voltage, Vbi - 0.001)
 
-    # It's time to calculate the depletion widths
-    if not hasattr(junction, "wp") or not hasattr(junction, "wn"):
-
-        if hasattr(junction, "depletion_approximation") and junction.depletion_approximation == "one-sided abrupt":
-            print("using one-sided abrupt junction approximation for depletion width")
-            one_sided = True
-        else:
-            one_sided = False
-
-        wn, wp = get_depletion_widths(es, Vbi, V, Na, Nd, xi, one_sided)
-
-
-    wn = wn if not hasattr(junction, "wn") else junction.wn
-    wp = wp if not hasattr(junction, "wp") else junction.wp
+    wn, wp = get_depletion_widths(junction, es, Vbi, V, Na, Nd, xi)
 
     w = wn + wp + xi
 
@@ -423,21 +410,7 @@ def qe_depletion(junction, options):
     # First we have to figure out if we are talking about a PN, NP, PIN or NIP junction
     Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, Vbi, pn_or_np = process_junction(junction, options)
 
-    # It's time to calculate the depletion widths
-
-    if not hasattr(junction, "wp") or not hasattr(junction, "wn"):
-
-        if hasattr(junction, "depletion_approximation") and junction.depletion_approximation == "one-sided abrupt":
-            print("using one-sided abrupt junction approximation for depletion width")
-            one_sided = True
-        else:
-            one_sided = False
-
-        wn, wp = get_depletion_widths(es, Vbi, 0, Na, Nd, xi, one_sided)
-
-
-    wn = wn if not hasattr(junction, "wn") else junction.wn
-    wp = wp if not hasattr(junction, "wp") else junction.wp
+    wn, wp = get_depletion_widths(junction, es, Vbi, 0, Na, Nd, xi)
 
     # Now it is time to calculate currents
     if pn_or_np == "pn":
@@ -557,17 +530,28 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
     return out
 
 
-def get_depletion_widths(es, Vbi, V, Na, Nd, xi, one_sided=False):
-    # It's time to calculate the depletion widths
+def get_depletion_widths(junction, es, Vbi, V, Na, Nd, xi):
 
-    if one_sided:
-        science_reference("Sze abrupt junction approximation",
-                          "Sze: The Physics of Semiconductor Devices, 2nd edition, John Wiley & Sons, Inc (2007)")
-        wn = np.sqrt(2 * es * (Vbi - V) / (q * Nd))
-        wp = np.sqrt(2 * es * (Vbi - V) / (q * Na))
+    if not hasattr(junction, "wp") or not hasattr(junction, "wn"):
 
-    else:
-        wn = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
-        wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
+        if hasattr(junction, "depletion_approximation") and junction.depletion_approximation == "one-sided abrupt":
+            print("using one-sided abrupt junction approximation for depletion width")
+            one_sided = True
+        else:
+            one_sided = False
+
+
+        if one_sided:
+            science_reference("Sze abrupt junction approximation",
+                              "Sze: The Physics of Semiconductor Devices, 2nd edition, John Wiley & Sons, Inc (2007)")
+            wn = np.sqrt(2 * es * (Vbi - V) / (q * Nd))
+            wp = np.sqrt(2 * es * (Vbi - V) / (q * Na))
+
+        else:
+            wn = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
+            wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
+
+    wn = wn if not hasattr(junction, "wn") else junction.wn
+    wp = wp if not hasattr(junction, "wp") else junction.wp
 
     return wn, wp
