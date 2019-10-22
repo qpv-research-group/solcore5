@@ -9,13 +9,16 @@ T = 300
 QWmat_material_name = 'InGaAs'
 QWmat_in = 0.2
 QWmat = material(QWmat_material_name)(T=T, In=QWmat_in)
+QWmat_clean = material(QWmat_material_name)(T=T, In=QWmat_in)  # Clean material required for test_to_material
 QWmat_structure = {'material': QWmat_material_name, 'element': 'In', 'fraction': QWmat_in}
 Bmat_material_name = 'GaAsP'
 Bmat_p = 0.1
 Bmat = material(Bmat_material_name)(T=T, P=Bmat_p)
+Bmat_clean = material(Bmat_material_name)(T=T, P=Bmat_p)  # Clean material required for test_to_material
 Bmat_structure = {'material': Bmat_material_name, 'element': 'P', 'fraction': Bmat_p}
 i_GaAs_material_name = 'GaAs'
 i_GaAs = material(i_GaAs_material_name)(T=T)
+i_GaAs_clean = material(i_GaAs_material_name)(T=T)  # Clean material required for test_to_material
 i_GaAs_structure = {'material': i_GaAs_material_name}
 
 # Layers
@@ -130,15 +133,15 @@ def test_material_to_str():
 def test_to_material():
     QWmat_material = ToSolcoreMaterial(QWmat_structure, T, True)
     assert QWmat_material.__class__.__name__ == QWmat_material_name
-    assert QWmat_material.__dict__ == QWmat.__dict__
+    assert QWmat_material.__dict__ == QWmat_clean.__dict__
 
     Bmat_material = ToSolcoreMaterial(Bmat_structure, T, True)
     assert Bmat_material.__class__.__name__ == Bmat_material_name
-    assert Bmat_material.__dict__ == Bmat.__dict__
+    assert Bmat_material.__dict__ == Bmat_clean.__dict__
 
     i_GaAs_material = ToSolcoreMaterial(i_GaAs_structure, T, True)
     assert i_GaAs_material.__class__.__name__ == i_GaAs_material_name
-    assert i_GaAs_material.__dict__ == i_GaAs.__dict__
+    assert i_GaAs_material.__dict__ == i_GaAs_clean.__dict__
 
 def test_inline_composition():
     assert InLineComposition(device['layers'][0]) == 'In0.2GaAs'
