@@ -37,6 +37,7 @@ layer3 = Layer(width3, i_GaAs, role3, wkt_box)
 # Device
 device = CreateDeviceStructure(layers=[layer1, layer2, layer3])
 
+
 def test_layer_and_junction():
     assert layer1.width == width1
     assert layer1.role == role1
@@ -71,6 +72,7 @@ def test_layer_and_junction():
     assert tunnel1[0] == layer1
     assert tunnel1[1] == layer2
     assert tunnel1[2] == layer3
+
 
 def test_structure():
     structure1 = Structure([layer1, layer2], substrate=Bmat, T=T)
@@ -107,7 +109,7 @@ def test_structure():
     assert structure3.__dict__ == {'labels': ['layer1', 'layer1']}
     assert structure3[0] == layer1
     assert structure3[1] == layer1
-    assert structure3.width() == width1*2
+    assert structure3.width() == width1 * 2
     # Below currently fails due to a bug when specifying labels and repeating more than once
     # assert structure3.relative_widths()['layer1'] == width1 / structure3.width()
 
@@ -120,15 +122,17 @@ def test_structure():
     assert structure4[1] == layer2
     assert structure4[2] == layer1
     assert structure4[3] == layer2
-    assert structure4.width() == width1*2 + width2*2
+    assert structure4.width() == width1 * 2 + width2 * 2
     # Below currently fails due to a bug when specifying labels and repeating more than once
     # assert structure4.relative_widths()['layer1'] == width1 / structure4.width()
     # assert structure4.relative_widths()['layer2'] == width2 / structure4.width()
+
 
 def test_material_to_str():
     assert SolcoreMaterialToStr(QWmat) == QWmat_structure
     assert SolcoreMaterialToStr(Bmat) == Bmat_structure
     assert SolcoreMaterialToStr(i_GaAs) == i_GaAs_structure
+
 
 def test_to_material():
     QWmat_material = ToSolcoreMaterial(QWmat_structure, T, True)
@@ -143,10 +147,12 @@ def test_to_material():
     assert i_GaAs_material.__class__.__name__ == i_GaAs_material_name
     assert i_GaAs_material.__dict__ == i_GaAs_clean.__dict__
 
+
 def test_inline_composition():
     assert InLineComposition(device['layers'][0]) == 'In0.2GaAs'
     assert InLineComposition(device['layers'][1]) == 'GaAsP0.1'
     assert InLineComposition(device['layers'][2]) == 'GaAs'
+
 
 def test_to_layer():
     device_layer = device['layers'][0]
@@ -156,6 +162,7 @@ def test_to_layer():
     assert layer.width == width1
     assert layer.role == role1
     assert layer.material.__str__() == QWmat.__str__()
+
 
 def test_to_structure():
     structure = ToStructure(device)
