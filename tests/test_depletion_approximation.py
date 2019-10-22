@@ -1,26 +1,23 @@
-from pytest import approx, mark, raises
-from random import randrange
+from pytest import approx, raises
 import numpy as np
-
 from solcore.constants import kb, q, vacuum_permittivity
 
 
 def test_get_j_dark():
     from solcore.analytic_solar_cells.depletion_approximation import get_j_dark
 
-    xnm = randrange(2, 1000)
-    x = xnm*1e-9
-    xi  = randrange(0, 1000)*1e-9
+    x = np.power(10, np.random.uniform(-8, -5))
+    xi = np.power(10, np.random.uniform(-8, -5))
 
-    l = randrange(5, 10000)*1e-9
-    s = randrange(1, 1000)
-    d = randrange(1, 1e5)*1e-5
-    Vbi = randrange(1, 50)*1e-1
-    minor = randrange(1, 1e6)*1e-8
-    T = randrange(1, 300)
-    es = randrange(1, 20)*vacuum_permittivity
-    Na = randrange(1, 1e5)*1e19
-    Nd = randrange(1, 1e5)*1e19
+    l = np.power(10, np.random.uniform(-9, -6))
+    s = np.power(10, np.random.uniform(1, 3))
+    d = np.power(10, np.random.uniform(-5, 0))
+    Vbi = np.random.uniform(0.1,5)
+    minor = np.power(10, np.random.uniform(-7, -4))
+    T = np.random.uniform(0.1,400)
+    es = np.random.uniform(1,20)*vacuum_permittivity
+    Na = np.power(10, np.random.uniform(22, 25))
+    Nd = np.power(10, np.random.uniform(22, 25))
 
     V = np.linspace(-6, 4, 20)
     V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
@@ -35,18 +32,19 @@ def test_get_j_dark():
 
     result = get_j_dark(x, w, l, s, d, V, minor, T)
 
-    assert result == approx(expected)
+    assert result == approx(expected, nan_ok=True)
 
 def test_factor():
     from solcore.analytic_solar_cells.depletion_approximation import factor
-    T = randrange(1, 300)
+    T = np.random.uniform(0.1,400)
+    Vbi = np.random.uniform(0.1,5)
+    tp = np.power(10, np.random.uniform(-10, -5))
+    tn = np.power(10, np.random.uniform(-10, -5))
+    dEt = 0
+
     kT = kb*T
     V = np.linspace(-6, 4, 20)
-    Vbi = randrange(1, 50)*1e-1
     V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
-    tp = randrange(1, 1e5)*1e-10
-    tn = randrange(1, 1e5)*1e-10
-    dEt = 0
 
     m = V >= -1120 * kT / q
     V = V[m]
@@ -93,19 +91,21 @@ def test_factor():
 def test_forward():
     from solcore.analytic_solar_cells.depletion_approximation import factor, forward
 
-    T = randrange(1, 300)
+    T = np.random.uniform(0.1,400)
+    Vbi = np.random.uniform(0.1,5)
+    tp = np.power(10, np.random.uniform(-10, -5))
+    tn = np.power(10, np.random.uniform(-10, -5))
+    dEt = 0
+
     kT = kb*T
     V = np.linspace(-6, 4, 20)
-    Vbi = randrange(1, 50)*1e-1
     V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
-    tp = randrange(1, 1e5)*1e-10
-    tn = randrange(1, 1e5)*1e-10
-    dEt = 0
-    ni = randrange(1, 1e7)*1e2
-    es = randrange(1, 20)*vacuum_permittivity
-    Na = randrange(1, 1e5)*1e19
-    Nd = randrange(1, 1e5)*1e19
-    xi  = randrange(0, 1000)*1e-9
+
+    ni = np.power(10, np.random.uniform(2, 9))
+    es = np.random.uniform(1,20)*vacuum_permittivity
+    Na = np.power(10, np.random.uniform(22, 25))
+    Nd = np.power(10, np.random.uniform(22, 25))
+    xi = np.power(10, np.random.uniform(-8, -5))
 
     m = V >= -1120 * kT / q
     V = V[m]
@@ -114,7 +114,6 @@ def test_forward():
     wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
 
     w = wn + wp + xi
-    #w = w[m]
 
     f_b = factor(V, Vbi, tp, tn, kT, dEt)
     expected = 2 * q * ni * w / np.sqrt(tn * tp) * \
@@ -125,22 +124,24 @@ def test_forward():
     assert result == approx(expected, nan_ok=True)
 
 
-# this test failed one, not sure on conditions (rng)
 def test_get_J_srh():
     from solcore.analytic_solar_cells.depletion_approximation import forward, get_Jsrh
-    T = randrange(1, 300)
+
+    T = np.random.uniform(0.1,400)
+    Vbi = np.random.uniform(0.1,5)
+    tp = np.power(10, np.random.uniform(-10, -5))
+    tn = np.power(10, np.random.uniform(-10, -5))
+    dEt = 0
+
     kT = kb*T
     V = np.linspace(-6, 4, 20)
-    Vbi = randrange(1, 50)*1e-1
     V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
-    tp = randrange(1, 1e5)*1e-10
-    tn = randrange(1, 1e5)*1e-10
-    dEt = 0
-    ni = randrange(1, 1e7)*1e2
-    es = randrange(1, 20)*vacuum_permittivity
-    Na = randrange(1, 1e5)*1e19
-    Nd = randrange(1, 1e5)*1e19
-    xi  = randrange(0, 1000)*1e-9
+
+    ni = np.power(10, np.random.uniform(2, 9))
+    es = np.random.uniform(1,20)*vacuum_permittivity
+    Na = np.power(10, np.random.uniform(22, 25))
+    Nd = np.power(10, np.random.uniform(22, 25))
+    xi = np.power(10, np.random.uniform(-8, -5))
 
     wn = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
     wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
@@ -163,19 +164,18 @@ def test_get_J_sc_diffusion_top():
     from solcore.interpolate import interp1d
     from solcore.light_source import LightSource
 
-    D = randrange(1, 1e5)*1e-5 # Diffusion coefficient
-    L = randrange(5, 10000)*1e-9 # Diffusion length
-    minority = randrange(1, 70)# minority carrier density
-    s = randrange(1, 1000) # surface recombination velocity
-
+    D = np.power(10, np.random.uniform(-5, 0)) # Diffusion coefficient
+    L = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
+    minority = np.power(10, np.random.uniform(-7, -4))# minority carrier density
+    s = np.power(10, np.random.uniform(0, 3)) # surface recombination velocity
 
     light_source = LightSource(source_type="standard", version="AM1.5g")
     wl = np.linspace(300, 1800, 50)*1e-9
     wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
 
-    xa_nm = randrange(1, 1000)
+    xa_nm = np.random.uniform(1, 1000)
     xa = xa_nm*1e-9
-    xb = randrange(xa_nm+1, 1100)*1e-9
+    xb = np.random.uniform(xa_nm+1, 1100)*1e-9
 
     ## make a simple Beer-Lambert profile
     dist = np.linspace(0, xb, 1000)
@@ -215,8 +215,6 @@ def test_get_J_sc_diffusion_top():
 
     result = get_J_sc_diffusion(xa, xb, gen_prof, D, L, minority, s, wl, phg, side='top')
 
-    print(result)
-
     assert result == approx(expected)
 
 
@@ -226,19 +224,18 @@ def test_get_J_sc_diffusion_bottom():
     from solcore.interpolate import interp1d
     from solcore.light_source import LightSource
 
-    D = randrange(1, 1e5)*1e-5 # Diffusion coefficient
-    L = randrange(5, 10000)*1e-9 # Diffusion length
-    minority = randrange(1, 70)# minority carrier density
-    s = randrange(1, 1000) # surface recombination velocity
-
+    D = np.power(10, np.random.uniform(-5, 0)) # Diffusion coefficient
+    L = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
+    minority = np.power(10, np.random.uniform(-7, -4))# minority carrier density
+    s = np.power(10, np.random.uniform(0, 3)) # surface recombination velocity
 
     light_source = LightSource(source_type="standard", version="AM1.5g")
     wl = np.linspace(300, 1800, 50)*1e-9
     wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
 
-    xa_nm = randrange(1, 1000)
+    xa_nm = np.random.uniform(1, 1000)
     xa = xa_nm*1e-9
-    xb = randrange(xa_nm+1, 1100)*1e-9
+    xb = np.random.uniform(xa_nm+1, 1100)*1e-9
 
     ## make a simple Beer-Lambert profile
     dist = np.linspace(0, xb, 1000)
@@ -290,9 +287,9 @@ def test_get_J_sc_SCR():
     wl = np.linspace(300, 1800, 50)*1e-9
     wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
 
-    xa_nm = randrange(1, 1000)
+    xa_nm = np.random.uniform(1, 1000)
     xa = xa_nm*1e-9
-    xb = randrange(xa_nm+1, 1100)*1e-9
+    xb = np.random.uniform(xa_nm+1, 1100)*1e-9
 
     ## make a simple Beer-Lambert profile
     dist = np.linspace(0, xb, 1000)
@@ -304,24 +301,15 @@ def test_get_J_sc_SCR():
     output = output.T
     gen_prof = interp1d(dist, output, axis = 0)
 
-    #plt.figure()
-    #plt.imshow(output)
-    #plt.show()
-
     zz = np.linspace(xa, xb, 1001)
     gg = gen_prof(zz) * phg
     expected = np.trapz(np.trapz(gg, wl, axis=1), zz)
 
     result = get_J_sc_SCR(xa, xb, gen_prof, wl, phg)
-    # think the units might be wrong (factor of 1e9?) but it doesn't really matter
 
     assert  expected == approx(result)
 
-# get_Jsrh: what is the 1120?
 
-## QE
-
-# no need to pass wl to this function
 def test_get_J_sc_SCR_vs_WL():
     from solcore.light_source import LightSource
     from solcore.interpolate import interp1d
@@ -331,9 +319,9 @@ def test_get_J_sc_SCR_vs_WL():
     wl = np.linspace(300, 1800, 50)*1e-9
     wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
 
-    xa_nm = randrange(1, 1000)
+    xa_nm = np.random.uniform(1, 1000)
     xa = xa_nm*1e-9
-    xb = randrange(xa_nm+1, 1100)*1e-9
+    xb = np.random.uniform(xa_nm+1, 1100)*1e-9
 
     ## make a simple Beer-Lambert profile
     dist = np.linspace(0, xb, 1000)
@@ -345,16 +333,11 @@ def test_get_J_sc_SCR_vs_WL():
     output = output.T
     gen_prof = interp1d(dist, output, axis = 0)
 
-    #plt.figure()
-    #plt.imshow(output)
-    #plt.show()
-
     zz = np.linspace(xa, xb, 1001)
     gg = gen_prof(zz) * phg
     expected = np.trapz(gg, zz, axis=0)
 
     result = get_J_sc_SCR_vs_WL(xa, xb, gen_prof, wl, phg)
-    # think the units might be wrong (factor of 1e9?) but it doesn't really matter
 
     assert  expected == approx(result)
 
@@ -365,19 +348,18 @@ def test_get_J_sc_diffusion_vs_WL_top():
     from solcore.interpolate import interp1d
     from solcore.light_source import LightSource
 
-    D = randrange(1, 1e5)*1e-5 # Diffusion coefficient
-    L = randrange(5, 10000)*1e-9 # Diffusion length
-    minority = randrange(1, 70)# minority carrier density
-    s = randrange(1, 1000) # surface recombination velocity
-
+    D = np.power(10, np.random.uniform(-5, 0)) # Diffusion coefficient
+    L = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
+    minority = np.power(10, np.random.uniform(-7, -4))# minority carrier density
+    s = np.power(10, np.random.uniform(0, 3)) # surface recombination velocity
 
     light_source = LightSource(source_type="standard", version="AM1.5g")
     wl = np.linspace(300, 1800, 50)*1e-9
     wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
 
-    xa_nm = randrange(1, 1000)
+    xa_nm = np.random.uniform(1, 1000)
     xa = xa_nm*1e-9
-    xb = randrange(xa_nm+1, 1100)*1e-9
+    xb = np.random.uniform(xa_nm+1, 1100)*1e-9
 
     ## make a simple Beer-Lambert profile
     dist = np.linspace(0, xb, 1000)
@@ -410,7 +392,6 @@ def test_get_J_sc_diffusion_vs_WL_top():
 
         guess = minority * np.ones((2, zz.size))
         guess[1] = np.zeros_like(guess[0])
-        #print(zz)
         solution = solve_bvp(fun, bc, zz, guess)
 
         expected[i] = solution.y[1][-1]
@@ -421,26 +402,24 @@ def test_get_J_sc_diffusion_vs_WL_top():
     assert result == approx(expected)
 
 
-# very similar to just get_J_sc_diffusion.
-
 def test_get_J_sc_diffusion_vs_WL_bottom():
     from solcore.analytic_solar_cells.depletion_approximation import get_J_sc_diffusion_vs_WL
     from scipy.integrate import solve_bvp
     from solcore.interpolate import interp1d
     from solcore.light_source import LightSource
 
-    D = randrange(1, 1e5) * 1e-5  # Diffusion coefficient
-    L = randrange(5, 10000) * 1e-9  # Diffusion length
-    minority = randrange(1, 70)  # minority carrier density
-    s = randrange(1, 1000)  # surface recombination velocity
+    D = np.power(10, np.random.uniform(-5, 0)) # Diffusion coefficient
+    L = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
+    minority = np.power(10, np.random.uniform(-7, -4))# minority carrier density
+    s = np.power(10, np.random.uniform(0, 3)) # surface recombination velocity
 
     light_source = LightSource(source_type="standard", version="AM1.5g")
     wl = np.linspace(300, 1800, 50) * 1e-9
     wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
 
-    xa_nm = randrange(1, 1000)
+    xa_nm = np.random.uniform(1, 1000)
     xa = xa_nm * 1e-9
-    xb = randrange(xa_nm + 1, 1100) * 1e-9
+    xb = np.random.uniform(xa_nm + 1, 1100) * 1e-9
 
     ## make a simple Beer-Lambert profile
     dist = np.linspace(0, xb, 1000)
@@ -472,7 +451,6 @@ def test_get_J_sc_diffusion_vs_WL_bottom():
 
         guess = minority * np.ones((2, zz.size))
         guess[1] = np.zeros_like(guess[0])
-        # print(zz)
         solution = solve_bvp(fun, bc, zz, guess)
 
         expected[i] = solution.y[1][0]
@@ -488,42 +466,42 @@ def test_process_junction_exceptions():
     from solcore.structure import Layer, Junction
     from solcore.state import State
 
-    Nd = randrange(1, 10)*1e18
-    Na = randrange(1, 9)*1e17
+    Na = np.power(10, np.random.uniform(22, 25))
+    Nd = np.power(10, np.random.uniform(22, 25))
 
     options = State()
-    options.T = randrange(1, 350)
+    options.T = np.random.uniform(0.1, 350)
 
-    Lp = randrange(5, 10000)*1e-9 # Diffusion length
-    Ln = randrange(5, 10000)*1e-9 # Diffusion length
+    Lp = np.power(10, np.random.uniform(-9, -6))# Diffusion length
+    Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
 
     GaAs_n = material("GaAs")(Nd = Nd, hole_diffusion_length=Ln)
     GaAs_p = material("GaAs")(Na = Na, electron_diffusion_length=Lp)
     GaAs_i = material("GaAs")()
     Ge_n = material("Ge")(Nd = Nd, hole_diffusion_length=Ln)
 
-    n_width = randrange(500, 1000)*1e-9
-    p_width = randrange(3000, 5000)*1e-9
-    i_width = randrange(300, 500) * 1e-9
+    n_width = np.random.uniform(500, 1000)*1e-9
+    p_width = np.random.uniform(3000, 5000)*1e-9
+    i_width = np.random.uniform(300, 500) * 1e-9
 
     test_junc  = Junction([Layer(n_width, GaAs_n,role="emitter"),
                            Layer(p_width, GaAs_p, role="neither")])
 
     with raises(RuntimeError):
-        results = process_junction(test_junc, options)
+        process_junction(test_junc, options)
 
     test_junc =  Junction([Layer(n_width, GaAs_n,role="emitter"),
                            Layer(i_width, GaAs_i, role="intrinsic"),
                            Layer(p_width, GaAs_p, role="nothing")])
 
     with raises(RuntimeError):
-        results = process_junction(test_junc, options)
+        process_junction(test_junc, options)
 
     test_junc  = Junction([Layer(n_width, Ge_n,role="emitter"),
                            Layer(p_width, GaAs_p, role="base")])
 
     with raises(AssertionError):
-        results = process_junction(test_junc, options)
+        process_junction(test_junc, options)
 
 
 def test_process_junction_np():
@@ -532,22 +510,22 @@ def test_process_junction_np():
     from solcore.structure import Layer, Junction
     from solcore.state import State
 
-    Nd = randrange(1, 10)*1e18
-    Na = randrange(1, 9)*1e17
+    Na = np.power(10, np.random.uniform(23, 26))
+    Nd = np.power(10, np.random.uniform(22, 25))
 
     options = State()
-    options.T = randrange(1, 350)
+    options.T = np.random.uniform(0.1, 350)
 
-    Lp = randrange(5, 10000)*1e-9 # Diffusion length
-    Ln = randrange(5, 10000)*1e-9 # Diffusion length
+    Lp = np.power(10, np.random.uniform(-9, -6))# Diffusion length
+    Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
 
     GaAs_window = material("GaAs")()
     GaAs_n = material("GaAs")(Nd = Nd, hole_diffusion_length=Ln)
     GaAs_p = material("GaAs")(Na = Na, electron_diffusion_length=Lp)
 
-    n_width = randrange(500, 1000)*1e-9
-    p_width = randrange(3000, 5000)*1e-9
-    window_width = randrange(25, 200)*1e-9
+    n_width = np.random.uniform(500, 1000)*1e-9
+    p_width = np.random.uniform(3000, 5000)*1e-9
+    window_width = np.random.uniform(25, 200)*1e-9
 
     test_junc  = Junction([Layer(window_width, GaAs_window, role="window"),
                            Layer(n_width, GaAs_n,role="emitter"),
@@ -575,20 +553,20 @@ def test_process_junction_pn():
     from solcore.structure import Layer, Junction
     from solcore.state import State
 
-    Nd = randrange(1, 9) * 1e17
-    Na = randrange(1, 10) * 1e18
+    Na = np.power(10, np.random.uniform(22, 25))
+    Nd = np.power(10, np.random.uniform(23, 26))
 
     options = State()
-    options.T = randrange(1, 350)
+    options.T = np.random.uniform(1, 350)
 
-    Lp = randrange(5, 10000) * 1e-9  # Diffusion length
-    Ln = randrange(5, 10000) * 1e-9  # Diffusion length
+    Lp = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
+    Ln = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
 
     GaAs_n = material("GaAs")(Nd=Nd, hole_diffusion_length=Ln)
     GaAs_p = material("GaAs")(Na=Na, electron_diffusion_length=Lp)
 
-    p_width = randrange(500, 1000)*1e-9
-    n_width = randrange(3000, 5000)*1e-9
+    p_width = np.random.uniform(500, 1000)*1e-9
+    n_width = np.random.uniform(3000, 5000)*1e-9
 
     test_junc = Junction([Layer(p_width, GaAs_p, role="emitter"), Layer(n_width, GaAs_n, role="base")])
 
@@ -614,22 +592,22 @@ def test_process_junction_nip():
     from solcore.structure import Layer, Junction
     from solcore.state import State
 
-    Nd = randrange(1, 10)*1e18
-    Na = randrange(1, 9)*1e17
+    Na = np.power(10, np.random.uniform(23, 26))
+    Nd = np.power(10, np.random.uniform(22, 25))
 
     options = State()
-    options.T = randrange(1, 350)
+    options.T = np.random.uniform(0.1, 350)
 
-    Lp = randrange(5, 10000)*1e-9 # Diffusion length
-    Ln = randrange(5, 10000)*1e-9 # Diffusion length
+    Lp = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
+    Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
 
     GaAs_n = material("GaAs")(Nd = Nd, hole_diffusion_length=Ln)
     GaAs_p = material("GaAs")(Na = Na, electron_diffusion_length=Lp)
     GaAs_i = material("GaAs")()
 
-    n_width = randrange(500, 1000)*1e-9
-    p_width = randrange(3000, 5000)*1e-9
-    i_width = randrange(100, 300)*1e-9
+    n_width = np.random.uniform(500, 1000)*1e-9
+    p_width = np.random.uniform(3000, 5000)*1e-9
+    i_width = np.random.uniform(100, 300)*1e-9
 
     test_junc  = Junction([Layer(n_width, GaAs_n,role="emitter"),
                            Layer(i_width, GaAs_i, role="intrinsic"),
@@ -657,22 +635,22 @@ def test_process_junction_pin():
     from solcore.structure import Layer, Junction
     from solcore.state import State
 
-    Nd = randrange(1, 9) * 1e17
-    Na = randrange(1, 10) * 1e18
+    Na = np.power(10, np.random.uniform(22, 25))
+    Nd = np.power(10, np.random.uniform(23, 26))
 
     options = State()
-    options.T = randrange(1, 350)
+    options.T = np.random.uniform(0.1, 350)
 
-    Lp = randrange(5, 10000) * 1e-9  # Diffusion length
-    Ln = randrange(5, 10000) * 1e-9  # Diffusion length
+    Lp = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
+    Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
 
     GaAs_n = material("GaAs")(Nd=Nd, hole_diffusion_length=Ln)
     GaAs_p = material("GaAs")(Na=Na, electron_diffusion_length=Lp)
     GaAs_i = material("GaAs")()
 
-    p_width = randrange(500, 1000)
-    n_width = randrange(3000, 5000)
-    i_width = randrange(100, 300)*1e-9
+    p_width = np.random.uniform(500, 1000)
+    n_width = np.random.uniform(3000, 5000)
+    i_width = np.random.uniform(100, 300)*1e-9
 
     test_junc = Junction([Layer(p_width, GaAs_p, role="emitter"),
                           Layer(i_width, GaAs_i, role="intrinsic"),
@@ -694,7 +672,6 @@ def test_process_junction_pin():
     assert results[17] == 'pn'
 
 
-
 def test_process_junction_set_in_junction():
     from solcore.analytic_solar_cells.depletion_approximation import process_junction
     from solcore import material
@@ -702,28 +679,28 @@ def test_process_junction_set_in_junction():
     from solcore.state import State
 
     options = State()
-    options.T = randrange(1, 350)
+    options.T = np.random.uniform(0.1, 350)
 
-    Lp = randrange(5, 10000) * 1e-9  # Diffusion length
-    Ln = randrange(5, 10000) * 1e-9  # Diffusion length
+    Lp = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
+    Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
 
-    sn = randrange(1, 1000)
-    sp = randrange(1, 1000)
+    sn = np.power(10, np.random.uniform(0, 3))
+    sp = np.power(10, np.random.uniform(0, 3))
 
-    se = randrange(1, 20)*vacuum_permittivity
+    se = np.random.uniform(1, 20)*vacuum_permittivity
 
     GaAs_n = material("GaAs")()
     GaAs_p = material("GaAs")()
     GaAs_i = material("GaAs")()
 
-    p_width = randrange(500, 1000)
-    n_width = randrange(3000, 5000)
-    i_width = randrange(100, 300)*1e-9
+    p_width = np.random.uniform(500, 1000)
+    n_width = np.random.uniform(3000, 5000)
+    i_width = np.random.uniform(100, 300)*1e-9
 
-    mun = randrange(1, 1e5)*1e-5
-    mup = randrange(1, 1e5)*1e-5
+    mun = np.power(10, np.random.uniform(-5, 0))
+    mup = np.power(10, np.random.uniform(-5, 0))
 
-    Vbi = randrange(0,3)
+    Vbi = np.random.uniform(0, 3)
 
     test_junc = Junction([Layer(p_width, GaAs_p, role="emitter"),
                           Layer(i_width, GaAs_i, role="intrinsic"),
@@ -749,13 +726,12 @@ def test_get_depletion_widths():
     from solcore.analytic_solar_cells.depletion_approximation import get_depletion_widths
     from solcore.structure import Junction
 
-    xnm = randrange(2, 1000)
-    xi  = randrange(0, 1000)*1e-9
+    xi  = np.power(10, np.random.uniform(-10, -6))
 
-    Vbi = randrange(1, 50)*1e-1
-    es = randrange(1, 20)*vacuum_permittivity
-    Na = randrange(1, 1e5)*1e19
-    Nd = randrange(1, 1e5)*1e19
+    Vbi = np.random.uniform(0, 3)
+    es = np.random.uniform(1, 20)*vacuum_permittivity
+    Na = np.power(10, np.random.uniform(22, 25))
+    Nd = np.power(10, np.random.uniform(22, 25))
 
     V = np.linspace(-6, 4, 20)
     V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
@@ -775,12 +751,12 @@ def test_get_depletion_widths_onesided():
     from solcore.analytic_solar_cells.depletion_approximation import get_depletion_widths
     from solcore.structure import Junction
 
-    xi  = randrange(0, 1000)*1e-9
+    xi  = np.power(10, np.random.uniform(-10, -6))
 
-    Vbi = randrange(1, 50)*1e-1
-    es = randrange(1, 20)*vacuum_permittivity
-    Na = randrange(1, 1e5)*1e19
-    Nd = randrange(1, 1e5)*1e19
+    Vbi = np.random.uniform(0, 3)
+    es = np.random.uniform(1, 20)*vacuum_permittivity
+    Na = np.power(10, np.random.uniform(22, 25))
+    Nd = np.power(10, np.random.uniform(22, 25))
 
     V = np.linspace(-6, 4, 20)
     V = np.where(V < Vbi - 0.001, V, Vbi - 0.001)
@@ -800,8 +776,8 @@ def test_get_depletion_widths_set_in_junction():
     from solcore.analytic_solar_cells.depletion_approximation import get_depletion_widths
     from solcore.structure import Junction
 
-    wn = randrange(1,100)
-    wp = randrange(1,100)
+    wn = np.random.uniform(1,100)
+    wp = np.random.uniform(1,100)
     test_junc = Junction(wn=wn, wp=wp)
 
     wn_r, wp_r = get_depletion_widths(test_junc, 0, 0, 0, 0, 0, 0)
@@ -810,51 +786,27 @@ def test_get_depletion_widths_set_in_junction():
     assert wp_r == approx(wp)
 
 
-def test_dark_iv_depletion_pn():
+def test_dark_iv_depletion_pn(pn_junction):
     from solcore.analytic_solar_cells.depletion_approximation import iv_depletion, get_depletion_widths, get_j_dark, get_Jsrh, process_junction
-    from solcore import material
-    from solcore.structure import Layer, Junction
-    from solcore.state import State
     from scipy.interpolate import interp1d
 
-    Nd = randrange(1, 9) * 1e17
-    Na = randrange(1, 10) * 1e18
-
-    options = State()
-
-    options.T = 270
-    options.wavelength = np.linspace(290, 700, 150)*1e-9
-    options.internal_voltages =  np.linspace(-6, 4, 200)
+    test_junc, light_source, options = pn_junction
     options.light_iv = False
-
-    Lp = randrange(5, 500) * 1e-9  # Diffusion length
-    Ln = randrange(5, 500) * 1e-9  # Diffusion length
-
-    GaAs_n = material("GaAs")(Nd=Nd, hole_diffusion_length=Ln)
-    GaAs_p = material("GaAs")(Na=Na, electron_diffusion_length=Lp)
-
-    p_width = randrange(500, 1000)*1e-9
-    n_width = randrange(3000, 5000)*1e-9
-
-    test_junc = Junction([Layer(p_width, GaAs_p, role="emitter"),
-                          Layer(n_width, GaAs_n, role="base")])
-
-    test_junc.voltage = options.internal_voltages
     T = options.T
 
     Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, \
-    Vbi, pn_or_np = process_junction(test_junc, options)
+    Vbi, pn_or_np = process_junction(test_junc[0], options)
 
     kbT = kb * T
 
-    # And now we account for the possible applied voltage, which can be, at most, equal to Vbi
-    V = np.where(test_junc.voltage < Vbi - 0.001, test_junc.voltage, Vbi - 0.001)
+    test_junc[0].voltage = options.internal_voltages
 
-    wn, wp = get_depletion_widths(test_junc, es, Vbi, V, Na, Nd, xi)
+    V = np.where(test_junc[0].voltage < Vbi - 0.001, test_junc[0].voltage, Vbi - 0.001)
+
+    wn, wp = get_depletion_widths(test_junc[0], es, Vbi, V, Na, Nd, xi)
 
     w = wn + wp + xi
 
-    # Now it is time to calculate currents
     l_top, l_bottom = ln, lp
     x_top, x_bottom = xp, xn
     w_top, w_bottom = wp, wn
@@ -862,20 +814,13 @@ def test_dark_iv_depletion_pn():
     d_top, d_bottom = dp, dn
     min_top, min_bot = niSquared / Na, niSquared / Nd
 
-    #print(min_bot, min_top)
     JtopDark = get_j_dark(x_top, w_top, l_top, s_top, d_top, V, min_top, T)
     JbotDark = get_j_dark(x_bottom, w_bottom, l_bottom, s_bottom, d_bottom, V, min_bot, T)
 
-    # hereby we define the subscripts to refer to the layer in which the current is generated:
     JnDark, JpDark = JbotDark, JtopDark
 
-    # These might not be the right lifetimes. Actually, they are not as they include all recombination processes, not
-    # just SRH recombination, which is what the equation in Jenny, p159 refers to. Let´ leave them, for now.
     lifetime_n = ln ** 2 / dn
     lifetime_p = lp ** 2 / dp  # Jenny p163
-
-    # Here we use the full version of the SRH recombination term as calculated by Sah et al. Works for positive bias
-    # and moderately negative ones.
 
     Jrec = get_Jsrh(ni, V, Vbi, lifetime_p, lifetime_n, w, kbT)
 
@@ -883,62 +828,35 @@ def test_dark_iv_depletion_pn():
     J_sc_bot = 0
     J_sc_scr = 0
 
-    test_junc.current = Jrec + JnDark + JpDark + V / 1e14- J_sc_top - J_sc_bot - J_sc_scr
-    iv = interp1d(test_junc.voltage, test_junc.current, kind='linear', bounds_error=False, assume_sorted=True,
-                           fill_value=(test_junc.current[0], test_junc.current[-1]), copy=True)
+    current = Jrec + JnDark + JpDark + V / 1e14- J_sc_top - J_sc_bot - J_sc_scr
+    iv = interp1d(test_junc[0].voltage, current, kind='linear', bounds_error=False, assume_sorted=True,
+                           fill_value=(current[0], current[-1]), copy=True)
 
-    iv_depletion(test_junc, options)
+    iv_depletion(test_junc[0], options)
 
-    #print(test_junc.iv(options.internal_voltages))
-    assert test_junc.iv(options.internal_voltages) == approx(iv(options.internal_voltages), nan_ok=True)
-
+    assert test_junc[0].iv(options.internal_voltages) == approx(iv(options.internal_voltages), nan_ok=True)
 
 
-def test_dark_iv_depletion_np():
+def test_dark_iv_depletion_np(np_junction):
     from solcore.analytic_solar_cells.depletion_approximation import iv_depletion, get_depletion_widths, get_j_dark, get_Jsrh, process_junction
-    from solcore import material
-    from solcore.structure import Layer, Junction
-    from solcore.state import State
     from scipy.interpolate import interp1d
 
-    Nd = randrange(1, 10) * 1e18
-    Na = randrange(1, 9) * 1e17
-
-    options = State()
-
-    options.T = 270
-    options.wavelength = np.linspace(290, 700, 150)*1e-9
-    options.internal_voltages =  np.linspace(-6, 4, 200)
+    test_junc, light_source, options = np_junction
     options.light_iv = False
-
-    Lp = randrange(5, 500) * 1e-9  # Diffusion length
-    Ln = randrange(5, 500) * 1e-9  # Diffusion length
-
-    GaAs_n = material("GaAs")(Nd=Nd, hole_diffusion_length=Ln)
-    GaAs_p = material("GaAs")(Na=Na, electron_diffusion_length=Lp)
-
-    n_width = randrange(500, 1000)*1e-9
-    p_width = randrange(3000, 5000)*1e-9
-
-    test_junc = Junction([Layer(n_width, GaAs_n, role="emitter"),
-                          Layer(p_width, GaAs_p, role="base")])
-
-    test_junc.voltage = options.internal_voltages
     T = options.T
 
+    test_junc[0].voltage = options.internal_voltages
     Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, \
-    Vbi, pn_or_np = process_junction(test_junc, options)
+    Vbi, pn_or_np = process_junction(test_junc[0], options)
 
     kbT = kb * T
 
-    # And now we account for the possible applied voltage, which can be, at most, equal to Vbi
-    V = np.where(test_junc.voltage < Vbi - 0.001, test_junc.voltage, Vbi - 0.001)
+    V = np.where(test_junc[0].voltage < Vbi - 0.001, test_junc[0].voltage, Vbi - 0.001)
 
-    wn, wp = get_depletion_widths(test_junc, es, Vbi, V, Na, Nd, xi)
+    wn, wp = get_depletion_widths(test_junc[0], es, Vbi, V, Na, Nd, xi)
 
     w = wn + wp + xi
 
-    # Now it is time to calculate currents
     l_bottom, l_top = ln, lp
     x_bottom, x_top = xp, xn
     w_bottom, w_top = wp, wn
@@ -946,20 +864,13 @@ def test_dark_iv_depletion_np():
     d_bottom, d_top = dp, dn
     min_bot, min_top = niSquared / Na, niSquared / Nd
 
-    #print(min_bot, min_top)
     JtopDark = get_j_dark(x_top, w_top, l_top, s_top, d_top, V, min_top, T)
     JbotDark = get_j_dark(x_bottom, w_bottom, l_bottom, s_bottom, d_bottom, V, min_bot, T)
 
-    # hereby we define the subscripts to refer to the layer in which the current is generated:
     JpDark, JnDark = JbotDark, JtopDark
 
-    # These might not be the right lifetimes. Actually, they are not as they include all recombination processes, not
-    # just SRH recombination, which is what the equation in Jenny, p159 refers to. Let´ leave them, for now.
     lifetime_n = ln ** 2 / dn
     lifetime_p = lp ** 2 / dp  # Jenny p163
-
-    # Here we use the full version of the SRH recombination term as calculated by Sah et al. Works for positive bias
-    # and moderately negative ones.
 
     Jrec = get_Jsrh(ni, V, Vbi, lifetime_p, lifetime_n, w, kbT)
 
@@ -967,68 +878,22 @@ def test_dark_iv_depletion_np():
     J_sc_bot = 0
     J_sc_scr = 0
 
-    test_junc.current = Jrec + JnDark + JpDark + V / 1e14- J_sc_top - J_sc_bot - J_sc_scr
-    iv = interp1d(test_junc.voltage, test_junc.current, kind='linear', bounds_error=False, assume_sorted=True,
-                           fill_value=(test_junc.current[0], test_junc.current[-1]), copy=True)
+    current = Jrec + JnDark + JpDark + V / 1e14- J_sc_top - J_sc_bot - J_sc_scr
+    iv = interp1d(test_junc[0].voltage, current, kind='linear', bounds_error=False, assume_sorted=True,
+                           fill_value=(current[0], current[-1]), copy=True)
 
-    iv_depletion(test_junc, options)
+    iv_depletion(test_junc[0], options)
 
-    #print(test_junc.iv(options.internal_voltages))
-    assert test_junc.iv(options.internal_voltages) == approx(iv(options.internal_voltages), nan_ok=True)
+    assert test_junc[0].iv(options.internal_voltages) == approx(iv(options.internal_voltages), nan_ok=True)
 
 
-## check for qe:
-# - array sizes
-# - QE < 100% everywhere
-# - QE(wl) < A(wl)
+def test_qe_depletion_np(np_junction):
 
-def test_qe_depletion_np():
-    from solcore.structure import Junction, Layer
-    from solcore import si, material
-    from solcore.solar_cell import SolarCell
-    from solcore.solar_cell_solver import prepare_solar_cell
-    from solcore.state import State
-    from solcore.light_source import LightSource
     from solcore.analytic_solar_cells import qe_depletion
-    from solcore.optics import solve_beer_lambert
 
-    Nd = randrange(1, 100)*1e24
-    Na = randrange(1, 100)*1e23
+    test_junc, light_source, options = np_junction
 
-    Lp = randrange(5, 3000) * 1e-9  # Diffusion length
-    Ln = randrange(5, 3000) * 1e-9  # Diffusion length
-
-    AlInP = material("AlInP")
-    InGaP = material("GaInP")
-    window_material = AlInP(Al=0.52)
-    top_cell_n_material = InGaP(In=0.48, Nd=Nd,
-                                hole_diffusion_length=Lp)
-    top_cell_p_material = InGaP(In=0.48, Na=Na,
-                                electron_diffusion_length=Ln)
-
-    rel_perm = randrange(8, 20)
-    for mat in [top_cell_n_material, top_cell_p_material]:
-        mat.permittivity = rel_perm * vacuum_permittivity
-
-    n_width = randrange(500, 1000)*1e-9
-    p_width = randrange(3000, 5000)*1e-9
-
-    test_junc = SolarCell([Junction([Layer(si("25nm"), material=window_material, role='window'),
-                  Layer(n_width, material=top_cell_n_material, role='emitter'),
-                  Layer(p_width, material=top_cell_p_material, role='base'),
-                 ], sn=1, sp=1, kind='DA')])
-
-    light_source = LightSource(source_type="standard", version="AM1.5g")
-
-    options = State()
-    wl = np.linspace(290, 700, 150) * 1e-9
-    options.T = randrange(10, 350)
-    options.wavelength = wl
-    options.light_source = light_source
-    options.position = None
-    prepare_solar_cell(test_junc, options)
-
-    solve_beer_lambert(test_junc, options)
+    wl = options.wavelength
 
     qe_depletion(test_junc[0], options)
 
@@ -1044,53 +909,12 @@ def test_qe_depletion_np():
 
 
 
-def test_qe_depletion_pn():
-    from solcore.structure import Junction, Layer
-    from solcore import si, material
-    from solcore.solar_cell import SolarCell
-    from solcore.solar_cell_solver import prepare_solar_cell
-    from solcore.state import State
-    from solcore.light_source import LightSource
+def test_qe_depletion_pn(pn_junction):
     from solcore.analytic_solar_cells import qe_depletion
-    from solcore.optics import solve_beer_lambert
 
-    Na = randrange(1, 100)*1e24
-    Nd = randrange(1, 100)*1e23
+    test_junc, light_source, options = pn_junction
 
-    Lp = randrange(5, 3000) * 1e-9  # Diffusion length
-    Ln = randrange(5, 3000) * 1e-9  # Diffusion length
-
-    AlInP = material("AlInP")
-    InGaP = material("GaInP")
-    window_material = AlInP(Al=0.52)
-    top_cell_n_material = InGaP(In=0.48, Nd=Nd,
-                                hole_diffusion_length=Lp)
-    top_cell_p_material = InGaP(In=0.48, Na=Na,
-                                electron_diffusion_length=Ln)
-
-    rel_perm = randrange(8, 20)
-    for mat in [top_cell_n_material, top_cell_p_material]:
-        mat.permittivity = rel_perm * vacuum_permittivity
-
-    p_width = randrange(500, 1000)*1e-9
-    n_width = randrange(3000, 5000)*1e-9
-
-    test_junc = SolarCell([Junction([Layer(si("25nm"), material=window_material, role='window'),
-                  Layer(p_width, material=top_cell_p_material, role='emitter'),
-                  Layer(n_width, material=top_cell_n_material, role='base'),
-                 ], sn=1, sp=1, kind='DA')])
-
-    light_source = LightSource(source_type="standard", version="AM1.5g")
-
-    options = State()
-    wl = np.linspace(290, 700, 150) * 1e-9
-    options.T = randrange(10, 350)
-    options.wavelength = wl
-    options.light_source = light_source
-    options.position = None
-    prepare_solar_cell(test_junc, options)
-
-    solve_beer_lambert(test_junc, options)
+    wl = options.wavelength
 
     qe_depletion(test_junc[0], options)
 
@@ -1105,56 +929,14 @@ def test_qe_depletion_pn():
     assert np.all(test_junc[0].iqe(wl) >= test_junc[0].eqe(wl))
 
 
-def test_iv_depletion_np():
-    from solcore.structure import Junction, Layer
-    from solcore import si, material
-    from solcore.solar_cell import SolarCell
-    from solcore.solar_cell_solver import prepare_solar_cell
-    from solcore.state import State
-    from solcore.light_source import LightSource
+def test_iv_depletion_np(np_junction):
+
     from solcore.analytic_solar_cells import iv_depletion
-    from solcore.optics import solve_beer_lambert
 
-    Nd = randrange(1, 100)*1e24
-    Na = randrange(1, 100)*1e23
-
-    Lp = randrange(5, 3000) * 1e-9  # Diffusion length
-    Ln = randrange(5, 3000) * 1e-9  # Diffusion length
-
-    AlInP = material("AlInP")
-    InGaP = material("GaInP")
-    window_material = AlInP(Al=0.52)
-    top_cell_n_material = InGaP(In=0.48, Nd=Nd,
-                                hole_diffusion_length=Lp)
-    top_cell_p_material = InGaP(In=0.48, Na=Na,
-                                electron_diffusion_length=Ln)
-
-    rel_perm = randrange(8, 20)
-    for mat in [top_cell_n_material, top_cell_p_material]:
-        mat.permittivity = rel_perm * vacuum_permittivity
-
-    n_width = randrange(500, 1000)*1e-9
-    p_width = randrange(3000, 5000)*1e-9
-
-    test_junc = SolarCell([Junction([Layer(si("25nm"), material=window_material, role='window'),
-                  Layer(n_width, material=top_cell_n_material, role='emitter'),
-                  Layer(p_width, material=top_cell_p_material, role='base'),
-                 ], sn=1, sp=1, kind='DA')])
-
-    light_source = LightSource(source_type="standard", version="AM1.5g")
-    V = np.linspace(-2, 4, 300)
-    options = State()
-    wl = np.linspace(290, 700, 150) * 1e-9
-    options.T = randrange(10, 350)
-    options.wavelength = wl
-    options.light_source = light_source
+    test_junc, light_source, options = np_junction
     options.light_iv = True
-    options.position = None
-    options.internal_voltages = V
-
-    prepare_solar_cell(test_junc, options)
-
-    solve_beer_lambert(test_junc, options)
+    V = options.internal_voltages
+    wl = options.wavelength
 
     iv_depletion(test_junc[0], options)
 
@@ -1168,72 +950,30 @@ def test_iv_depletion_np():
     power = abs(test_junc[0].iv(V[quadrant])*V[quadrant])[:-1]
 
     assert abs(test_junc[0].iv(0)) <= Jph
-    assert approx_Voc < top_cell_n_material.band_gap/q
+    assert approx_Voc < test_junc[0][1].material.band_gap/q
     assert np.all(power < light_source.power_density)
 
 
-def test_iv_depletion_pn():
-    from solcore.structure import Junction, Layer
-    from solcore import si, material
-    from solcore.solar_cell import SolarCell
-    from solcore.solar_cell_solver import prepare_solar_cell
-    from solcore.state import State
-    from solcore.light_source import LightSource
+def test_iv_depletion_pn(pn_junction):
     from solcore.analytic_solar_cells import iv_depletion
-    from solcore.optics import solve_beer_lambert
 
-    Na = randrange(1, 100) * 1e24
-    Nd = randrange(1, 100) * 1e23
-
-    Lp = randrange(5, 3000) * 1e-9  # Diffusion length
-    Ln = randrange(5, 3000) * 1e-9  # Diffusion length
-
-    AlInP = material("AlInP")
-    InGaP = material("GaInP")
-    window_material = AlInP(Al=0.52)
-    top_cell_n_material = InGaP(In=0.48, Nd=Nd,
-                                hole_diffusion_length=Lp)
-    top_cell_p_material = InGaP(In=0.48, Na=Na,
-                                electron_diffusion_length=Ln)
-
-    rel_perm = randrange(8, 20)
-    for mat in [top_cell_n_material, top_cell_p_material]:
-        mat.permittivity = rel_perm * vacuum_permittivity
-
-    p_width = randrange(500, 1000) * 1e-9
-    n_width = randrange(3000, 5000) * 1e-9
-
-    test_junc = SolarCell([Junction([Layer(si("25nm"), material=window_material, role='window'),
-                                     Layer(p_width, material=top_cell_p_material, role='emitter'),
-                                     Layer(n_width, material=top_cell_n_material, role='base'),
-                                     ], sn=1, sp=1, kind='DA')])
-
-    light_source = LightSource(source_type="standard", version="AM1.5g")
-    V = np.linspace(-2, 4, 300)
-    options = State()
-    wl = np.linspace(290, 700, 150) * 1e-9
-    options.T = randrange(10, 350)
-    options.wavelength = wl
-    options.light_source = light_source
+    test_junc, light_source, options = pn_junction
     options.light_iv = True
-    options.position = None
-    options.internal_voltages = V
-
-    prepare_solar_cell(test_junc, options)
-
-    solve_beer_lambert(test_junc, options)
+    V = options.internal_voltages
+    wl = options.wavelength
 
     iv_depletion(test_junc[0], options)
 
     wl_sp, ph = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
-    Jph = q * np.trapz(test_junc.absorbed * ph, wl)
+    Jph = q*np.trapz(test_junc.absorbed*ph, wl)
 
     approx_Voc = V[np.argmin(abs(test_junc[0].iv(V)))]
 
     quadrant = (V > 0) * (V < approx_Voc)
 
-    power = abs(test_junc[0].iv(V[quadrant]) * V[quadrant])[:-1]
+    power = abs(test_junc[0].iv(V[quadrant])*V[quadrant])[:-1]
 
     assert abs(test_junc[0].iv(0)) <= Jph
-    assert approx_Voc < top_cell_n_material.band_gap / q
+    assert approx_Voc < test_junc[0][1].material.band_gap/q
     assert np.all(power < light_source.power_density)
+
