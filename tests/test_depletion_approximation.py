@@ -1,6 +1,7 @@
-from pytest import approx, raises
+from pytest import approx, mark, raises
 import numpy as np
 from solcore.constants import kb, q, vacuum_permittivity
+
 
 
 def test_get_j_dark():
@@ -33,6 +34,7 @@ def test_get_j_dark():
     result = get_j_dark(x, w, l, s, d, V, minor, T)
 
     assert result == approx(expected, nan_ok=True)
+
 
 def test_factor():
     from solcore.analytic_solar_cells.depletion_approximation import factor
@@ -790,7 +792,7 @@ def test_dark_iv_depletion_pn(pn_junction):
     from solcore.analytic_solar_cells.depletion_approximation import iv_depletion, get_depletion_widths, get_j_dark, get_Jsrh, process_junction
     from scipy.interpolate import interp1d
 
-    test_junc, light_source, options = pn_junction
+    test_junc, options = pn_junction
     options.light_iv = False
     T = options.T
 
@@ -841,7 +843,7 @@ def test_dark_iv_depletion_np(np_junction):
     from solcore.analytic_solar_cells.depletion_approximation import iv_depletion, get_depletion_widths, get_j_dark, get_Jsrh, process_junction
     from scipy.interpolate import interp1d
 
-    test_junc, light_source, options = np_junction
+    test_junc, options = np_junction
     options.light_iv = False
     T = options.T
 
@@ -891,7 +893,7 @@ def test_qe_depletion_np(np_junction):
 
     from solcore.analytic_solar_cells import qe_depletion
 
-    test_junc, light_source, options = np_junction
+    test_junc, options = np_junction
 
     wl = options.wavelength
 
@@ -912,7 +914,7 @@ def test_qe_depletion_np(np_junction):
 def test_qe_depletion_pn(pn_junction):
     from solcore.analytic_solar_cells import qe_depletion
 
-    test_junc, light_source, options = pn_junction
+    test_junc, options = pn_junction
 
     wl = options.wavelength
 
@@ -933,14 +935,14 @@ def test_iv_depletion_np(np_junction):
 
     from solcore.analytic_solar_cells import iv_depletion
 
-    test_junc, light_source, options = np_junction
+    test_junc, options = np_junction
     options.light_iv = True
     V = options.internal_voltages
     wl = options.wavelength
 
     iv_depletion(test_junc[0], options)
 
-    wl_sp, ph = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+    wl_sp, ph = options.light_source.spectrum(output_units='photon_flux_per_m', x=wl)
     Jph = q*np.trapz(test_junc.absorbed*ph, wl)
 
     approx_Voc = V[np.argmin(abs(test_junc[0].iv(V)))]
@@ -949,22 +951,38 @@ def test_iv_depletion_np(np_junction):
 
     power = abs(test_junc[0].iv(V[quadrant])*V[quadrant])[:-1]
 
+
     assert abs(test_junc[0].iv(0)) <= Jph
+    if (abs(test_junc[0].iv(0)) > Jph):
+        import matplotlib.pyplot as plt
+        plt.figure()
+        plt.plot(V, np.log(test_junc[0].iv(V)))
+        # plt.ylim(0, 200)
+        plt.xlim(-1, 2)
+        plt.gca().set_ylim(bottom=1)
+        plt.text(-0.8, 2, 'np - Doping top ' +str(test_junc[0][1].material.Nd))
+        plt.text(-0.8, 4, 'np - Doping bottom ' + str(test_junc[0][2].material.Na))
+        plt.text(-0.8, 6, 'Widths ' + str(test_junc[0][1].width) + str(test_junc[0][2].width))
+        plt.text(-0.8, 8, 'Lhole, Lelectron ' +
+                 str(test_junc[0][1].material.hole_diffusion_length) +
+                 str(test_junc[0][2].material.electron_diffusion_length))
+        plt.text(-0.8, 10, str(abs(test_junc[0].iv(0))))
+        plt.show()
     assert approx_Voc < test_junc[0][1].material.band_gap/q
-    assert np.all(power < light_source.power_density)
+    assert np.all(power < options.light_source.power_density)
 
 
 def test_iv_depletion_pn(pn_junction):
     from solcore.analytic_solar_cells import iv_depletion
 
-    test_junc, light_source, options = pn_junction
+    test_junc, options = pn_junction
     options.light_iv = True
     V = options.internal_voltages
     wl = options.wavelength
 
     iv_depletion(test_junc[0], options)
 
-    wl_sp, ph = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+    wl_sp, ph = options.light_source.spectrum(output_units='photon_flux_per_m', x=wl)
     Jph = q*np.trapz(test_junc.absorbed*ph, wl)
 
     approx_Voc = V[np.argmin(abs(test_junc[0].iv(V)))]
@@ -974,6 +992,22 @@ def test_iv_depletion_pn(pn_junction):
     power = abs(test_junc[0].iv(V[quadrant])*V[quadrant])[:-1]
 
     assert abs(test_junc[0].iv(0)) <= Jph
+    # if (abs(test_junc[0].iv(0)) > Jph):
+    #     import matplotlib.pyplot as plt
+    #     plt.figure()
+    #     plt.plot(V, np.log(test_junc[0].iv(V)))
+    #     # plt.ylim(0, 200)
+    #     plt.xlim(-1, 2)
+    #     plt.gca().set_ylim(bottom=1)
+    #
+    #     plt.text(-0.8, 2, 'pn - Doping top' +str(test_junc[0][1].material.Na))
+    #     plt.text(-0.8, 4, 'pn - Doping bottom' + str(test_junc[0][2].material.Nd))
+    #     plt.text(-0.8, 6, 'Widths' + str(test_junc[0][1].width) + str(test_junc[0][2].width))
+    #     plt.text(-0.8, 8, 'Lelectron, Lhole ' +
+    #              str(test_junc[0][1].material.electron_diffusion_length) +
+    #              str(test_junc[0][2].material.hole_diffusion_length))
+    #     plt.text(-0.8, 10, str(abs(test_junc[0].iv(0))))
+    #     plt.show()
     assert approx_Voc < test_junc[0][1].material.band_gap/q
-    assert np.all(power < light_source.power_density)
+    assert np.all(power < options.light_source.power_density)
 

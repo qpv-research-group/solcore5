@@ -7,6 +7,123 @@ from solcore.science_tracker import science_reference
 from solcore.state import State
 
 
+def identify_layers(junction):
+    # First we have to figure out if we are talking about a PN, NP, PIN or NIP junction
+    # We search for the emitter and check if it is n-type or p-type
+    idx = 0
+    pn_or_np = 'pn'
+    homojunction = True
+
+    for layer in junction:
+        if layer.role.lower() != 'emitter':
+            idx += 1
+        else:
+            Na = 0
+            Nd = 0
+            if hasattr(layer.material, 'Na'): Na = layer.material.Na
+            if hasattr(layer.material, 'Nd'): Nd = layer.material.Nd
+            if Na < Nd:
+                pn_or_np = "np"
+                nRegion = junction[idx]
+            else:
+                pRegion = junction[idx]
+
+            id_top = idx
+
+            break
+
+    # Now we check for an intrinsic region and, if there is, for the base.
+    if junction[idx + 1].role.lower() == 'intrinsic':
+        iRegion = junction[idx + 1]
+
+        if junction[idx + 2].role.lower() == 'base':
+            if pn_or_np == "pn":
+                nRegion = junction[idx + 2]
+
+            else:
+                pRegion = junction[idx + 2]
+
+            id_bottom = idx + 2
+            homojunction = homojunction and nRegion.material.material_string == pRegion.material.material_string
+            homojunction = homojunction and nRegion.material.material_string == iRegion.material.material_string
+
+        else:
+            raise RuntimeError(
+                'ERROR processing junctions: A layer following the "intrinsic" layer must be defined as '
+                '"base".')
+
+    # If there is no intrinsic region, we check directly the base
+    elif junction[idx + 1].role.lower() == 'base':
+        if pn_or_np == "pn":
+            nRegion = junction[idx + 1]
+
+        else:
+            pRegion = junction[idx + 1]
+
+        iRegion = None
+
+        id_bottom = idx + 1
+        homojunction = homojunction and nRegion.material.material_string == pRegion.material.material_string
+
+    else:
+        raise RuntimeError(
+            'ERROR processing junctions: A layer following the "emitter" must be defined as "intrinsic"'
+            'or "base".')
+
+    # We assert that we are really working with an homojunction
+    assert homojunction, 'ERROR: The DA solver only works with homojunctions, for now.'
+
+
+    return id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np
+
+
+def identify_parameters(junction, T, pRegion, nRegion, iRegion):
+
+    kbT = kb * T
+
+    xp = pRegion.width
+    xn = nRegion.width
+    xi = 0 if iRegion is None else iRegion.width
+
+    sn = 0 if not hasattr(junction, "sn") else junction.sn
+    sp = 0 if not hasattr(junction, "sp") else junction.sp
+
+    # Now we have to get all the material parameters needed for the calculation
+    if hasattr(junction, "permittivity"):
+        es = junction.permittivity
+    else:
+        es = nRegion.material.permittivity  # equal for n and p.  I hope.
+
+    # For the diffusion length, subscript n and p refer to the carriers, electrons and holes
+    if hasattr(junction, "ln"):
+        ln = junction.ln
+    else:
+        ln = pRegion.material.electron_diffusion_length
+
+    if hasattr(junction, "lp"):
+        lp = junction.lp
+    else:
+        lp = nRegion.material.hole_diffusion_length
+
+    # For the diffusion coefficient, n and p refer to the regions, n side and p side. Yeah, it's confusing...
+    if hasattr(junction, "mup"):
+        dp = junction.mup * kbT / q
+    else:
+        dp = pRegion.material.electron_mobility * kbT / q
+
+    if hasattr(junction, "mun"):
+        dn = junction.mun * kbT / q
+    else:
+        dn = nRegion.material.hole_mobility * kbT / q
+
+    ni = nRegion.material.ni
+
+    Na = pRegion.material.Na
+    Nd = nRegion.material.Nd
+
+    return xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es
+
+
 def process_junction(junction, options):
     T = options.T
 
@@ -62,10 +179,10 @@ def process_junction(junction, options):
     elif junction[idx + 1].role.lower() == 'base':
         if pn_or_np == "pn":
             nRegion = junction[idx + 1]
-            #nidx = idx + 1
+
         else:
             pRegion = junction[idx + 1]
-            #pidx = idx + 1
+
         iRegion = None
 
         id_bottom = idx + 1
@@ -118,16 +235,6 @@ def process_junction(junction, options):
     ni = nRegion.material.ni
     niSquared = ni**2
 
-    # Effective masses and effective density of states
-    # mEff_h = nRegion.material.eff_mass_hh_z * electron_mass
-    # mEff_e = pRegion.material.eff_mass_electron * electron_mass
-    # Egap = nRegion.material.band_gap
-    #
-    # Nv = 2 * (mEff_h * kb * T / (2 * pi * hbar ** 2)) ** 1.5  # Jenny p58
-    # Nc = 2 * (mEff_e * kb * T / (2 * pi * hbar ** 2)) ** 1.5
-    # niSquared = Nc * Nv * np.exp(-Egap / (kb * T))
-    # ni = np.sqrt(niSquared)
-
     Na = pRegion.material.Na
     Nd = nRegion.material.Nd
 
@@ -149,10 +256,17 @@ def iv_depletion(junction, options):
 
     junction.voltage = options.internal_voltages
     T = options.T
-
-    Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, Vbi, pn_or_np = process_junction(junction, options)
-
     kbT = kb * T
+
+    id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(junction)
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(junction, T, pRegion, nRegion, iRegion)
+
+    niSquared = ni**2
+
+    Vbi = (kbT / q) * np.log(Nd * Na / niSquared) if not hasattr(junction, "Vbi") else junction.Vbi  # Jenny p146
+
+    #Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, Vbi, pn_or_np = process_junction(junction, options)
+
     R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, 'R_shunt') else 1e14
 
     # And now we account for the possible applied voltage, which can be, at most, equal to Vbi
@@ -178,9 +292,10 @@ def iv_depletion(junction, options):
         d_bottom, d_top = dp, dn
         min_bot, min_top = niSquared / Na, niSquared / Nd
 
-    #print(min_bot, min_top)
     JtopDark = get_j_dark(x_top, w_top, l_top, s_top, d_top, V, min_top, T)
     JbotDark = get_j_dark(x_bottom, w_bottom, l_bottom, s_bottom, d_bottom, V, min_bot, T)
+
+    #print('Jtop dark, Jbot dark:', str(JtopDark) + '   '+ str(JbotDark))
 
     # hereby we define the subscripts to refer to the layer in which the current is generated:
     if pn_or_np == "pn":
@@ -404,11 +519,17 @@ def qe_depletion(junction, options):
     science_reference('Depletion approximation',
                       'J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).')
 
-    ### same as qe
-    T = options.T
 
     # First we have to figure out if we are talking about a PN, NP, PIN or NIP junction
-    Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, Vbi, pn_or_np = process_junction(junction, options)
+    T = options.T
+    kbT = kb * T
+
+    id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(junction)
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(junction, T, pRegion, nRegion, iRegion)
+
+    niSquared = ni ** 2
+
+    Vbi = (kbT / q) * np.log(Nd * Na / niSquared) if not hasattr(junction, "Vbi") else junction.Vbi  # Jenny p146
 
     wn, wp = get_depletion_widths(junction, es, Vbi, 0, Na, Nd, xi)
 
@@ -441,7 +562,6 @@ def qe_depletion(junction, options):
     # The contribution from the Emitter (top side).
     xa = cum_widths[id_top]
     xb = cum_widths[id_top + 1] - w_top
-    #print('xa, xb, wtop', xa, xb, w_top)
     deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
     j_sc_top = d_top * abs(deriv)
 
@@ -519,7 +639,6 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
         guess = y0 * np.ones((2, zz.size))
         guess[1] = np.zeros_like(guess[0])
-        #print(zz)
         solution = solve_bvp(fun, bc, zz, guess)
 
         if side == 'top':
