@@ -9,11 +9,8 @@ from solcore.light_source import LightSource
 from solcore.solar_cell_solver import solar_cell_solver
 
 # TODO The purpose of this example needs to be clarified. It is messy
-
 T = 298
-
 substrate = material('GaAs')(T=T)
-
 
 def AlGaAs(T):
     # We create the other materials we need for the device
@@ -28,7 +25,6 @@ def AlGaAs(T):
                        Layer(width=si('200nm'), material=bsf, role="BSF")], sn=1e6, sp=1e6, T=T, kind='PDD')
 
     return output
-
 
 my_solar_cell = SolarCell([default_GaAs(T)], T=T, R_series=0, substrate=substrate)
 
@@ -90,5 +86,4 @@ if __name__ == '__main__':
     #
     # plt.xlabel('Wavelength (nm)')
     # plt.ylabel('EQE')
-
     plt.show()
