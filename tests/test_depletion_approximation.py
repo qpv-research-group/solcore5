@@ -462,17 +462,13 @@ def test_get_J_sc_diffusion_vs_WL_bottom():
     assert result == approx(expected)
 
 
-def test_process_junction_exceptions():
-    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+def test_identify_layers_exceptions():
+    from solcore.analytic_solar_cells.depletion_approximation import identify_layers
     from solcore import material
     from solcore.structure import Layer, Junction
-    from solcore.state import State
 
     Na = np.power(10, np.random.uniform(22, 25))
     Nd = np.power(10, np.random.uniform(22, 25))
-
-    options = State()
-    options.T = np.random.uniform(0.1, 350)
 
     Lp = np.power(10, np.random.uniform(-9, -6))# Diffusion length
     Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
@@ -490,24 +486,24 @@ def test_process_junction_exceptions():
                            Layer(p_width, GaAs_p, role="neither")])
 
     with raises(RuntimeError):
-        process_junction(test_junc, options)
+        identify_layers(test_junc)
 
     test_junc =  Junction([Layer(n_width, GaAs_n,role="emitter"),
                            Layer(i_width, GaAs_i, role="intrinsic"),
                            Layer(p_width, GaAs_p, role="nothing")])
 
     with raises(RuntimeError):
-        process_junction(test_junc, options)
+        identify_layers(test_junc)
 
     test_junc  = Junction([Layer(n_width, Ge_n,role="emitter"),
                            Layer(p_width, GaAs_p, role="base")])
 
     with raises(AssertionError):
-        process_junction(test_junc, options)
+        identify_layers(test_junc)
 
 
 def test_process_junction_np():
-    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore.analytic_solar_cells.depletion_approximation import identify_layers, identify_parameters
     from solcore import material
     from solcore.structure import Layer, Junction
     from solcore.state import State
@@ -516,7 +512,7 @@ def test_process_junction_np():
     Nd = np.power(10, np.random.uniform(22, 25))
 
     options = State()
-    options.T = np.random.uniform(0.1, 350)
+    options.T = np.random.uniform(250, 350)
 
     Lp = np.power(10, np.random.uniform(-9, -6))# Diffusion length
     Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
@@ -533,24 +529,21 @@ def test_process_junction_np():
                            Layer(n_width, GaAs_n,role="emitter"),
                            Layer(p_width, GaAs_p, role="base")])
 
-    results = process_junction(test_junc, options)
+    id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(test_junc, options.T, pRegion, nRegion, iRegion)
 
     ni_expect = GaAs_n.ni
-    niSquared_expect = ni_expect**2
 
-    Vbi_expect = (kb*options.T / q) * np.log(Nd * Na / niSquared_expect)
+    assert [id_top, id_bottom] == approx([1, 2])
+    assert pn_or_np == 'np'
+    assert [xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es] == approx([n_width, p_width, 0, 0, 0, Lp, Ln, GaAs_n.hole_mobility * kb * options.T / q,
+                                    GaAs_p.electron_mobility * kb * options.T / q, Nd, Na, ni_expect, GaAs_n.permittivity])
 
-    assert results[0:17] == approx((Na, Nd, ni_expect, niSquared_expect, 0,
-                             Lp, Ln, n_width, p_width,
-                             0, 0, GaAs_n.hole_mobility * kb*options.T / q,
-                                    GaAs_p.electron_mobility * kb * options.T / q,
-                              GaAs_n.permittivity, 1, 2, Vbi_expect))
 
-    assert results[17] == 'np'
 
 
 def test_process_junction_pn():
-    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore.analytic_solar_cells.depletion_approximation import identify_layers, identify_parameters
     from solcore import material
     from solcore.structure import Layer, Junction
     from solcore.state import State
@@ -559,7 +552,7 @@ def test_process_junction_pn():
     Nd = np.power(10, np.random.uniform(23, 26))
 
     options = State()
-    options.T = np.random.uniform(1, 350)
+    options.T = np.random.uniform(250, 350)
 
     Lp = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
     Ln = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
@@ -572,24 +565,19 @@ def test_process_junction_pn():
 
     test_junc = Junction([Layer(p_width, GaAs_p, role="emitter"), Layer(n_width, GaAs_n, role="base")])
 
-    results = process_junction(test_junc, options)
+    id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(test_junc, options.T, pRegion, nRegion, iRegion)
 
     ni_expect = GaAs_n.ni
-    niSquared_expect = ni_expect ** 2
 
-    Vbi_expect = (kb * options.T / q) * np.log(Nd * Na / niSquared_expect)
-
-    assert results[0:17] == approx((Na, Nd, ni_expect, niSquared_expect, 0,
-                                    Lp, Ln, n_width, p_width,
-                                    0, 0, GaAs_n.hole_mobility * kb * options.T / q,
-                                    GaAs_p.electron_mobility * kb * options.T / q,
-                                    GaAs_n.permittivity, 0, 1, Vbi_expect))
-
-    assert results[17] == 'pn'
+    assert [id_top, id_bottom] == approx([0, 1])
+    assert pn_or_np == 'pn'
+    assert [xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es] == approx([n_width, p_width, 0, 0, 0, Lp, Ln, GaAs_n.hole_mobility * kb * options.T / q,
+                                    GaAs_p.electron_mobility * kb * options.T / q, Nd, Na, ni_expect, GaAs_n.permittivity])
 
 
 def test_process_junction_nip():
-    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore.analytic_solar_cells.depletion_approximation import identify_layers, identify_parameters
     from solcore import material
     from solcore.structure import Layer, Junction
     from solcore.state import State
@@ -598,7 +586,7 @@ def test_process_junction_nip():
     Nd = np.power(10, np.random.uniform(22, 25))
 
     options = State()
-    options.T = np.random.uniform(0.1, 350)
+    options.T = np.random.uniform(250, 350)
 
     Lp = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
     Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
@@ -615,24 +603,20 @@ def test_process_junction_nip():
                            Layer(i_width, GaAs_i, role="intrinsic"),
                            Layer(p_width, GaAs_p, role="base")])
 
-    results = process_junction(test_junc, options)
+    id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(test_junc, options.T, pRegion, nRegion, iRegion)
 
     ni_expect = GaAs_n.ni
-    niSquared_expect = ni_expect**2
 
-    Vbi_expect = (kb*options.T / q) * np.log(Nd * Na / niSquared_expect)
+    assert [id_top, id_bottom] == approx([0, 2])
+    assert pn_or_np == 'np'
+    assert [xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es] == approx([n_width, p_width, i_width, 0, 0, Lp, Ln, GaAs_n.hole_mobility * kb * options.T / q,
+                                    GaAs_p.electron_mobility * kb * options.T / q, Nd, Na, ni_expect, GaAs_n.permittivity])
 
-    assert results[0:17] == approx((Na, Nd, ni_expect, niSquared_expect, i_width,
-                             Lp, Ln, n_width, p_width,
-                             0, 0, GaAs_n.hole_mobility * kb*options.T / q,
-                                    GaAs_p.electron_mobility * kb * options.T / q,
-                              GaAs_n.permittivity, 0, 2, Vbi_expect))
-
-    assert results[17] == 'np'
 
 
 def test_process_junction_pin():
-    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore.analytic_solar_cells.depletion_approximation import identify_layers, identify_parameters
     from solcore import material
     from solcore.structure import Layer, Junction
     from solcore.state import State
@@ -641,7 +625,7 @@ def test_process_junction_pin():
     Nd = np.power(10, np.random.uniform(23, 26))
 
     options = State()
-    options.T = np.random.uniform(0.1, 350)
+    options.T = np.random.uniform(250, 350)
 
     Lp = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
     Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
@@ -658,30 +642,25 @@ def test_process_junction_pin():
                           Layer(i_width, GaAs_i, role="intrinsic"),
                           Layer(n_width, GaAs_n, role="base")])
 
-    results = process_junction(test_junc, options)
+    id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(test_junc, options.T, pRegion, nRegion, iRegion)
 
     ni_expect = GaAs_n.ni
-    niSquared_expect = ni_expect ** 2
 
-    Vbi_expect = (kb * options.T / q) * np.log(Nd * Na / niSquared_expect)
-
-    assert results[0:17] == approx((Na, Nd, ni_expect, niSquared_expect, i_width,
-                             Lp, Ln, n_width, p_width,
-                             0, 0, GaAs_n.hole_mobility * kb*options.T / q,
-                                    GaAs_p.electron_mobility * kb * options.T / q,
-                              GaAs_n.permittivity, 0, 2, Vbi_expect))
-
-    assert results[17] == 'pn'
+    assert [id_top, id_bottom] == approx([0, 2])
+    assert pn_or_np == 'pn'
+    assert [xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es] == approx([n_width, p_width, i_width, 0, 0, Lp, Ln, GaAs_n.hole_mobility * kb * options.T / q,
+                                    GaAs_p.electron_mobility * kb * options.T / q, Nd, Na, ni_expect, GaAs_n.permittivity])
 
 
 def test_process_junction_set_in_junction():
-    from solcore.analytic_solar_cells.depletion_approximation import process_junction
+    from solcore.analytic_solar_cells.depletion_approximation import identify_layers, identify_parameters
     from solcore import material
     from solcore.structure import Layer, Junction
     from solcore.state import State
 
     options = State()
-    options.T = np.random.uniform(0.1, 350)
+    options.T = np.random.uniform(250, 350)
 
     Lp = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
     Ln = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
@@ -711,17 +690,15 @@ def test_process_junction_set_in_junction():
                          ln = Ln, lp= Lp,
                          mup = mup, mun = mun, Vbi = Vbi)
 
-    results = process_junction(test_junc, options)
+    id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
+    xn, xp, xi, sn_c, sp_c, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(test_junc, options.T, pRegion, nRegion, iRegion)
 
     ni_expect = GaAs_n.ni
-    niSquared_expect = ni_expect ** 2
 
-    assert results[0:17] == approx((GaAs_n.Na, GaAs_p.Nd, ni_expect, niSquared_expect, i_width,
-                             Ln, Lp, n_width, p_width,
-                             sn, sp, mun* kb*options.T / q, mup* kb*options.T / q,
-                              se, 0, 2, Vbi))
-
-    assert results[17] == 'pn'
+    assert [id_top, id_bottom] == approx([0, 2])
+    assert pn_or_np == 'pn'
+    assert [xn, xp, xi, sn_c, sp_c, ln, lp, dn, dp, Nd_c, Na_c, ni, es] == approx([n_width, p_width, i_width, sn, sp, Ln, Lp, mun * kb * options.T / q,
+                                    mup * kb * options.T / q, 1, 1, ni_expect, se])
 
 
 def test_get_depletion_widths():
@@ -789,17 +766,21 @@ def test_get_depletion_widths_set_in_junction():
 
 
 def test_dark_iv_depletion_pn(pn_junction):
-    from solcore.analytic_solar_cells.depletion_approximation import iv_depletion, get_depletion_widths, get_j_dark, get_Jsrh, process_junction
+    from solcore.analytic_solar_cells.depletion_approximation import iv_depletion, get_depletion_widths, get_j_dark, get_Jsrh, identify_layers, identify_parameters
     from scipy.interpolate import interp1d
 
     test_junc, options = pn_junction
     options.light_iv = False
     T = options.T
 
-    Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, \
-    Vbi, pn_or_np = process_junction(test_junc[0], options)
+    id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc[0])
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(test_junc[0], T, pRegion, nRegion, iRegion)
+
+    niSquared = ni**2
 
     kbT = kb * T
+
+    Vbi = (kbT / q) * np.log(Nd * Na / niSquared)
 
     test_junc[0].voltage = options.internal_voltages
 
@@ -840,7 +821,7 @@ def test_dark_iv_depletion_pn(pn_junction):
 
 
 def test_dark_iv_depletion_np(np_junction):
-    from solcore.analytic_solar_cells.depletion_approximation import iv_depletion, get_depletion_widths, get_j_dark, get_Jsrh, process_junction
+    from solcore.analytic_solar_cells.depletion_approximation import iv_depletion, get_depletion_widths, get_j_dark, get_Jsrh, identify_layers, identify_parameters
     from scipy.interpolate import interp1d
 
     test_junc, options = np_junction
@@ -848,10 +829,15 @@ def test_dark_iv_depletion_np(np_junction):
     T = options.T
 
     test_junc[0].voltage = options.internal_voltages
-    Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, \
-    Vbi, pn_or_np = process_junction(test_junc[0], options)
+
+    id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc[0])
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(test_junc[0], T, pRegion, nRegion, iRegion)
+
+    niSquared = ni**2
 
     kbT = kb * T
+
+    Vbi = (kbT / q) * np.log(Nd * Na / niSquared)
 
     V = np.where(test_junc[0].voltage < Vbi - 0.001, test_junc[0].voltage, Vbi - 0.001)
 
@@ -953,21 +939,6 @@ def test_iv_depletion_np(np_junction):
 
 
     assert abs(test_junc[0].iv(0)) <= Jph
-    if (abs(test_junc[0].iv(0)) > Jph):
-        import matplotlib.pyplot as plt
-        plt.figure()
-        plt.plot(V, np.log(test_junc[0].iv(V)))
-        # plt.ylim(0, 200)
-        plt.xlim(-1, 2)
-        plt.gca().set_ylim(bottom=1)
-        plt.text(-0.8, 2, 'np - Doping top ' +str(test_junc[0][1].material.Nd))
-        plt.text(-0.8, 4, 'np - Doping bottom ' + str(test_junc[0][2].material.Na))
-        plt.text(-0.8, 6, 'Widths ' + str(test_junc[0][1].width) + str(test_junc[0][2].width))
-        plt.text(-0.8, 8, 'Lhole, Lelectron ' +
-                 str(test_junc[0][1].material.hole_diffusion_length) +
-                 str(test_junc[0][2].material.electron_diffusion_length))
-        plt.text(-0.8, 10, str(abs(test_junc[0].iv(0))))
-        plt.show()
     assert approx_Voc < test_junc[0][1].material.band_gap/q
     assert np.all(power < options.light_source.power_density)
 
@@ -992,22 +963,6 @@ def test_iv_depletion_pn(pn_junction):
     power = abs(test_junc[0].iv(V[quadrant])*V[quadrant])[:-1]
 
     assert abs(test_junc[0].iv(0)) <= Jph
-    # if (abs(test_junc[0].iv(0)) > Jph):
-    #     import matplotlib.pyplot as plt
-    #     plt.figure()
-    #     plt.plot(V, np.log(test_junc[0].iv(V)))
-    #     # plt.ylim(0, 200)
-    #     plt.xlim(-1, 2)
-    #     plt.gca().set_ylim(bottom=1)
-    #
-    #     plt.text(-0.8, 2, 'pn - Doping top' +str(test_junc[0][1].material.Na))
-    #     plt.text(-0.8, 4, 'pn - Doping bottom' + str(test_junc[0][2].material.Nd))
-    #     plt.text(-0.8, 6, 'Widths' + str(test_junc[0][1].width) + str(test_junc[0][2].width))
-    #     plt.text(-0.8, 8, 'Lelectron, Lhole ' +
-    #              str(test_junc[0][1].material.electron_diffusion_length) +
-    #              str(test_junc[0][2].material.hole_diffusion_length))
-    #     plt.text(-0.8, 10, str(abs(test_junc[0].iv(0))))
-    #     plt.show()
     assert approx_Voc < test_junc[0][1].material.band_gap/q
     assert np.all(power < options.light_source.power_density)
 
