@@ -1,3 +1,4 @@
+from pytest import fixture
 import random
 from solcore import material
 from solcore.poisson_drift_diffusion.DeviceStructure import CreateDeviceStructure
@@ -8,17 +9,11 @@ from solcore.structure import InLineComposition, ToLayer, ToStructure
 T = 300
 QWmat_material_name = 'InGaAs'
 QWmat_in = 0.2
-QWmat = material(QWmat_material_name)(T=T, In=QWmat_in)
-QWmat_clean = material(QWmat_material_name)(T=T, In=QWmat_in)  # Clean material required for test_to_material
 QWmat_structure = {'material': QWmat_material_name, 'element': 'In', 'fraction': QWmat_in}
 Bmat_material_name = 'GaAsP'
 Bmat_p = 0.1
-Bmat = material(Bmat_material_name)(T=T, P=Bmat_p)
-Bmat_clean = material(Bmat_material_name)(T=T, P=Bmat_p)  # Clean material required for test_to_material
 Bmat_structure = {'material': Bmat_material_name, 'element': 'P', 'fraction': Bmat_p}
 i_GaAs_material_name = 'GaAs'
-i_GaAs = material(i_GaAs_material_name)(T=T)
-i_GaAs_clean = material(i_GaAs_material_name)(T=T)  # Clean material required for test_to_material
 i_GaAs_structure = {'material': i_GaAs_material_name}
 
 # Layers
@@ -26,19 +21,47 @@ available_roles = ['Barrier', 'Base', 'BSF', 'Emitter', 'Intrinsic', 'Window']
 wkt_box = 'POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'
 width1 = random.uniform(1e-9, 1e-8)
 role1 = random.choice(available_roles)
-layer1 = Layer(width1, QWmat, role1, wkt_box, new_property='new_property')
 width2 = random.uniform(1e-9, 1e-8)
 role2 = random.choice(available_roles)
-layer2 = Layer(width2, Bmat, role2, wkt_box)
 width3 = random.uniform(1e-9, 1e-8)
 role3 = random.choice(available_roles)
-layer3 = Layer(width3, i_GaAs, role3, wkt_box)
 
-# Device
-device = CreateDeviceStructure(layers=[layer1, layer2, layer3])
+@fixture
+def QWmat():
+    return material(QWmat_material_name)(T=T, In=QWmat_in)
 
 
-def test_layer_and_junction():
+@fixture
+def Bmat():
+    return material(Bmat_material_name)(T=T, P=Bmat_p)
+
+
+@fixture
+def i_GaAs():
+    return material(i_GaAs_material_name)(T=T)
+
+
+@fixture
+def layer1(QWmat):
+    return Layer(width1, QWmat, role1, wkt_box, new_property='new_property')
+
+
+@fixture
+def layer2(Bmat):
+    return Layer(width2, Bmat, role2, wkt_box)
+
+
+@fixture
+def layer3(i_GaAs):
+    return Layer(width3, i_GaAs, role3, wkt_box)
+
+
+@fixture
+def device(layer1, layer2, layer3):
+    return CreateDeviceStructure(layers=[layer1, layer2, layer3])
+
+
+def test_layer_and_junction(QWmat, layer1, Bmat, layer2, i_GaAs, layer3):
     assert layer1.width == width1
     assert layer1.role == role1
     assert layer1.material == QWmat
@@ -74,7 +97,7 @@ def test_layer_and_junction():
     assert tunnel1[2] == layer3
 
 
-def test_structure():
+def test_structure(Bmat, layer1, layer2, layer3):
     structure1 = Structure([layer1, layer2], substrate=Bmat, T=T)
 
     assert structure1.__len__() == 2
@@ -128,33 +151,33 @@ def test_structure():
     # assert structure4.relative_widths()['layer2'] == width2 / structure4.width()
 
 
-def test_material_to_str():
+def test_material_to_str(QWmat, Bmat, i_GaAs):
     assert SolcoreMaterialToStr(QWmat) == QWmat_structure
     assert SolcoreMaterialToStr(Bmat) == Bmat_structure
     assert SolcoreMaterialToStr(i_GaAs) == i_GaAs_structure
 
 
-def test_to_material():
+def test_to_material(QWmat, Bmat, i_GaAs):
     QWmat_material = ToSolcoreMaterial(QWmat_structure, T, True)
     assert QWmat_material.__class__.__name__ == QWmat_material_name
-    assert QWmat_material.__dict__ == QWmat_clean.__dict__
+    assert QWmat_material.__dict__ == QWmat.__dict__
 
     Bmat_material = ToSolcoreMaterial(Bmat_structure, T, True)
     assert Bmat_material.__class__.__name__ == Bmat_material_name
-    assert Bmat_material.__dict__ == Bmat_clean.__dict__
+    assert Bmat_material.__dict__ == Bmat.__dict__
 
     i_GaAs_material = ToSolcoreMaterial(i_GaAs_structure, T, True)
     assert i_GaAs_material.__class__.__name__ == i_GaAs_material_name
-    assert i_GaAs_material.__dict__ == i_GaAs_clean.__dict__
+    assert i_GaAs_material.__dict__ == i_GaAs.__dict__
 
 
-def test_inline_composition():
+def test_inline_composition(device):
     assert InLineComposition(device['layers'][0]) == 'In0.2GaAs'
     assert InLineComposition(device['layers'][1]) == 'GaAsP0.1'
     assert InLineComposition(device['layers'][2]) == 'GaAs'
 
 
-def test_to_layer():
+def test_to_layer(QWmat, device):
     device_layer = device['layers'][0]
     composition = device_layer['properties']['composition']
     layer = ToLayer(width1, ToSolcoreMaterial(composition, T), role1)
@@ -164,7 +187,7 @@ def test_to_layer():
     assert layer.material.__str__() == QWmat.__str__()
 
 
-def test_to_structure():
+def test_to_structure(device):
     structure = ToStructure(device)
 
     assert structure.__len__() == 3
