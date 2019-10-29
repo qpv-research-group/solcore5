@@ -1,4 +1,4 @@
-from pytest import fixture
+from pytest import approx, fixture
 import random
 from solcore import material
 from solcore.poisson_drift_diffusion.DeviceStructure import CreateDeviceStructure
@@ -102,7 +102,7 @@ def test_structure(b_mat, layer1, layer2, layer3):
 
     assert structure1.__len__() == 2
     assert structure1.__dict__ == {'substrate': b_mat, 'T': t, 'labels': [None, None]}
-    assert structure1.width() == width1 + width2
+    assert structure1.width() == approx(width1 + width2)
     assert structure1[0] == layer1
     assert structure1[1] == layer2
 
@@ -120,10 +120,10 @@ def test_structure(b_mat, layer1, layer2, layer3):
     assert structure2[0] == layer1
     assert structure2[1] == layer2
     assert structure2[2] == layer3
-    assert structure2.width() == width1 + width2 + width3
-    assert structure2.relative_widths()['layer1'] == width1 / structure2.width()
-    assert structure2.relative_widths()['layer2'] == width2 / structure2.width()
-    assert structure2.relative_widths()['layer3'] == width3 / structure2.width()
+    assert structure2.width() == approx(width1 + width2 + width3)
+    assert structure2.relative_widths()['layer1'] == approx(width1 / structure2.width())
+    assert structure2.relative_widths()['layer2'] == approx(width2 / structure2.width())
+    assert structure2.relative_widths()['layer3'] == approx(width3 / structure2.width())
 
     structure3 = Structure([])
     structure3.append(layer1, layer_label='layer1', repeats=2)
@@ -132,7 +132,7 @@ def test_structure(b_mat, layer1, layer2, layer3):
     assert structure3.__dict__ == {'labels': ['layer1', 'layer1']}
     assert structure3[0] == layer1
     assert structure3[1] == layer1
-    assert structure3.width() == width1 * 2
+    assert structure3.width() == approx(width1 * 2)
     # Below currently fails due to a bug when specifying labels and repeating more than once
     # assert structure3.relative_widths()['layer1'] == width1 / structure3.width()
 
@@ -145,7 +145,7 @@ def test_structure(b_mat, layer1, layer2, layer3):
     assert structure4[1] == layer2
     assert structure4[2] == layer1
     assert structure4[3] == layer2
-    assert structure4.width() == width1 * 2 + width2 * 2
+    assert structure4.width() == approx(width1 * 2 + width2 * 2)
     # Below currently fails due to a bug when specifying labels and repeating more than once
     # assert structure4.relative_widths()['layer1'] == width1 / structure4.width()
     # assert structure4.relative_widths()['layer2'] == width2 / structure4.width()
@@ -191,4 +191,4 @@ def test_to_structure(device):
     structure = ToStructure(device)
 
     assert structure.__len__() == 3
-    assert structure.width() == width1 + width2 + width3
+    assert structure.width() == approx(width1 + width2 + width3)
