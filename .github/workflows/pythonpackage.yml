@@ -27,6 +27,8 @@ jobs:
       run: pip install --no-deps --install-option="--with_pdd" -e .
     - name: Test with pytest
       run: pytest --cov=solcore/
-    - name: Send to Coveralls
+    - name: Coveralls
       if: success()
-      run: coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
