@@ -4,6 +4,7 @@ from datetime import datetime
 from solcore import spectral_conversion_nm_ev
 from solcore.science_tracker import science_reference
 import os
+from .. import DATA
 
 this_dir = os.path.split(__file__)[0]
 
@@ -17,7 +18,7 @@ def equation_of_time(day_angle):
 def loadUtilitySpectra():
     global am_zero_wavelength, am_zero_irradiance, waterspectra, ozonespectra, uniformgasspectra
 
-    spctra = numpy.loadtxt(os.path.join(this_dir, "SPCTRAL_si_units.txt"), unpack=True)
+    spctra = numpy.loadtxt(DATA / "SPCTRAL_si_units.txt", unpack=True)
     (am_zero_wavelength, am_zero_irradiance, waterspectra, ozonespectra, uniformgasspectra) \
         = spctra
     waterspectra = waterspectra / 100

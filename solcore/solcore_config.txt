@@ -4,32 +4,32 @@ welcome_message: 1
 verbose_loading: 1
 
 [Units]
-default: SOLCORE_ROOT/units_system/Default_units.txt
+default: SOLCORE_ROOT/data/Default_units.txt
 
 [Parameters]
-calculables: SOLCORE_ROOT/parameter_system/calculable_parameters.txt
-adachi_binaries: SOLCORE_ROOT/material_data/Adachi/binaries.txt
-adachi_compounds: SOLCORE_ROOT/material_data/Adachi/ternaries.txt
-vurgaftman_binaries: SOLCORE_ROOT/material_data/Vurgaftman/binaries.txt
-vurgaftman_compounds: SOLCORE_ROOT/material_data/Vurgaftman/ternaries.txt
-levinshtein_groupIV: SOLCORE_ROOT/material_data/Levinshtein/GroupIV.txt
+calculables: SOLCORE_ROOT/data/calculable_parameters.txt
+adachi_binaries: SOLCORE_ROOT/data/Adachi/binaries.txt
+adachi_compounds: SOLCORE_ROOT/data/Adachi/ternaries.txt
+vurgaftman_binaries: SOLCORE_ROOT/data/Vurgaftman/binaries.txt
+vurgaftman_compounds: SOLCORE_ROOT/data/Vurgaftman/ternaries.txt
+levinshtein_groupIV: SOLCORE_ROOT/data/Levinshtein/GroupIV.txt
 
 [Materials]
-GaAs: SOLCORE_ROOT/material_data/GaAs-Material
-InSb: SOLCORE_ROOT/material_data/InSb-Material
-GaSb: SOLCORE_ROOT/material_data/GaSb-Material
-AlAs: SOLCORE_ROOT/material_data/AlAs-Material
-AlGaAs: SOLCORE_ROOT/material_data/AlGaAs-Material
-InGaAs: SOLCORE_ROOT/material_data/InGaAs-Material
-GaInSb: SOLCORE_ROOT/material_data/InGaSb-Material
-Ge: SOLCORE_ROOT/material_data/Ge-Material
-Si: SOLCORE_ROOT/material_data/Si-Material
-GaInP: SOLCORE_ROOT/material_data/GaInP-Material
-GaAsP: SOLCORE_ROOT/material_data/GaAsP-Material
-AlInP: SOLCORE_ROOT/material_data/AlInP-Material
+GaAs: SOLCORE_ROOT/data/GaAs-Material
+InSb: SOLCORE_ROOT/data/InSb-Material
+GaSb: SOLCORE_ROOT/data/GaSb-Material
+AlAs: SOLCORE_ROOT/data/AlAs-Material
+AlGaAs: SOLCORE_ROOT/data/AlGaAs-Material
+InGaAs: SOLCORE_ROOT/data/InGaAs-Material
+GaInSb: SOLCORE_ROOT/data/InGaSb-Material
+Ge: SOLCORE_ROOT/data/Ge-Material
+Si: SOLCORE_ROOT/data/Si-Material
+GaInP: SOLCORE_ROOT/data/GaInP-Material
+GaAsP: SOLCORE_ROOT/data/GaAsP-Material
+AlInP: SOLCORE_ROOT/data/AlInP-Material
 
 [Others]
-sopra: SOLCORE_ROOT/material_data/SOPRA_DB
+sopra: SOLCORE_ROOT/data/SOPRA_DB
 
 [External programs]
 spice:

@@ -10,15 +10,14 @@ J. Appl. Phys., vol. 87, no. 6, p. 2890, 2000.
 
 import json
 import numpy as np
-import os
 from solcore.science_tracker import science_reference
+from .. import DATA
 
 # Constants
 kb = 8.6173324e-5  # eV K-1
 Log = lambda x: np.log10(x)
 
-this_dir = os.path.split(__file__)[0]
-parameters = os.path.join(this_dir, "mobility_parameters.json")
+parameters = DATA / "mobility_parameters.json"
 f = open(parameters, mode="r")
 data = json.load(f)
 

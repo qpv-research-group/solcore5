@@ -9,9 +9,10 @@ from natsort import natsorted
 from configparser import ConfigParser
 from solcore.science_tracker import science_reference
 from solcore import config, SOLCORE_ROOT
+from .. import DATA
 
-SOPRA_PATH = os.path.abspath(config['Others']['sopra'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
-compounds_path = os.path.join(SOPRA_PATH, "compounds.txt")
+SOPRA_PATH = DATA / "SOPRA_DB"
+compounds_path = SOPRA_PATH / "compounds.txt"
 compounds_info = ConfigParser()
 compounds_info.read(compounds_path)
 
@@ -34,7 +35,7 @@ class sopra_database:
         self.__SOPRA_PATH = SOPRA_PATH
 
         # Load in SOPRA_DB.csv database file
-        DB = np.genfromtxt(os.path.join(self.__SOPRA_PATH, "SOPRA_DB_Updated.csv"), delimiter=",", dtype=str)
+        DB = np.genfromtxt(self.__SOPRA_PATH / "SOPRA_DB_Updated.csv", delimiter=",", dtype=str)
 
         self.__fname = None
         for fname, symbol, range, info in DB:
@@ -42,7 +43,7 @@ class sopra_database:
             if re.fullmatch(Material.upper(), fname) is not None:
                 self.__fname = fname
 
-                self.path = os.path.join(self.__SOPRA_PATH, self.__fname + ".MAT")
+                self.path = self.__SOPRA_PATH / (self.__fname + ".MAT")
 
                 # self.info contains all detail loaded from SOPRA_DB,csv file...
                 self.info = {"Material": symbol,
@@ -69,32 +70,12 @@ class sopra_database:
         """ SOPRA_DB.material_list() :: Loads a list (.pdf file) of all available SOPRA materials. """
 
         print("Opening List of Available Materials in the SOPRA database")
+        path = SOPRA_PATH / "List_Of_Files_Updated_PDF.pdf"
 
-        # Need different treatment depending on computer OS.
-        if sys.platform == 'darwin':
-            # Find spaces in the filename and add a \ before (for unix based systems)
-            directory = SOPRA_PATH.split(" ")
+        command = {"darwin": "open", "linux": "xdg-open", "win32": "start"}.get(sys.platform)
 
-            new_path = directory[0]
-            for i in range(1, len(directory), 1):
-                new_path = new_path + "\ " + directory[i]
-
-            os.system("open " + os.path.join(new_path, "List_Of_Files_Updated_PDF.pdf"))
-
-        elif sys.platform == 'linux':
-            # Find spaces in the filename and add a \ before (for unix based systems)
-            directory = SOPRA_PATH.split(" ")
-
-            new_path = directory[0]
-            for i in range(1, len(directory), 1):
-                new_path = new_path + "\ " + directory[i]
-
-            os.system("xdg-open " + os.path.join(new_path, "List_Of_Files_Updated_PDF.pdf"))
-
-        elif sys.platform == 'win32':
-            # Find spaces in the filename and add a \ before (for unix based systems)
-
-            os.system("start " + os.path.join(SOPRA_PATH, "List_Of_Files_Updated_PDF.pdf"))
+        if command is not None:
+            os.system(f"{command} {path}")
 
     def load_n(self, Lambda=None):
         """ SOPRA_DB.load_n(Lambda) :: Load refractive index (n) data of the requested material.
@@ -171,7 +152,7 @@ class sopra_database:
         T_degC = T - 273.15  # Convert from Kelvin to degC (units given in the data)...
 
         # Navigate to the correct folder that contains temperature dependent data...
-        path = os.path.join(self.__SOPRA_PATH, self.__fname + "_T")
+        path = self.__SOPRA_PATH / (self.__fname + "_T")
 
         try:
             os.stat(path)
@@ -184,7 +165,7 @@ class sopra_database:
         # if folder exists, read in files from folder...
         Folder = natsorted(os.listdir(path))
 
-        DATA = []
+        DAT = []
         TEMP = []
 
         for files in Folder:
@@ -197,7 +178,7 @@ class sopra_database:
                 Num.append("0")
                 TEMP.append(float(Num[0]))
 
-                Wav, n, k = np.genfromtxt(os.path.join(path, files), delimiter="*",
+                Wav, n, k = np.genfromtxt(path / files, delimiter="*",
                                           skip_header=3, skip_footer=3, usecols=(2, 3, 4), unpack=True)
 
                 if Lambda is not None:
@@ -205,10 +186,10 @@ class sopra_database:
                     n_interp = np.interp(Lambda, Wav, n)
                     k_interp = np.interp(Lambda, Wav, k)
 
-                    DATA.append((Lambda, n_interp, k_interp, float(Num[0])))
+                    DAT.append((Lambda, n_interp, k_interp, float(Num[0])))
 
                 else:
-                    DATA.append((Wav, n, k, float(Num[0])))
+                    DAT.append((Wav, n, k, float(Num[0])))
 
         # Check and see if the entered temperature is within the range of data...
         if T_degC <= min(TEMP):
@@ -226,14 +207,14 @@ class sopra_database:
         k_interp_data = []
 
         # In range of all wavelenghs...
-        for i in range(0, len(DATA[0][0])):
+        for i in range(0, len(DAT[0][0])):
 
             T_list = []
             k_at_T = []
             n_at_T = []
 
             # At each wavelenth, build a list of n and k at each T...
-            for X, n, k, temp in DATA:
+            for X, n, k, temp in DAT:
                 T_list.append(temp)
                 k_at_T.append(k[i])
                 n_at_T.append(n[i])
@@ -243,7 +224,7 @@ class sopra_database:
             k_interp_data.append(np.interp(T - 273.19, T_list, k_at_T))
 
         # Return the Wavelength vector and the new n and k data...
-        return (DATA[0][0], n_interp_data, k_interp_data)
+        return (DAT[0][0], n_interp_data, k_interp_data)
 
     def load_composition(self, Lambda, **kwargs):
         """ SOPRA_DB.load_temperature(T, Lambda) :: Loads n and k data for a set of materials with varying composition.
@@ -259,7 +240,7 @@ class sopra_database:
             frac = kwargs[material]
 
         # Navigate to the correct folder that contains temperature dependent data...
-        path = os.path.join(self.__SOPRA_PATH, self.__fname + "_" + mat_fraction.upper())
+        path = self.__SOPRA_PATH / (self.__fname + "_" + mat_fraction.upper())
         try:
             os.stat(path)
 
@@ -272,7 +253,7 @@ class sopra_database:
         # if folder exists, read in files from folder...
         Folder = natsorted(os.listdir(path))
 
-        DATA = []
+        DAT = []
         COMP = []
 
         for files in Folder:
@@ -285,7 +266,7 @@ class sopra_database:
                 Num.append("0")
                 COMP.append(float(Num[0]))
 
-                Wav, n, k = np.genfromtxt(os.path.join(path, files), delimiter="*",
+                Wav, n, k = np.genfromtxt(path / files, delimiter="*",
                                           skip_header=3, skip_footer=3, usecols=(2, 3, 4), unpack=True)
 
                 if Lambda is not None:
@@ -293,10 +274,10 @@ class sopra_database:
                     n_interp = np.interp(Lambda, Wav, n)
                     k_interp = np.interp(Lambda, Wav, k)
 
-                    DATA.append((Lambda, n_interp, k_interp, float(Num[0])))
+                    DAT.append((Lambda, n_interp, k_interp, float(Num[0])))
 
                 else:
-                    DATA.append((Wav, n, k, float(Num[0])))
+                    DAT.append((Wav, n, k, float(Num[0])))
 
         # Check and see if the entered temperature is within the range of data...
         if frac <= min(COMP):
@@ -312,14 +293,14 @@ class sopra_database:
         k_interp_data = []
 
         # In range of all wavelenghs...
-        for i in range(0, len(DATA[0][0])):
+        for i in range(0, len(DAT[0][0])):
 
             x_list = []
             k_at_C = []
             n_at_C = []
 
             # At each wavelenth, build a list of n and k at each T...
-            for X, n, k, x in DATA:
+            for X, n, k, x in DAT:
                 x_list.append(x)
                 k_at_C.append(k[i])
                 n_at_C.append(n[i])
@@ -329,7 +310,7 @@ class sopra_database:
             k_interp_data.append(np.interp(frac, x_list, k_at_C))
 
         # Return the Wavelength vector and the new n and k data...
-        return (DATA[0][0], n_interp_data, k_interp_data)
+        return (DAT[0][0], n_interp_data, k_interp_data)
 
 
 class SOPRAError(Exception):

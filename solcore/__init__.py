@@ -1,8 +1,10 @@
 # First we load the configuration files, in the main Solcore4 folder and in the user folder, if present.
 from configparser import ConfigParser
 import os
+from pathlib import Path
 
 SOLCORE_ROOT = os.path.split(__file__)[0]
+DATA = Path(__file__).parent / "data"
 default_config = os.path.join(SOLCORE_ROOT, 'solcore_config.txt')
 user_config = os.path.join(os.path.expanduser('~'), '.solcore_config.txt')
 

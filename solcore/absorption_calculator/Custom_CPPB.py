@@ -5,6 +5,7 @@ import os, sys
 import re
 from solcore.science_tracker import science_reference
 import solcore.constants as const
+from .. import DATA
 
 
 class Custom_CPPB():
@@ -18,10 +19,7 @@ class Custom_CPPB():
 
     def __init__(self):
 
-        # Define filepath to the MaterialParameters file import...
-        DIR, SCRIPT = os.path.split(__file__)
-
-        self.__PARAMS_PATH = os.path.join(DIR, 'Custom_CPPB_MaterialParamaters.txt')
+        self.__PARAMS_PATH = DATA / 'Custom_CPPB_MaterialParamaters.txt'
 
         # Opens MaterialParameters file and dumps all content into a list...
         with open(self.__PARAMS_PATH, mode="r") as File:

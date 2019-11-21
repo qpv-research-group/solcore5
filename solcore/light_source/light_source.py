@@ -22,6 +22,7 @@ from solcore.light_source.smarts import (
     get_default_smarts_object,
     calculate_spectrum_smarts,
 )
+from .. import DATA
 
 
 REGISTERED_CONVERTERS: dict = {}
@@ -40,9 +41,7 @@ def reference_spectra():
         "West Conshohocken, PA, 2012, www.astm.org",
     )
 
-    this_dir = os.path.split(__file__)[0]
-    output = np.loadtxt(
-        os.path.join(this_dir, "astmg173.csv"), dtype=float, delimiter=",", skiprows=2
+    output = np.loadtxt(DATA / "astmg173.csv", dtype=float, delimiter=",", skiprows=2
     )
 
     return output

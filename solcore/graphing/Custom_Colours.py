@@ -10,10 +10,10 @@ import os
 import re
 from cycler import cycler, Cycler
 from typing import List, Tuple, Dict, Union
+from .. import DATA
 
 # define the file path to the Colours.csv file, which sits within the Graphing Package
-this_dir, this_fname = os.path.split(__file__)
-file_path = os.path.join(this_dir, 'Colours.txt')
+file_path = DATA / 'Colours.txt'
 
 # Need to read the file in as text, declare
 # opens .txt as file object
