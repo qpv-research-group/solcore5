@@ -1,17 +1,25 @@
+import os
+from datetime import datetime
+
 import numpy
 from numpy import *
-from datetime import datetime
+
 from solcore import spectral_conversion_nm_ev
 from solcore.science_tracker import science_reference
-import os
+
 from .. import DATA
 
 this_dir = os.path.split(__file__)[0]
 
 
 def equation_of_time(day_angle):
-    value = 229.18 * (0.000075 + 0.001868 * cos(day_angle) - 0.032077 * sin(day_angle) -
-                      0.014615 * cos(2 * day_angle) - 0.040849 * sin(2 * day_angle))
+    value = 229.18 * (
+        0.000075
+        + 0.001868 * cos(day_angle)
+        - 0.032077 * sin(day_angle)
+        - 0.014615 * cos(2 * day_angle)
+        - 0.040849 * sin(2 * day_angle)
+    )
     return value
 
 
@@ -19,8 +27,13 @@ def loadUtilitySpectra():
     global am_zero_wavelength, am_zero_irradiance, waterspectra, ozonespectra, uniformgasspectra
 
     spctra = numpy.loadtxt(DATA / "SPCTRAL_si_units.txt", unpack=True)
-    (am_zero_wavelength, am_zero_irradiance, waterspectra, ozonespectra, uniformgasspectra) \
-        = spctra
+    (
+        am_zero_wavelength,
+        am_zero_irradiance,
+        waterspectra,
+        ozonespectra,
+        uniformgasspectra,
+    ) = spctra
     waterspectra = waterspectra / 100
     ozonespectra = ozonespectra / 100
 
@@ -29,21 +42,21 @@ loadUtilitySpectra()
 
 
 def get_default_spectral2_object():
-    """ Returns a default state object for use with calculate_spectrum. Parameters returned are for:
-        - Coventry (52.39°N,-1.56°E)
-        - for 12:30 pm on the 30th of June 2011 (that's in the future!) (not any more..)
-        - rural atmospheric conditions
-        - 30% humidity
-        - 1.42mm precipitated water
-        - 1030 hPa atmospheric pressure
-        - 0.34mm of Ozone
-        - turbidity of 15%.
+    """Returns a default state object for use with calculate_spectrum. Parameters
+    returned are for:
+
+    - Coventry (52.39°N,-1.56°E) - for 12:30 pm on the 30th of June 2011 (that's in the
+    future!) (not any more..) - rural atmospheric conditions - 30% humidity - 1.42mm
+    precipitated water - 1030 hPa atmospheric pressure - 0.34mm of Ozone - turbidity of
+    15%.
     """
     defaults = {}
 
     defaults["latitude"] = 52.39 / 180 * numpy.pi  # Coventry
     defaults["longitude"] = -1.56 / 180 * numpy.pi
-    defaults["dateAndTime"] = datetime(2011, 6, 30, 12, 30)  # 12:30pm, 30th of June 2011
+    defaults["dateAndTime"] = datetime(
+        2011, 6, 30, 12, 30
+    )  # 12:30pm, 30th of June 2011
     defaults["aod_model"] = "rural"
     defaults["pressure"] = 103000.0  # si("1030 hPa")  #si ("1 atm")
     defaults["humidity"] = 0.3  # si("30 %")
@@ -63,16 +76,19 @@ def get_default_spectral2_object():
     return defaults
 
 
-def calculate_spectrum_spectral2(stateObject=None, suppress_nan=True, power_density_in_nm=False):
-    """ Calculates a solar spectrum using the SPECTRAL2 irradiance model developed by the NRL:
+def calculate_spectrum_spectral2(
+    stateObject=None, suppress_nan=True, power_density_in_nm=False
+):
+    """Calculates a solar spectrum using the SPECTRAL2 irradiance model developed by the
+    NRL:
 
-    "http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/"
-    
-    :param stateObject:
-    :param suppress_nan:
-    :return:
+    "http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/"  :param stateObject: :param
+    suppress_nan: :return:
     """
-    science_reference("spectral2 irradiance model", "http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/")
+    science_reference(
+        "spectral2 irradiance model",
+        "http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/",
+    )
 
     if stateObject == None:
         stateObject = get_default_spectral2_object()
@@ -87,23 +103,40 @@ def calculate_spectrum_spectral2(stateObject=None, suppress_nan=True, power_dens
     turbidity = stateObject["turbidity"]
     precipwater = stateObject["precipwater"]
 
-    assert aod_model in "rural urban maritime tropospheric".split(), "aod_model must be rural, urban, maritime, or tropospheric"
+    assert (
+        aod_model in "rural urban maritime tropospheric".split()
+    ), "aod_model must be rural, urban, maritime, or tropospheric"
 
-    time_since_new_years = dateAndTime - datetime(dateAndTime.year, 1, 1, 0, 0)  # 1/1/year, 0:00 am.
-    time_since_midnight = dateAndTime - datetime(dateAndTime.year, dateAndTime.month, dateAndTime.day, 0, 0)
+    time_since_new_years = dateAndTime - datetime(
+        dateAndTime.year, 1, 1, 0, 0
+    )  # 1/1/year, 0:00 am.
+    time_since_midnight = dateAndTime - datetime(
+        dateAndTime.year, dateAndTime.month, dateAndTime.day, 0, 0
+    )
     # hours_since_midnight = time_since_midnight.seconds / convert(time_since_midnight.seconds, "s", "h")
     hours_since_midnight = time_since_midnight.seconds / 3600
     day_number = time_since_new_years.days
 
     # converting back go degrees for longitude rounding
-    longitude_degrees = longitude / numpy.pi * 180  # convert(longitude,"radians",u"degrees")
+    longitude_degrees = (
+        longitude / numpy.pi * 180
+    )  # convert(longitude,"radians",u"degrees")
 
     day_angle = (2.0 * pi * (day_number - 1.0)) / 365.0  # this is in radians
-    hour_angle_degrees = 15.0 * (hours_since_midnight + equation_of_time(day_angle) / 60.0 +
-                                 ((int(longitude_degrees / 15.0) * 15.0 - longitude_degrees) * 4.0)
-                                 / 60.0 + 12.0) - 360.0  # this is in degrees.
+    hour_angle_degrees = (
+        15.0
+        * (
+            hours_since_midnight
+            + equation_of_time(day_angle) / 60.0
+            + ((int(longitude_degrees / 15.0) * 15.0 - longitude_degrees) * 4.0) / 60.0
+            + 12.0
+        )
+        - 360.0
+    )  # this is in degrees.
 
-    hour_angle = hour_angle_degrees / 180 * numpy.pi  # convert(hour_angle_degrees, "degrees", "radians")
+    hour_angle = (
+        hour_angle_degrees / 180 * numpy.pi
+    )  # convert(hour_angle_degrees, "degrees", "radians")
 
     declination = (
         0.006918
@@ -128,19 +161,23 @@ def calculate_spectrum_spectral2(stateObject=None, suppress_nan=True, power_dens
         + sin(declination) * sin(latitude)
     )
 
-    solar_zenith_angle_degrees = solar_zenith_angle / pi * 180  # convert(solar_zenith_angle,"radians",u'degrees')
+    solar_zenith_angle_degrees = (
+        solar_zenith_angle / pi * 180
+    )  # convert(solar_zenith_angle,"radians",u'degrees')
     # original code checked to stop sun dropping below horizon
     # //Stop sun dropping below horizon
     #     if(solar_zenith_angle > 91)
     #        solar_zenith_angle = 91; (was in degrees)
 
-
     # this used to be 1/ could this cause issues in java?
-    relative_am = 1.0 / (cos(solar_zenith_angle) + (
-        0.15 * pow((93.885 - solar_zenith_angle_degrees), -1.253)))  ##AARG raised to the power of degrees
+    relative_am = 1.0 / (
+        cos(solar_zenith_angle)
+        + (0.15 * pow((93.885 - solar_zenith_angle_degrees), -1.253))
+    )  ##AARG raised to the power of degrees
     pressure_corrected_am = relative_am * (pressure / 101325.33538686013)  # si("1 atm")
     effective_ozone_am = (1.0 + (22.0 / 6370.0)) / (
-        pow((pow(cos(solar_zenith_angle), 2.0) + (2.0 * (22.0 / 6370.0))), 0.5))
+        pow((pow(cos(solar_zenith_angle), 2.0) + (2.0 * (22.0 / 6370.0))), 0.5)
+    )
 
     if aod_model == "rural":
         c_coefficient = [0.581, 16.823, 17.539]
@@ -150,7 +187,7 @@ def calculate_spectrum_spectral2(stateObject=None, suppress_nan=True, power_dens
         d_coefficient = [1.0, 84.254, -9.1, 65.458]
     elif aod_model == "maritime":
         c_coefficient = [0.1134, 0.8941, 1.0796]
-        d_coefficient = [0.04435, 1.6048, 0, 1.5298];
+        d_coefficient = [0.04435, 1.6048, 0, 1.5298]
     elif aod_model == "tropospheric":
         c_coefficient = [0.6786, 13.899, 13.313]
         d_coefficient = [1.8379, 14.912, 0, 5.96]
@@ -158,32 +195,58 @@ def calculate_spectrum_spectral2(stateObject=None, suppress_nan=True, power_dens
         c_coefficient, d_coefficient = aod_model
 
     # 0.9 degrees * something_in_percent rather than 90 degrees?? Honestly.
-    x_humidity = cos(humidity * pi / 2.)  # si(0.9,"degrees","radians")
+    x_humidity = cos(humidity * pi / 2.0)  # si(0.9,"degrees","radians")
 
-    alpha1 = (c_coefficient[0] + c_coefficient[1] * x_humidity) / (1 + c_coefficient[2] * x_humidity)
-    alpha2 = (d_coefficient[0] + d_coefficient[1] * x_humidity + d_coefficient[2] * x_humidity ** 2) / (
-        1 + (d_coefficient[3] * x_humidity))
+    alpha1 = (c_coefficient[0] + c_coefficient[1] * x_humidity) / (
+        1 + c_coefficient[2] * x_humidity
+    )
+    alpha2 = (
+        d_coefficient[0]
+        + d_coefficient[1] * x_humidity
+        + d_coefficient[2] * x_humidity ** 2
+    ) / (1 + (d_coefficient[3] * x_humidity))
 
     wavelength_um = am_zero_wavelength * 1e6  # convert(am_zero_wavelength, "m", 'um')
 
-    rayleigh_coeff = exp(-pressure_corrected_am / (wavelength_um ** 4 * (115.6406 - 1.335 / wavelength_um ** 2)))
+    rayleigh_coeff = exp(
+        -pressure_corrected_am
+        / (wavelength_um ** 4 * (115.6406 - 1.335 / wavelength_um ** 2))
+    )
 
-    aerosol_coeff = where(wavelength_um <= 0.5,
-                          exp(-pressure_corrected_am * turbidity * 2.0 ** (alpha2 - alpha1) * wavelength_um ** -alpha1),
-                          exp(-pressure_corrected_am * turbidity * wavelength_um ** -alpha2)
-                          )
+    aerosol_coeff = where(
+        wavelength_um <= 0.5,
+        exp(
+            -pressure_corrected_am
+            * turbidity
+            * 2.0 ** (alpha2 - alpha1)
+            * wavelength_um ** -alpha1
+        ),
+        exp(-pressure_corrected_am * turbidity * wavelength_um ** -alpha2),
+    )
 
-    vapour_coeff = exp(-(0.2385 * precipwater * waterspectra * relative_am)
-                       / (1. + 20.07 * precipwater * waterspectra * relative_am) ** 0.45)
+    vapour_coeff = exp(
+        -(0.2385 * precipwater * waterspectra * relative_am)
+        / (1.0 + 20.07 * precipwater * waterspectra * relative_am) ** 0.45
+    )
 
     ozone_coeff = exp(-ozonespectra * ozone * effective_ozone_am)
 
-    mixed_coeff = exp((-1.41 * uniformgasspectra * pressure_corrected_am)
-                      / (1. + 118.93 * uniformgasspectra * pressure_corrected_am) ** 0.45);
+    mixed_coeff = exp(
+        (-1.41 * uniformgasspectra * pressure_corrected_am)
+        / (1.0 + 118.93 * uniformgasspectra * pressure_corrected_am) ** 0.45
+    )
 
     # Apply attenuation/scatting coefficients to the per m specturm (SI wavelength spectrum)
     wavelength_m = am_zero_wavelength
-    irradiance_per_m = am_zero_irradiance * earth_sun_distance_factor * rayleigh_coeff * aerosol_coeff * vapour_coeff * ozone_coeff * mixed_coeff
+    irradiance_per_m = (
+        am_zero_irradiance
+        * earth_sun_distance_factor
+        * rayleigh_coeff
+        * aerosol_coeff
+        * vapour_coeff
+        * ozone_coeff
+        * mixed_coeff
+    )
 
     if suppress_nan:
         irradiance_per_m = numpy.nan_to_num(irradiance_per_m)
@@ -199,20 +262,28 @@ def calculate_spectrum_spectral2(stateObject=None, suppress_nan=True, power_dens
 
     else:
         # Convert to per eV spectrum
-        energy_ev, irradiance_per_ev = spectral_conversion_nm_ev(wavelength_nm, irradiance_per_nm)
+        energy_ev, irradiance_per_ev = spectral_conversion_nm_ev(
+            wavelength_nm, irradiance_per_nm
+        )
 
         # Covert to energy per Joule spectrum
         energy_j = energy_ev * 1.6e-19  # siUnits(energy_ev, 'J')
-        irradiance_per_j = irradiance_per_ev / 1.6e-19  # siUnits(irradiance_per_ev, 'J-1')
+        irradiance_per_j = (
+            irradiance_per_ev / 1.6e-19
+        )  # siUnits(irradiance_per_ev, 'J-1')
 
         # integrate to find power density
         power_density = trapz(x=wavelength_m, y=irradiance_per_m)
 
-        storage['incident power density'] = power_density
-        storage['incident spectrum wavelength si'] = array([wavelength_m, irradiance_per_m])
-        storage['incident spectrum wavelength nm'] = array([wavelength_nm, irradiance_per_nm])
-        storage['incident spectrum energy si'] = array([energy_j, irradiance_per_j])
-        storage['incident spectrum energy eV'] = array([energy_ev, irradiance_per_ev])
+        storage["incident power density"] = power_density
+        storage["incident spectrum wavelength si"] = array(
+            [wavelength_m, irradiance_per_m]
+        )
+        storage["incident spectrum wavelength nm"] = array(
+            [wavelength_nm, irradiance_per_nm]
+        )
+        storage["incident spectrum energy si"] = array([energy_j, irradiance_per_j])
+        storage["incident spectrum energy eV"] = array([energy_ev, irradiance_per_ev])
 
     return storage
 
@@ -222,5 +293,8 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
-    plt.plot(data['incident spectrum wavelength nm'][0], data['incident spectrum wavelength nm'][1])
+    plt.plot(
+        data["incident spectrum wavelength nm"][0],
+        data["incident spectrum wavelength nm"][1],
+    )
     plt.show()

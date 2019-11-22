@@ -1,18 +1,16 @@
-""" Poisson_drift_diffusion related tests
-"""
-from pytest import approx, mark
-
-import numpy as np
+"""Poisson_drift_diffusion related tests."""
 import os
 import tempfile
 
+import numpy as np
+from pytest import approx, mark
+
 import solcore.poisson_drift_diffusion as PDD
-from solcore.solar_cell import SolarCell, default_GaAs
-from solcore.structure import Layer, Junction
-from solcore import si
-from solcore import material
+from solcore import material, si
 from solcore.light_source import LightSource
+from solcore.solar_cell import SolarCell, default_GaAs
 from solcore.solar_cell_solver import solar_cell_solver
+from solcore.structure import Junction, Layer
 
 T = 298
 

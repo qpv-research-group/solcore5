@@ -1,38 +1,40 @@
 import os
-from scipy.interpolate import interp1d
-import numpy as np
-from typing import Callable, Optional
 from functools import wraps
+from typing import Callable, Optional
 
-from solcore.science_tracker import science_reference
+import numpy as np
+from scipy.interpolate import interp1d
+
 from solcore import (
-    spectral_conversion_nm_ev,
-    spectral_conversion_nm_hz,
     eVnm,
     nmHz,
     nmJ,
+    spectral_conversion_nm_ev,
+    spectral_conversion_nm_hz,
 )
-from solcore.constants import q, h, c, kb
-
-from solcore.light_source.spectral2 import (
-    get_default_spectral2_object,
-    calculate_spectrum_spectral2,
-)
+from solcore.constants import c, h, kb, q
 from solcore.light_source.smarts import (
-    get_default_smarts_object,
     calculate_spectrum_smarts,
+    get_default_smarts_object,
 )
-from .. import DATA
+from solcore.light_source.spectral2 import (
+    calculate_spectrum_spectral2,
+    get_default_spectral2_object,
+)
+from solcore.science_tracker import science_reference
 
+from .. import DATA
 
 REGISTERED_CONVERTERS: dict = {}
 """ Registered spectrum conversion functions."""
 
 
 def reference_spectra():
-    """ Function providing the standard reference spectra: AM0, AM1.5g and AM1.5d.
+    """Function providing the standard reference spectra: AM0, AM1.5g and AM1.5d.
 
-    :return: A 2D array with 4 columns representing the wavelength, AM0, AM1.5g and AM1.5d standard spectra."""
+    :return: A 2D array with 4 columns representing the wavelength, AM0, AM1.5g and
+    AM1.5d standard spectra.
+    """
 
     science_reference(
         "Standard solar spectra",
@@ -41,14 +43,17 @@ def reference_spectra():
         "West Conshohocken, PA, 2012, www.astm.org",
     )
 
-    output = np.loadtxt(DATA / "astmg173.csv", dtype=float, delimiter=",", skiprows=2
-    )
+    output = np.loadtxt(DATA / "astmg173.csv", dtype=float, delimiter=",", skiprows=2)
 
     return output
 
 
 class LightSource:
-    """ This is a common interface to access all types of light sources supported by Solcore: standard solar spectra (AM0, AM1.5g, and AM1.5d), blackbody radiation, laser light or spectra created from atmospheric data using SPECTRAL2 or SMARTS. Aditionally, it can also use experimentally measured spectra.
+    """This is a common interface to access all types of light sources supported by
+    Solcore: standard solar spectra (AM0, AM1.5g, and AM1.5d), blackbody radiation,
+    laser light or spectra created from atmospheric data using SPECTRAL2 or SMARTS.
+
+    Aditionally, it can also use experimentally measured spectra.
     """
 
     type_of_source = [
@@ -61,9 +66,8 @@ class LightSource:
     ]
 
     def __init__(self, source_type, x=None, **kwargs):
-        """
+        """:param source_type:
 
-        :param source_type:
         :param kwargs:
         """
         self.source_type = source_type
@@ -81,11 +85,17 @@ class LightSource:
         self.cache_spectrum = None
 
     def spectrum(self, x=None, **kwargs):
-        """ Returns the spectrum of the light in the requested units. Internally, the spectrum is always managed in power density per nanometers, but the output can be provided in other compatible units, such as power density per Hertz or photon flux per eV.
+        """Returns the spectrum of the light in the requested units. Internally, the
+        spectrum is always managed in power density per nanometers, but the output can
+        be provided in other compatible units, such as power density per Hertz or photon
+        flux per eV.
 
-        :param x: (Default=None) If "x" is provided, it must be an array with the spectral range in which to calculate the spectrum. Depending on the "units" defined when creating the light source, this array must be in nm, m, eV, J or hz.
-        :param kwargs: Options to update the light source. It can be "units", "concentration" or any of the options specific to the chosen type of light source.
-        :return: Array with the spectrum in the requested units
+        :param x: (Default=None) If "x" is provided, it must be an array with the
+        spectral range in which to calculate the spectrum. Depending on the "units"
+        defined when creating the light source, this array must be in nm, m, eV, J or
+        hz. :param kwargs: Options to update the light source. It can be "units",
+        "concentration" or any of the options specific to the chosen type of light
+        source. :return: Array with the spectrum in the requested units
         """
         if x is not None:
             self.x = x
@@ -113,7 +123,8 @@ class LightSource:
             )
 
     def _update(self, **kwargs):
-        """ Updates the options of the light source with new values. It only updates existing options. No new options are added.
+        """Updates the options of the light source with new values. It only updates
+        existing options. No new options are added.
 
         :param kwargs: A dictionary with the options to update and their new values.
         :return: None
@@ -130,7 +141,8 @@ class LightSource:
         self.cache_spectrum = None
 
     def _update_get_spectrum(self):
-        """ Updates the function to get the spectrum, depending on the chosen output units.
+        """Updates the function to get the spectrum, depending on the chosen output
+        units.
 
         :return: None
         """
@@ -140,7 +152,9 @@ class LightSource:
             raise ValueError(f"Valid units are: {list(REGISTERED_CONVERTERS.keys())}.")
 
     def _update_spectrum_function(self):
-        """ Updates the spectrum function during the light source creation or just after updating one or more of the options. It also updates the "options" property with any default options available to the chosen light source, if any.
+        """Updates the spectrum function during the light source creation or just after
+        updating one or more of the options. It also updates the "options" property with
+        any default options available to the chosen light source, if any.
 
         :return: True
         """
@@ -170,10 +184,11 @@ class LightSource:
             print(err)
 
     def _get_standard_spectrum(self, options):
-        """ Gets one of the reference standard spectra: AM0, AM1.5g or AM1.5d.
+        """Gets one of the reference standard spectra: AM0, AM1.5g or AM1.5d.
 
-        :param options: A dictionary that contains the 'version' of the standard spectrum: 'AM0', 'AM1.5g' or 'AM1.5d'
-        :return: A function that takes as input the wavelengths and return the standard spectrum at those wavelengths.
+        :param options: A dictionary that contains the 'version' of the standard
+        spectrum: 'AM0', 'AM1.5g' or 'AM1.5d' :return: A function that takes as input
+        the wavelengths and return the standard spectrum at those wavelengths.
         """
 
         try:
@@ -207,10 +222,13 @@ class LightSource:
             print(err)
 
     def _get_laser_spectrum(self, options):
-        """ Creates a gaussian light source with a given total power, linewidth and central wavelength. These three parameters must be provided in the "options" diccionary.
+        """Creates a gaussian light source with a given total power, linewidth and
+        central wavelength. These three parameters must be provided in the "options"
+        diccionary.
 
-        :param options: A dictionary that must contain the 'power', the 'linewidth' and the 'center' of the laser emission.
-        :return: A function that takes as input the wavelengths and return the laser spectrum at those wavelengths.
+        :param options: A dictionary that must contain the 'power', the 'linewidth' and
+        the 'center' of the laser emission. :return: A function that takes as input the
+        wavelengths and return the laser spectrum at those wavelengths.
         """
         try:
             power = options["power"]
@@ -240,13 +258,15 @@ class LightSource:
             )
 
     def _get_blackbody_spectrum(self, options):
-        """ Gets the expontaneous emission in W/m2/sr/nm from a black body source chemical potential = 0
+        """Gets the expontaneous emission in W/m2/sr/nm from a black body source
+        chemical potential = 0.
 
-        :param options: A dictionary that must contain the temperature of the blackbody, in kelvin 'T' and the 'entendue' in sr. If not provided, the entendue will be taken as 1 sr. Possible values for entendue are:
-            - 'Sun': The entendue will be taken as 6.8e-5 sr.
-            - 'hemispheric': The entendue wil be taken as pi/2 sr.
-            - A numeric value
-        :return: A function that takes as input the wavelengths and return the black body spectrum at those wavelengths.
+        :param options: A dictionary that must contain the temperature of the blackbody,
+        in kelvin 'T' and the 'entendue' in sr. If not provided, the entendue will be
+        taken as 1 sr. Possible values for entendue are:     - 'Sun': The entendue will
+        be taken as 6.8e-5 sr.     - 'hemispheric': The entendue wil be taken as pi/2
+        sr.     - A numeric value :return: A function that takes as input the
+        wavelengths and return the black body spectrum at those wavelengths.
         """
 
         try:
@@ -291,10 +311,13 @@ class LightSource:
             )
 
     def _get_spectral2_spectrum(self, options):
-        """ Get the solar spectrum calculated with the SPECTRAL2 calculator. The options dictionary is updated with the default options of all parameters if they are not provided.
+        """Get the solar spectrum calculated with the SPECTRAL2 calculator. The options
+        dictionary is updated with the default options of all parameters if they are not
+        provided.
 
         :param options: A dictionary that contain all the options for the calculator.
-        :return: A function that takes as input the wavelengths and return the SPECTRAL2 calculated spectrum at those wavelengths.
+        :return: A function that takes as input the wavelengths and return the SPECTRAL2
+        calculated spectrum at those wavelengths.
         """
         default = get_default_spectral2_object()
 
@@ -316,10 +339,13 @@ class LightSource:
         return output
 
     def _get_smarts_spectrum(self, options):
-        """ Get the solar spectrum calculated with the SMARTS calculator. The options dictionary is updated with the default options of all parameters if they are not provided.
+        """Get the solar spectrum calculated with the SMARTS calculator. The options
+        dictionary is updated with the default options of all parameters if they are not
+        provided.
 
         :param options: A dictionary that contain all the options for the calculator.
-        :return: A function that takes as input the wavelengths and return the SMARTS calculated spectrum at those wavelengths.
+        :return: A function that takes as input the wavelengths and return the SMARTS
+        calculated spectrum at those wavelengths.
         """
         outputs = {
             "Extraterrestial": 2,
@@ -368,12 +394,13 @@ class LightSource:
             print("ERROR in SMARTS: {}".format(err))
 
     def _get_custom_spectrum(self, options):
-        """ Convert an custom spectrum into a solcore light source object.
+        """Convert an custom spectrum into a solcore light source object.
 
-        :param options: A dictionary that contains the following information:
-            - 'x_data' and 'y_data' of the custom spectrum.
-            - 'input_units', the units of the spectrum, such as 'photon_flux_per_nm' or 'power_density_per_eV'
-        :return: A function that takes as input the wavelengths and return the custom spectrum at those wavelengths.
+        :param options: A dictionary that contains the following information:     -
+        'x_data' and 'y_data' of the custom spectrum.     - 'input_units', the units of
+        the spectrum, such as 'photon_flux_per_nm' or 'power_density_per_eV' :return: A
+        function that takes as input the wavelengths and return the custom spectrum at
+        those wavelengths.
         """
 
         try:
@@ -425,7 +452,7 @@ class LightSource:
 
 
 def register_conversion_function(fun: Callable):
-    """Registers a view method that will trigger an event. """
+    """Registers a view method that will trigger an event."""
 
     @wraps(fun)
     def wrapper(*args, **kwargs):
@@ -438,12 +465,10 @@ def register_conversion_function(fun: Callable):
 
 @register_conversion_function
 def power_density_per_nm(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in power density per nanometer.
+    """Function that returns the spectrum in power density per nanometer.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the wavelengths (in nm)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the wavelengths (in nm)
     :return: The spectrum in the chosen units.
     """
     return spectrum(x)
@@ -451,12 +476,10 @@ def power_density_per_nm(spectrum: Callable[[np.ndarray], np.ndarray], x: np.nda
 
 @register_conversion_function
 def photon_flux_per_nm(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per nanometer.
+    """Function that returns the spectrum in photon flux per nanometer.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the wavelengths (in nm)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the wavelengths (in nm)
     :return: The spectrum in the chosen units.
     """
     return spectrum(x) / (c * h * 1e9 / x)
@@ -464,12 +487,10 @@ def photon_flux_per_nm(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarr
 
 @register_conversion_function
 def power_density_per_m(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in power density per meter.
+    """Function that returns the spectrum in power density per meter.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the wavelengths (in m)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the wavelengths (in m)
     :return: The spectrum in the chosen units.
     """
     return spectrum(x * 1e9) * 1e9
@@ -477,12 +498,10 @@ def power_density_per_m(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndar
 
 @register_conversion_function
 def photon_flux_per_m(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per meter.
+    """Function that returns the spectrum in photon flux per meter.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the wavelengths (in m)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the wavelengths (in m)
     :return: The spectrum in the chosen units.
     """
     return spectrum(x * 1e9) / (c * h / x) * 1e9
@@ -490,12 +509,10 @@ def photon_flux_per_m(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarra
 
 @register_conversion_function
 def power_density_per_ev(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in power density per eV.
+    """Function that returns the spectrum in power density per eV.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the energies (in eV)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the energies (in eV)
     :return: The spectrum in the chosen units.
     """
     wavelength = eVnm(x)[::-1]
@@ -506,12 +523,10 @@ def power_density_per_ev(spectrum: Callable[[np.ndarray], np.ndarray], x: np.nda
 
 @register_conversion_function
 def photon_flux_per_ev(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per eV.
+    """Function that returns the spectrum in photon flux per eV.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the energies (in eV)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the energies (in eV)
     :return: The spectrum in the chosen units.
     """
     wavelength = eVnm(x)[::-1]
@@ -524,12 +539,10 @@ def photon_flux_per_ev(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarr
 def power_density_per_joule(
     spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray
 ):
-    """ Function that returns the spectrum in power density per Joule.
+    """Function that returns the spectrum in power density per Joule.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the energies (in J)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the energies (in J)
     :return: The spectrum in the chosen units.
     """
     wavelength = nmJ(x)[::-1]
@@ -540,12 +553,10 @@ def power_density_per_joule(
 
 @register_conversion_function
 def photon_flux_per_joule(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per Joule.
+    """Function that returns the spectrum in photon flux per Joule.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the energies (in J)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the energies (in J)
     :return: The spectrum in the chosen units.
     """
     wavelength = nmJ(x)[::-1]
@@ -556,12 +567,10 @@ def photon_flux_per_joule(spectrum: Callable[[np.ndarray], np.ndarray], x: np.nd
 
 @register_conversion_function
 def power_density_per_hz(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in power density per hertz.
+    """Function that returns the spectrum in power density per hertz.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the frequencies (in hz)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the frequencies (in hz)
     :return: The spectrum in the chosen units.
     """
     wavelength = nmHz(x)[::-1]
@@ -572,12 +581,10 @@ def power_density_per_hz(spectrum: Callable[[np.ndarray], np.ndarray], x: np.nda
 
 @register_conversion_function
 def photon_flux_per_hz(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per hertz.
+    """Function that returns the spectrum in photon flux per hertz.
 
-    The input spectrum is assumed to be in power density per nanometer.
-
-    :param spectrum: The spectrum to interpolate.
-    :param x: Array with the frequencies (in hz)
+    The input spectrum is assumed to be in power density per nanometer.  :param
+    spectrum: The spectrum to interpolate. :param x: Array with the frequencies (in hz)
     :return: The spectrum in the chosen units.
     """
     wavelength = nmHz(x)[::-1]

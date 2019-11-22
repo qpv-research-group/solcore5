@@ -1,6 +1,6 @@
-from solcore import si, material
-from solcore.structure import Layer, Structure
 import solcore.quantum_mechanics as QM
+from solcore import material, si
+from solcore.structure import Layer, Structure
 
 # First we create the materials we need
 bulk = material("GaAs")(T=293, strained=False)
@@ -22,11 +22,26 @@ well_layer = Layer(width=si("7.2nm"), material=QW)
 # material with the keyword "substrate" is essential in order to calculate correctly the strain.
 
 # A single QW with interlayers
-test_structure_1 = Structure([top_layer, inter, well_layer, inter, bottom_layer], substrate=bulk)
-output_1 = QM.schrodinger(test_structure_1, quasiconfined=0, graphtype='potentials', num_eigenvalues=20, show=True)
+test_structure_1 = Structure(
+    [top_layer, inter, well_layer, inter, bottom_layer], substrate=bulk
+)
+output_1 = QM.schrodinger(
+    test_structure_1,
+    quasiconfined=0,
+    graphtype="potentials",
+    num_eigenvalues=20,
+    show=True,
+)
 
 # 10 QWs without interlayers
-test_structure_2 = Structure([top_layer, barrier_layer] + 10 * [well_layer, barrier_layer] + [bottom_layer],
-                             substrate=bulk)
-output_2 = QM.schrodinger(test_structure_2, quasiconfined=0.05, graphtype='potentialsLDOS', num_eigenvalues=200,
-                          show=True)
+test_structure_2 = Structure(
+    [top_layer, barrier_layer] + 10 * [well_layer, barrier_layer] + [bottom_layer],
+    substrate=bulk,
+)
+output_2 = QM.schrodinger(
+    test_structure_2,
+    quasiconfined=0.05,
+    graphtype="potentialsLDOS",
+    num_eigenvalues=200,
+    show=True,
+)

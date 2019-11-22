@@ -1,34 +1,30 @@
-import numpy as np
 import math
+
+import numpy as np
 from scipy.optimize import root
 
+from solcore.constants import c, h, kb, q
 from solcore.state import State
-from solcore.constants import kb, q, c, h
 
 
 def iv_multijunction(solar_cell, options):
-    """ Calculates the overall IV characteristics of any number of junctions numerically at the requested voltage
-    points. If photocurrent is not provided, the resultant IV characteristics are purely recombination currents,
-    otherwise light IVs are returned.
+    """Calculates the overall IV characteristics of any number of junctions numerically
+    at the requested voltage points. If photocurrent is not provided, the resultant IV
+    characteristics are purely recombination currents, otherwise light IVs are returned.
 
-    In the end, the soalr_cell object is updated with an "iv" attribute containing a dictionary with:
-        "IV": (V, I) Calculated IV characteristics
-        "junction IV": [(V junc 1, I junc 1), (V junc 2, I junc 2), ...]
-        "Rseries IV": (V, I) Calculated IV characteristics of the series resistance
-        "coupled IV": For each junction but for the first one, a list with the coupled current coming form the upper junctions.
-        "Isc", Voc", "P", "FF" and "Eta": In case of mpp = True and light IV.
-
-    The sign convention is:
-        - Photocurrents: Positive.
-        - Dark Currents: Negative
-
-    :param solar_cell: A solar cell object with one or more junctions. The IV of the individual junctions must have been calculated already.
-    :param kwargs: A dictionary containing, at least, the following elements:
-        - mpp: (Boolean) If Isc, Voc, FF, Vmpp, Impp and Pmpp must be calculated.
-        - voltages: Array of voltages in which to calculate the data
-        - light_iv: (Boolean) if light IV is being calculated
-    :return: None
-
+    In the end, the soalr_cell object is updated with an "iv" attribute containing a
+    dictionary with:     "IV": (V, I) Calculated IV characteristics     "junction IV":
+    [(V junc 1, I junc 1), (V junc 2, I junc 2), ...]     "Rseries IV": (V, I)
+    Calculated IV characteristics of the series resistance     "coupled IV": For each
+    junction but for the first one, a list with the coupled     current coming form the
+    upper junctions.     "Isc", Voc", "P", "FF" and "Eta": In case of mpp = True and
+    light IV.  The sign convention is:     - Photocurrents: Positive.     - Dark
+    Currents: Negative  :param solar_cell: A solar cell object with one or more
+    junctions. The IV of the individual junctions must have been calculated already.
+    :param kwargs: A dictionary containing, at least, the following elements:     - mpp:
+    (Boolean) If Isc, Voc, FF, Vmpp, Impp and Pmpp must be calculated.     - voltages:
+    Array of voltages in which to calculate the data     - light_iv: (Boolean) if light
+    IV is being calculated :return: None
     """
     output_V = options.voltages
     mpp_parameters = options.mpp
@@ -42,18 +38,24 @@ def iv_multijunction(solar_cell, options):
     tunnel_jun = solar_cell.tunnel_indices
     V_junction_array = np.zeros((len(output_V), num_jun))
 
-    # The following assumes that all junctions have the currents defined at the same voltages
+    # The following assumes that all junctions have the currents defined at the same
+    # voltages
     minimum_J = solar_cell(0).current
     for j in range(1, num_jun):
-        minimum_J = np.where(np.absolute(minimum_J) < np.absolute(solar_cell(j).current), minimum_J,
-                             solar_cell(j).current)
+        minimum_J = np.where(
+            np.absolute(minimum_J) < np.absolute(solar_cell(j).current),
+            minimum_J,
+            solar_cell(j).current,
+        )
 
     minimum_J = np.sort(minimum_J)
 
     # For each junction, we find the voltage corresponding to each of these currents
     temp_V_junction_array = np.zeros((len(minimum_J), num_jun))
     for j in range(num_jun):
-        temp_V_junction_array[:, j] = np.interp(minimum_J, solar_cell(j).current, solar_cell(j).voltage)
+        temp_V_junction_array[:, j] = np.interp(
+            minimum_J, solar_cell(j).current, solar_cell(j).voltage
+        )
 
     # We calculate the total voltage related to the...
     # ... series resistance
@@ -67,23 +69,30 @@ def iv_multijunction(solar_cell, options):
     for j in range(num_jun):
         temp_V_total += temp_V_junction_array[:, j]
 
-    # Finally, we calculate the current at the requested voltages and the voltages for each junction
+    # Finally, we calculate the current at the requested voltages and the voltages for
+    # each junction
     output_J = np.interp(output_V, temp_V_total, minimum_J)
     for j in range(num_jun):
-        V_junction_array[:, j] = np.interp(output_V, temp_V_total, temp_V_junction_array[:, j])
+        V_junction_array[:, j] = np.interp(
+            output_V, temp_V_total, temp_V_junction_array[:, j]
+        )
 
     coupled_J = []
     if radiative_coupling:
         # First of all, we check if all the junctions are DB or 2D
         ok = True
         for i in range(num_jun):
-            ok = ok and solar_cell(i).kind in ['DB', '2D']
+            ok = ok and solar_cell(i).kind in ["DB", "2D"]
 
         if ok:
-            output_J, V_junction_array, coupled_J = solve_radiative_coupling(solar_cell, options, V_junction_array)
+            output_J, V_junction_array, coupled_J = solve_radiative_coupling(
+                solar_cell, options, V_junction_array
+            )
         else:
             print(
-                'WARNING: Only "DB" and "2D" junctions (using the DB solver) can use radiative coupling.\nSkipping calculation...')
+                'WARNING: Only "DB" and "2D" junctions (using the DB solver) can use '
+                "radiative coupling.\nSkipping calculation..."
+            )
 
     # Finally, we calculate the solar cell parameters
     Isc = None
@@ -94,7 +103,8 @@ def iv_multijunction(solar_cell, options):
     FF = None
     Eta = None
 
-    # If we are calculating the light IV, we also calculate the main parameters: Jsc, Voc, FF, MPP...
+    # If we are calculating the light IV, we also calculate the main parameters: Jsc,
+    # Voc, FF, MPP...
     if mpp_parameters and light_iv:
         VV = output_V
         II = -output_J
@@ -108,46 +118,53 @@ def iv_multijunction(solar_cell, options):
             Vmpp = VV[idx]
             Impp = II[idx]
             FF = Pmpp / (Isc * Voc)
-            Eta = Pmpp/power
+            Eta = Pmpp / power
 
         except Exception as err:
-            print('Error calculating the MPP parameters: {}'.format(err))
+            print("Error calculating the MPP parameters: {}".format(err))
 
-    solar_cell.iv = State({
-        "IV": (output_V, -output_J),
-        "junction IV": [(V_junction_array[:, i], -output_J) for i in range(num_jun)],
-        "coupled IV": coupled_J,
-        "Rseries IV": (output_J * Rs, -output_J),
-        "Isc": Isc,
-        "Voc": Voc,
-        "FF": FF,
-        "Pmpp": Pmpp,
-        "Vmpp": Vmpp,
-        "Impp": Impp,
-        "Eta": Eta
-    })
+    solar_cell.iv = State(
+        {
+            "IV": (output_V, -output_J),
+            "junction IV": [
+                (V_junction_array[:, i], -output_J) for i in range(num_jun)
+            ],
+            "coupled IV": coupled_J,
+            "Rseries IV": (output_J * Rs, -output_J),
+            "Isc": Isc,
+            "Voc": Voc,
+            "FF": FF,
+            "Pmpp": Pmpp,
+            "Vmpp": Vmpp,
+            "Impp": Impp,
+            "Eta": Eta,
+        }
+    )
 
 
 def solve_radiative_coupling(solar_cell, options, V_junction_array):
-    """ Calculates the radiative IV curve of a MJ solar cell in the presence of radiative coupling between subcells.
+    """Calculates the radiative IV curve of a MJ solar cell in the presence of radiative
+    coupling between subcells.
 
     WARNING: Tunnel junctions are not implemented in the radiative coupling mode, yet.
-
-    :param solar_cell: The MJ solar cell structure
-    :param options: General options of the solver
-    :param V_junction_array: Array with all the junction voltages without coupling. Only the first element is used, actually.
-    :return: A tupple with J, V_junction_array in the presence of coupling and the coupled current
+    :param solar_cell: The MJ solar cell structure :param options: General options of
+    the solver :param V_junction_array: Array with all the junction voltages without
+    coupling. Only the first element is used, actually. :return: A tupple with J,
+    V_junction_array in the presence of coupling and the coupled current
     """
-    print('Calculating IV curve with radiative coupling...')
-    print('WARNING: Tunnel junctions are not implemented in the radiative coupling calculator, yet.')
+    print("Calculating IV curve with radiative coupling...")
+    print(
+        "WARNING: Tunnel junctions are not implemented in the radiative coupling "
+        "calculator, yet."
+    )
 
     output_V = options.voltages
     wl = options.wavelength
     T = options.T
     num_jun = solar_cell.junctions
 
-    # First we calculate the front surface reflection and effective refractive index, as we will do normally for a
-    # detailed balanced calculation
+    # First we calculate the front surface reflection and effective refractive index,
+    # as we will do normally for a detailed balanced calculation
     Rn = np.minimum(0.999999, solar_cell(0).reflected(wl))
 
     # Out of the normal incidence reflection we calculate an effective refractive index
@@ -196,13 +213,20 @@ def solve_radiative_coupling(solar_cell, options, V_junction_array):
                 t = cos_t[k]
 
                 # The integral of the absorpton/emission across the back surface
-                A = A + (1 + R[:, k] * Bem ** (1 / t)) * (
-                    1 - Bem ** (1 / t)) * (1 - Bab ** (1 / t)) * Btrans ** (1 / t) * t
+                A = (
+                    A
+                    + (1 + R[:, k] * Bem ** (1 / t))
+                    * (1 - Bem ** (1 / t))
+                    * (1 - Bab ** (1 / t))
+                    * Btrans ** (1 / t)
+                    * t
+                )
 
             A = 2 * np.pi * A / (steps + 1)
-            boltz = j01 * (A / wl ** 4) * np.exp(- (h * c / wl) / (kb * T))
+            boltz = j01 * (A / wl ** 4) * np.exp(-(h * c / wl) / (kb * T))
 
-            # Now the coupling factors are defined, we need to calculate the coupling current, integrating over wavlenegth
+            # Now the coupling factors are defined, we need to calculate the coupling
+            # current, integrating over wavlenegth
             # We use the boltzmann approximation to make our life easier (and faster).
             coupling_currents[i, j - 1] = np.trapz(boltz, wl)
 
@@ -228,7 +252,9 @@ def solve_radiative_coupling(solar_cell, options, V_junction_array):
 
             # Here is where the coupling comes into play
             for i in range(j):
-                I2 = I2 - coupling_currents[i, j - 1] * np.exp((q * voltages[i]) / (kb * T))
+                I2 = I2 - coupling_currents[i, j - 1] * np.exp(
+                    (q * voltages[i]) / (kb * T)
+                )
 
             output[j] = I1 - I2
 
@@ -247,11 +273,11 @@ def solve_radiative_coupling(solar_cell, options, V_junction_array):
             return F(VV, voltages)
 
         # Solve the problem
-        result = root(FF, guess, method='lm', tol=1e-10)
-        V_junction_array[i] = result['x']
+        result = root(FF, guess, method="lm", tol=1e-10)
+        V_junction_array[i] = result["x"]
 
         # Finally, we calculate the current, based on the current of the first junction
-        output_J[i] = solar_cell(0).iv(result['x'][0])
+        output_J[i] = solar_cell(0).iv(result["x"][0])
 
         guess = V_junction_array[i]
 
@@ -260,7 +286,13 @@ def solve_radiative_coupling(solar_cell, options, V_junction_array):
     for j in range(1, num_jun):
         coupled = []
         for i in range(j):
-             coupled.append((V_junction_array[:, i], coupling_currents[i, j - 1] * np.exp((q * V_junction_array[:, i]) / (kb * T))))
+            coupled.append(
+                (
+                    V_junction_array[:, i],
+                    coupling_currents[i, j - 1]
+                    * np.exp((q * V_junction_array[:, i]) / (kb * T)),
+                )
+            )
 
         coupled_J.append(coupled)
 

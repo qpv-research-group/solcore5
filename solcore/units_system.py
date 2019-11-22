@@ -1,12 +1,13 @@
-from collections import defaultdict
-import re  # tools to manage regular expresions
-import numpy as np
 import os
+import re  # tools to manage regular expresions
+from collections import defaultdict
+
+import numpy as np
 
 import solcore
-from solcore.source_managed_class import SourceManagedClass
 from solcore.constants import *
 from solcore.singleton import Singleton
+from solcore.source_managed_class import SourceManagedClass
 
 
 class UnitError(Exception):
@@ -19,42 +20,55 @@ class WrongDimensionError(Exception):
         BaseException.__init__(self, msg)
 
 
-def generateConversionDictForSISuffix(suffix, centi=False, deci=False, non_base_si_factor=1):
+def generateConversionDictForSISuffix(
+    suffix, centi=False, deci=False, non_base_si_factor=1
+):
     prefixes = "Y,Z,E,P,T,G,M,k,,m,u,n,p,f,a,z,y".split(",")
     exponents = list(range(8, -9, -1))
 
     if centi:
         prefixes.append("c")
-        exponents.append(-2. / 3.)
+        exponents.append(-2.0 / 3.0)
 
     if deci:
         prefixes.append("d")
-        exponents.append(-1. / 3.)
+        exponents.append(-1.0 / 3.0)
 
     unitNames = ["%s%s" % (prefix, suffix) for prefix in prefixes]
-    conversion = [1000. ** exponent * non_base_si_factor for exponent in exponents]
+    conversion = [1000.0 ** exponent * non_base_si_factor for exponent in exponents]
 
     return dict(zip(unitNames, conversion))
 
 
 class UnitsSystem(SourceManagedClass):
-    """ Contains all the functions related with the conversion of units. While defined inside this class, most of these
-    functions are available outside it, being decorated with 'breakout' (see 'Singleton')"""
+    """Contains all the functions related with the conversion of units.
+
+    While defined inside this class, most of these functions are available outside it,
+    being decorated with 'breakout' (see 'Singleton')
+    """
 
     def __init__(self, sources=None):
         SourceManagedClass.__init__(self)
-        self.separate_value_and_unit_RE = re.compile(u"([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)(?:[ \t]*(.*))?")
-        self.split_units_RE = re.compile(u"(?:([^ \+\-\^\.0-9]+)[\^]?([\-\+]?[^ \-\+]*)?)")
+        self.separate_value_and_unit_RE = re.compile(
+            u"([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)(?:[ \t]*(.*))?"
+        )
+        self.split_units_RE = re.compile(
+            u"(?:([^ \+\-\^\.0-9]+)[\^]?([\-\+]?[^ \-\+]*)?)"
+        )
         self.siConversions = {}
         self.dimensions = defaultdict(dict)
 
         for name, path in sources.items():
-            self.add_source(name, os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)))
+            self.add_source(
+                name,
+                os.path.abspath(path.replace("SOLCORE_ROOT", solcore.SOLCORE_ROOT)),
+            )
 
         self.read()
 
     def read(self, name=None):
-        """ Reads the units file and creates a database with all units and conversion factors. """
+        """Reads the units file and creates a database with all units and conversion
+        factors."""
         SourceManagedClass.read(self, name)
         self.si_conversions = {}
         for dimension in self.database.sections():
@@ -65,12 +79,16 @@ class UnitsSystem(SourceManagedClass):
                     si_base_unit = expression.split()[0]
                     centi = "centi" in expression
                     deci = "deci" in expression
-                    non_base_si_factor = self.safe_eval(expression.split()[1]) if "altbase" in expression else 1
+                    non_base_si_factor = (
+                        self.safe_eval(expression.split()[1])
+                        if "altbase" in expression
+                        else 1
+                    )
                     dimension_conversions = generateConversionDictForSISuffix(
                         si_base_unit,
                         centi=centi,
                         deci=deci,
-                        non_base_si_factor=non_base_si_factor
+                        non_base_si_factor=non_base_si_factor,
                     )
                     self.siConversions.update(dimension_conversions)
                     self.dimensions[dimension].update(dimension_conversions)
@@ -80,10 +98,12 @@ class UnitsSystem(SourceManagedClass):
                 self.dimensions[dimension][unit] = self.siConversions[unit]
 
     def safe_eval(self, string_expression):
-        return eval(string_expression, {"__builtins__": {}}, {"constants": solcore.constants})
+        return eval(
+            string_expression, {"__builtins__": {}}, {"constants": solcore.constants}
+        )
 
     def siUnits(self, value, unit):
-        """ Convert value from unit to equivalent si-unit
+        """Convert value from unit to equivalent si-unit.
 
         >>> print(siUnits(1,"mm")) # yields meters
         0.001
@@ -99,14 +119,15 @@ class UnitsSystem(SourceManagedClass):
 
         units_list = self.split_units_RE.findall(unit)
         for unit, power in units_list:
-            power = float(power) if power != '' else 1
-            value = value * np.power((self.siConversions[unit]),
-                                     power)  ### caution, *= is WRONG because it modifies original obj. DO NOT WANT
+            power = float(power) if power != "" else 1
+            value = value * np.power(
+                (self.siConversions[unit]), power
+            )  ### caution, *= is WRONG because it modifies original obj. DO NOT WANT
 
         return value
 
     def asUnit(self, value, unit):
-        """ Converts from si unit to other unit. It is the reversed of siUnits function
+        """Converts from si unit to other unit. It is the reversed of siUnits function.
 
         >>> print(asUnit(1, "mA")) # print 1A in mA.
         1000.0
@@ -121,19 +142,21 @@ class UnitsSystem(SourceManagedClass):
 
         units_list = self.split_units_RE.findall(unit)
         for unit, power in units_list:
-            power = float(power) if power != '' else 1
-            value = value / (self.siConversions[unit]) ** power  ### caution, /= is WRONG because it modifies original obj. DO NOT WANT
+            power = float(power) if power != "" else 1
+            value = (
+                value / (self.siConversions[unit]) ** power
+            )  ### caution, /= is WRONG because it modifies original obj. DO NOT WANT
 
         return value
 
     def si(self, *args):
-        """ Utility function that forwards to either siUnit or siUnitFromString"""
+        """Utility function that forwards to either siUnit or siUnitFromString."""
         if type(args[0]) == str:
             return self.siUnitFromString(*args)
         return self.siUnits(*args)
 
     def siUnitFromString(self, string):
-        """ Converts a string of a number with units into si units of that quantity
+        """Converts a string of a number with units into si units of that quantity.
 
         >>> print(si("5 mm s-1")) # output in m/s
         0.005
@@ -153,12 +176,12 @@ class UnitsSystem(SourceManagedClass):
         value = float(value)
         units_list = self.split_units_RE.findall(unit)
         for unit, power in units_list:
-            power = float(power) if power != '' else 1
+            power = float(power) if power != "" else 1
             value *= (self.siConversions[unit]) ** power
         return value
 
     def convert(self, value, from_unit, to_unit):
-        """ Converts between comparable units, does NOT check if units are comparable.
+        """Converts between comparable units, does NOT check if units are comparable.
 
         >>> print(convert(1, "nm", "mm"))
         1e-06
@@ -175,7 +198,7 @@ class UnitsSystem(SourceManagedClass):
         return self.asUnit(self.siUnits(value, from_unit), to_unit)
 
     def eVnm(self, value):
-        """ Bi-directional conversion between nm and eV.
+        """Bi-directional conversion between nm and eV.
 
         >>> print('%.3f'%eVnm(1000))
         1.240
@@ -189,7 +212,7 @@ class UnitsSystem(SourceManagedClass):
         return factor / value
 
     def nmJ(self, value):
-        """ Bi-directional conversion between nm and J.
+        """Bi-directional conversion between nm and J.
 
         >>> print(nmJ(1000))
         1.9864452126e-19
@@ -203,7 +226,7 @@ class UnitsSystem(SourceManagedClass):
         return factor / self.siUnits(value, "nm")
 
     def mJ(self, value):
-        """ Bi-directional conversion between m and J.
+        """Bi-directional conversion between m and J.
 
         >>> print(mJ(1000))
         1.986445212595144e-25
@@ -217,16 +240,17 @@ class UnitsSystem(SourceManagedClass):
         return factor / value
 
     def nmHz(self, value):
-        """ Bi-directional conversion between nm and Hz.
+        """Bi-directional conversion between nm and Hz.
 
-        :param value: a number with units [nm] or [Hz].
-        :return: Either a number which is the conversion [nm] --> [Hz] or [Hz] --> [nm]
+        :param value: a number with units [nm] or [Hz]. :return: Either a number which
+        is the conversion [nm] --> [Hz] or [Hz] --> [nm]
         """
         factor = self.asUnit(c, "nm s-1")
         return factor / value
 
     def spectral_conversion_nm_ev(self, x, y):
-        """ Bi-directional conversion between a spectrum per nanometer and a spectrum per electronvolt.
+        """Bi-directional conversion between a spectrum per nanometer and a spectrum per
+        electronvolt.
 
         Example:
         1) nm --> eV conversion
@@ -262,12 +286,15 @@ class UnitsSystem(SourceManagedClass):
         x_prime = self.eVnm(x)
         conversion_constant = self.asUnit(h, "eV s") * self.asUnit(c, "nm s-1")
         y_prime = y * conversion_constant / x_prime ** 2
-        y_prime = reverse(y_prime)  # Wavelength ascends as electronvolts decends therefore reverse arrays
+        y_prime = reverse(
+            y_prime
+        )  # Wavelength ascends as electronvolts decends therefore reverse arrays
         x_prime = reverse(x_prime)
         return (x_prime, y_prime)
 
     def spectral_conversion_nm_hz(self, x, y):
-        """ Bi-directional conversion between a spectrum per nanometer and a spectrum per Hertz.
+        """Bi-directional conversion between a spectrum per nanometer and a spectrum per
+        Hertz.
 
         Example:
         1) nm --> Hz conversion
@@ -303,12 +330,15 @@ class UnitsSystem(SourceManagedClass):
         x_prime = self.nmHz(x)
         conversion_constant = self.asUnit(c, "nm s-1")
         y_prime = y * conversion_constant / x_prime ** 2
-        y_prime = reverse(y_prime)  # Wavelength ascends as frequency decends therefore reverse arrays
+        y_prime = reverse(
+            y_prime
+        )  # Wavelength ascends as frequency decends therefore reverse arrays
         x_prime = reverse(x_prime)
         return (x_prime, y_prime)
 
     def sensibleUnits(self, value, dimension, precision=2):
-        """ Attempt to convert a physical quantity of a particular dimension to the most sensible units
+        """Attempt to convert a physical quantity of a particular dimension to the most
+        sensible units.
 
         >>> print(sensibleUnits(0.001,"length",0))
         1 mm
@@ -337,7 +367,7 @@ class UnitsSystem(SourceManagedClass):
         return formatting % (self.asUnit(value, bestUnit), bestUnit)
 
     def eV(self, e):
-        """ Transform an energy value in SI units in a string expresing the value in eV.
+        """Transform an energy value in SI units in a string expresing the value in eV.
 
         >>> print(eV(1e-19))
         0.624 eV
@@ -348,7 +378,7 @@ class UnitsSystem(SourceManagedClass):
         return "%.3f eV" % self.asUnit(e, "eV")
 
     def guess_dimension(self, unit):
-        """ Guess the dimension of a unit.
+        """Guess the dimension of a unit.
 
         >>> print guess_dimension("nm")
         length
@@ -356,35 +386,46 @@ class UnitsSystem(SourceManagedClass):
         :param unit: the unit.
         :return: None
         """
-        possibilities = [key for key in self.dimensions.keys() if unit in self.dimensions[key]]
+        possibilities = [
+            key for key in self.dimensions.keys() if unit in self.dimensions[key]
+        ]
 
-        assert len(possibilities) != 0, "Guessing dimension of '%s': No candidates found" % unit
-        assert len(
-            possibilities) == 1, "Guessing dimension of '%s': Multiple candidates found, please convert manually. (%s)" % (
-            unit, ", ".join(possibilities))
+        assert len(possibilities) != 0, (
+            "Guessing dimension of '%s': No candidates found" % unit
+        )
+        assert len(possibilities) == 1, (
+            "Guessing dimension of '%s': Multiple candidates found, please convert manually. (%s)"
+            % (unit, ", ".join(possibilities))
+        )
 
         return possibilities[0]
 
     def list_dimensions(self):
         for dim in self.dimensions.keys():
             print(
-                "%s: %s" % (dim, ", ".join([k for k in self.dimensions[dim].keys() if k is not None and k is not ""])))
+                "%s: %s"
+                % (
+                    dim,
+                    ", ".join(
+                        [
+                            k
+                            for k in self.dimensions[dim].keys()
+                            if k is not None and k is not ""
+                        ]
+                    ),
+                )
+            )
 
 
 def compare_floats(a, b, absoulte_precision=1e-12, relative_precision=None):
-    """ Returns true if the absolute difference between the numbers a and b is less than the precision.
+    """Returns true if the absolute difference between the numbers a and b is less than
+    the precision.
 
-    Arguments:
-    a -- a float
-    b -- a float
-
-    Keyword Arguments (optional):
+    Arguments: a -- a float b -- a float  Keyword Arguments (optional):
     absolute_precision -- the absolute precision, abs(a-b) of the comparison.
-    relative_precision -- the relative precision, max(a,b)/min(a,b) - 1. of the comparison.
-
-    Returns:
-    True if the numbers are the same within the limits of the precision.
-    False if the number are not the same within the limits of the precision.
+    relative_precision -- the relative precision, max(a,b)/min(a,b) - 1. of the
+    comparison.  Returns: True if the numbers are the same within the limits of the
+    precision. False if the number are not the same within the limits of the precision.
     """
 
     if relative_precision is None:
@@ -394,7 +435,7 @@ def compare_floats(a, b, absoulte_precision=1e-12, relative_precision=None):
         else:
             return False
     else:
-        relative = max(a, b) / min(a, b) - 1.
+        relative = max(a, b) / min(a, b) - 1.0
         if relative < relative_precision:
             return True
         else:
@@ -417,7 +458,7 @@ def reverse(x):
     return x[::-1]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     UnitsSystem()
 
     print(solcore.eVnm(1240))

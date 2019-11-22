@@ -1,19 +1,17 @@
-""" Dielectric constant model tests
-"""
-from pytest import approx
-import numpy as np
+"""Dielectric constant model tests."""
 import random
+
+import numpy as np
+from pytest import approx
 
 from solcore.absorption_calculator.dielectric_constant_models import (
     Cauchy,
+    DielectricConstantModel,
     Drude,
     Gauss,
     Lorentz,
     Poles,
     PolySegment,
-)
-from solcore.absorption_calculator.dielectric_constant_models import (
-    DielectricConstantModel,
 )
 from solcore.interpolate import interp1d
 

@@ -1,34 +1,31 @@
-""" Absorption calculator related tests
-"""
-from pytest import approx, mark
-
-from solcore import material, si
-from solcore.structure import Structure, Layer
-from solcore.absorption_calculator import create_adachi_alpha
-from solcore.absorption_calculator import (
-    calculate_rat,
-    calculate_ellipsometry,
-    calculate_absorption_profile,
-)
-from solcore.state import State
-from solcore.solar_cell_solver import prepare_solar_cell
-from solcore.absorption_calculator.dielectric_constant_models import (
-    DielectricConstantModel,
-    Drude,
-)
-
-from solcore.solar_cell_solver import solar_cell_solver
-from solcore.solar_cell import SolarCell
-from solcore.materials import create_new_material
-from solcore.absorption_calculator import download_db, search_db
-from solcore.absorption_calculator.nk_db import nkdb_load_n
-from solcore.config_tools import add_source
-from solcore.optics import solve_tmm
-
+"""Absorption calculator related tests."""
 import os
 from pathlib import Path
 
 import numpy as np
+from pytest import approx, mark
+
+from solcore import material, si
+from solcore.absorption_calculator import (
+    calculate_absorption_profile,
+    calculate_ellipsometry,
+    calculate_rat,
+    create_adachi_alpha,
+    download_db,
+    search_db,
+)
+from solcore.absorption_calculator.dielectric_constant_models import (
+    DielectricConstantModel,
+    Drude,
+)
+from solcore.absorption_calculator.nk_db import nkdb_load_n
+from solcore.config_tools import add_source
+from solcore.materials import create_new_material
+from solcore.optics import solve_tmm
+from solcore.solar_cell import SolarCell
+from solcore.solar_cell_solver import prepare_solar_cell, solar_cell_solver
+from solcore.state import State
+from solcore.structure import Layer, Structure
 
 
 def test_adachi_absorption():

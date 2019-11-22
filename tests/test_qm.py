@@ -1,12 +1,12 @@
-"""Quantum mechanics tests"""
+"""Quantum mechanics tests."""
+import numpy as np
 from pytest import approx
 
 import solcore
-from solcore import material, si
-from solcore.constants import vacuum_permittivity, q
-from solcore.structure import Layer, Structure
 import solcore.quantum_mechanics as QM
-import numpy as np
+from solcore import material, si
+from solcore.constants import q, vacuum_permittivity
+from solcore.structure import Layer, Structure
 
 # Energies in meV
 my_energies = {
@@ -45,8 +45,7 @@ my_absorption = [
 
 
 def test_kp_bands():
-    """ Testing QM.kp_bands
-    """
+    """Testing QM.kp_bands."""
     GaAs = solcore.material("GaAs")(T=300)
     GaAsP = solcore.material("GaAsP")(P=0.3, T=300)
     InGaAs = solcore.material("InGaAs")(In=0.2, T=300)
@@ -95,8 +94,7 @@ def test_kp_bands():
 
 
 def test_KPbands():
-    """ Testing QM.KPbands and QM.fit_effective_masses
-    """
+    """Testing QM.KPbands and QM.fit_effective_masses."""
     GaAs = solcore.material("GaAs")(T=300)
     GaAsP = solcore.material("GaAsP")(P=0.3, T=300)
     InGaAs = solcore.material("InGaAs")(In=0.2, T=300)
@@ -147,8 +145,7 @@ def test_KPbands():
 
 
 def test_kp8x8_bulk():
-    """ Testing QM.kp8x8_bulk
-    """
+    """Testing QM.kp8x8_bulk."""
     GaAs = solcore.material("GaAs")(T=300)
     GaAsP = solcore.material("GaAsP")(P=0.3, T=300)
     InGaAs = solcore.material("InGaAs")(In=0.2, T=300)
@@ -184,8 +181,7 @@ def test_kp8x8_bulk():
 
 
 def test_quantum_mechanics_schrodinger():
-    """ Testing schrodinger equation solver
-    """
+    """Testing schrodinger equation solver."""
     bulk = material("GaAs")(T=293)
     barrier = material("GaAsP")(T=293, P=0.1)
 

@@ -1,6 +1,23 @@
+default_language_version:
+  python: python3.7
 repos:
 - repo: https://github.com/kynan/nbstripout
   rev: master
   hooks:
     - id: nbstripout
       files: ".ipynb"
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.2.1
+  hooks:
+#    - id: flake8
+    - id: check-merge-conflict
+    - id: debug-statements
+#- repo: https://github.com/myint/docformatter
+#  rev: master
+#  hooks:
+#    - id: docformatter
+#      args: [--in-place, --recursive, --wrap-summaries=88, --wrap-descriptions=88, --force-wrap]
+- repo: https://github.com/ambv/black/
+  rev: 19.3b0
+  hooks:
+    - id: black

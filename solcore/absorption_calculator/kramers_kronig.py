@@ -3,7 +3,7 @@ from scipy.integrate import quad
 
 
 class Epsi1:
-    def __init__(self, epsi_2, mini=0., maxi=5.):
+    def __init__(self, epsi_2, mini=0.0, maxi=5.0):
 
         self.epsi_2 = epsi_2
         self.mini = max(mini, 0)
@@ -31,10 +31,9 @@ class Epsi1:
         return val
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from solcore.absorption_calculator.dielectric_constant_models import Lorentz
-
 
     def epsi2(x):
         En = 2.5
@@ -50,7 +49,6 @@ if __name__ == '__main__':
 
         return out
 
-
     epsi1 = Epsi1(epsi2)
 
     E = np.linspace(0, 5, 50)
@@ -64,9 +62,9 @@ if __name__ == '__main__':
 
     # print(e1, e2)
 
-    plt.plot(E, e1, 'b', label='e1')
-    plt.plot(E, e2, 'r', label='e2')
-    plt.plot(E, e1_l, 'b--', label='e1_l')
-    plt.plot(E, e2_l, 'r--', label='e2_l')
+    plt.plot(E, e1, "b", label="e1")
+    plt.plot(E, e2, "r", label="e2")
+    plt.plot(E, e1_l, "b--", label="e1_l")
+    plt.plot(E, e2_l, "r--", label="e2_l")
     plt.legend()
     plt.show()

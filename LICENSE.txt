@@ -16,4 +16,3 @@ publication, please cite the initial Solcore paper at:
 and semiconductor materials”
 D. Alonso-Alvarez, T. Wilson, P. Pearce, M. Führer, D. Farrell and N. Ekins-Daukes.
 Journal of Computational Electronics (2018) https://doi.org/10.1007/s10825-018-1171-3
-

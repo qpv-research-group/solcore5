@@ -1,8 +1,7 @@
-"""
-Calculates the k-points of the Brillouin zone in a given direction
-"""
+"""Calculates the k-points of the Brillouin zone in a given direction."""
+from typing import Dict, List, Tuple
+
 import numpy as np
-from typing import List, Dict, Tuple
 
 label_map: Dict[str, str] = {
     "Gamma": "$\Gamma$",
@@ -21,15 +20,15 @@ def brillouin_critical_points(a: float) -> Dict[str, np.ndarray]:
         "W": np.pi / a * np.array((1, 2, 0)),
         "L": np.pi / a * np.array((1, 1, 1)),
         "U": np.pi / a * np.array((1 / 2, 2, 1 / 2)),
-        "K": np.pi / a * np.array((3 / 2, 3 / 2, 0))
+        "K": np.pi / a * np.array((3 / 2, 3 / 2, 0)),
     }
 
 
-def traverse_brillouin(a: float,
-                       traverse_order: tuple = ("L", "Gamma", "X",
-                                                "W", "K", "Gamma"),
-                       steps: int = 30) -> Tuple[np.ndarray, float,
-                                                 List[Tuple[float, str]]]:
+def traverse_brillouin(
+    a: float,
+    traverse_order: tuple = ("L", "Gamma", "X", "W", "K", "Gamma"),
+    steps: int = 30,
+) -> Tuple[np.ndarray, float, List[Tuple[float, str]]]:
 
     critical_points = brillouin_critical_points(a)
     traverse_list = list(traverse_order)
@@ -54,22 +53,47 @@ def traverse_brillouin(a: float,
 
     for i, target in enumerate(traverse_list):
         coords = np.vstack(
-            (coords, k_coords + np.matrix(np.linspace(0, 1, steps)[1:]).transpose() * (critical_points[target] - k_coords)))
-        graph_cords = np.hstack((graph_cords, np.linspace(graph_cords[-1], graph_cords[-1] + traverse_widths[i], steps)[1:]))
+            (
+                coords,
+                k_coords
+                + np.matrix(np.linspace(0, 1, steps)[1:]).transpose()
+                * (critical_points[target] - k_coords),
+            )
+        )
+        graph_cords = np.hstack(
+            (
+                graph_cords,
+                np.linspace(
+                    graph_cords[-1], graph_cords[-1] + traverse_widths[i], steps
+                )[1:],
+            )
+        )
         xticks.append(graph_cords[-1])
         k_coords = critical_points[target]
 
     scale = max(graph_cords)
-    return np.array(coords), graph_cords / scale, list(zip(xticks / scale, [label_map[s] for s in traverse_order]))
+    return (
+        np.array(coords),
+        graph_cords / scale,
+        list(zip(xticks / scale, [label_map[s] for s in traverse_order])),
+    )
 
 
-def kvector(a: float, t: float = 0, p: float = np.pi,
-            fraction: float = 0.2, points: int = 50,
-            vin: np.ndarray = None) -> np.ndarray:
-    """ Calculates the k points in a direction given by the spheric angles theta (t) and phi (p).
+def kvector(
+    a: float,
+    t: float = 0,
+    p: float = np.pi,
+    fraction: float = 0.2,
+    points: int = 50,
+    vin: np.ndarray = None,
+) -> np.ndarray:
+    """Calculates the k points in a direction given by the spheric angles theta (t) and
+    phi (p).
 
-    The fraction of the Brilluin zone calculated is given by "fraction" and the number of points by "points".
-    If "vin" is given, the direction of interest is taken from this vector."""
+    The fraction of the Brilluin zone calculated is given by "fraction" and the number
+    of points by "points". If "vin" is given, the direction of interest is taken from
+    this vector.
+    """
 
     s3 = np.sqrt(3)
 
@@ -79,8 +103,22 @@ def kvector(a: float, t: float = 0, p: float = np.pi,
 
     # Unity vectors of the high symmetry directions (normalised)
     X = np.array([[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]])
-    L = 1 / s3 * np.array(
-        [[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1], [-1, 1, -1], [-1, -1, -1], [-1, -1, 1]])
+    L = (
+        1
+        / s3
+        * np.array(
+            [
+                [1, 1, 1],
+                [1, 1, -1],
+                [1, -1, 1],
+                [1, -1, -1],
+                [-1, 1, 1],
+                [-1, 1, -1],
+                [-1, -1, -1],
+                [-1, -1, 1],
+            ]
+        )
+    )
 
     # Unity vector in the direction of interest
     if vin is not None:

@@ -1,5 +1,6 @@
 def VBO_align(structure):
-    """Takes in the the structure layers and sets Ec and Ev energies in the state which aligns the heterostructure."""
+    """Takes in the the structure layers and sets Ec and Ev energies in the state which
+    aligns the heterostructure."""
 
     for layer in structure:
         layer.Ev = layer.material.valence_band_offset

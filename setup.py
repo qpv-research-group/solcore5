@@ -1,14 +1,14 @@
-from setuptools import find_packages
-from numpy.distutils.core import Extension, setup
-
 import os
 import sys
 from configparser import ConfigParser
 
+from numpy.distutils.core import Extension, setup
+from setuptools import find_packages
+
 
 def gen_data_files(*dirs):
-    """ Creates the list of files (not necessarily python files) that need to be
-    installed together with the rest of stuff """
+    """Creates the list of files (not necessarily python files) that need to be
+    installed together with the rest of stuff."""
     results = []
     exclude = [".DS_Store", "__pycache__", "egg", ".git"]
     for src_dir in dirs:

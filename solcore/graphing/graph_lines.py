@@ -1,12 +1,10 @@
 from copy import copy
+
 import numpy
-
-from matplotlib.patches import Rectangle
 from matplotlib import font_manager
+from matplotlib.patches import Rectangle
 
-line_defaults = {
-    "linewidth": 0.5,
-}
+line_defaults = {"linewidth": 0.5}
 
 
 class GraphData_Base(object):
@@ -72,7 +70,8 @@ class GraphData(GraphData_Base):
 class GraphDataErrorbars(GraphData_Base):
     def draw(self, axis, figure=None):
         assert (
-        "xerr" in self.line_format or "yerr" in self.line_format), "GraphDataErrorbars requres xerr, yerr or both to be set"
+            "xerr" in self.line_format or "yerr" in self.line_format
+        ), "GraphDataErrorbars requres xerr, yerr or both to be set"
         x, y = self.data
         axis.errorbar(x, y, **self.line_format)
 
@@ -90,13 +89,22 @@ class GraphDataBetween(GraphData_Base):
 
 class LegendEntry(GraphData_Base):
     def draw(self, axis, figure=None):
-        p = Rectangle((0, 0), 1, 1, edgecolor='none', facecolor='none')
+        p = Rectangle((0, 0), 1, 1, edgecolor="none", facecolor="none")
 
         return p, self.data
 
 
 class GraphDataLabels(GraphData_Base):
-    def __init__(self, *data, color_index=None, font_size=None, fontname=None, weight=None, font_color=None, **options):
+    def __init__(
+        self,
+        *data,
+        color_index=None,
+        font_size=None,
+        fontname=None,
+        weight=None,
+        font_color=None,
+        **options
+    ):
         font_args = {}
 
         if font_size is not None:
@@ -124,7 +132,7 @@ class GraphDataLabels(GraphData_Base):
 
 
 class Text(GraphData_Base):
-    def draw(self, axis, figure=None, ):
+    def draw(self, axis, figure=None):
         print(self._data[0], self._data[1], self._data[2])
         figure.text(self._data[0], self._data[1], self._data[2])
 
@@ -134,4 +142,11 @@ class GraphDataImage(GraphData_Base):
 
     def draw(self, axis, figure=None):
         z = self.data
-        image = axis.imshow(z, **{k: self.line_format[k] for k in self.line_format.keys() if k not in ["color", ]})
+        image = axis.imshow(
+            z,
+            **{
+                k: self.line_format[k]
+                for k in self.line_format.keys()
+                if k not in ["color"]
+            }
+        )

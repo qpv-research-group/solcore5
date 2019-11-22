@@ -1,5 +1,5 @@
-from pytest import fixture
 import numpy as np
+from pytest import fixture
 
 
 @fixture
@@ -26,6 +26,7 @@ def da_light_source():
 
 def da_options():
     from solcore.state import State
+
     options = State()
     wl = np.linspace(290, 700, 150) * 1e-9
     options.T = np.random.uniform(250, 350)
@@ -51,22 +52,42 @@ def junction(nd_top, na_top, nd_bottom, na_bottom):
     AlInP = material("AlInP")
     InGaP = material("GaInP")
     window_material = AlInP(Al=0.52)
-    top_cell_n_material = InGaP(In=0.48, Nd=nd_top, Na=na_top,
-                                hole_diffusion_length=Lp, electron_diffusion_length=Ln)
-    top_cell_p_material = InGaP(In=0.48, Nd=nd_bottom, Na=na_bottom,
-                                hole_diffusion_length=Lp, electron_diffusion_length=Ln)
+    top_cell_n_material = InGaP(
+        In=0.48,
+        Nd=nd_top,
+        Na=na_top,
+        hole_diffusion_length=Lp,
+        electron_diffusion_length=Ln,
+    )
+    top_cell_p_material = InGaP(
+        In=0.48,
+        Nd=nd_bottom,
+        Na=na_bottom,
+        hole_diffusion_length=Lp,
+        electron_diffusion_length=Ln,
+    )
 
-    rel_perm = np.random.uniform(1,20)
+    rel_perm = np.random.uniform(1, 20)
     for mat in [top_cell_n_material, top_cell_p_material]:
         mat.permittivity = rel_perm * vacuum_permittivity
 
-    n_width = np.random.uniform(500, 1000)*1e-9
-    p_width = np.random.uniform(3000, 5000)*1e-9
+    n_width = np.random.uniform(500, 1000) * 1e-9
+    p_width = np.random.uniform(3000, 5000) * 1e-9
 
-    test_junc = SolarCell([Junction([Layer(si("25nm"), material=window_material, role='window'),
-                  Layer(n_width, material=top_cell_n_material, role='emitter'),
-                  Layer(p_width, material=top_cell_p_material, role='base'),
-                 ], sn=1, sp=1, kind='DA')])
+    test_junc = SolarCell(
+        [
+            Junction(
+                [
+                    Layer(si("25nm"), material=window_material, role="window"),
+                    Layer(n_width, material=top_cell_n_material, role="emitter"),
+                    Layer(p_width, material=top_cell_p_material, role="base"),
+                ],
+                sn=1,
+                sp=1,
+                kind="DA",
+            )
+        ]
+    )
 
     options = da_options()
     options.light_source = da_light_source()
@@ -87,7 +108,6 @@ def np_junction():
 
     test_junc, options = junction(Nd_top, Na_top, Nd_bottom, Na_bottom)
     return test_junc, options
-
 
 
 @fixture

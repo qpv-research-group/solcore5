@@ -1,14 +1,15 @@
 import tempfile
 from copy import copy
+from typing import Any, Dict, List, Tuple, Union
 
+import matplotlib.cm as cmx
 from matplotlib import font_manager
-from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_pdf import FigureCanvasPdf
 from matplotlib.colors import Normalize  # ColorConverter
-import matplotlib.cm as cmx
-from typing import List, Tuple, Dict, Union, Any
+from matplotlib.figure import Figure
+
 from .graph_support import flatten, open_with_os
 
 graph_defaults: Dict[str, Any] = {
@@ -20,12 +21,24 @@ graph_defaults: Dict[str, Any] = {
     "palette": "bright hue wheel",
     "square": True,
     "colormap": "nipy_spectral",
-    "grid": {"dash_capstyle": "round", "zorder": 1, "alpha": 0.5}
+    "grid": {"dash_capstyle": "round", "zorder": 1, "alpha": 0.5},
 }
 
 mpl_simple_properties: Tuple[str, ...] = (
-"title", "xlabel", "ylabel", "zlabel", "xlim", "ylim", "zlim3d", "xticks", "xticklabels", "yticks", "yticklabels",
-"yscale", "xscale",)
+    "title",
+    "xlabel",
+    "ylabel",
+    "zlabel",
+    "xlim",
+    "ylim",
+    "zlim3d",
+    "xticks",
+    "xticklabels",
+    "yticks",
+    "yticklabels",
+    "yscale",
+    "xscale",
+)
 directions: Tuple[str, ...] = ("left", "right", "top", "bottom")
 
 
@@ -93,7 +106,9 @@ class Graph:
             self.figure = Figure(figsize=self.options["figsize"])
         else:
             self.figure = Figure()
-        self.figure.subplots_adjust(**{k: self.options[k] for k in self.options.keys() if k in directions})
+        self.figure.subplots_adjust(
+            **{k: self.options[k] for k in self.options.keys() if k in directions}
+        )
 
     def create_axis(self, figure: Figure) -> None:
         if "axis" in self.options:
@@ -102,51 +117,72 @@ class Graph:
             # print ("already has axis")
             return
         else:
-            subplot_args = self.options["subplot_args"] if "subplot_args" in self.options else {}
+            subplot_args = (
+                self.options["subplot_args"] if "subplot_args" in self.options else {}
+            )
             self.axis = figure.add_subplot(
                 self.options["subplot"] if "subplot" in self.options else 111,
                 **subplot_args
             )
 
     def setup_matplotlib(self) -> None:
-        simple_setters = {k: self.options[k] for k in mpl_simple_properties if k in self.options}
+        simple_setters = {
+            k: self.options[k] for k in mpl_simple_properties if k in self.options
+        }
         for key, value in simple_setters.items():
             getattr(self.axis, "set_{}".format(key))(value)
 
         if "grid" in self.options and self.options["grid"] is not None:
             self.axis.grid(**self.options["grid"])
 
-        if "xhide" in self.options: self.axis.get_xaxis().set_visible(False)
-        if "yhide" in self.options: self.axis.get_yaxis().set_visible(False)
-        if "xlabelcolor" in self.options: self.axis.get_xaxis().label.set_color(self.options["xlabelcolor"])
-        if "ylabelcolor" in self.options: self.axis.get_yaxis().label.set_color(self.options["ylabelcolor"])
-        if "x_major_formatter" in self.options: self.axis.get_xaxis().set_major_formatter(
-            self.options["x_major_formatter"])
-        if "y_major_formatter" in self.options: self.axis.get_yaxis().set_major_formatter(
-            self.options["y_major_formatter"])
+        if "xhide" in self.options:
+            self.axis.get_xaxis().set_visible(False)
+        if "yhide" in self.options:
+            self.axis.get_yaxis().set_visible(False)
+        if "xlabelcolor" in self.options:
+            self.axis.get_xaxis().label.set_color(self.options["xlabelcolor"])
+        if "ylabelcolor" in self.options:
+            self.axis.get_yaxis().label.set_color(self.options["ylabelcolor"])
+        if "x_major_formatter" in self.options:
+            self.axis.get_xaxis().set_major_formatter(self.options["x_major_formatter"])
+        if "y_major_formatter" in self.options:
+            self.axis.get_yaxis().set_major_formatter(self.options["y_major_formatter"])
 
         # if "xticks" in self.options:
         #     x_coordinate, x_label= list(zip(*self.options["xticks"]))
         #     self.axis.set_xticks(x_coordinate)
         #     self.axis.set_xticklabels(x_label)
 
-        if "yticklabelcolor" in self.options and self.options["yticklabelcolor"] is not None:
+        if (
+            "yticklabelcolor" in self.options
+            and self.options["yticklabelcolor"] is not None
+        ):
             for tl in self.axis.get_yticklabels():
                 tl.set_color(self.options["yticklabelcolor"])
-        if "xticklabelcolor" in self.options and self.options["xticklabelcolor"] is not None:
+        if (
+            "xticklabelcolor" in self.options
+            and self.options["xticklabelcolor"] is not None
+        ):
             for tl in self.axis.get_xticklabels():
                 tl.set_color(self.options["xticklabelcolor"])
 
     def render_data(self) -> None:
 
-        all_color_indexes = [d.color_index if (
-            hasattr(d, "color_index")
-            and d.color_index is not None
-            and not ("color" in d.line_format)
-        ) else -i - 1 for i, d in enumerate(self.data) if not (
-            "color" in d.line_format or
-            "facecolor" in d.line_format or
-            "edgecolor" in d.line_format)]
+        all_color_indexes = [
+            d.color_index
+            if (
+                hasattr(d, "color_index")
+                and d.color_index is not None
+                and not ("color" in d.line_format)
+            )
+            else -i - 1
+            for i, d in enumerate(self.data)
+            if not (
+                "color" in d.line_format
+                or "facecolor" in d.line_format
+                or "edgecolor" in d.line_format
+            )
+        ]
 
         unique_color_indexes = len(set(all_color_indexes))
 
@@ -156,7 +192,11 @@ class Graph:
         self.legend_additions: List = []
 
         for i, datum in enumerate(self.data):
-            if "color" not in datum.line_format and "edgecolor" not in datum.line_format and "facecolor" not in datum.line_format:
+            if (
+                "color" not in datum.line_format
+                and "edgecolor" not in datum.line_format
+                and "facecolor" not in datum.line_format
+            ):
                 if hasattr(datum, "color_index") and datum.color_index is not None:
                     color = scalarMap.to_rgba(datum.color_index)
                 else:
@@ -168,8 +208,7 @@ class Graph:
                 datum.edit = self.options["edit"]
             legend_entry = datum.draw(self.axis)
             if legend_entry is not None:
-                self.legend_additions.append((i, legend_entry[0], legend_entry[1])
-                                             )
+                self.legend_additions.append((i, legend_entry[0], legend_entry[1]))
 
     def draw_legend(self) -> None:
         font_args = {}
@@ -203,15 +242,25 @@ class Graph:
         legend_args = (final_handles, final_labels)
 
         legend_kwargs = {
-            "frameon": self.options["legendframe"] if "legendframe" in self.options else False,
-            "title": self.options["legendtitle"] if "legendtitle" in self.options else False,
-            "ncol": self.options["legendcolumns"] if "legendcolumns" in self.options else 1,
+            "frameon": self.options["legendframe"]
+            if "legendframe" in self.options
+            else False,
+            "title": self.options["legendtitle"]
+            if "legendtitle" in self.options
+            else False,
+            "ncol": self.options["legendcolumns"]
+            if "legendcolumns" in self.options
+            else 1,
             "numpoints": 4,
             "prop": self.legend_font_properties,
-            "handlelength": self.options["handlelength"] if "handlelength" in self.options else 2
+            "handlelength": self.options["handlelength"]
+            if "handlelength" in self.options
+            else 2,
         }
         if legend_location == "outside":
-            legend_kwargs['bbox_to_anchor'] = self.options["legendbox"] if "legendbox" in self.options else (1.6, 1)
+            legend_kwargs["bbox_to_anchor"] = (
+                self.options["legendbox"] if "legendbox" in self.options else (1.6, 1)
+            )
         else:
             legend_kwargs["loc"] = legend_location
 
@@ -221,27 +270,34 @@ class Graph:
         self.main_drawing_flow(self.figure)
 
         if path is None:
-            handle, path = tempfile.mkstemp(prefix="tmp_solcore_", suffix=".%s" % self.options["format"])
+            handle, path = tempfile.mkstemp(
+                prefix="tmp_solcore_", suffix=".%s" % self.options["format"]
+            )
 
         if self.options["format"].upper() == "PDF":
             self.canvas = FigureCanvasPdf(self.figure)
         else:
             self.canvas = FigureCanvasAgg(self.figure)
 
-        self.canvas.print_figure(path, dpi=self.options["dpi"], bbox_extra_artists=self.extra_artists,
-                                 bbox_inches='tight')
+        self.canvas.print_figure(
+            path,
+            dpi=self.options["dpi"],
+            bbox_extra_artists=self.extra_artists,
+            bbox_inches="tight",
+        )
 
         if show and not self.suppress_show:
             open_with_os(path)
 
     def show(self) -> None:
         import pylab
+
         self.main_drawing_flow(pylab.gcf())
         pylab.show()
 
 
 class TwinnedAxisGraph(Graph):
-    def __init__(self, *args: Any, twin:str = "x", **kwargs: Any) -> None:
+    def __init__(self, *args: Any, twin: str = "x", **kwargs: Any) -> None:
         self.twin = twin
         self.line_format: Any = {}
         Graph.__init__(self, *args, **kwargs)

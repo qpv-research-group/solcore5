@@ -1,18 +1,20 @@
 import numpy as np
-
-from solcore.constants import kb, q, hbar, c
-from solcore.structure import Junction
 from scipy.optimize import root
+
+from solcore.constants import c, hbar, kb, q
+from solcore.structure import Junction
 
 from .detailed_balance import iv_detailed_balance
 
 
 def iv_2diode(junction, options):
-    """ Calculates the IV curve of a junction object using the 2-diode equation. All parameters needed for the calculation need to be included in the junction object. Series resistance is included at solar cell level, not at junction level. The junction is then updated with an "iv" function that calculates the IV curve at any voltage.
+    """Calculates the IV curve of a junction object using the 2-diode equation. All
+    parameters needed for the calculation need to be included in the junction object.
+    Series resistance is included at solar cell level, not at junction level. The
+    junction is then updated with an "iv" function that calculates the IV curve at any
+    voltage.
 
-    :param junction: A junction object.
-    :param options: Solver options.
-    :return: None.
+    :param junction: A junction object. :param options: Solver options. :return: None.
     """
 
     T = options.T
@@ -21,15 +23,15 @@ def iv_2diode(junction, options):
     wl = options.wavelength
 
     # We get some of the minimum parameters
-    R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, 'R_shunt') else 1e14
-    n1 = junction.n1 if hasattr(junction, 'n1') else 1
-    n2 = junction.n2 if hasattr(junction, 'n2') else 2
+    R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, "R_shunt") else 1e14
+    n1 = junction.n1 if hasattr(junction, "n1") else 1
+    n2 = junction.n2 if hasattr(junction, "n2") else 2
 
     try:
         # We check if we are using a radiative recombination and reference current
         # If that is the case, we solve the properties first using the DB model with the Boltzmann aproximation
-        if hasattr(junction, 'reff') and hasattr(junction, 'jref'):
-            options.db_mode = 'boltzmann'
+        if hasattr(junction, "reff") and hasattr(junction, "jref"):
+            options.db_mode = "boltzmann"
             iv_detailed_balance(junction, options)
 
             reff = max(junction.reff, 1e-10)
@@ -40,43 +42,63 @@ def iv_2diode(junction, options):
             Vref = n1 * kb * T / q * np.log(reff * jref / j01 + 1)
 
             # Now we can calculate the j02
-            junction.j02 = ((1 - reff) * jref - Vref / R_shunt) / (np.exp(q * Vref / (n2 * kb * T)) - 1)
+            junction.j02 = ((1 - reff) * jref - Vref / R_shunt) / (
+                np.exp(q * Vref / (n2 * kb * T)) - 1
+            )
             j02 = junction.j02
 
         # If not, we are in the normal 2D equation case
         else:
             j01 = junction.j01
-            j02 = junction.j02 if hasattr(junction, 'j02') else 0
+            j02 = junction.j02 if hasattr(junction, "j02") else 0
 
             # If the saturation currents correspond to a different temperature, we update them for the current temperature.
-            if hasattr(junction, 'Tref') and (T != junction.Tref):
-                assert hasattr(junction,
-                               'Eg'), 'ERROR: The bandgap for each junction (Eg) must be provided if the working ' \
-                                      'temperature (T) is different that the reference temperature (Tref). '
+            if hasattr(junction, "Tref") and (T != junction.Tref):
+                assert hasattr(junction, "Eg"), (
+                    "ERROR: The bandgap for each junction (Eg) must be provided if the working "
+                    "temperature (T) is different that the reference temperature (Tref). "
+                )
 
                 Eg = junction.Eg
                 Tref = junction.Tref
                 kB = kb / q
-                j01 = j01 * (T / Tref) ** 3 * np.exp(-Eg / (n1 * kB) * (1 / T - 1 / Tref))
-                j02 = j02 * (T / Tref) ** (5. / 3.) * np.exp(-Eg / (n2 * kB) * (1 / T - 1 / Tref))
+                j01 = (
+                    j01 * (T / Tref) ** 3 * np.exp(-Eg / (n1 * kB) * (1 / T - 1 / Tref))
+                )
+                j02 = (
+                    j02
+                    * (T / Tref) ** (5.0 / 3.0)
+                    * np.exp(-Eg / (n2 * kB) * (1 / T - 1 / Tref))
+                )
 
         if not light:
             jsc = 0
         else:
-            if hasattr(junction, 'jsc'):
+            if hasattr(junction, "jsc"):
                 jsc = junction.jsc
-            elif hasattr(junction, 'eqe'):
+            elif hasattr(junction, "eqe"):
                 eqe = junction.eqe
-                wl, ph = options.light_source.spectrum(x=wl, output_units='photon_flux_per_m')
+                wl, ph = options.light_source.spectrum(
+                    x=wl, output_units="photon_flux_per_m"
+                )
                 jsc = q * np.trapz(eqe(wl) * ph, wl)
             else:
                 jsc = 0
 
     except AttributeError as err:
-        raise AttributeError('ERROR in 2-diode equation. Junction is missing one essential argument. {}'.format(err))
+        raise AttributeError(
+            "ERROR in 2-diode equation. Junction is missing one essential argument. {}".format(
+                err
+            )
+        )
 
     def iv(v):
-        out = j01 * (np.exp(q * v / (n1 * kb * T)) - 1) + j02 * (np.exp(q * v / (n2 * kb * T)) - 1) + v / R_shunt - jsc
+        out = (
+            j01 * (np.exp(q * v / (n1 * kb * T)) - 1)
+            + j02 * (np.exp(q * v / (n2 * kb * T)) - 1)
+            + v / R_shunt
+            - jsc
+        )
         return np.minimum(out, 1e8)
 
     junction.jsc = jsc
@@ -440,16 +462,15 @@ def iv_2diode(junction, options):
 #     return output
 #
 
+
 def calculate_J01(Eg_in_eV, T, n):
-    """ Calculate the reverse saturation current J01, assumed radiative, considering an absorption equal to 1 above the
-    bandgap. Light trapping is included by considering the refractive index of the material:
+    """Calculate the reverse saturation current J01, assumed radiative, considering an
+    absorption equal to 1 above the bandgap. Light trapping is included by considering
+    the refractive index of the material:
 
-    .. math:: J_{01} = \\frac {q n^2 k_b T} {2 \\pi ^2 c^2 \\hbar ^3} e^{\\frac{-E_g}{k_b T}} (E_g^2 + 2 k_b T E_g + 2 k_b^2 T^2)
-
-
-    :param Eg_in_eV: Bandgap  in eV
-    :param T: Cell temperature
-    :param n: Refractive index of the material
+    .. math:: J_{01} = \\frac {q n^2 k_b T} {2 \\pi ^2 c^2 \\hbar ^3}
+    e^{\\frac{-E_g}{k_b T}} (E_g^2 + 2 k_b T E_g + 2 k_b^2 T^2)   :param Eg_in_eV:
+    Bandgap  in eV :param T: Cell temperature :param n: Refractive index of the material
     :return: The reverse saturation current J01
     """
     Eg = Eg_in_eV * q
@@ -462,15 +483,14 @@ def calculate_J01(Eg_in_eV, T, n):
 
 
 def calculate_J02_from_Voc(J01, Jsc, Voc, T, R_shunt=1e15):
-    """ Calculates J02 based on the J01, Jsc and the Voc. It is just the result of solving the 2-diode equation for J02.
-    Ideality factors n1 and n2 are assumed to be equal to 1 and 2, respectively.
+    """Calculates J02 based on the J01, Jsc and the Voc. It is just the result of
+    solving the 2-diode equation for J02. Ideality factors n1 and n2 are assumed to be
+    equal to 1 and 2, respectively.
 
-    :param J01: Reverse saturation current J01, typically the radiative component
-    :param Jsc: Short circuit current (=photocurrent)
-    :param Voc: Open circuit voltage
-    :param T: Temperature
-    :param R_shunt: Shunt resistance (default = 1e15)
-    :return: The reverse saturation current J02
+    :param J01: Reverse saturation current J01, typically the radiative component :param
+    Jsc: Short circuit current (=photocurrent) :param Voc: Open circuit voltage :param
+    T: Temperature :param R_shunt: Shunt resistance (default = 1e15) :return: The
+    reverse saturation current J02
     """
     Term1 = Jsc - J01 * (np.exp(q * Voc / (kb * T)) - 1) - Voc / R_shunt
     Term2 = np.exp(q * Voc / (2 * kb * T)) - 1
@@ -480,15 +500,14 @@ def calculate_J02_from_Voc(J01, Jsc, Voc, T, R_shunt=1e15):
 
 
 def calculate_J02_from_rad_eff(J01, radiative_efficiency, V, T, R_shunt=1e15):
-    """ Calculates J02 based on J01 and a radiative efficiency at a given voltage and temperature. Ideality factors n1
-    and n2 are assumed to be equal to 1 and 2, respectively.
+    """Calculates J02 based on J01 and a radiative efficiency at a given voltage and
+    temperature. Ideality factors n1 and n2 are assumed to be equal to 1 and 2,
+    respectively.
 
-    :param J01: Reverse saturation current J01, typically the radiative component
-    :param radiative_efficiency: Fraction of the dark current that is radiative
-    :param V: Operating voltage
-    :param T: Temperature
-    :param R_shunt: Shunt resistance (default = 1e15)
-    :return:
+    :param J01: Reverse saturation current J01, typically the radiative component :param
+    radiative_efficiency: Fraction of the dark current that is radiative :param V:
+    Operating voltage :param T: Temperature :param R_shunt: Shunt resistance (default =
+    1e15) :return:
     """
 
     Term1 = J01 * (np.exp(q * V / (kb * T)) - 1)
@@ -500,28 +519,39 @@ def calculate_J02_from_rad_eff(J01, radiative_efficiency, V, T, R_shunt=1e15):
     return J02
 
 
-def calculate_j02_from_J01_Jsc_reference_radiative_efficiency(J01, Jsc_ref, radiative_efficiency, T):
+def calculate_j02_from_J01_Jsc_reference_radiative_efficiency(
+    J01, Jsc_ref, radiative_efficiency, T
+):
     Voc_reference = (kb * T / q) * np.log((Jsc_ref * radiative_efficiency / J01) + 1)
-    J02 = (Jsc_ref - (radiative_efficiency * Jsc_ref)) / (np.exp(q * Voc_reference / (2 * kb * T)) - 1)
+    J02 = (Jsc_ref - (radiative_efficiency * Jsc_ref)) / (
+        np.exp(q * Voc_reference / (2 * kb * T)) - 1
+    )
 
     return J02
 
 
 def update_j0(junctions, T, Tref):
-    """ Updates the reverse saturation currents for the target temperature knowing their values at a reference
-    temperature.
+    """Updates the reverse saturation currents for the target temperature knowing their
+    values at a reference temperature.
 
-    :param junctions: List of junctions
-    :param T: Target temperature
-    :param Tref: Working temperature
-    :return: List of junctions with their saturation currents updated for the new temperatures
+    :param junctions: List of junctions :param T: Target temperature :param Tref:
+    Working temperature :return: List of junctions with their saturation currents
+    updated for the new temperatures
     """
     kB = kb / q
 
     for junc in junctions:
-        assert hasattr(junc, 'Eg'), 'ERROR: The bandgap for each junction (Eg) must be provided if the working ' \
-                                    'temperature (T) is different that the reference temperature (Tref). '
-        junc.j01 = junc.j01 * (T / Tref) ** 3 * np.exp(-junc.Eg / kB * (1 / T - 1 / Tref))
-        junc.j02 = junc.j02 * (T / Tref) ** (5. / 3.) * np.exp(-0.5 * junc.Eg / kB * (1 / T - 1 / Tref))
+        assert hasattr(junc, "Eg"), (
+            "ERROR: The bandgap for each junction (Eg) must be provided if the working "
+            "temperature (T) is different that the reference temperature (Tref). "
+        )
+        junc.j01 = (
+            junc.j01 * (T / Tref) ** 3 * np.exp(-junc.Eg / kB * (1 / T - 1 / Tref))
+        )
+        junc.j02 = (
+            junc.j02
+            * (T / Tref) ** (5.0 / 3.0)
+            * np.exp(-0.5 * junc.Eg / kB * (1 / T - 1 / Tref))
+        )
 
     return junctions

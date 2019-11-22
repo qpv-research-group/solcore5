@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from solcore import si, material
-from solcore.structure import Layer, Structure
 import solcore.quantum_mechanics as QM
-from solcore.constants import vacuum_permittivity, q
+from solcore import material, si
+from solcore.constants import q, vacuum_permittivity
+from solcore.structure import Layer, Structure
 
 # First we create the materials we need
 bulk = material("GaAs")(T=293, strained=False)
@@ -33,7 +33,7 @@ alpha_params = {
     "espace": E,
     "hwhm": si("6meV"),
     "dimensionality": 0.16,
-    "line_shape": "Gauss"
+    "line_shape": "Gauss",
 }
 
 # plt.figure(figsize=(4, 4.5))
@@ -45,20 +45,27 @@ for j, i in enumerate(comp):
     well_layer = Layer(width=si("7.2nm"), material=QW)
 
     # The following lines create the QW structure, with different number of QWs and interlayers
-    test_structure = Structure([barrier_layer, inter, well_layer, inter, barrier_layer], substrate=bulk)
+    test_structure = Structure(
+        [barrier_layer, inter, well_layer, inter, barrier_layer], substrate=bulk
+    )
 
     # Finally, the quantum properties are claculated here
-    output = QM.schrodinger(test_structure, quasiconfined=0, num_eigenvalues=20, alpha_params=alpha_params,
-                            calculate_absorption=True)
+    output = QM.schrodinger(
+        test_structure,
+        quasiconfined=0,
+        num_eigenvalues=20,
+        alpha_params=alpha_params,
+        calculate_absorption=True,
+    )
 
-    alfa = output[0]['alphaE'](E)
-    plt.plot(1240 / (E / q), alfa / 100, label='{}%'.format(int(i * 100)))
+    alfa = output[0]["alphaE"](E)
+    plt.plot(1240 / (E / q), alfa / 100, label="{}%".format(int(i * 100)))
 
 plt.xlim(826, 1100)
 plt.ylim(0, 23000)
-plt.xlabel('Wavelength (nm)')
-plt.ylabel('$\\alpha$ cm$^{-1}$')
-plt.legend(loc='upper right', frameon=False)
+plt.xlabel("Wavelength (nm)")
+plt.ylabel("$\\alpha$ cm$^{-1}$")
+plt.legend(loc="upper right", frameon=False)
 plt.tight_layout()
 
 plt.show()
