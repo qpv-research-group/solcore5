@@ -162,7 +162,7 @@
 <p id="t28" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t29" class="pln"><span class="com"># Now we load the Units system, making available in the solcore scope some functions</span><span class="strut">&nbsp;</span></p>
 <p id="t30" class="pln"><span class="com"># internal to the system</span><span class="strut">&nbsp;</span></p>
-<p id="t31" class="stm run hide_run"><span class="key">from</span> <span class="op">.</span><span class="nam">units_system</span> <span class="key">import</span> <span class="nam">UnitsSystem</span>  <span class="com"># isort:skip</span><span class="strut">&nbsp;</span></p>
+<p id="t31" class="stm run hide_run"><span class="key">from</span> <span class="op">.</span><span class="nam">units_system</span> <span class="key">import</span> <span class="nam">UnitsSystem</span>  <span class="com"># isort:skip  # noqa: E402</span><span class="strut">&nbsp;</span></p>
 <p id="t32" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t33" class="pln"><span class="com"># First we populate the Units system:</span><span class="strut">&nbsp;</span></p>
 <p id="t34" class="stm run hide_run"><span class="nam">UnitsSystem</span><span class="op">(</span><span class="nam">config</span><span class="op">[</span><span class="str">"Units"</span><span class="op">]</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
@@ -184,7 +184,7 @@
 <p id="t50" class="stm run hide_run"><span class="nam">eV</span> <span class="op">=</span> <span class="nam">UnitsSystem</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">eV</span><span class="strut">&nbsp;</span></p>
 <p id="t51" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t52" class="pln"><span class="com"># And the same with the Parameter system</span><span class="strut">&nbsp;</span></p>
-<p id="t53" class="stm run hide_run"><span class="key">from</span> <span class="op">.</span><span class="nam">materials</span> <span class="key">import</span> <span class="nam">ParameterSystem</span>  <span class="com"># isort:skip</span><span class="strut">&nbsp;</span></p>
+<p id="t53" class="stm run hide_run"><span class="key">from</span> <span class="op">.</span><span class="nam">materials</span> <span class="key">import</span> <span class="nam">ParameterSystem</span>  <span class="com"># isort:skip  # noqa: E402</span><span class="strut">&nbsp;</span></p>
 <p id="t54" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t55" class="stm run hide_run"><span class="nam">ParameterSystem</span><span class="op">(</span><span class="nam">config</span><span class="op">[</span><span class="str">"Parameters"</span><span class="op">]</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t56" class="stm run hide_run"><span class="nam">get_parameter</span> <span class="op">=</span> <span class="nam">ParameterSystem</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">get_parameter</span><span class="strut">&nbsp;</span></p>
@@ -204,7 +204,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-11-22 12:21
+            created at 2019-11-22 15:07
         </p>
     </div>
 </div>

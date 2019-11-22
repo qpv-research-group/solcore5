@@ -28,14 +28,18 @@ class Database:
             print("Database file found at", sqlitedbpath)
 
     def create_database_from_folder(self, yml_database_path, interpolation_points=100):
+        print(yml_database_path)
         create_sqlite_database(
             yml_database_path, self.db_path, interpolation_points=interpolation_points
         )
 
-    def create_database_from_url(self, interpolation_points=100, riiurl=_riiurl):
-        Database.DownloadRIIzip(riiurl=riiurl)
+    def create_database_from_url(
+        self, interpolation_points=100, riiurl=_riiurl, outputfolder=""
+    ):
+        Database.DownloadRIIzip(outputfolder=outputfolder, riiurl=riiurl)
         self.create_database_from_folder(
-            "database", interpolation_points=interpolation_points
+            os.path.join(outputfolder, "database"),
+            interpolation_points=interpolation_points,
         )
 
     def check_url_version(self):

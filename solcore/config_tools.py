@@ -3,6 +3,8 @@ sources with material data, etc."""
 import os
 import shutil
 from configparser import ConfigParser
+from typing import Optional
+from warnings import warn
 
 import solcore
 
@@ -67,9 +69,8 @@ def remove_source(section: str, name: str) -> None:
 
     if name in default_config_data.options(section):
         print(
-            "Source {} is a default Solcore source. It can not be removed and will be disabled instead.".format(
-                name
-            )
+            "Source {} is a default Solcore source. It can not be removed and will be "
+            "disabled instead.".format(name)
         )
         add_units_source(name, "")
         return
@@ -249,12 +250,26 @@ def check_user_config() -> None:
 
     :return: None
     """
+    global user_config_data
     if len(user_config_data.sections()) == 0:
         response = input(
             "No user configuration was detected. Do you want to create one (Y/n)?"
         )
-
         if response in "Yy":
-            reset_defaults(True)
-            user_config_data = ConfigParser()
-            user_config_data.read(user_config)
+            create_user_config_file()
+
+
+def create_user_config_file(location: Optional[str] = None):
+    """Creates a user configuration file."""
+    global user_config, user_config_data
+
+    if location is None:
+        location: str = os.path.expanduser("~")
+        warn(f"Creating user configuration file in {location}/.solcore_config.cfg")
+    else:
+        assert os.path.isdir(location)
+
+    user_config = os.path.join(location, ".solcore_config.cfg")
+    reset_defaults(True)
+    user_config_data = ConfigParser()
+    user_config_data.read(user_config)

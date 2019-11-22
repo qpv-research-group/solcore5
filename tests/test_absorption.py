@@ -1,26 +1,20 @@
 """Absorption calculator related tests."""
-import os
 from pathlib import Path
 
 import numpy as np
-from pytest import approx, mark
+from pytest import approx
 
-from solcore import material, si
+from solcore import si
 from solcore.absorption_calculator import (
     calculate_absorption_profile,
     calculate_ellipsometry,
     calculate_rat,
     create_adachi_alpha,
-    download_db,
-    search_db,
 )
 from solcore.absorption_calculator.dielectric_constant_models import (
     DielectricConstantModel,
     Drude,
 )
-from solcore.absorption_calculator.nk_db import nkdb_load_n
-from solcore.config_tools import add_source
-from solcore.materials import create_new_material
 from solcore.optics import solve_tmm
 from solcore.solar_cell import SolarCell
 from solcore.solar_cell_solver import prepare_solar_cell, solar_cell_solver
@@ -29,6 +23,8 @@ from solcore.structure import Layer, Structure
 
 
 def test_adachi_absorption():
+    from solcore import material
+
     material_name = "InGaAs"
     solcore_material = material(material_name)(T=300, In=0.1)
 
@@ -46,6 +42,8 @@ def test_adachi_absorption():
 
 
 def test_TMM_rat():
+    from solcore import material
+
     GaAs = material("GaAs")(T=300)
 
     my_structure = Structure([Layer(si(3000, "nm"), material=GaAs)])
@@ -64,6 +62,8 @@ def test_TMM_rat():
 
 
 def test_TMM_absorption_profile():
+    from solcore import material
+
     GaAs = material("GaAs")(T=300)
 
     my_structure = Structure(
@@ -81,6 +81,8 @@ def test_TMM_absorption_profile():
 
 
 def test_TMM_ellipsometry():
+    from solcore import material
+
     GaAs = material("GaAs")(T=300)
 
     my_structure = Structure(
@@ -149,6 +151,8 @@ def test_sopra_absorption():
 
 
 def test_substrate_presence_A():
+    from solcore import material
+
     wavelength = np.linspace(300, 800, 3) * 1e-9
 
     GaAs = material("GaAs")(T=300)
@@ -193,6 +197,7 @@ def test_substrate_presence_A():
 
 
 def test_BL_correction():
+    from solcore import material
 
     wl = np.linspace(800, 950, 4) * 1e-9
 
@@ -229,6 +234,8 @@ def test_BL_correction():
 
 
 def test_substrate_presence_profile():
+    from solcore import material
+
     wavelength = np.linspace(300, 800, 3) * 1e-9
 
     GaAs = material("GaAs")(T=300)
@@ -271,11 +278,9 @@ def test_substrate_presence_profile():
     assert all([d == approx(o) for d, o in zip(profile, profile_data)])
 
 
-# TODO: the following tests for custom materials do not work as they require changes to the user config file.
-# It is possible the downloading of the database for test_database_materials is also an issue.
-
-
 def test_inc_coh_tmm():
+    from solcore import material
+
     GaInP = material("GaInP")(In=0.5)
     GaAs = material("GaAs")()
     Ge = material("Ge")()
@@ -321,42 +326,3 @@ def test_inc_coh_tmm():
         ]
     )
     assert A_calc == approx(A_data)
-
-
-@mark.skip
-def test_define_material():
-    home_folder = os.path.expanduser("~")
-    custom_nk_path = os.path.join(home_folder, "Solcore/custommats")
-    param_path = os.path.join(home_folder, "Solcore/custom_params.txt")
-
-    add_source("Others", "custom_mats", custom_nk_path)
-    add_source("Parameters", "custom", param_path)
-    this_dir = os.path.split(__file__)[0]
-    create_new_material(
-        "SiGeSn",
-        os.path.join(this_dir, "SiGeSn_n.txt"),
-        os.path.join(this_dir, "SiGeSn_k.txt"),
-        os.path.join(this_dir, "SiGeSn_params.txt"),
-    )
-
-
-@mark.skip
-def test_use_material():
-    SiGeSn = material("SiGeSn")()
-    assert SiGeSn.n(400e-9) == approx(4.175308391752484)
-    assert SiGeSn.k(400e-9) == approx(2.3037424963866306)
-
-
-@mark.skip
-def test_database_materials():
-    home_folder = os.path.expanduser("~")
-    nk_db_path = os.path.join(home_folder, "Solcore/NK.db")
-
-    add_source("Others", "nk", nk_db_path)
-    download_db(confirm=True)
-    wl, n = nkdb_load_n(2683)  # Should be carbon, from Phillip
-
-    data_path = Path(__file__).parent / "data" / "database_materials.txt"
-    n_data = np.loadtxt(data_path)
-
-    assert all([d == approx(o) for d, o in zip(n, n_data)])

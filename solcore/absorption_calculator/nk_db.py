@@ -5,11 +5,11 @@
 import os
 import sqlite3
 
-from solcore import SOLCORE_ROOT, config
+from solcore import SOLCORE_ROOT
 from solcore.materials.refractiveindex_info_DB import dboperations as DB
 
 
-def download_db(url=None, interpolation_points=200, confirm=False):
+def download_db(url=None, interpolation_points=200, confirm=False, outputfolder=""):
     """This function downloads the refractiveindex.info database and creates on SQLite
     database at the path specified in the user config file.
 
@@ -19,6 +19,8 @@ def download_db(url=None, interpolation_points=200, confirm=False):
     to save the data at. Default is 200. :param confirm: if True, will not ask if you
     want to download database again even if it has been downloaded previously :return:
     """
+    from solcore.config_tools import user_config_data as config
+
     NK_PATH = os.path.abspath(
         config["Others"]["nk"].replace("SOLCORE_ROOT", SOLCORE_ROOT)
     )
@@ -37,7 +39,7 @@ def download_db(url=None, interpolation_points=200, confirm=False):
     if confirm:
         db = DB.Database(NK_PATH)
         if url is None:
-            db.create_database_from_url(interpolation_points)
+            db.create_database_from_url(interpolation_points, outputfolder=outputfolder)
         else:
             db.create_database_from_url(interpolation_points, url)
 
@@ -50,6 +52,7 @@ def search_db(term="", exact=False):
     tuples of with one tuple per database entry matching the search term. The first
     entry of each tuple is the pageid of the database entry.
     """
+    from solcore.config_tools import user_config_data as config
 
     NK_PATH = os.path.abspath(
         config["Others"]["nk"].replace("SOLCORE_ROOT", SOLCORE_ROOT)
@@ -82,6 +85,8 @@ def search_db(term="", exact=False):
 
 
 def nkdb_load_n(pageid):
+    from solcore.config_tools import user_config_data as config
+
     NK_PATH = os.path.abspath(
         config["Others"]["nk"].replace("SOLCORE_ROOT", SOLCORE_ROOT)
     )
@@ -94,6 +99,8 @@ def nkdb_load_n(pageid):
 
 
 def nkdb_load_k(pageid):
+    from solcore.config_tools import user_config_data as config
+
     NK_PATH = os.path.abspath(
         config["Others"]["nk"].replace("SOLCORE_ROOT", SOLCORE_ROOT)
     )
@@ -116,6 +123,7 @@ def create_nk_txt(pageid, file, folder=""):
     and [file]_k.txt :param folder: folder where the files should be saved :return:
     parameter_source: file with list of other parameters for the new material
     """
+    from solcore.config_tools import user_config_data as config
 
     NK_PATH = os.path.abspath(
         config["Others"]["nk"].replace("SOLCORE_ROOT", SOLCORE_ROOT)

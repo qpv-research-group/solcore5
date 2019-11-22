@@ -2,6 +2,15 @@ import numpy as np
 from pytest import fixture
 
 
+@fixture(scope="session")
+def user_config_file(tmp_path_factory):
+    from solcore.config_tools import create_user_config_file
+
+    path = tmp_path_factory.mktemp("solcore_test")
+    create_user_config_file(path)
+    return str(path)
+
+
 @fixture
 def wavelength():
     return np.linspace(300, 1200)

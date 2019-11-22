@@ -6,9 +6,7 @@ import os
 from re import sub
 from shutil import copyfile
 
-from solcore import SOLCORE_ROOT, config
-from solcore.config_tools import add_source
-
+from solcore import SOLCORE_ROOT
 from .parameter_system import ParameterSystem
 
 
@@ -18,11 +16,16 @@ def create_new_material(mat_name, n_source, k_source, parameter_source=None):
     source files for the n and k data and other parameters which will be copied into the
     material_data/Custom folder.
 
-    :param mat_name: the name of the new material :param n_source: path of the n values
-    (txt file, first column wavelength in m, second column n) :param k_source: path of
-    the n values (txt file, first column wavelength in m, second column k) :return:
+    :param mat_name: the name of the new material
+    :param n_source: path of the n values
+    (txt file, first column wavelength in m, second column n)
+    :param k_source: path of
+    the n values (txt file, first column wavelength in m, second column k)
+
+    :return:
     parameter_source: file with list of materials for the new material
     """
+    from solcore.config_tools import add_source, user_config_data as config
 
     CUSTOM_PATH = os.path.abspath(
         config["Others"]["custom_mats"].replace("SOLCORE_ROOT", SOLCORE_ROOT)
@@ -68,7 +71,8 @@ def create_new_material(mat_name, n_source, k_source, parameter_source=None):
             else:
                 parameters = "[" + mat_name + "]\n\n"
                 print(
-                    "Material created with optical constants n and k only, no other parameters provided."
+                    "Material created with optical constants n and k only, no other "
+                    "parameters provided."
                 )
 
             fout = open(PARAMETER_PATH, "a")
@@ -76,11 +80,12 @@ def create_new_material(mat_name, n_source, k_source, parameter_source=None):
             fout.close()
         else:
             print(
-                "There are already parameters for this material in the custom parameter file at "
-                + PARAMETER_PATH
+                "There are already parameters for this material in the custom "
+                "parameter file at " + PARAMETER_PATH
             )
 
-        # modify the user's config file (in their home folder) to include the relevant paths
+        # modify the user's config file (in their home folder) to include the
+        # relevant paths
         new_entry = (
             mat_name
             + " = "
@@ -89,10 +94,7 @@ def create_new_material(mat_name, n_source, k_source, parameter_source=None):
             + mat_name
             + "-Material\n"
         )
-        home_folder = os.path.expanduser("~")
-        user_config = os.path.join(home_folder, ".solcore_config.cfg")
-        existing_config = open(user_config, "r").read()
-        if not new_entry in existing_config:
+        if not new_entry in config:
 
             add_source(
                 "Materials",
@@ -102,27 +104,8 @@ def create_new_material(mat_name, n_source, k_source, parameter_source=None):
 
         else:
             print(
-                "A path for this material was already added to the Solcore config file in the home directory."
+                "A path for this material was already added to the Solcore config file "
             )
 
     else:
         print("There is already a material with this name - choose a different one.")
-
-        # # Finally add the relevant paths to the MANIFEST.in file.
-        # # Don't need to add the full path, just relative to where the MANIFEST file is.
-        # Don't think this is necessary if it's installed as a package?
-        #
-        # path_toadd = folder.replace(SOLCORE_ROOT, 'solcore')
-        # new_entry = '\ninclude ' + os.path.join(path_toadd, 'n.txt').replace("\\","/") +' \ninclude ' + os.path.join(path_toadd, 'k.txt').replace("\\","/")
-        #
-        # MANIFEST_PATH = os.path.join(os.path.dirname(SOLCORE_ROOT), 'MANIFEST.in')
-        #
-        # existing_manifest = open(MANIFEST_PATH, 'r').read()
-        #
-        # # check if it's already been added
-        # if not new_entry in existing_manifest:
-        #     fout = open(MANIFEST_PATH, "a")
-        #     fout.write(new_entry)
-        #     fout.close()
-        # else:
-        #     print('A path for this material was already added to the MANIFEST.in file in the package directory')
