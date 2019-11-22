@@ -1,4 +1,4 @@
-name: Solcore
+name: build
 
 on: [push, pull_request]
 
