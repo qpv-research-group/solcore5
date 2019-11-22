@@ -2,7 +2,7 @@
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
 [![Documentation Status](http://readthedocs.org/projects/solcore5/badge/?version=latest)](http://solcore5.readthedocs.io/en/latest/?badge=latest)
-![image](https://github.com/qpv-research-group/solcore5/workflows/build/badge.svg?branch=devel)
+[![image](https://github.com/qpv-research-group/solcore5/workflows/build/badge.svg?branch=devel)](https://github.com/qpv-research-group/solcore5/actions?query=workflow%3Abuild)
 [![image](https://coveralls.io/repos/github/qpv-research-group/solcore5/badge.svg?branch=devel)](https://coveralls.io/github/qpv-research-group/solcore5?branch=devel)
 
 Solcore
