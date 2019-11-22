@@ -70,7 +70,7 @@ def create_new_material(mat_name, n_source, k_source, parameter_source = None):
         # modify the user's config file (in their home folder) to include the relevant paths
         new_entry = mat_name + ' = ' + config['Others']['custom_mats'] + '/' + mat_name + '-Material\n'
         home_folder = os.path.expanduser('~')
-        user_config = os.path.join(home_folder, '.solcore_config.txt')
+        user_config = os.path.join(home_folder, '.solcore_config.cfg')
         existing_config = open(user_config, 'r').read()
         if not new_entry in existing_config:
 

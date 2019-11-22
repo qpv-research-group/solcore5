@@ -8,7 +8,7 @@ import solcore
 import glob
 
 home_folder: str = os.path.expanduser('~')
-user_config: str = os.path.join(home_folder, '.solcore_config.txt')
+user_config: str = os.path.join(home_folder, '.solcore_config.cfg')
 user_config_data = ConfigParser()
 user_config_data.read(user_config)
 

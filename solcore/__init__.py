@@ -5,8 +5,8 @@ from pathlib import Path
 
 SOLCORE_ROOT = os.path.split(__file__)[0]
 DATA = Path(__file__).parent / "data"
-default_config = os.path.join(SOLCORE_ROOT, 'solcore_config.txt')
-user_config = os.path.join(os.path.expanduser('~'), '.solcore_config.txt')
+default_config = os.path.join(SOLCORE_ROOT, 'solcore_config.cfg')
+user_config = os.path.join(os.path.expanduser('~'), '.solcore_config.cfg')
 
 config = ConfigParser()
 config.read([default_config, user_config])
