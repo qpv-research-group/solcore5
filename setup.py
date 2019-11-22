@@ -21,7 +21,7 @@ def gen_data_files(*dirs):
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-default_config = os.path.join(here, "solcore", "solcore_config.txt")
+default_config = os.path.join(here, "solcore", "solcore_config.cfg")
 config = ConfigParser()
 config.read([default_config])
 
