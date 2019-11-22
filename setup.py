@@ -6,7 +6,6 @@ import sys
 from configparser import ConfigParser
 
 
-
 def gen_data_files(*dirs):
     """ Creates the list of files (not necessarily python files) that need to be
     installed together with the rest of stuff """
