@@ -88,7 +88,6 @@ if __name__ == "__main__":
 
     class test:
         __name__ = "ASC_examples"
-        pass
 
     moo = test()
 

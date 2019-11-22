@@ -1,8 +1,6 @@
 import numpy as np
-from scipy.optimize import root
 
 from solcore.constants import c, hbar, kb, q
-from solcore.structure import Junction
 
 from .detailed_balance import iv_detailed_balance
 

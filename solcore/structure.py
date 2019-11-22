@@ -1,7 +1,5 @@
 from collections import defaultdict
 
-import solcore
-
 
 class Structure(list):
     """Subclass of lists that stores information of a 'sample' consisting of several
@@ -177,10 +175,12 @@ def ToSolcoreMaterial(comp, T, execute=False, **kwargs):
     :return: A Solcore material or a string with the command to calculate the solcore
     material
     """
+    from solcore import material  # noqa: F403,F401
+
     # It provides a solcore material out of its string composition. The output can be a string with the comand or a solcore material itself.
     if "element" in comp.keys():
         # A ternary material
-        out = 'solcore.material("%s")(T=%s, %s=%s' % (
+        out = 'material("%s")(T=%s, %s=%s' % (
             comp["material"],
             T,
             comp["element"],
@@ -188,7 +188,7 @@ def ToSolcoreMaterial(comp, T, execute=False, **kwargs):
         )
     else:
         # A binary material
-        out = 'solcore.material("%s")(T=%s' % (comp["material"], T)
+        out = 'material("%s")(T=%s' % (comp["material"], T)
 
     for key in kwargs.keys():
         out = out + ", {}={}".format(key, kwargs[key])
@@ -201,13 +201,18 @@ def ToSolcoreMaterial(comp, T, execute=False, **kwargs):
         return out
 
 
-def ToLayer(width, material, role):
+def ToLayer(width, mat, role):
     """Creates a Layer based on strings containing the width, the material and the role.
 
-    :param width: Width of the layer :param material: Material of the layer, as a string
-    :param role: The role of the layer :return: A Solcore Layer
+    :param width: Width of the layer
+    :param material: Material of the layer, as a string
+    :param role: The role of the layer
+
+    :return: A Solcore Layer
     """
-    return eval('Layer( width=%s, material=%s, role="%s"  )' % (width, material, role))
+    from solcore import material  # noqa: F403,F401
+
+    return eval('Layer( width=%s, material=%s, role="%s"  )' % (width, mat, role))
 
 
 def ToStructure(device):

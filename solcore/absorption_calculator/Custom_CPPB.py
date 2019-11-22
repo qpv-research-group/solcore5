@@ -1,8 +1,6 @@
 # Custom_CPPB module for building customisable optical constant models based on any number of local oscillator functions
 
-import os
 import re
-import sys
 
 import numpy as np
 

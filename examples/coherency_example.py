@@ -3,7 +3,7 @@ import numpy as np
 
 from solcore import material, si
 from solcore.solar_cell import Junction, Layer, SolarCell
-from solcore.solar_cell_solver import prepare_solar_cell, solar_cell_solver
+from solcore.solar_cell_solver import solar_cell_solver
 from solcore.state import State
 
 GaInP = material("GaInP")(In=0.5)

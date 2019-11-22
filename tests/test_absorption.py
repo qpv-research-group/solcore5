@@ -165,7 +165,7 @@ def test_substrate_presence_A():
         },
     )
 
-    z_pos = np.linspace(0, my_structure.width, 10)
+    np.linspace(0, my_structure.width, 10)
 
     A_subs = my_structure[0].layer_absorption
 

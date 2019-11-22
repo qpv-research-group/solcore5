@@ -28,7 +28,7 @@ try:
         update_epsilon,
         rcwa_position_resolved,
     )
-except Exception as err:
+except Exception:
     print(
         "WARNING: The RCWA solver will not be available because an S4 installation has not been found."
     )

@@ -6,7 +6,7 @@ from numpy.linalg import eig
 import solcore
 from solcore import constants
 from solcore.crystals import brillouin_critical_points, kvector, traverse_brillouin
-from solcore.graphing import *
+from solcore.graphing import Graph, GraphData
 from solcore.science_tracker import science_reference
 
 electron_charge = constants.q
@@ -55,7 +55,7 @@ def eight_band_strain_hamiltonian(
     sqrt2 = np.sqrt(2)
     sqrt3 = np.sqrt(3)
     sqrt6 = np.sqrt(6)
-    sqrt3o2 = np.sqrt(3 / 2)
+    np.sqrt(3 / 2)
 
     m0 = constants.electron_mass
 
@@ -134,7 +134,7 @@ def eight_band_strain_hamiltonian(
     Eso = lambda kx, ky, kz, exx, eyy, ezz: Ev0 - (P(kx, ky, kz, exx, eyy, ezz) + Delta)
 
     eyy = exx
-    p = P(kx, ky, kz, exx, eyy, ezz)
+    P(kx, ky, kz, exx, eyy, ezz)
     q = Q(kx, ky, kz, exx, eyy, ezz)
     r = R(kx, ky, kz, exx, eyy, ezz)
     s = S(kx, ky, kz, exx, eyy, ezz)

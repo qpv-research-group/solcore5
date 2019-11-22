@@ -1,6 +1,6 @@
 import tempfile
 from copy import copy
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 import matplotlib.cm as cmx
 from matplotlib import font_manager

@@ -28,7 +28,7 @@ if welcome_message:
 
 # Now we load the Units system, making available in the solcore scope some functions
 # internal to the system
-from .units_system import UnitsSystem  # isort:skip
+from .units_system import UnitsSystem  # isort:skip  # noqa: E402
 
 # First we populate the Units system:
 UnitsSystem(config["Units"])
@@ -50,7 +50,7 @@ spectral_conversion_nm_hz = UnitsSystem().spectral_conversion_nm_hz
 eV = UnitsSystem().eV
 
 # And the same with the Parameter system
-from .materials import ParameterSystem  # isort:skip
+from .materials import ParameterSystem  # isort:skip  # noqa: E402
 
 ParameterSystem(config["Parameters"])
 get_parameter = ParameterSystem().get_parameter

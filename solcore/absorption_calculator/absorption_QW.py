@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import array
 
-from solcore.constants import *
+from solcore.constants import c, electron_mass, h, hbar, kb, pi, q, vacuum_permittivity
 from solcore.science_tracker import science_reference
 
 H = lambda x: 0 if x < 0 else 1  ### blindly changed this !!

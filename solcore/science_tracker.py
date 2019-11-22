@@ -80,7 +80,7 @@ if __name__ == "__main__":
         myRandomFunctionB(d=1)
 
     def myRandomFunctionB(d) -> None:
-        a = 1
+        pass
 
         science_reference("doing something smart", "My Awesome Book, by me.")
 

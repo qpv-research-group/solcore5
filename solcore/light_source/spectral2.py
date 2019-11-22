@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 import numpy
-from numpy import *
+from numpy import arccos, array, cos, exp, pi, sin, trapz, where
 
 from solcore import spectral_conversion_nm_ev
 from solcore.science_tracker import science_reference
@@ -10,6 +10,12 @@ from solcore.science_tracker import science_reference
 from .. import DATA
 
 this_dir = os.path.split(__file__)[0]
+
+am_zero_wavelength = None
+am_zero_irradiance = None
+waterspectra = None
+ozonespectra = None
+uniformgasspectra = None
 
 
 def equation_of_time(day_angle):
@@ -23,8 +29,9 @@ def equation_of_time(day_angle):
     return value
 
 
-def loadUtilitySpectra():
-    global am_zero_wavelength, am_zero_irradiance, waterspectra, ozonespectra, uniformgasspectra
+def load_utility_spectra():
+    global am_zero_wavelength, am_zero_irradiance, waterspectra, ozonespectra
+    global uniformgasspectra
 
     spctra = numpy.loadtxt(DATA / "SPCTRAL_si_units.txt", unpack=True)
     (
@@ -38,7 +45,7 @@ def loadUtilitySpectra():
     ozonespectra = ozonespectra / 100
 
 
-loadUtilitySpectra()
+load_utility_spectra()
 
 
 def get_default_spectral2_object():
@@ -50,11 +57,11 @@ def get_default_spectral2_object():
     precipitated water - 1030 hPa atmospheric pressure - 0.34mm of Ozone - turbidity of
     15%.
     """
-    defaults = {}
+    defaults = dict()
 
     defaults["latitude"] = 52.39 / 180 * numpy.pi  # Coventry
     defaults["longitude"] = -1.56 / 180 * numpy.pi
-    defaults["dateAndTime"] = datetime(
+    defaults["date_and_time"] = datetime(
         2011, 6, 30, 12, 30
     )  # 12:30pm, 30th of June 2011
     defaults["aod_model"] = "rural"
@@ -77,12 +84,12 @@ def get_default_spectral2_object():
 
 
 def calculate_spectrum_spectral2(
-    stateObject=None, suppress_nan=True, power_density_in_nm=False
+    state_object=None, suppress_nan=True, power_density_in_nm=False
 ):
     """Calculates a solar spectrum using the SPECTRAL2 irradiance model developed by the
     NRL:
 
-    "http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/"  :param stateObject: :param
+    "http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/"  :param state_object: :param
     suppress_nan: :return:
     """
     science_reference(
@@ -90,30 +97,29 @@ def calculate_spectrum_spectral2(
         "http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/",
     )
 
-    if stateObject == None:
-        stateObject = get_default_spectral2_object()
+    if state_object is None:
+        state_object = get_default_spectral2_object()
 
-    latitude = stateObject["latitude"]
-    longitude = stateObject["longitude"]
-    dateAndTime = stateObject["dateAndTime"]
-    aod_model = stateObject["aod_model"]
-    pressure = stateObject["pressure"]
-    humidity = stateObject["humidity"]
-    ozone = stateObject["ozone"]
-    turbidity = stateObject["turbidity"]
-    precipwater = stateObject["precipwater"]
+    latitude = state_object["latitude"]
+    longitude = state_object["longitude"]
+    date_and_time = state_object["date_and_time"]
+    aod_model = state_object["aod_model"]
+    pressure = state_object["pressure"]
+    humidity = state_object["humidity"]
+    ozone = state_object["ozone"]
+    turbidity = state_object["turbidity"]
+    precipwater = state_object["precipwater"]
 
     assert (
         aod_model in "rural urban maritime tropospheric".split()
     ), "aod_model must be rural, urban, maritime, or tropospheric"
 
-    time_since_new_years = dateAndTime - datetime(
-        dateAndTime.year, 1, 1, 0, 0
+    time_since_new_years = date_and_time - datetime(
+        date_and_time.year, 1, 1, 0, 0
     )  # 1/1/year, 0:00 am.
-    time_since_midnight = dateAndTime - datetime(
-        dateAndTime.year, dateAndTime.month, dateAndTime.day, 0, 0
+    time_since_midnight = date_and_time - datetime(
+        date_and_time.year, date_and_time.month, date_and_time.day, 0, 0
     )
-    # hours_since_midnight = time_since_midnight.seconds / convert(time_since_midnight.seconds, "s", "h")
     hours_since_midnight = time_since_midnight.seconds / 3600
     day_number = time_since_new_years.days
 
@@ -164,21 +170,17 @@ def calculate_spectrum_spectral2(
     solar_zenith_angle_degrees = (
         solar_zenith_angle / pi * 180
     )  # convert(solar_zenith_angle,"radians",u'degrees')
-    # original code checked to stop sun dropping below horizon
-    # //Stop sun dropping below horizon
-    #     if(solar_zenith_angle > 91)
-    #        solar_zenith_angle = 91; (was in degrees)
 
     # this used to be 1/ could this cause issues in java?
     relative_am = 1.0 / (
         cos(solar_zenith_angle)
         + (0.15 * pow((93.885 - solar_zenith_angle_degrees), -1.253))
-    )  ##AARG raised to the power of degrees
+    )  # AARG raised to the power of degrees
     pressure_corrected_am = relative_am * (pressure / 101325.33538686013)  # si("1 atm")
     effective_ozone_am = (1.0 + (22.0 / 6370.0)) / (
         pow((pow(cos(solar_zenith_angle), 2.0) + (2.0 * (22.0 / 6370.0))), 0.5)
     )
-
+    c_coefficient = d_coefficient = None
     if aod_model == "rural":
         c_coefficient = [0.581, 16.823, 17.539]
         d_coefficient = [0.8547, 78.696, 0, 64.458]

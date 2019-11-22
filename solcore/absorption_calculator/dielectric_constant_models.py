@@ -433,7 +433,6 @@ class DielectricConstantModel(list):
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
-    from solcore.absorption_calculator.transfer_matrix import calculate_rat
 
     E = 2 * np.logspace(2, 4, 200)
 

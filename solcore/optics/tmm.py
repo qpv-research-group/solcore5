@@ -1,16 +1,12 @@
 import types
 
 import numpy as np
-from scipy.interpolate import interp1d
 
-import solcore.analytic_solar_cells as ASC
-from solcore import si
 from solcore.absorption_calculator import (
     OptiStack,
     calculate_absorption_profile,
     calculate_rat,
 )
-from solcore.optics.beer_lambert import calculate_absorption_beer_lambert
 from solcore.structure import Junction, Layer, TunnelJunction
 
 # import matplotlib.pyplot as plt

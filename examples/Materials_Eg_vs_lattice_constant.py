@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from solcore import asUnit, material, si
+from solcore import asUnit, material
 
 # This is the list of materials available in Solcore... yes, it could be obtained in a
 # more automated way.

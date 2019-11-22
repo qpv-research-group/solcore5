@@ -1,5 +1,3 @@
-import sys
-
 import numpy as np
 from scipy.integrate import quad
 from scipy.interpolate import interp1d
@@ -190,7 +188,7 @@ def LoadAbsorption(layer, T, wavelengths, use_Adachi=False):
                 edge = 1240e-9 / (layer["properties"]["band_gap"] / q)
                 edgeidx = np.abs(wavelengths - edge).argmin()
                 absorption[edgeidx:] = 0
-        except Exception as err:
+        except Exception:
             print(
                 "Warning: Using Adachi calculation to estimate the absorption coefficient of material: ",
                 InLineComposition(layer),

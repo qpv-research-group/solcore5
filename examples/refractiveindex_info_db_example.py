@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from solcore import material, si
-from solcore.absorption_calculator.nk_db import download_db, search_db
+from solcore.absorption_calculator.nk_db import search_db
 from solcore.solar_cell import SolarCell
 from solcore.solar_cell_solver import default_options, solar_cell_solver
 from solcore.structure import Layer

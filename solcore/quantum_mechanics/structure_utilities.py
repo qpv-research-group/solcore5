@@ -54,7 +54,6 @@ def assemble_qw_structure(
 def vary_well_widths(structure, fraction=0.5, region_sought="well"):
     """Returns an array of indices which correspond to the region that are quantum wells
     in the structure."""
-    depth = 0
 
     for i, (layer, label) in enumerate(zip(structure, structure.labels)):
         if label != region_sought:

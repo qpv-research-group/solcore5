@@ -13,7 +13,7 @@ def test_state():
     state1.c = array1
     assert state1.__len__() == 3
     assert state1.a == 1
-    assert state1.b == True
+    assert state1.b is True
     assert all([input == output for input, output in zip(array1, state1.c)])
 
     state2 = State()
@@ -22,6 +22,6 @@ def test_state():
     state1.update(state2)
     assert state1.__len__() == 4
     assert state1.a == 1
-    assert state2.b == False
+    assert state2.b is False
     assert all([input == output for input, output in zip(array1, state1.c)])
     assert all([input == output for input, output in zip(array2, state1.d)])

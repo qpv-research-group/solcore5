@@ -1,5 +1,5 @@
 import numpy as np
-from pytest import approx, mark, raises
+from pytest import approx, raises
 
 from solcore.constants import kb, q, vacuum_permittivity
 

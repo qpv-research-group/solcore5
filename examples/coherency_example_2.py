@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from solcore import material, si, siUnits
-from solcore.interpolate import interp1d
 from solcore.light_source import LightSource
 from solcore.solar_cell import SolarCell
 from solcore.solar_cell_solver import (

@@ -1,6 +1,5 @@
-import os
 from functools import wraps
-from typing import Callable, Optional
+from typing import Callable
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -116,7 +115,7 @@ class LightSource:
 
             return self.x, output * self.options["concentration"]
 
-        except AttributeError as err:
+        except AttributeError:
             raise AttributeError(
                 'ERROR: No stored spectrum or "x" data not available.'
                 'You must call the "spectrum" function at least once with a value for the "x" argument.'

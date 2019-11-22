@@ -4,7 +4,7 @@
 
 import os
 from re import sub
-from shutil import copyfile, move
+from shutil import copyfile
 
 from solcore import SOLCORE_ROOT, config
 from solcore.config_tools import add_source

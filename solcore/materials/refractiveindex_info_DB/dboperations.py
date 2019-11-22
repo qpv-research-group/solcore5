@@ -37,7 +37,6 @@ class Database:
         self.create_database_from_folder(
             "database", interpolation_points=interpolation_points
         )
-        pass
 
     def check_url_version(self):
         print(_riiurl)

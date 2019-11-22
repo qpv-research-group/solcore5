@@ -124,9 +124,6 @@ class CPPicker:
             self.plot_a_curve(fraction, background=True)
         self.plot_a_curve(self.fraction_order[self.current_curve], background=False)
 
-        x_old = []
-        y_old = []
-
         for critical_point_sublist in self.critical_points:
             x, y = (
                 [point[0] for point in critical_point_sublist],
@@ -138,7 +135,6 @@ class CPPicker:
         plt.show()
 
     def loop(self):
-        current_critical_point = 0
         self.setup_plot()
 
         while self.finished == False:
@@ -151,7 +147,7 @@ class CPPicker:
         thisline = event.artist
         xdata = thisline.get_xdata()
         ydata = thisline.get_ydata()
-        ind = event.ind
+        event.ind
         x = event.mouseevent.xdata
         y = (
             numpy.interp(x, xdata, ydata)

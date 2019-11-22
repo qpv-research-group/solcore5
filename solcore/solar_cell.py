@@ -1,5 +1,3 @@
-import numpy as np
-
 from solcore import material, si
 from solcore.structure import Junction, Layer, Structure, TunnelJunction
 

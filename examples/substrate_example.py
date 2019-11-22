@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from solcore import material, si
-from solcore.absorption_calculator import OptiStack
-from solcore.solar_cell import Junction, Layer, SolarCell, default_GaAs
+from solcore.solar_cell import Layer, SolarCell
 from solcore.solar_cell_solver import solar_cell_solver
 
 T = 298

@@ -2,7 +2,6 @@ import configparser
 import math  # hyperbolic functions etc in parameterisation
 import os
 import sys
-from copy import copy
 from functools import (
     lru_cache,
 )  # cache function calls to stop things taking forever / recalculating smae things

@@ -11,7 +11,6 @@ import numpy
 
 import solcore
 from solcore import siUnits
-from solcore.singleton import Singleton
 from solcore.source_managed_class import SourceManagedClass
 
 

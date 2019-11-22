@@ -1,6 +1,5 @@
 """This module contains tools for configuring the solcore installation, adding/removing
 sources with material data, etc."""
-import glob
 import os
 import shutil
 from configparser import ConfigParser

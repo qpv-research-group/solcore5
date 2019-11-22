@@ -138,7 +138,6 @@ def solve_beer_lambert(solar_cell, options):
     # Each building block (layer or junction) needs to have access to the absorbed
     # light in its region.
     # We update each object with that information.
-    I_0 = fraction
     for j in range(len(solar_cell)):
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])

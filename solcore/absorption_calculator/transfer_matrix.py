@@ -2,7 +2,6 @@
 materials...) and the transfer matrix package developed by Steven Byrnes and included in
 the PyPi repository."""
 import numpy as np
-import tmm as old_tmm
 
 import solcore
 from solcore.absorption_calculator import tmm_core_vec as tmm

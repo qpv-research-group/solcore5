@@ -1,8 +1,5 @@
 # from: https://github.com/HugoGuillen/refractiveindex.info-sqlite
 
-import argparse
-import os
-import sys
 
 import numpy
 import scipy.interpolate

@@ -191,7 +191,7 @@ def critical_thickness(
 
 if __name__ == "__main__":
     T = linspace(300, 1000, 10)
-    from solcore.graphing import *
+    from solcore.graphing import Graph, GraphData
 
     result = critical_thickness(
         layer_material="GaInAs",

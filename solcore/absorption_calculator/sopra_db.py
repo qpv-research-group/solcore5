@@ -13,7 +13,6 @@ from configparser import ConfigParser
 import numpy as np
 from natsort import natsorted
 
-from solcore import SOLCORE_ROOT, config
 from solcore.science_tracker import science_reference
 
 from .. import DATA

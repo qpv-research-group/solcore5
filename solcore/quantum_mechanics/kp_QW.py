@@ -27,14 +27,14 @@ def kp4x4(mat, host_material):
     independent of strain.
     """
 
-    Delta = mat.spin_orbit_splitting
+    mat.spin_orbit_splitting
     Eg = mat.band_gap
     Ev0 = mat.valence_band_offset
     Ec0 = mat.valence_band_offset + Eg
     a0 = mat.lattice_constant
     g1 = mat.gamma1
     g2 = mat.gamma2
-    g3 = mat.gamma3
+    mat.gamma3
     ac = mat.a_c
     av = abs(mat.a_v)
     b = mat.b
@@ -79,7 +79,7 @@ def kp6x6(mat, host_material):
     a0 = mat.lattice_constant
     g1 = mat.gamma1
     g2 = mat.gamma2
-    g3 = mat.gamma3
+    mat.gamma3
     ac = mat.a_c
     av = abs(mat.a_v)
     b = mat.b
@@ -166,7 +166,7 @@ def fill_hamiltonian_holes_4x4(A1, A2, B1, B2, C, D, delta, block):
     uu = np.zeros(2 * N)
     uuu = np.zeros(2 * N)
 
-    if block is "U":
+    if block == "U":
         # We write the equations for the UPPER 2x2 block of the Hamiltonian, for g1
         # and g2
 
@@ -285,7 +285,7 @@ def solve_holes_QW_at_kt_4x4(
     kt, z, fhh, flh, g1, g2, g3, num=(10, 10), quasiconfined=0.0, symmetric=False
 ):
     # Normalization factors
-    N = len(z)
+    len(z)
     L = max(z)
     delta = (z[1] - z[0]) / L
     kt = kt * L
@@ -425,8 +425,8 @@ def solve_electrons_QW_at_kt_parabolic(kt, z, fe, me, num=(10, 10), quasiconfine
     correspond to the allowed energy levels of the system.  The previous solver, eig,
     has been replaced by the spare matrix version, eigs, that is faster to compute
     "Varible effective mass Schordinger equation and tridiagonal solution method.",
-    "Frensley, W. R. (1991). \ Numerical evaluation of resonant states. \ Superlattices
-    and Microstructures, 11(3), 347350. \ doi:10.1016/0749-6036(92)90396-M")
+    "Frensley, W. R. (1991). Numerical evaluation of resonant states. Superlattices
+    and Microstructures, 11(3), 347350. doi:10.1016/0749-6036(92)90396-M")
     """
 
     # Normalization factors

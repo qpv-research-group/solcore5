@@ -5,7 +5,7 @@ from numpy import array, ones, sqrt, trapz
 from scipy.sparse import dia_matrix
 from scipy.sparse.linalg import eigs
 
-from solcore.constants import *
+from solcore.constants import hbar, q
 from solcore.science_tracker import science_reference
 
 from . import structure_utilities
@@ -214,7 +214,7 @@ def discard_unconfined_energy(E, psi, V, quasiconfined):
         E, psi = zip(
             *[(E_i, psi_i) for (E_i, psi_i) in zip(E, psi) if abs(E_i) <= maxE]
         )
-    except ValueError as exception:
+    except ValueError:
         print(
             "Warning: wavefunction filter removed all states for this band, try reducing the filter strength."
         )
@@ -246,7 +246,7 @@ def discard_unconfined(x, structure, E, psi, threshold=0.8):
                 >= threshold
             ]
         )
-    except ValueError as exception:
+    except ValueError:
         print(
             "Warning: wavefunction filter removed all states for this band, try reducing the filter strength."
         )

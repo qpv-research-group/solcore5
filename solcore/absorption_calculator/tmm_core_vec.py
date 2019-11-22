@@ -296,7 +296,7 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # has no left interface.
     vw_list = np.zeros((num_layers, num_wl, 2), dtype=complex)
     vw = np.zeros((num_wl, 2, 2), dtype=complex)
-    I = np.identity(2)
+    np.identity(2)
     vw[:, 0, 0] = t
     vw[:, 0, 1] = t
     vw_list[-1] = vw[:, 0, :]

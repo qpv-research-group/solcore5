@@ -3,7 +3,7 @@ import os
 import tempfile
 
 import numpy as np
-from pytest import approx, mark
+from pytest import approx
 
 import solcore.poisson_drift_diffusion as PDD
 from solcore import material, si

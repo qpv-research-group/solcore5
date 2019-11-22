@@ -6,7 +6,6 @@
 # to give access to a whole range of different colours.
 # Will write as a class for practice.
 
-import os
 import re
 from typing import Dict, List, Tuple, Union
 

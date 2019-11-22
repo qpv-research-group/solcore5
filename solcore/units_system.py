@@ -5,8 +5,7 @@ from collections import defaultdict
 import numpy as np
 
 import solcore
-from solcore.constants import *
-from solcore.singleton import Singleton
+from solcore.constants import c, h
 from solcore.source_managed_class import SourceManagedClass
 
 
