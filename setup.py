@@ -1,9 +1,9 @@
+from setuptools import find_packages
+from numpy.distutils.core import Extension, setup
+
 import os
 import sys
 from configparser import ConfigParser
-
-from numpy.distutils.core import Extension, setup
-from setuptools import find_packages
 
 
 def gen_data_files(*dirs):
@@ -65,6 +65,7 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
 
 
 install_requires = [
+    "numpy",
     "matplotlib",
     "scipy",
     "tmm",
