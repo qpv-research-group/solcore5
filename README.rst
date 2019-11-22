@@ -6,13 +6,12 @@
 
 .. image:: https://img.shields.io/badge/License-LGPLv3-blue.svg
    :target: http://www.gnu.org/licenses/lgpl.html
-   
+
 .. image:: http://readthedocs.org/projects/solcore5/badge/?version=latest
    :target: http://solcore5.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
-   
-.. image:: https://travis-ci.org/qpv-research-group/solcore5.svg?branch=devel
-   :target: https://travis-ci.org/qpv-research-group/solcore5
+
+.. image:: https://github.com/qpv-research-group/solcore5/workflows/build/badge.svg?branch=devel
 
 .. image:: https://coveralls.io/repos/github/qpv-research-group/solcore5/badge.svg?branch=devel
    :target: https://coveralls.io/github/qpv-research-group/solcore5?branch=devel
