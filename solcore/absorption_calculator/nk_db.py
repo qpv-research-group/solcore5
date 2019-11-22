@@ -5,7 +5,7 @@
 import os
 import sqlite3
 
-from solcore.material_data.refractiveindex_info_DB import dboperations as DB
+from solcore.materials.refractiveindex_info_DB import dboperations as DB
 from solcore import config, SOLCORE_ROOT
 
 def download_db(url = None, interpolation_points = 200, confirm = False):

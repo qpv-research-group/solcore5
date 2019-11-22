@@ -7,7 +7,7 @@ import sqlite3
 import numpy as np
 
 # from solcore.material_data.refractiveindex_info_DB import dbmaterial
-from solcore.material_data.refractiveindex_info_DB import DBMaterial
+from solcore.materials.refractiveindex_info_DB import DBMaterial
 
 Shelf = namedtuple('Shelf', ['shelf', 'name'])
 Book = namedtuple('Book', ['book', 'name'])

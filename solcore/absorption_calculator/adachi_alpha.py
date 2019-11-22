@@ -1,5 +1,4 @@
 import numpy as np
-from solcore import get_parameter
 from solcore.constants import hbar, pi, c
 from solcore.science_tracker import science_reference
 
@@ -13,6 +12,7 @@ def create_adachi_alpha(material, Esteps=(1.42, 6, 3000), T=300, wl=None):
     :param wl: (None) Optional array indicating the wavelengths in which calculating the data
     :return: A tuple containing 4 arrays: (Energy, n, k, alpha)
     """
+    from solcore import get_parameter
 
     science_reference("Adachi optical dispersion relations",
                       'S.Adachi, “Optical dispersion relations for GaP, GaAs, GaSb, InP, InAs, InSb, AlxGa1−xAs, '

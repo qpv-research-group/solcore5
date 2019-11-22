@@ -1,6 +1,6 @@
 from solcore import material
 from solcore import si
-from solcore.material_system import create_new_material
+from solcore.materials import create_new_material
 from solcore.absorption_calculator import create_nk_txt, download_db, search_db
 from solcore.config_tools import add_source
 import matplotlib.pyplot as plt

@@ -19,7 +19,7 @@ from solcore.absorption_calculator.dielectric_constant_models import (
 
 from solcore.solar_cell_solver import solar_cell_solver
 from solcore.solar_cell import SolarCell
-from solcore.material_system import create_new_material
+from solcore.materials import create_new_material
 from solcore.absorption_calculator import download_db, search_db
 from solcore.absorption_calculator.nk_db import nkdb_load_n
 from solcore.config_tools import add_source

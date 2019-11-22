@@ -21,7 +21,7 @@ if welcome_message:
 \tSoftware released under the GNU Lesser General Public License.\n""".format(version))
 
 # Now we load the Units system, making available in the solcore scope some functions internal to the system
-from solcore.units_system import UnitsSystem
+from .units_system import UnitsSystem
 
 # First we populate the Units system:
 UnitsSystem(config['Units'])
@@ -43,14 +43,14 @@ spectral_conversion_nm_hz = UnitsSystem().spectral_conversion_nm_hz
 eV = UnitsSystem().eV
 
 # And the same with the Parameter system
-from solcore.parameter_system import ParameterSystem
+from .materials import ParameterSystem
 
 ParameterSystem(config['Parameters'])
 get_parameter = ParameterSystem().get_parameter
 
 
 # And the same with the Materials system
-from solcore.material_system import MaterialSystem
+from .materials import MaterialSystem
 
 MaterialSystem(config['Materials'])
 material = MaterialSystem().material

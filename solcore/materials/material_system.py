@@ -9,14 +9,14 @@ from scipy.integrate import quad
 import configparser
 
 import solcore
-from solcore.material_system import critical_point_interpolate
-from solcore.parameter_system import ParameterSystem
+from solcore.materials import critical_point_interpolate
+from .parameter_system import ParameterSystem
 from solcore.constants import h, c, q, kb, pi, electron_mass as m0, vacuum_permittivity
 from solcore.singleton import Singleton
 from solcore.source_managed_class import SourceManagedClass
 from solcore.absorption_calculator.sopra_db import sopra_database, compounds_info
 from solcore.absorption_calculator.nk_db import nkdb_load_n, nkdb_load_k
-from solcore.material_data import calculate_mobility
+from .mobility import calculate_mobility
 
 
 class MaterialSystem(SourceManagedClass, metaclass=Singleton):

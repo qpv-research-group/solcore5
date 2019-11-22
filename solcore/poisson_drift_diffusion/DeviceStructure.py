@@ -6,7 +6,7 @@ from scipy.integrate import quad
 
 from solcore import constants, material
 from solcore.absorption_calculator import adachi_alpha
-from solcore.material_data import calculate_mobility
+from solcore.materials import calculate_mobility
 from solcore.structure import *
 from .QWunit import QWunit
 

@@ -7,7 +7,7 @@ import os
 from shutil import copyfile, move
 from re import sub
 from solcore import config, SOLCORE_ROOT
-from solcore.parameter_system import ParameterSystem
+from .parameter_system import ParameterSystem
 from solcore.config_tools import add_source
 
 
