@@ -65,7 +65,6 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
 
 
 install_requires = [
-    "numpy",
     "matplotlib",
     "scipy",
     "tmm",
