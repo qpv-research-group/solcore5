@@ -8,8 +8,27 @@ import tmm as old_tmm
 from solcore.interpolate import interp1d
 from solcore.structure import ToStructure
 from solcore.absorption_calculator import tmm_core_vec as tmm
+from time import time
+from functools import lru_cache, wraps
 
 degree = np.pi / 180
+
+
+def np_cache(function):
+    @lru_cache()
+    def cached_wrapper(hashable_array):
+        array = np.array(hashable_array)
+        return function(array)
+
+    @wraps(function)
+    def wrapper(array):
+        return cached_wrapper(tuple(array))
+
+    # copy lru_cache attributes over too
+    wrapper.cache_info = cached_wrapper.cache_info
+    wrapper.cache_clear = cached_wrapper.cache_clear
+
+    return wrapper
 
 
 class OptiStack(object):
@@ -106,14 +125,18 @@ class OptiStack(object):
             n0 = 1
 
         for i in range(self.num_layers):
+            start=time()
             out.append(self.n_data[i](wl_m) + self.k_data[i](wl_m) * 1.0j)
+
 
         # substrate irrelevant if no_back_reflexion = True
         if self.no_back_reflexion:
+
             return [n0] + out + [self.n_data[-1](wl_m) + self._k_absorbing(wl_m) * 1.0j, n1] # look at last entry in stack,
             # make high;y absorbing layer based on it.
 
         else:
+
             return [n0] + out + [n1]
 
 
@@ -211,6 +234,20 @@ class OptiStack(object):
         self.n_data[idx1], self.n_data[idx2] = self.n_data[idx2], self.n_data[idx1]
         self.k_data[idx1], self.k_data[idx2] = self.k_data[idx2], self.k_data[idx1]
 
+
+    def set_widths(self, widths):
+        """Changes the widths of the layers in the stack.
+
+        :param: widths: a list or array of widths, length equal to the number of layers
+        :return: None"""
+
+        #assert len(widths) == self.num_layers, \
+        #    'Error: The list of widths must have as many elements (now {}) as the ' \
+        #    'number of layers (now {}).'.format(len(widths), self.num_layers)
+
+        self.widths = widths
+
+
     def _add_solcore_layer(self, layer):
         """ Adds a Solcore layer to the end (bottom) of the stack, extracting its thickness and n and k data.
 
@@ -219,8 +256,9 @@ class OptiStack(object):
         """
         self.widths.append(solcore.asUnit(layer.width, 'nm'))
         self.models.append([])
-        self.n_data.append(layer.material.n)
-        self.k_data.append(layer.material.k)
+        self.n_data.append(np_cache(layer.material.n))
+        self.k_data.append(np_cache(layer.material.k))
+
 
     def _add_modelled_layer(self, layer):
         """ Adds a layer to the end (bottom) of the stack. The layer must be defined as a list containing the layer
@@ -231,8 +269,8 @@ class OptiStack(object):
         """
         self.widths.append(layer[0])
         self.models.append(layer[1])
-        self.n_data.append(self.models[-1].n_and_k)
-        self.k_data.append(self._k_dummy)
+        self.n_data.append(np_cache(self.models[-1].n_and_k))
+        self.k_data.append(np_cache(self._k_dummy))
 
     def _add_raw_nk_layer(self, layer):
         """ Adds a layer to the end (bottom) of the stack. The layer must be defined as a list containing the layer
@@ -262,17 +300,17 @@ class OptiStack(object):
 
                 return out
 
-            n_data = lambda x: self.models[-1].n_and_k(x) * mix(x) + (1 - mix(x)) * interp1d(
-                x=solcore.si(layer[1], 'nm'), y=layer[2], fill_value=layer[2][-1])(x)
-            k_data = lambda x: interp1d(x=solcore.si(layer[1], 'nm'), y=layer[3], fill_value=layer[3][-1])(x)
+            n_data = np_cache(lambda x: self.models[-1].n_and_k(x) * mix(x) + (1 - mix(x)) * interp1d(
+                x=solcore.si(layer[1], 'nm'), y=layer[2], fill_value=layer[2][-1])(x))
+            k_data = np_cache(lambda x: interp1d(x=solcore.si(layer[1], 'nm'), y=layer[3], fill_value=layer[3][-1])(x))
 
             self.n_data.append(n_data)
             self.k_data.append(k_data)
 
         else:
             self.models.append([])
-            self.n_data.append(interp1d(x=solcore.si(layer[1], 'nm'), y=layer[2], fill_value=layer[2][-1]))
-            self.k_data.append(interp1d(x=solcore.si(layer[1], 'nm'), y=layer[3], fill_value=layer[3][-1]))
+            self.n_data.append(np_cache(interp1d(x=solcore.si(layer[1], 'nm'), y=layer[2], fill_value=layer[2][-1])))
+            self.k_data.append(np_cache(interp1d(x=solcore.si(layer[1], 'nm'), y=layer[3], fill_value=layer[3][-1])))
 
 
 def calculate_rat(structure, wavelength, angle=0, pol='u',
@@ -343,6 +381,8 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['A_per_layer'] = 0.5*(A_per_layer_p + A_per_layer_s)
 
         else:
+
+
             out_p = tmm.inc_tmm('p', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
             out_s = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
 
