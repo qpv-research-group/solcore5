@@ -238,9 +238,12 @@ class OptiStack(object):
         :param: widths: a list or array of widths, length equal to the number of layers
         :return: None"""
 
-        #assert len(widths) == self.num_layers, \
-        #    'Error: The list of widths must have as many elements (now {}) as the ' \
-        #    'number of layers (now {}).'.format(len(widths), self.num_layers)
+        if type(widths) is np.ndarray:
+            widths = widths.tolist()
+
+        assert len(widths) == self.num_layers, \
+            'Error: The list of widths must have as many elements (now {}) as the ' \
+        'number of layers (now {}).'.format(len(widths), self.num_layers)
 
         self.widths = widths
 
