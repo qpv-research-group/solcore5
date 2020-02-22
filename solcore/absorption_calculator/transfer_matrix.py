@@ -4,11 +4,9 @@ transfer matrix package developed by Steven Byrnes and included in the PyPi repo
 """
 import numpy as np
 import solcore
-import tmm as old_tmm
 from solcore.interpolate import interp1d
 from solcore.structure import ToStructure
 from solcore.absorption_calculator import tmm_core_vec as tmm
-from time import time
 from functools import lru_cache, wraps
 
 degree = np.pi / 180
@@ -125,7 +123,6 @@ class OptiStack(object):
             n0 = 1
 
         for i in range(self.num_layers):
-            start=time()
             out.append(self.n_data[i](wl_m) + self.k_data[i](wl_m) * 1.0j)
 
 
