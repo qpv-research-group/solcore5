@@ -13,6 +13,14 @@ degree = np.pi / 180
 
 
 def np_cache(function):
+    """This function was taken from https://stackoverflow.com/questions/52331944/cache-decorator-for-numpy-arrays/52332109#52332109
+    
+    Creates a cacheable version of a function which takes a 1D numpy array as input, by using a wrapping function
+    which converts the array to a tuple. It returns a function which returns the same output as the input function,
+    but can be cached, avoiding a bottleneck when optical constants in a material are looked up repeatedly.
+
+    :param: function: the function of which a cacheable version is to be created
+    :return: wrapper: the cacheable version of the function"""
     @lru_cache()
     def cached_wrapper(hashable_array):
         array = np.array(hashable_array)
