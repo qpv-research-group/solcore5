@@ -1,4 +1,4 @@
-Looking at the effect of substrate and the no_back_reflexion option in the TMM solver
+Looking at the effect of substrate and the no_back_reflection option in the TMM solver
 =====================================================================================
 
 .. image:: substrate_RAT.png
@@ -32,13 +32,13 @@ Looking at the effect of substrate and the no_back_reflexion option in the TMM s
 	wl = si(np.linspace(300, 900, 200), 'nm')
 
 	# Thin solar cell, no substrate - will get significant absorption enhancement from reflection at the GaAs/air interface at the back
-	# MUST specify no_back_reflexion = False, so that Solcore does not automatically suppress reflections from the back
-	# (currently, the default setting in solcore is to suppress reflections from the back, so no_back_reflexion = True
-	solar_cell_solver(thin_GaAs, 'optics', user_options={'wavelength': wl, 'optics_method': 'TMM', 'no_back_reflexion': False})
+	# MUST specify no_back_reflection = False, so that Solcore does not automatically suppress reflections from the back
+	# (currently, the default setting in solcore is to suppress reflections from the back, so no_back_reflection = True
+	solar_cell_solver(thin_GaAs, 'optics', user_options={'wavelength': wl, 'optics_method': 'TMM', 'no_back_reflection': False})
 	z_pos = np.linspace(0, thin_GaAs.width, 201)
 	profiles_thin = thin_GaAs[0].absorbed(z_pos)
 	# Same thin solar cell, but now on a GaAs substrate. In this case, we get the same result whether or not we specify
-	# no_back_reflexion to be True or False, since with a GaAs on GaAs cell we don't get any reflection at the back interface anyway
+	# no_back_reflection to be True or False, since with a GaAs on GaAs cell we don't get any reflection at the back interface anyway
 	solar_cell_solver(GaAs_on_substrate, 'optics', user_options={'wavelength': wl, 'optics_method': 'TMM'})
 	profiles_thick = GaAs_on_substrate[0].absorbed(z_pos)
 
@@ -49,10 +49,10 @@ Looking at the effect of substrate and the no_back_reflexion option in the TMM s
 	# Now we consider the thin solar cell without substrate again but ask Solcore to suppress back reflections. We must also
 	# ask Solcore to recalculate the absorption, otherwise it will just use the results calculated above which are already
 	# in the thin_GaAs object
-	# What no_back_reflexion = True actually does is add a highly absorbing layer based on the final layer in the stack so that
+	# What no_back_reflection = True actually does is add a highly absorbing layer based on the final layer in the stack so that
 	# nothing is reflected.
 
-	solar_cell_solver(thin_GaAs, 'optics', user_options={'wavelength': wl, 'optics_method': 'TMM', 'no_back_reflexion': True,
+	solar_cell_solver(thin_GaAs, 'optics', user_options={'wavelength': wl, 'optics_method': 'TMM', 'no_back_reflection': True,
 														 'recalculate_absorption': True})
 
 	plt.plot(wl * 1e9,  thin_GaAs[0].layer_absorption, '--')

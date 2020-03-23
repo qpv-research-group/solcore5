@@ -3,7 +3,7 @@ Transfer matrix method
 
 Example 1: :doc:`Using the TMM solver to calculate the reflextion of a multilayered ARC <../Examples/example_RAT_of_ARC>`
 
-Example 2: :doc:`Looking at the effect of substrate and the no_back_reflexion option in the TMM solver <../Examples/substrate_example>`
+Example 2: :doc:`Looking at the effect of substrate and the no_back_reflection option in the TMM solver <../Examples/substrate_example>`
 
 Example 3: :doc:`Coherent and incoherent layers in the TMM solver<../Examples/example_coherency>`
 
