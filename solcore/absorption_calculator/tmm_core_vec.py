@@ -582,7 +582,9 @@ class absorp_analytic_fn:
         """
         adds another compatible absorption analytical function
         """
-        if all(b.a1 != self.a1) or all(b.a3 != self.a3):
+
+        if np.all(b.a1 != self.a1) or np.all(b.a3 != self.a3):
+
             raise ValueError('Incompatible absorption analytical functions!')
         self.A1 += b.A1
         self.A2 += b.A2
