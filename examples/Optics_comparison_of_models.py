@@ -13,7 +13,7 @@ wl = si(np.linspace(400, 900, 80), 'nm')
 light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
                            output_units='photon_flux_per_m', concentration=1)
 opts = default_options
-opts.wavelength, opts.no_back_reflexion, opts.size, opts.light_source, opts.T_ambient = \
+opts.wavelength, opts.no_back_reflection, opts.size, opts.light_source, opts.T_ambient = \
     wl, False, [400, 400], light_source, T
 opts.recalculate_absorption = True
 # The size of the unit cell for the RCWA structure is 400 x 400 nm

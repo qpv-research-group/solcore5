@@ -863,7 +863,7 @@
 <p id="t44" class="pln"><span class="str">    TMM solver or to solve some of its limitations.</span><span class="strut">&nbsp;</span></p>
 <p id="t45" class="pln"><span class="str">    """</span><span class="strut">&nbsp;</span></p>
 <p id="t46" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t47" class="stm run hide_run">    <span class="key">def</span> <span class="nam">__init__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">structure</span><span class="op">=</span><span class="op">(</span><span class="op">)</span><span class="op">,</span> <span class="nam">no_back_reflexion</span><span class="op">=</span><span class="key">False</span><span class="op">,</span> <span class="nam">substrate</span><span class="op">=</span><span class="key">None</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t47" class="stm run hide_run">    <span class="key">def</span> <span class="nam">__init__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">structure</span><span class="op">=</span><span class="op">(</span><span class="op">)</span><span class="op">,</span> <span class="nam">no_back_reflection</span><span class="op">=</span><span class="key">False</span><span class="op">,</span> <span class="nam">substrate</span><span class="op">=</span><span class="key">None</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t48" class="pln">        <span class="str">"""Class constructor. It takes a Solcore structure and extract the thickness and</span><span class="strut">&nbsp;</span></p>
 <p id="t49" class="pln"><span class="str">        optical data from the Layers and the materials. Option is given to indicate if</span><span class="strut">&nbsp;</span></p>
 <p id="t50" class="pln"><span class="str">        the reflexion from the back of the structure must be supressed, usefull for</span><span class="strut">&nbsp;</span></p>
@@ -873,9 +873,9 @@
 <p id="t54" class="pln"><span class="str">        Alternativelly, it can take simply a list of [thickness, DielectricModel] or</span><span class="strut">&nbsp;</span></p>
 <p id="t55" class="pln"><span class="str">        [thickness, wavelength, n, k] for each layer accounting for the refractive index</span><span class="strut">&nbsp;</span></p>
 <p id="t56" class="pln"><span class="str">        of the layers. The three options can be mixed for maximum flexibility.  :param</span><span class="strut">&nbsp;</span></p>
-<p id="t57" class="pln"><span class="str">        structure: A list with one or more layers. :param no_back_reflexion: If</span><span class="strut">&nbsp;</span></p>
+<p id="t57" class="pln"><span class="str">        structure: A list with one or more layers. :param no_back_reflection: If</span><span class="strut">&nbsp;</span></p>
 <p id="t58" class="pln"><span class="str">        reflexion from the back must be suppressed. Default=False. :param substrate: a</span><span class="strut">&nbsp;</span></p>
-<p id="t59" class="pln"><span class="str">        semi-infinite transmission medium. Note that if no_back_reflexion is set to</span><span class="strut">&nbsp;</span></p>
+<p id="t59" class="pln"><span class="str">        semi-infinite transmission medium. Note that if no_back_reflection is set to</span><span class="strut">&nbsp;</span></p>
 <p id="t60" class="pln"><span class="str">        True, adding a substrate won't make any difference.</span><span class="strut">&nbsp;</span></p>
 <p id="t61" class="pln"><span class="str">        """</span><span class="strut">&nbsp;</span></p>
 <p id="t62" class="pln"><span class="strut">&nbsp;</span></p>
@@ -889,7 +889,7 @@
 <p id="t70" class="stm run hide_run">        <span class="nam">self</span><span class="op">.</span><span class="nam">num_layers</span> <span class="op">=</span> <span class="num">0</span><span class="strut">&nbsp;</span></p>
 <p id="t71" class="stm run hide_run">        <span class="nam">self</span><span class="op">.</span><span class="nam">add_layers</span><span class="op">(</span><span class="nam">structure</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t72" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t73" class="stm run hide_run">        <span class="nam">self</span><span class="op">.</span><span class="nam">no_back_reflexion</span> <span class="op">=</span> <span class="nam">no_back_reflexion</span><span class="strut">&nbsp;</span></p>
+<p id="t73" class="stm run hide_run">        <span class="nam">self</span><span class="op">.</span><span class="nam">no_back_reflection</span> <span class="op">=</span> <span class="nam">no_back_reflection</span><span class="strut">&nbsp;</span></p>
 <p id="t74" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t75" class="stm run hide_run">    <span class="key">def</span> <span class="nam">get_indices</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">wl</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t76" class="pln">        <span class="str">"""Returns the complex refractive index of the stack.</span><span class="strut">&nbsp;</span></p>
@@ -919,8 +919,8 @@
 <p id="t100" class="stm run hide_run">        <span class="key">for</span> <span class="nam">i</span> <span class="key">in</span> <span class="nam">range</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">num_layers</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t101" class="stm run hide_run">            <span class="nam">out</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">n_data</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span><span class="op">(</span><span class="nam">wl_m</span><span class="op">)</span> <span class="op">+</span> <span class="nam">self</span><span class="op">.</span><span class="nam">k_data</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span><span class="op">(</span><span class="nam">wl_m</span><span class="op">)</span> <span class="op">*</span> <span class="num">1.0j</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t102" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t103" class="pln">        <span class="com"># substrate irrelevant if no_back_reflexion = True</span><span class="strut">&nbsp;</span></p>
-<p id="t104" class="stm run hide_run">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">no_back_reflexion</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t103" class="pln">        <span class="com"># substrate irrelevant if no_back_reflection = True</span><span class="strut">&nbsp;</span></p>
+<p id="t104" class="stm run hide_run">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">no_back_reflection</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t105" class="stm run hide_run">            <span class="key">return</span> <span class="op">(</span><span class="strut">&nbsp;</span></p>
 <p id="t106" class="pln">                <span class="op">[</span><span class="nam">n0</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
 <p id="t107" class="pln">                <span class="op">+</span> <span class="nam">out</span><span class="strut">&nbsp;</span></p>
@@ -939,7 +939,7 @@
 <p id="t120" class="pln"><span class="str">        surface relfexion, defined as 1 mm thick.</span><span class="strut">&nbsp;</span></p>
 <p id="t121" class="pln"><span class="str">        """</span><span class="strut">&nbsp;</span></p>
 <p id="t122" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t123" class="stm run hide_run">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">no_back_reflexion</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t123" class="stm run hide_run">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">no_back_reflection</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t124" class="stm run hide_run">            <span class="key">return</span> <span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">inf</span><span class="op">]</span> <span class="op">+</span> <span class="nam">self</span><span class="op">.</span><span class="nam">widths</span> <span class="op">+</span> <span class="op">[</span><span class="num">1e6</span><span class="op">,</span> <span class="nam">np</span><span class="op">.</span><span class="nam">inf</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
 <p id="t125" class="pln">        <span class="key">else</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t126" class="stm run hide_run">            <span class="key">return</span> <span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">inf</span><span class="op">]</span> <span class="op">+</span> <span class="nam">self</span><span class="op">.</span><span class="nam">widths</span> <span class="op">+</span> <span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">inf</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
@@ -1119,7 +1119,7 @@
 <p id="t300" class="pln">    <span class="nam">pol</span><span class="op">=</span><span class="str">"u"</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
 <p id="t301" class="pln">    <span class="nam">coherent</span><span class="op">=</span><span class="key">True</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
 <p id="t302" class="pln">    <span class="nam">coherency_list</span><span class="op">=</span><span class="key">None</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
-<p id="t303" class="pln">    <span class="nam">no_back_reflexion</span><span class="op">=</span><span class="key">True</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
+<p id="t303" class="pln">    <span class="nam">no_back_reflection</span><span class="op">=</span><span class="key">True</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
 <p id="t304" class="pln"><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t305" class="pln">    <span class="str">"""Calculates the reflected, absorbed and transmitted intensity of the structure for</span><span class="strut">&nbsp;</span></p>
 <p id="t306" class="pln"><span class="str">    the wavelengths and angles defined.</span><span class="strut">&nbsp;</span></p>
@@ -1131,7 +1131,7 @@
 <p id="t312" class="pln"><span class="str">    'u' (unpolarised). :param coherent: If the light is coherent or not. If not, a</span><span class="strut">&nbsp;</span></p>
 <p id="t313" class="pln"><span class="str">    coherency list must be added. :param coherency_list: A list indicating in which</span><span class="strut">&nbsp;</span></p>
 <p id="t314" class="pln"><span class="str">    layers light should be treated as coeherent ('c') and in which incoherent ('i'). It</span><span class="strut">&nbsp;</span></p>
-<p id="t315" class="pln"><span class="str">    needs as many elements as layers in the structure. :param no_back_reflexion: If</span><span class="strut">&nbsp;</span></p>
+<p id="t315" class="pln"><span class="str">    needs as many elements as layers in the structure. :param no_back_reflection: If</span><span class="strut">&nbsp;</span></p>
 <p id="t316" class="pln"><span class="str">    reflexion from the back must be supressed. Default=True. :return: A dictionary with</span><span class="strut">&nbsp;</span></p>
 <p id="t317" class="pln"><span class="str">    the R, A and T at the specified wavelengths and angle.</span><span class="strut">&nbsp;</span></p>
 <p id="t318" class="pln"><span class="str">    """</span><span class="strut">&nbsp;</span></p>
@@ -1139,9 +1139,9 @@
 <p id="t320" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t321" class="stm run hide_run">    <span class="key">if</span> <span class="str">"OptiStack"</span> <span class="key">in</span> <span class="nam">str</span><span class="op">(</span><span class="nam">type</span><span class="op">(</span><span class="nam">structure</span><span class="op">)</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t322" class="stm run hide_run">        <span class="nam">stack</span> <span class="op">=</span> <span class="nam">structure</span><span class="strut">&nbsp;</span></p>
-<p id="t323" class="stm run hide_run">        <span class="nam">stack</span><span class="op">.</span><span class="nam">no_back_reflexion</span> <span class="op">=</span> <span class="nam">no_back_reflexion</span><span class="strut">&nbsp;</span></p>
+<p id="t323" class="stm run hide_run">        <span class="nam">stack</span><span class="op">.</span><span class="nam">no_back_reflection</span> <span class="op">=</span> <span class="nam">no_back_reflection</span><span class="strut">&nbsp;</span></p>
 <p id="t324" class="pln">    <span class="key">else</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t325" class="stm run hide_run">        <span class="nam">stack</span> <span class="op">=</span> <span class="nam">OptiStack</span><span class="op">(</span><span class="nam">structure</span><span class="op">,</span> <span class="nam">no_back_reflexion</span><span class="op">=</span><span class="nam">no_back_reflexion</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t325" class="stm run hide_run">        <span class="nam">stack</span> <span class="op">=</span> <span class="nam">OptiStack</span><span class="op">(</span><span class="nam">structure</span><span class="op">,</span> <span class="nam">no_back_reflection</span><span class="op">=</span><span class="nam">no_back_reflection</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t326" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t327" class="stm run hide_run">    <span class="key">if</span> <span class="key">not</span> <span class="nam">coherent</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t328" class="stm run hide_run">        <span class="key">if</span> <span class="nam">coherency_list</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
@@ -1152,7 +1152,7 @@
 <p id="t333" class="pln">                <span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t334" class="pln">            <span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t335" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t336" class="stm run hide_run">            <span class="key">if</span> <span class="nam">stack</span><span class="op">.</span><span class="nam">no_back_reflexion</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t336" class="stm run hide_run">            <span class="key">if</span> <span class="nam">stack</span><span class="op">.</span><span class="nam">no_back_reflection</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t337" class="stm mis">                <span class="nam">coherency_list</span> <span class="op">=</span> <span class="op">[</span><span class="str">"i"</span><span class="op">]</span> <span class="op">+</span> <span class="nam">coherency_list</span> <span class="op">+</span> <span class="op">[</span><span class="str">"i"</span><span class="op">,</span> <span class="str">"i"</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
 <p id="t338" class="pln">            <span class="key">else</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t339" class="stm run hide_run">                <span class="nam">coherency_list</span> <span class="op">=</span> <span class="op">[</span><span class="str">"i"</span><span class="op">]</span> <span class="op">+</span> <span class="nam">coherency_list</span> <span class="op">+</span> <span class="op">[</span><span class="str">"i"</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
@@ -1254,19 +1254,19 @@
 <p id="t435" class="stm run hide_run">    <span class="key">return</span> <span class="nam">output</span><span class="strut">&nbsp;</span></p>
 <p id="t436" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t437" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t438" class="stm run hide_run"><span class="key">def</span> <span class="nam">calculate_ellipsometry</span><span class="op">(</span><span class="nam">structure</span><span class="op">,</span> <span class="nam">wavelength</span><span class="op">,</span> <span class="nam">angle</span><span class="op">,</span> <span class="nam">no_back_reflexion</span><span class="op">=</span><span class="key">True</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t438" class="stm run hide_run"><span class="key">def</span> <span class="nam">calculate_ellipsometry</span><span class="op">(</span><span class="nam">structure</span><span class="op">,</span> <span class="nam">wavelength</span><span class="op">,</span> <span class="nam">angle</span><span class="op">,</span> <span class="nam">no_back_reflection</span><span class="op">=</span><span class="key">True</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t439" class="pln">    <span class="str">"""Calculates the ellipsometric parameters psi and delta. It can only deal with</span><span class="strut">&nbsp;</span></p>
 <p id="t440" class="pln"><span class="str">    coherent light and the whole stack (including back surface) is considered, so</span><span class="strut">&nbsp;</span></p>
 <p id="t441" class="pln"><span class="str">    caution must be taken when comparing the simulated results with experiments where</span><span class="strut">&nbsp;</span></p>
 <p id="t442" class="pln"><span class="str">    the back surface is rough or layers are thick and coherent light propagation makes</span><span class="strut">&nbsp;</span></p>
 <p id="t443" class="pln"><span class="str">    no sense.</span><span class="strut">&nbsp;</span></p>
 <p id="t444" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t445" class="pln"><span class="str">    The optional argument no_back_reflexion can be included to add an extra layer on the</span><span class="strut">&nbsp;</span></p>
+<p id="t445" class="pln"><span class="str">    The optional argument no_back_reflection can be included to add an extra layer on the</span><span class="strut">&nbsp;</span></p>
 <p id="t446" class="pln"><span class="str">    back absorbing all light that reaches that position without any reflexion, to remove</span><span class="strut">&nbsp;</span></p>
 <p id="t447" class="pln"><span class="str">    the reflexion from the back surface.  :param structure: A solcore structure with</span><span class="strut">&nbsp;</span></p>
 <p id="t448" class="pln"><span class="str">    layers and materials. :param wavelength: Wavelengths (in nm) in which calculate the</span><span class="strut">&nbsp;</span></p>
 <p id="t449" class="pln"><span class="str">    data. An array. :param angle: A tupple or list with the angles (in degrees) in which</span><span class="strut">&nbsp;</span></p>
-<p id="t450" class="pln"><span class="str">    to calculate the data. :param no_back_reflexion: If reflexion from the back must be</span><span class="strut">&nbsp;</span></p>
+<p id="t450" class="pln"><span class="str">    to calculate the data. :param no_back_reflection: If reflexion from the back must be</span><span class="strut">&nbsp;</span></p>
 <p id="t451" class="pln"><span class="str">    suppressed. Default=True. :return: A dictionary with psi and delta at the specified</span><span class="strut">&nbsp;</span></p>
 <p id="t452" class="pln"><span class="str">    wavelengths and angles (2D arrays).</span><span class="strut">&nbsp;</span></p>
 <p id="t453" class="pln"><span class="str">    """</span><span class="strut">&nbsp;</span></p>
@@ -1276,14 +1276,14 @@
 <p id="t457" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t458" class="stm run hide_run">    <span class="key">if</span> <span class="str">"OptiStack"</span> <span class="key">in</span> <span class="nam">str</span><span class="op">(</span><span class="nam">type</span><span class="op">(</span><span class="nam">structure</span><span class="op">)</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t459" class="stm mis">        <span class="nam">stack</span> <span class="op">=</span> <span class="nam">structure</span><span class="strut">&nbsp;</span></p>
-<p id="t460" class="stm mis">        <span class="nam">stack</span><span class="op">.</span><span class="nam">no_back_reflexion</span> <span class="op">=</span> <span class="nam">no_back_reflexion</span><span class="strut">&nbsp;</span></p>
+<p id="t460" class="stm mis">        <span class="nam">stack</span><span class="op">.</span><span class="nam">no_back_reflection</span> <span class="op">=</span> <span class="nam">no_back_reflection</span><span class="strut">&nbsp;</span></p>
 <p id="t461" class="pln">    <span class="key">else</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t462" class="stm run hide_run">        <span class="key">if</span> <span class="nam">hasattr</span><span class="op">(</span><span class="nam">structure</span><span class="op">,</span> <span class="str">"substrate"</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t463" class="stm mis">            <span class="nam">substrate</span> <span class="op">=</span> <span class="nam">structure</span><span class="op">.</span><span class="nam">substrate</span><span class="strut">&nbsp;</span></p>
 <p id="t464" class="pln">        <span class="key">else</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t465" class="stm run hide_run">            <span class="nam">substrate</span> <span class="op">=</span> <span class="key">None</span><span class="strut">&nbsp;</span></p>
 <p id="t466" class="stm run hide_run">        <span class="nam">stack</span> <span class="op">=</span> <span class="nam">OptiStack</span><span class="op">(</span><span class="strut">&nbsp;</span></p>
-<p id="t467" class="pln">            <span class="nam">structure</span><span class="op">,</span> <span class="nam">no_back_reflexion</span><span class="op">=</span><span class="nam">no_back_reflexion</span><span class="op">,</span> <span class="nam">substrate</span><span class="op">=</span><span class="nam">substrate</span><span class="strut">&nbsp;</span></p>
+<p id="t467" class="pln">            <span class="nam">structure</span><span class="op">,</span> <span class="nam">no_back_reflection</span><span class="op">=</span><span class="nam">no_back_reflection</span><span class="op">,</span> <span class="nam">substrate</span><span class="op">=</span><span class="nam">substrate</span><span class="strut">&nbsp;</span></p>
 <p id="t468" class="pln">        <span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t469" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t470" class="stm run hide_run">    <span class="nam">output</span> <span class="op">=</span> <span class="op">{</span><span class="str">"psi"</span><span class="op">:</span> <span class="nam">np</span><span class="op">.</span><span class="nam">zeros</span><span class="op">(</span><span class="op">(</span><span class="nam">num_wl</span><span class="op">,</span> <span class="nam">num_ang</span><span class="op">)</span><span class="op">)</span><span class="op">,</span> <span class="str">"Delta"</span><span class="op">:</span> <span class="nam">np</span><span class="op">.</span><span class="nam">zeros</span><span class="op">(</span><span class="op">(</span><span class="nam">num_wl</span><span class="op">,</span> <span class="nam">num_ang</span><span class="op">)</span><span class="op">)</span><span class="op">}</span><span class="strut">&nbsp;</span></p>
@@ -1310,7 +1310,7 @@
 <p id="t491" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t492" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t493" class="pln"><span class="com"># def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size=2, dist=None,</span><span class="strut">&nbsp;</span></p>
-<p id="t494" class="pln"><span class="com">#                                  no_back_reflexion=True):</span><span class="strut">&nbsp;</span></p>
+<p id="t494" class="pln"><span class="com">#                                  no_back_reflection=True):</span><span class="strut">&nbsp;</span></p>
 <p id="t495" class="pln"><span class="com">#     """ It calculates the absorbed energy density within the material. From the documentation:</span><span class="strut">&nbsp;</span></p>
 <p id="t496" class="pln"><span class="com">#</span><span class="strut">&nbsp;</span></p>
 <p id="t497" class="pln"><span class="com">#     'In principle this has units of [power]/[volume], but we can express it as a multiple of incoming light power</span><span class="strut">&nbsp;</span></p>
@@ -1333,9 +1333,9 @@
 <p id="t514" class="pln"><span class="com">#</span><span class="strut">&nbsp;</span></p>
 <p id="t515" class="pln"><span class="com">#     if 'OptiStack' in str(type(structure)):</span><span class="strut">&nbsp;</span></p>
 <p id="t516" class="pln"><span class="com">#         stack = structure</span><span class="strut">&nbsp;</span></p>
-<p id="t517" class="pln"><span class="com">#         stack.no_back_reflexion = no_back_reflexion</span><span class="strut">&nbsp;</span></p>
+<p id="t517" class="pln"><span class="com">#         stack.no_back_reflection = no_back_reflection</span><span class="strut">&nbsp;</span></p>
 <p id="t518" class="pln"><span class="com">#     else:</span><span class="strut">&nbsp;</span></p>
-<p id="t519" class="pln"><span class="com">#         stack = OptiStack(structure, no_back_reflexion=no_back_reflexion)</span><span class="strut">&nbsp;</span></p>
+<p id="t519" class="pln"><span class="com">#         stack = OptiStack(structure, no_back_reflection=no_back_reflection)</span><span class="strut">&nbsp;</span></p>
 <p id="t520" class="pln"><span class="com">#</span><span class="strut">&nbsp;</span></p>
 <p id="t521" class="pln"><span class="com">#     if dist is None:</span><span class="strut">&nbsp;</span></p>
 <p id="t522" class="pln"><span class="com">#         if z_limit is None:</span><span class="strut">&nbsp;</span></p>
@@ -1360,7 +1360,7 @@
 <p id="t541" class="pln">    <span class="nam">z_limit</span><span class="op">=</span><span class="key">None</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
 <p id="t542" class="pln">    <span class="nam">steps_size</span><span class="op">=</span><span class="num">2</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
 <p id="t543" class="pln">    <span class="nam">dist</span><span class="op">=</span><span class="key">None</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
-<p id="t544" class="pln">    <span class="nam">no_back_reflexion</span><span class="op">=</span><span class="key">True</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
+<p id="t544" class="pln">    <span class="nam">no_back_reflection</span><span class="op">=</span><span class="key">True</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
 <p id="t545" class="pln">    <span class="nam">angle</span><span class="op">=</span><span class="num">0</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
 <p id="t546" class="pln">    <span class="nam">pol</span><span class="op">=</span><span class="str">"u"</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
 <p id="t547" class="pln">    <span class="nam">coherent</span><span class="op">=</span><span class="key">True</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
@@ -1380,7 +1380,7 @@
 <p id="t561" class="pln"><span class="str">    Wavelengths in which calculate the data (in nm). An array :param z_limit: Maximum</span><span class="strut">&nbsp;</span></p>
 <p id="t562" class="pln"><span class="str">    value in the z direction :param steps_size: if the dist is not specified, the step</span><span class="strut">&nbsp;</span></p>
 <p id="t563" class="pln"><span class="str">    size in nm to use in the depth-dependent calculation :param dist: the positions (in</span><span class="strut">&nbsp;</span></p>
-<p id="t564" class="pln"><span class="str">    nm) at which to calculate depth-dependent absorption :param no_back_reflexion:</span><span class="strut">&nbsp;</span></p>
+<p id="t564" class="pln"><span class="str">    nm) at which to calculate depth-dependent absorption :param no_back_reflection:</span><span class="strut">&nbsp;</span></p>
 <p id="t565" class="pln"><span class="str">    whether to suppress reflections from the back interface (True) or not (False) :param</span><span class="strut">&nbsp;</span></p>
 <p id="t566" class="pln"><span class="str">    angle: incidence angle in degrees :param pol: polarization of incident light: 's',</span><span class="strut">&nbsp;</span></p>
 <p id="t567" class="pln"><span class="str">    'p' or 'u' (unpolarized) :param coherent: True if all the layers are to be treated</span><span class="strut">&nbsp;</span></p>
@@ -1394,7 +1394,7 @@
 <p id="t575" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t576" class="stm run hide_run">    <span class="key">if</span> <span class="str">"OptiStack"</span> <span class="key">in</span> <span class="nam">str</span><span class="op">(</span><span class="nam">type</span><span class="op">(</span><span class="nam">structure</span><span class="op">)</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t577" class="stm run hide_run">        <span class="nam">stack</span> <span class="op">=</span> <span class="nam">structure</span><span class="strut">&nbsp;</span></p>
-<p id="t578" class="stm run hide_run">        <span class="nam">stack</span><span class="op">.</span><span class="nam">no_back_reflexion</span> <span class="op">=</span> <span class="nam">no_back_reflexion</span><span class="strut">&nbsp;</span></p>
+<p id="t578" class="stm run hide_run">        <span class="nam">stack</span><span class="op">.</span><span class="nam">no_back_reflection</span> <span class="op">=</span> <span class="nam">no_back_reflexion</span><span class="strut">&nbsp;</span></p>
 <p id="t579" class="pln">    <span class="key">else</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t580" class="stm run hide_run">        <span class="nam">stack</span> <span class="op">=</span> <span class="nam">OptiStack</span><span class="op">(</span><span class="nam">structure</span><span class="op">,</span> <span class="nam">no_back_reflexion</span><span class="op">=</span><span class="nam">no_back_reflexion</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t581" class="pln"><span class="strut">&nbsp;</span></p>
