@@ -28,8 +28,8 @@ wl = np.linspace(250, 1700, 300) * 1e-9
 
 options = State()
 options.wavelength = wl
-options.optics_method = "TMM"
-options.no_back_reflexion = False
+options.optics_method = 'TMM'
+options.no_back_reflection = False
 options.BL_correction = True
 options.recalculate_absorption = True
 

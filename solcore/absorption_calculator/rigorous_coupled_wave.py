@@ -120,7 +120,7 @@ def initialise_S(stack, size, orders, substrate=None):
         S.SetMaterial("shape_mat_" + str(i1 + 1), 1)
 
     ## Make the layers
-    stack_OS = OptiStack(stack, no_back_reflexion=False, substrate=substrate)
+    stack_OS = OptiStack(stack, no_back_reflection=False, substrate=substrate)
     widths = stack_OS.get_widths()
 
     for i1 in range(

@@ -23,7 +23,7 @@ wl = si(np.linspace(300, 900, 200), "nm")
 solar_cell_solver(
     thin_GaAs,
     "optics",
-    user_options={"wavelength": wl, "optics_method": "TMM", "no_back_reflexion": False},
+    user_options={"wavelength": wl, "optics_method": "TMM", "no_back_reflection": False},
 )
 z_pos = np.linspace(0, thin_GaAs.width, 201)
 profiles_thin = thin_GaAs[0].absorbed(z_pos)
@@ -41,7 +41,7 @@ plt.plot(wl * 1e9, GaAs_on_substrate[0].layer_absorption)
 # Now we consider the thin solar cell without substrate again but ask Solcore to suppress back reflections. We must also
 # ask Solcore to recalculate the absorption, otherwise it will just use the results calculated above which are already
 # in the thin_GaAs object
-# What no_back_reflexion = True actually does is add a highly absorbing layer based on the final layer in the stack so that
+# What no_back_reflection = True actually does is add a highly absorbing layer based on the final layer in the stack so that
 # nothing is reflected.
 
 solar_cell_solver(
@@ -50,7 +50,7 @@ solar_cell_solver(
     user_options={
         "wavelength": wl,
         "optics_method": "TMM",
-        "no_back_reflexion": True,
+        "no_back_reflection": True,
         "recalculate_absorption": True,
     },
 )
@@ -63,6 +63,7 @@ plt.legend(
         "No substrate, suppress back reflection",
     ]
 )
+
 plt.xlabel("Wavelength (nm)")
 plt.ylabel("Absorption")
 plt.show()

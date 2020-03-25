@@ -8,30 +8,30 @@ from solcore.absorption_calculator import (
     calculate_rat,
 )
 from solcore.structure import Junction, Layer, TunnelJunction
-
-# import matplotlib.pyplot as plt
+from warnings import warn
 
 
 def solve_tmm(solar_cell, options):
-    """Calculates the reflection, transmission and absorption of a solar cell object
-    using the transfer matrix method. Internally, it creates an OptiStack and then it
-    calculates the optical properties of the whole structure. A substrate can be
-    specified in the SolarCell object, which is treated as a semi-infinite transmission
-    medium. Shading can also be specified (as a fraction).
+    """ Calculates the reflection, transmission and absorption of a solar cell object using the transfer matrix method.
+    Internally, it creates an OptiStack and then it calculates the optical properties of the whole structure.
+    A substrate can be specified in the SolarCell object, which is treated as a semi-infinite transmission medium.
+    Shading can also be specified (as a fraction).
 
-    Relevant options are 'wl' (the wavelengths, in m), the incidence angle 'theta' (in
-    degrees), the polarization 'pol' ('s', 'p' or 'u'), 'position' (locations in m at
-    which depth-dependent absorption is calculated), 'no_back_reflexion' and
-    'BL_correction'. 'no_back_reflexion' sets whether reflections from the back surface
-    are suppressed (if set to True, the default), or taken into account (if set to
-    False).  If 'BL_correction' is set to True, thick layers (thickness > 10*maximum
-    wavelength) are treated incoherently using the Beer-Lambert law, to avoid the
-    calculation of unphysical interference oscillations in the R/A/T spectra.  A
-    coherency_list option can be provided: this should have elements equal to the total
-    number of layers (if a Junction contains multiple Layers, each should have its own
-    entry in the coherency list). Each element is either 'c' for coherent treatment of
-    that layer or 'i' for incoherent treatment.  :param solar_cell: A SolarCell object
-    :param options: Options for the solver :return: None
+    Relevant options are 'wl' (the wavelengths, in m), the incidence angle 'theta' (in degrees), the polarization 'pol' ('s',
+    'p' or 'u'), 'position' (locations in m at which depth-dependent absorption is calculated), 'no_back_reflection' and 'BL_correction'.
+    'no_back_reflection' sets whether reflections from the back surface are suppressed (if set to True, the default),
+    or taken into account (if set to False).
+
+    If 'BL_correction' is set to True, thick layers (thickness > 10*maximum wavelength) are treated incoherently using
+    the Beer-Lambert law, to avoid the calculation of unphysical interference oscillations in the R/A/T spectra.
+
+    A coherency_list option can be provided: this should have elements equal to the total number of layers (if a Junction
+    contains multiple Layers, each should have its own entry in the coherency list). Each element is either 'c' for coherent
+    treatment of that layer or 'i' for incoherent treatment.
+
+    :param solar_cell: A SolarCell object
+    :param options: Options for the solver
+    :return: None
     """
     wl = options.wavelength
     BL_correction = options.BL_correction if "BL_correction" in options.keys() else True
@@ -61,14 +61,15 @@ def solve_tmm(solar_cell, options):
                 all_layers.append(layer)
                 widths.append(layer.width)
 
-    # With all the information, we create the optical stack
-    no_back_reflexion = (
-        options.no_back_reflexion if "no_back_reflexion" in options.keys() else True
-    )
+    no_back_reflection = options.no_back_reflection if 'no_back_reflection' in options.keys() else True
 
-    full_stack = OptiStack(
-        all_layers, no_back_reflexion=no_back_reflexion, substrate=solar_cell.substrate
-    )
+    # With all the information, we create the optical stack
+    if 'no_back_reflexion' in options.keys():
+        warn('The no_back_reflexion warning is deprecated. Use no_back_reflection instead.', FutureWarning)
+        no_back_reflection = options.no_back_reflexion
+
+
+    full_stack = OptiStack(all_layers, no_back_reflection=no_back_reflection, substrate=solar_cell.substrate)
 
     if "coherency_list" in options.keys():
         coherency_list = options.coherency_list
@@ -99,28 +100,16 @@ def solve_tmm(solar_cell, options):
     position = options.position * 1e9
     profile_position = position[position < sum(full_stack.widths)]
 
-    print("Calculating RAT...")
-    RAT = calculate_rat(
-        full_stack,
-        wl * 1e9,
-        angle=theta,
-        coherent=coherent,
-        coherency_list=coherency_list,
-        no_back_reflexion=no_back_reflexion,
-        pol=pol,
-    )
+    print('Calculating RAT...')
+    RAT = calculate_rat(full_stack, wl * 1e9, angle=theta,
+                        coherent=coherent, coherency_list=coherency_list, no_back_reflection=no_back_reflection,
+                        pol=pol)
 
-    print("Calculating absorption profile...")
-    out = calculate_absorption_profile(
-        full_stack,
-        wl * 1e9,
-        dist=profile_position,
-        angle=theta,
-        no_back_reflexion=no_back_reflexion,
-        pol=pol,
-        coherent=coherent,
-        coherency_list=coherency_list,
-    )
+    print('Calculating absorption profile...')
+    out = calculate_absorption_profile(full_stack, wl * 1e9, dist=profile_position,
+                                       angle=theta, no_back_reflection=no_back_reflection,
+                                       pol=pol, coherent=coherent,
+                                       coherency_list=coherency_list)
 
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_tmm(out, initial)

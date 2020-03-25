@@ -23,7 +23,7 @@ out = calculate_ellipsometry(my_structure, wavelength, angle=angles)
 
 # This results must be taken with care. As the ellipsometry routine can only deal with coherent light, there might be
 # strange oscillations related with intereference in thick layers, something that should not happen.
-# Setting no_back_reflexion=True (the default) should take care of most of this effects, but might add other unexpected
+# Setting no_back_reflection=True (the default) should take care of most of this effects, but might add other unexpected
 # ones.
 fig, ax1 = plt.subplots(1, 1)
 ax2 = ax1.twinx()

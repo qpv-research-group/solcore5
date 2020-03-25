@@ -192,9 +192,9 @@ wl = np.linspace(250, 1700, 400) * 1e-9
 
 options = State()
 options.wavelength = wl
-options.optics_method = "TMM"
-options.no_back_reflexion = False
-options.pol = "p"
+options.optics_method = 'TMM'
+options.no_back_reflection = False
+options.pol = 'p'
 options.BL_correction = True
 options.coherency_list = 111 * ["c"]
 options.theta = 30
