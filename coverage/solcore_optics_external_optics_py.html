@@ -1,0 +1,189 @@
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
+    <title>Coverage for solcore/optics/external_optics.py: 20%</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.hotkeys.js"></script>
+    <script type="text/javascript" src="jquery.isonscreen.js"></script>
+    <script type="text/javascript" src="coverage_html.js"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(coverage.pyfile_ready);
+    </script>
+</head>
+<body class="pyfile">
+
+<div id="header">
+    <div class="content">
+        <h1>Coverage for <b>solcore/optics/external_optics.py</b> :
+            <span class="pc_cov">20%</span>
+        </h1>
+
+        <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
+
+        <h2 class="stats">
+            20 statements &nbsp;
+            <span class="run hide_run shortkey_r button_toggle_run">4 run</span>
+            <span class="mis shortkey_m button_toggle_mis">16 missing</span>
+            <span class="exc shortkey_x button_toggle_exc">0 excluded</span>
+
+            
+        </h2>
+    </div>
+</div>
+
+<div class="help_panel">
+    <img id="panel_icon" src="keybd_open.png" alt="Hide keyboard shortcuts" />
+    <p class="legend">Hot-keys on this page</p>
+    <div>
+    <p class="keyhelp">
+        <span class="key">r</span>
+        <span class="key">m</span>
+        <span class="key">x</span>
+        <span class="key">p</span> &nbsp; toggle line displays
+    </p>
+    <p class="keyhelp">
+        <span class="key">j</span>
+        <span class="key">k</span> &nbsp; next/prev highlighted chunk
+    </p>
+    <p class="keyhelp">
+        <span class="key">0</span> &nbsp; (zero) top of page
+    </p>
+    <p class="keyhelp">
+        <span class="key">1</span> &nbsp; (one) first highlighted chunk
+    </p>
+    </div>
+</div>
+
+<div id="source">
+    <table>
+        <tr>
+            <td class="linenos">
+<p id="n1" class="stm run hide_run"><a href="#n1">1</a></p>
+<p id="n2" class="pln"><a href="#n2">2</a></p>
+<p id="n3" class="stm run hide_run"><a href="#n3">3</a></p>
+<p id="n4" class="pln"><a href="#n4">4</a></p>
+<p id="n5" class="pln"><a href="#n5">5</a></p>
+<p id="n6" class="stm run hide_run"><a href="#n6">6</a></p>
+<p id="n7" class="pln"><a href="#n7">7</a></p>
+<p id="n8" class="pln"><a href="#n8">8</a></p>
+<p id="n9" class="pln"><a href="#n9">9</a></p>
+<p id="n10" class="pln"><a href="#n10">10</a></p>
+<p id="n11" class="pln"><a href="#n11">11</a></p>
+<p id="n12" class="pln"><a href="#n12">12</a></p>
+<p id="n13" class="pln"><a href="#n13">13</a></p>
+<p id="n14" class="pln"><a href="#n14">14</a></p>
+<p id="n15" class="pln"><a href="#n15">15</a></p>
+<p id="n16" class="pln"><a href="#n16">16</a></p>
+<p id="n17" class="pln"><a href="#n17">17</a></p>
+<p id="n18" class="stm mis"><a href="#n18">18</a></p>
+<p id="n19" class="pln"><a href="#n19">19</a></p>
+<p id="n20" class="pln"><a href="#n20">20</a></p>
+<p id="n21" class="stm mis"><a href="#n21">21</a></p>
+<p id="n22" class="pln"><a href="#n22">22</a></p>
+<p id="n23" class="pln"><a href="#n23">23</a></p>
+<p id="n24" class="stm mis"><a href="#n24">24</a></p>
+<p id="n25" class="stm mis"><a href="#n25">25</a></p>
+<p id="n26" class="stm mis"><a href="#n26">26</a></p>
+<p id="n27" class="stm mis"><a href="#n27">27</a></p>
+<p id="n28" class="stm mis"><a href="#n28">28</a></p>
+<p id="n29" class="pln"><a href="#n29">29</a></p>
+<p id="n30" class="pln"><a href="#n30">30</a></p>
+<p id="n31" class="pln"><a href="#n31">31</a></p>
+<p id="n32" class="stm mis"><a href="#n32">32</a></p>
+<p id="n33" class="stm mis"><a href="#n33">33</a></p>
+<p id="n34" class="pln"><a href="#n34">34</a></p>
+<p id="n35" class="pln"><a href="#n35">35</a></p>
+<p id="n36" class="pln"><a href="#n36">36</a></p>
+<p id="n37" class="pln"><a href="#n37">37</a></p>
+<p id="n38" class="stm mis"><a href="#n38">38</a></p>
+<p id="n39" class="stm mis"><a href="#n39">39</a></p>
+<p id="n40" class="stm mis"><a href="#n40">40</a></p>
+<p id="n41" class="pln"><a href="#n41">41</a></p>
+<p id="n42" class="stm mis"><a href="#n42">42</a></p>
+<p id="n43" class="pln"><a href="#n43">43</a></p>
+<p id="n44" class="pln"><a href="#n44">44</a></p>
+<p id="n45" class="stm mis"><a href="#n45">45</a></p>
+<p id="n46" class="pln"><a href="#n46">46</a></p>
+<p id="n47" class="pln"><a href="#n47">47</a></p>
+<p id="n48" class="stm run hide_run"><a href="#n48">48</a></p>
+<p id="n49" class="stm mis"><a href="#n49">49</a></p>
+<p id="n50" class="stm mis"><a href="#n50">50</a></p>
+
+            </td>
+            <td class="text">
+<p id="t1" class="stm run hide_run"><span class="key">import</span> <span class="nam">types</span><span class="strut">&nbsp;</span></p>
+<p id="t2" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t3" class="stm run hide_run"><span class="key">import</span> <span class="nam">numpy</span> <span class="key">as</span> <span class="nam">np</span><span class="strut">&nbsp;</span></p>
+<p id="t4" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t5" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t6" class="stm run hide_run"><span class="key">def</span> <span class="nam">solve_external_optics</span><span class="op">(</span><span class="nam">solar_cell</span><span class="op">,</span> <span class="nam">options</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t7" class="pln">    <span class="str">"""Calculates the reflection, transmission and absorption of a solar cell from</span><span class="strut">&nbsp;</span></p>
+<p id="t8" class="pln"><span class="str">    external data, preparing the structure for further calculations. The external data</span><span class="strut">&nbsp;</span></p>
+<p id="t9" class="pln"><span class="str">    that must be provided in the solar cell definition is:</span><span class="strut">&nbsp;</span></p>
+<p id="t10" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t11" class="pln"><span class="str">    external_reflected: a function that provides the fraction of reflected light at the</span><span class="strut">&nbsp;</span></p>
+<p id="t12" class="pln"><span class="str">    specified wavelengths (in m) external_absorbed: a function that provides an array</span><span class="strut">&nbsp;</span></p>
+<p id="t13" class="pln"><span class="str">    with the differential absorption at a depth Z (in m) at the specified wavelengths.</span><span class="strut">&nbsp;</span></p>
+<p id="t14" class="pln"><span class="str">    Note that both are functions of a single variable - wavelength in the first case and</span><span class="strut">&nbsp;</span></p>
+<p id="t15" class="pln"><span class="str">    position in the second - and that the latter provides as output an array at the</span><span class="strut">&nbsp;</span></p>
+<p id="t16" class="pln"><span class="str">    wavelengths indicated in the options.  :param solar_cell: :param options: :return:</span><span class="strut">&nbsp;</span></p>
+<p id="t17" class="pln"><span class="str">    """</span><span class="strut">&nbsp;</span></p>
+<p id="t18" class="stm mis">    <span class="nam">solar_cell</span><span class="op">.</span><span class="nam">wavelength</span> <span class="op">=</span> <span class="nam">options</span><span class="op">.</span><span class="nam">wavelength</span><span class="strut">&nbsp;</span></p>
+<p id="t19" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t20" class="pln">    <span class="com"># We include the shadowing losses</span><span class="strut">&nbsp;</span></p>
+<p id="t21" class="stm mis">    <span class="nam">initial</span> <span class="op">=</span> <span class="op">(</span><span class="num">1</span> <span class="op">-</span> <span class="nam">solar_cell</span><span class="op">.</span><span class="nam">shading</span><span class="op">)</span> <span class="key">if</span> <span class="nam">hasattr</span><span class="op">(</span><span class="nam">solar_cell</span><span class="op">,</span> <span class="str">"shading"</span><span class="op">)</span> <span class="key">else</span> <span class="num">1</span><span class="strut">&nbsp;</span></p>
+<p id="t22" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t23" class="pln">    <span class="com"># We try to get the external attributes</span><span class="strut">&nbsp;</span></p>
+<p id="t24" class="stm mis">    <span class="key">try</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t25" class="stm mis">        <span class="nam">solar_cell</span><span class="op">.</span><span class="nam">reflected</span> <span class="op">=</span> <span class="nam">solar_cell</span><span class="op">.</span><span class="nam">external_reflected</span> <span class="op">*</span> <span class="nam">initial</span><span class="strut">&nbsp;</span></p>
+<p id="t26" class="stm mis">        <span class="nam">diff_absorption</span> <span class="op">=</span> <span class="nam">solar_cell</span><span class="op">.</span><span class="nam">external_absorbed</span><span class="strut">&nbsp;</span></p>
+<p id="t27" class="stm mis">    <span class="key">except</span> <span class="nam">AttributeError</span> <span class="key">as</span> <span class="nam">err</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t28" class="stm mis">        <span class="key">raise</span> <span class="nam">err</span><span class="strut">&nbsp;</span></p>
+<p id="t29" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t30" class="pln">    <span class="com"># We calculate the total amount of light absorbed in the solar cell, integrating</span><span class="strut">&nbsp;</span></p>
+<p id="t31" class="pln">    <span class="com"># over its whole thickness with a step of 1 nm</span><span class="strut">&nbsp;</span></p>
+<p id="t32" class="stm mis">    <span class="nam">all_z</span> <span class="op">=</span> <span class="nam">options</span><span class="op">.</span><span class="nam">position</span><span class="strut">&nbsp;</span></p>
+<p id="t33" class="stm mis">    <span class="nam">all_absorbed</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">trapz</span><span class="op">(</span><span class="nam">diff_absorption</span><span class="op">(</span><span class="nam">all_z</span><span class="op">)</span><span class="op">,</span> <span class="nam">all_z</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t34" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t35" class="pln">    <span class="com"># Each building block (layer or junction) needs to have access to the absorbed</span><span class="strut">&nbsp;</span></p>
+<p id="t36" class="pln">    <span class="com"># light in its region.</span><span class="strut">&nbsp;</span></p>
+<p id="t37" class="pln">    <span class="com"># We update each object with that information.</span><span class="strut">&nbsp;</span></p>
+<p id="t38" class="stm mis">    <span class="key">for</span> <span class="nam">j</span> <span class="key">in</span> <span class="nam">range</span><span class="op">(</span><span class="nam">len</span><span class="op">(</span><span class="nam">solar_cell</span><span class="op">)</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t39" class="stm mis">        <span class="nam">solar_cell</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span><span class="op">.</span><span class="nam">diff_absorption</span> <span class="op">=</span> <span class="nam">diff_absorption</span><span class="strut">&nbsp;</span></p>
+<p id="t40" class="stm mis">        <span class="nam">solar_cell</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span><span class="op">.</span><span class="nam">absorbed</span> <span class="op">=</span> <span class="nam">types</span><span class="op">.</span><span class="nam">MethodType</span><span class="op">(</span><span class="nam">absorbed</span><span class="op">,</span> <span class="nam">solar_cell</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t41" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t42" class="stm mis">    <span class="nam">solar_cell</span><span class="op">.</span><span class="nam">transmitted</span> <span class="op">=</span> <span class="op">(</span><span class="strut">&nbsp;</span></p>
+<p id="t43" class="pln">        <span class="num">1</span> <span class="op">-</span> <span class="nam">solar_cell</span><span class="op">.</span><span class="nam">external_reflected</span> <span class="op">-</span> <span class="nam">all_absorbed</span><span class="strut">&nbsp;</span></p>
+<p id="t44" class="pln">    <span class="op">)</span> <span class="op">*</span> <span class="nam">initial</span><span class="strut">&nbsp;</span></p>
+<p id="t45" class="stm mis">    <span class="nam">solar_cell</span><span class="op">.</span><span class="nam">absorbed</span> <span class="op">=</span> <span class="nam">all_absorbed</span> <span class="op">*</span> <span class="nam">initial</span><span class="strut">&nbsp;</span></p>
+<p id="t46" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t47" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t48" class="stm run hide_run"><span class="key">def</span> <span class="nam">absorbed</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">z</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t49" class="stm mis">    <span class="nam">out</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">diff_absorption</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">offset</span> <span class="op">+</span> <span class="nam">z</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="nam">z</span> <span class="op">&lt;</span> <span class="nam">self</span><span class="op">.</span><span class="nam">width</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t50" class="stm mis">    <span class="key">return</span> <span class="nam">out</span><span class="op">.</span><span class="nam">T</span><span class="strut">&nbsp;</span></p>
+
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="footer">
+    <div class="content">
+        <p>
+            <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
+            created at 2019-11-22 12:03
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

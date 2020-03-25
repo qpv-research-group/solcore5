@@ -1,0 +1,33 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  linux_build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        python-version: [3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install fortran
+      run: sudo apt install -y gfortran
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade setuptools wheel pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-mock coveralls
+    - name: Install Solcore
+      run: pip install --no-deps --install-option="--with_pdd" -e .
+    - name: Test with pytest
+      run: pytest --cov=solcore/
+    - name: Coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      run: coveralls

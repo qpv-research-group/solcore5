@@ -18,7 +18,7 @@ Optical methods
 ---------------
 
 - :doc:`Using the TMM solver to calculate the reflextion of a multilayered ARC <example_RAT_of_ARC>`
-- :doc:`Looking at the effect of substrate and the no_back_reflexion option in the TMM solver <substrate_example>`
+- :doc:`Looking at the effect of substrate and the no_back_reflection option in the TMM solver <substrate_example>`
 - :doc:`Coherent and incoherent layers in the TMM solver<example_coherency>`
 
 Custom materials
