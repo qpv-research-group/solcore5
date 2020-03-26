@@ -26,14 +26,15 @@ jobs:
       run: |
         python -m pip install --upgrade setuptools wheel pip
         pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-mock
 
     - name: Install Solcore Linux and MacOS
       if: matrix.os != 'windows-latest'
-      run: pip install --no-deps --install-option="--with_pdd" -e .[dev]
+      run: pip install --no-deps --install-option="--with_pdd" -e .
 
     - name: Install Solcore Windows
       if: matrix.os == 'windows-latest'
-      run: pip install --no-deps -e .[dev]
+      run: pip install --no-deps -e .
 
     - name: Test with pytest
       run: pytest --cov=solcore/
