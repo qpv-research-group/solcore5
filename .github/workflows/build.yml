@@ -4,10 +4,11 @@ on: [push, pull_request]
 
 jobs:
   linux_build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 2
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.7, 3.8]
 
     steps:
@@ -16,18 +17,31 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install fortran
+
+    - name: Install fortran in Linux
+      if: matrix.os == 'ubuntu-latest'
       run: sudo apt install -y gfortran
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade setuptools wheel pip
         pip install -r requirements.txt
-        pip install pytest pytest-cov pytest-mock coveralls
-    - name: Install Solcore
-      run: pip install --no-deps --install-option="--with_pdd" -e .
+
+    - name: Install Solcore Linux and MacOS
+      if: matrix.os != 'windows-latest'
+      run: pip install --no-deps --install-option="--with_pdd" -e .[dev]
+
+    - name: Install Solcore Windows
+      if: matrix.os == 'windows-latest'
+      run: pip install --no-deps -e .[dev]
+
     - name: Test with pytest
       run: pytest --cov=solcore/
+
     - name: Coveralls
+      if: matrix.os == 'ubuntu-latest'
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      run: coveralls
+      run: |
+        pip install coveralls
+        coveralls
