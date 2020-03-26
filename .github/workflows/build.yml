@@ -28,8 +28,19 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-cov pytest-mock
 
-    - name: Install Solcore
+    - name: Install Solcore Linux and MacOS
+      if: matrix.os != 'windows-latest'
       run: pip install --no-deps --install-option="--with_pdd" -e .
+
+    - name: Install Solcore Windows
+      if: matrix.os == 'windows-latest'
+      env:
+        FC: gfortran
+        CC: gcc
+      run: |
+        echo "[build]`ncompiler=mingw32" | Out-File -Encoding ASCII ~/pydistutils.cfg
+        pip install --no-deps --install-option="--with_pdd" -e .
+      shell: powershell
 
     - name: Test with pytest
       run: pytest --cov=solcore/
