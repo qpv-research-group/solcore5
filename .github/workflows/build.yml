@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 
 jobs:
-  linux_build:
+  testing:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -28,13 +28,8 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-cov pytest-mock
 
-    - name: Install Solcore Linux and MacOS
-      if: matrix.os != 'windows-latest'
+    - name: Install Solcore
       run: pip install --no-deps --install-option="--with_pdd" -e .
-
-    - name: Install Solcore Windows
-      if: matrix.os == 'windows-latest'
-      run: pip install --no-deps -e .
 
     - name: Test with pytest
       run: pytest --cov=solcore/
