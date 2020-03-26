@@ -1,6 +1,6 @@
 name: build
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   testing:
@@ -43,6 +43,7 @@ jobs:
       shell: powershell
 
     - name: Test with pytest
+      if: not ((matrix.os == 'windows-latest') && (matrix.python-version == 3.8))
       run: pytest --cov=solcore/
 
     - name: Coveralls
