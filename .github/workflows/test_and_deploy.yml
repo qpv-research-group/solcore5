@@ -10,6 +10,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.7, 3.8]
+      exclude:
+        - os: windows-latest
+          python-version: 3.8
 
     steps:
     - uses: actions/checkout@v1
@@ -42,14 +45,13 @@ jobs:
       shell: powershell
 
     - name: Test with pytest
-      if: matrix.os != 'windows-latest' && matrix.python-version != 3.8
       run: pytest --cov=solcore/
 
     - name: Build package
       if: success() && startsWith(github.event.ref, 'refs/tags')
       run: python setup.py sdist bdist_wheel
 
-    - name: Build package and publish
+    - name: Publish package
       if: success() && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
