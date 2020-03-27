@@ -49,7 +49,9 @@ jobs:
 
     - name: Build package
       if: success() && startsWith(github.event.ref, 'refs/tags')
-      run: python setup.py sdist bdist_wheel
+      run: |
+        python setup.py update_manifest
+        python setup.py sdist bdist_wheel
 
     - name: Publish package
       if: success() && startsWith(github.event.ref, 'refs/tags')
