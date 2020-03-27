@@ -53,3 +53,12 @@ jobs:
       run: |
         pip install coveralls
         coveralls
+
+    - name: Codecov
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        pip install codecov
+        codecov
+
