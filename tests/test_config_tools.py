@@ -100,6 +100,36 @@ def test_restore_defaults(config):
     assert value == config[s, o]
 
 
+def test_register_observer(config):
+    from random import choice
+
+    def dummy():
+        pass
+
+    s = choice(config.sections)
+    config.register_observer(s, dummy)
+
+    assert s in config._observers
+    assert len(config._observers[s]) == 1
+    assert config._observers[s][0] == dummy
+
+
+def test_notify_observer(config):
+    from random import choice
+
+    source = {}
+
+    def dummy(name, value):
+        source[name] = value
+
+    s = choice(config.sections)
+    o = choice(config.sources(s))
+    config.register_observer(s, dummy)
+
+    config[s, o] = "spider"
+    assert source.get(o) == config[s, o]
+
+
 def test_welcome_message(config):
     config.welcome_message(False)
     assert config.welcome_message() is False

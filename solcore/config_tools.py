@@ -4,13 +4,16 @@ etc.
 from configparser import ConfigParser
 import os
 import shutil
-from typing import Union, Optional
+from typing import Union, Optional, Callable
 from pathlib import Path
 from warnings import warn
+from collections import defaultdict
+from functools import reduce
 
 
 class SolcoreConfig:
     def __init__(self, default_config: Union[Path, str], user_config: Union[Path, str]):
+        self._observers = defaultdict(list)
         self.default_config = default_config
         self.user_config = user_config
 
@@ -55,6 +58,31 @@ class SolcoreConfig:
         with open(self.user_config, "w") as fp:
             self._user_data.write(fp)
 
+    def register_observer(
+        self, section: str, callback: Callable[[str, str], None]
+    ) -> None:
+        """ Registers and observer to be called when a section changes.
+
+        :param section: Section to observe.
+        :param callback: Function to execute when there are changes. It takes the name
+        and value of the updated/new source as inputs.
+        :return: None
+        """
+        if section not in self.sections:
+            raise KeyError(f"Unknown section: {section}.")
+        self._observers[section].append(callback)
+
+    def _notify_observers(self, section: str, name: str, value: str) -> None:
+        """ Notifies the observers of a section of a change in a source.
+
+        :param section: Section changed.
+        :param name: Source added/updated.
+        :param name: New value
+        :return: None
+        """
+        for c in self._observers[section]:
+            c(name, value)
+
     def __getitem__(self, item):
         """Gets an item from Solcore's configuration."""
         if isinstance(item, tuple) and len(item) == 2:
@@ -69,6 +97,7 @@ class SolcoreConfig:
         if isinstance(key, tuple) and len(key) == 2 and key[0] in self._user_data:
             self._user_data[key[0]][key[1]] = value
             self.save_user_config()
+            self._notify_observers(section=key[0], name=key[1], value=value)
         else:
             raise KeyError(f"Invalid config option {key}.")
 
