@@ -8,19 +8,20 @@ from typing import Union, Optional, Callable
 from pathlib import Path
 from warnings import warn
 from collections import defaultdict
-from functools import reduce
+
+
+SOLCORE_ROOT = str(Path(__file__).parent)
 
 
 class SolcoreConfig:
     def __init__(self, default_config: Union[Path, str], user_config: Union[Path, str]):
-        self._observers = defaultdict(list)
         self.default_config = default_config
         self.user_config = user_config
-
+        self._observers = defaultdict(list)
         self._default_data = ConfigParser()
-        self._default_data.read(self.default_config)
-
         self._user_data = ConfigParser()
+
+        self._default_data.read(self.default_config)
         if not os.path.exists(self.user_config):
             self.reset_defaults(confirm=True)
         else:
@@ -50,7 +51,7 @@ class SolcoreConfig:
             shutil.copy2(self.default_config, self.user_config)
             self._user_data.read(self.user_config)
 
-    def save_user_config(self) -> None:
+    def _save_user_config(self) -> None:
         """ Saves the current user configuration
 
         :return: None
@@ -59,7 +60,7 @@ class SolcoreConfig:
             self._user_data.write(fp)
 
     def register_observer(
-        self, section: str, callback: Callable[[str, str], None]
+        self, section: str, callback: Callable[[str], None]
     ) -> None:
         """ Registers and observer to be called when a section changes.
 
@@ -72,7 +73,7 @@ class SolcoreConfig:
             raise KeyError(f"Unknown section: {section}.")
         self._observers[section].append(callback)
 
-    def _notify_observers(self, section: str, name: str, value: str) -> None:
+    def _notify_observers(self, section: str, source: str, value: str) -> None:
         """ Notifies the observers of a section of a change in a source.
 
         :param section: Section changed.
@@ -81,12 +82,14 @@ class SolcoreConfig:
         :return: None
         """
         for c in self._observers[section]:
-            c(name, value)
+            c(source=source, value=value)
 
     def __getitem__(self, item):
         """Gets an item from Solcore's configuration."""
         if isinstance(item, tuple) and len(item) == 2:
-            return self._user_data[item[0]][item[1]]
+            return self._user_data[item[0]][item[1]].replace(
+                "SOLCORE_ROOT", SOLCORE_ROOT
+            )
         elif isinstance(item, str):
             return self._user_data[item]
         else:
@@ -96,8 +99,8 @@ class SolcoreConfig:
         """Sets an item in Solcore's configuration."""
         if isinstance(key, tuple) and len(key) == 2 and key[0] in self._user_data:
             self._user_data[key[0]][key[1]] = value
-            self.save_user_config()
-            self._notify_observers(section=key[0], name=key[1], value=value)
+            self._save_user_config()
+            self._notify_observers(section=key[0], source=key[1], value=value)
         else:
             raise KeyError(f"Invalid config option {key}.")
 
@@ -127,7 +130,7 @@ class SolcoreConfig:
             self[section, name] = ""
         else:
             self._user_data.remove_option(section, name)
-            self.save_user_config()
+            self._save_user_config()
 
         print(f"{section}:{name} source removed!")
 
@@ -158,7 +161,7 @@ class SolcoreConfig:
         for s in self._default_data.sections():
             for o in self._default_data.options(s):
                 self._user_data[s][o] = self._default_data[s][o]
-        self.save_user_config()
+        self._save_user_config()
 
     def version(self) -> str:
         """ Provides the Solcore version
@@ -208,40 +211,58 @@ class SolcoreConfig:
             self["External programs", "smarts"] = str(location)
         return self["External programs", "smarts"]
 
-    def units(self, name: str, location: Optional[Union[Path, str]] = None) -> str:
+    def units(
+        self, name: Optional[str] = None, location: Optional[Union[Path, str]] = None
+    ) -> Union[list, str]:
         """ Adds a Units source to Solcore or returns the value of an existing one.
+
+        If called without arguments, it returns the list of available Unit sources.
 
         :param name: The name of the source.
         :param location: The full path to the location of the source. The source must
         be a ConfigParser formatted file.
-        :return: The path to the source
+        :return: The path to the source or a list of available sources
         """
+        if name is None:
+            return self.sources("Units")
         if location is not None:
             self["Units", name] = str(location)
         return self["Units", name]
 
-    def parameters(self, name: str, location: Optional[Union[Path, str]] = None) -> str:
+    def parameters(
+        self, name: Optional[str] = None, location: Optional[Union[Path, str]] = None
+    ) -> Union[list, str]:
         """ Adds a Parameters source to Solcore or returns the value of an existing one.
+
+        If called without arguments, it returns the list of available Parameter sources.
 
         :param name: The name of the source.
         :param location: The full path to the location of the source. The source must
         be a ConfigParser formatted file.
-        :return: The path to the source
+        :return: The path to the source or a list of available sources
         """
+        if name is None:
+            return self.sources("Parameters")
         if location is not None:
             self["Parameters", name] = str(location)
         return self["Parameters", name]
 
-    def materials(self, name: str, location: Optional[Union[Path, str]] = None) -> str:
+    def materials(
+        self, name: Optional[str] = None, location: Optional[Union[Path, str]] = None
+    ) -> Union[list, str]:
         """ Adds a Materials source to Solcore or returns the value of an existing one.
+
+        If called without arguments, it returns the list of available Material sources.
 
         :param name: The name of the source.
         :param location: The full path to the location of the source. The source must
         be a folder containing the n and k
         data of the material. See the the Material System in the manual for more
         information.
-        :return: The path to the source
+        :return: The path to the source or a list of available sources
         """
+        if name is None:
+            return self.sources("Materials")
         if location is not None:
             self["Materials", name] = str(location)
         return self["Materials", name]
@@ -287,7 +308,7 @@ def save_user_config() -> None:
     )
     from . import config
 
-    config.save_user_config()
+    config._save_user_config()
 
 
 def remove_source(section: str, name: str) -> None:

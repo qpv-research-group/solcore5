@@ -19,33 +19,35 @@ if config.welcome_message():
 from solcore.units_system import UnitsSystem
 
 # First we populate the Units system:
-UnitsSystem(config["Units"])
+units_system = UnitsSystem(config.units)
+config.register_observer("Units", units_system.read)
 
 # And now we load some functions form it.
-si = UnitsSystem().si
-asUnit = UnitsSystem().asUnit
-siUnits = UnitsSystem().siUnits
-sensibleUnits = UnitsSystem().sensibleUnits
-siUnitFromString = UnitsSystem().siUnitFromString
-convert = UnitsSystem().convert
-guess_dimension = UnitsSystem().guess_dimension
-nmJ = UnitsSystem().nmJ
-mJ = UnitsSystem().mJ
-eVnm = UnitsSystem().eVnm
-nmHz = UnitsSystem().nmHz
-spectral_conversion_nm_ev = UnitsSystem().spectral_conversion_nm_ev
-spectral_conversion_nm_hz = UnitsSystem().spectral_conversion_nm_hz
-eV = UnitsSystem().eV
+si = units_system.si
+asUnit = units_system.asUnit
+siUnits = units_system.siUnits
+sensibleUnits = units_system.sensibleUnits
+siUnitFromString = units_system.siUnitFromString
+convert = units_system.convert
+guess_dimension = units_system.guess_dimension
+nmJ = units_system.nmJ
+mJ = units_system.mJ
+eVnm = units_system.eVnm
+nmHz = units_system.nmHz
+spectral_conversion_nm_ev = units_system.spectral_conversion_nm_ev
+spectral_conversion_nm_hz = units_system.spectral_conversion_nm_hz
+eV = units_system.eV
 
 # And the same with the Parameter system
 from solcore.parameter_system import ParameterSystem
 
-ParameterSystem(config["Parameters"])
-get_parameter = ParameterSystem().get_parameter
-
+parameters_system = ParameterSystem(config.parameters)
+config.register_observer("Parameters", parameters_system.read)
+get_parameter = parameters_system.get_parameter
 
 # And the same with the Materials system
 from solcore.material_system import MaterialSystem
 
-MaterialSystem(config["Materials"])
-material = MaterialSystem().material
+materials_system = MaterialSystem(config.materials)
+config.register_observer("Materials", materials_system.read)
+material = materials_system.material

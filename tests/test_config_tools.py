@@ -19,6 +19,7 @@ def config(default_config, user_config):
 
 
 def test_solcore_config_class(config):
+    from solcore import SOLCORE_ROOT
     from random import choice
     import os
 
@@ -27,7 +28,7 @@ def test_solcore_config_class(config):
 
     s = choice(config.sections)
     o = choice(config.sources(s))
-    assert config[s, o] == config._user_data[s][o]
+    assert config[s, o] == config._user_data[s][o].replace("SOLCORE_ROOT", SOLCORE_ROOT)
     assert config[s] == config._user_data[s]
     with raises(KeyError):
         assert config["cat"] == config._user_data[s]
@@ -117,17 +118,17 @@ def test_register_observer(config):
 def test_notify_observer(config):
     from random import choice
 
-    source = {}
+    sources = {}
 
-    def dummy(name, value):
-        source[name] = value
+    def dummy(source, value):
+        sources[source] = value
 
     s = choice(config.sections)
     o = choice(config.sources(s))
     config.register_observer(s, dummy)
 
     config[s, o] = "spider"
-    assert source.get(o) == config[s, o]
+    assert sources[o] == config[s, o]
 
 
 def test_welcome_message(config):
@@ -153,6 +154,7 @@ def test_smarts(config):
 def test_units(config):
     from random import choice
 
+    assert config.units() == config.sources("Units")
     o = choice(config.sources("Units"))
     config.units(o, "neither/here/nor/there")
     assert config.units(o) == "neither/here/nor/there"
@@ -161,6 +163,7 @@ def test_units(config):
 def test_parameters(config):
     from random import choice
 
+    assert config.parameters() == config.sources("Parameters")
     o = choice(config.sources("Parameters"))
     config.parameters(o, "neither/here/nor/there")
     assert config.parameters(o) == "neither/here/nor/there"
@@ -169,6 +172,7 @@ def test_parameters(config):
 def test_materials(config):
     from random import choice
 
+    assert config.materials() == config.sources("Materials")
     o = choice(config.sources("Materials"))
     config.materials(o, "neither/here/nor/there")
     assert config.materials(o) == "neither/here/nor/there"
