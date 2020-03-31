@@ -17,6 +17,7 @@ class SolcoreConfig:
     def __init__(self, default_config: Union[Path, str], user_config: Union[Path, str]):
         self.default_config = default_config
         self.user_config = user_config
+        self.user_folder = str(Path(user_config).parent)
         self._observers = defaultdict(list)
         self._default_data = ConfigParser()
         self._user_data = ConfigParser()

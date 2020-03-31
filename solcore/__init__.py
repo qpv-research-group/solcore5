@@ -2,7 +2,12 @@ import os
 
 SOLCORE_ROOT = os.path.split(__file__)[0]
 default_config = os.path.join(SOLCORE_ROOT, "solcore_config.txt")
-user_config = os.path.join(os.path.expanduser("~"), ".solcore_config.txt")
+user_path = os.environ.get("SOLCORE_USER_DATA")
+if user_path is None:
+    user_path = os.path.join(os.path.expanduser("~"), ".solcore")
+if not os.path.exists(user_path):
+    os.mkdir(user_path)
+user_config = os.path.join(user_path, "solcore_config.txt")
 
 from .config_tools import SolcoreConfig
 
