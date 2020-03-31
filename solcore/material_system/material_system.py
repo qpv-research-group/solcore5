@@ -1,7 +1,6 @@
 import math  # hyperbolic functions etc in parameterisation
 import os
 import sys
-from copy import copy
 from functools import lru_cache  # cache function calls to stop things taking forever / recalculating smae things
 
 import numpy as np
@@ -26,11 +25,11 @@ class MaterialSystem(metaclass=Singleton):
         self.known_materials = {}
         self.sources = {}
         if sources is not None:
-            self.sources = {k: sources(k) for k in sources()}
+            self.sources = {k.lower(): sources(k) for k in sources()}
 
     def read(self, source, value):
         """ Reads a new source. """
-        self.sources[source] =  value
+        self.sources[source.lower()] = value
 
     def material(self, name, sopra=False, nk_db=False):
         """ This function checks if the requested material exists and creates a class

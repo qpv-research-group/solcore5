@@ -21,6 +21,8 @@ class SolcoreConfig:
         self._observers = defaultdict(list)
         self._default_data = ConfigParser()
         self._user_data = ConfigParser()
+        self._default_data.optionxform = str
+        self._user_data.optionxform = str
 
         self._default_data.read(self.default_config)
         if not os.path.exists(self.user_config):

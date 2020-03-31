@@ -8,8 +8,8 @@ from shutil import copyfile, move
 from re import sub
 from solcore import config, SOLCORE_ROOT
 from solcore.parameter_system import ParameterSystem
-from solcore.config_tools import add_source
-
+from configparser import ConfigParser
+from solcore.material_system import MaterialSystem
 
 
 def create_new_material(mat_name, n_source, k_source, parameter_source = None):
@@ -21,82 +21,47 @@ def create_new_material(mat_name, n_source, k_source, parameter_source = None):
     :param mat_name: the name of the new material
     :param n_source: path of the n values (txt file, first column wavelength in m, second column n)
     :param k_source: path of the n values (txt file, first column wavelength in m, second column k)
-    :return: parameter_source: file with list of materials for the new material
+    :param: parameter_source: file with list of parameters for the new material
     """
 
-    CUSTOM_PATH = os.path.abspath(config['Others']['custom_mats'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
-    PARAMETER_PATH = os.path.abspath(config['Parameters']['custom'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
-
-    # check if there is already a material with this name
-    if mat_name not in sorted(ParameterSystem().database.sections()):
-
-        # create a folder in the custom materials folders
-        folder = os.path.join(CUSTOM_PATH, mat_name + '-Material')
-        if not os.path.exists(folder) and folder != "":
-            os.makedirs(folder)
-        else:
-            print('This material already exists (or at least, a folder for it).')
-
-        # copy n and k data files to the material's folder
-        copyfile(n_source, os.path.join(folder, 'n.txt'))
-        copyfile(k_source, os.path.join(folder, 'k.txt'))
-
-        # create the parameter file if it doesn't already exist
+    PARAMETER_PATH = os.path.join(config.user_folder, "custom_parameters.txt")
+    if "custom" not in config.parameters():
         if not os.path.isfile(PARAMETER_PATH):
             open(PARAMETER_PATH, 'a').close()
+        config["Parameters", "custom"] = PARAMETER_PATH
 
-        # append the parameters for the new material
-        fout = open(PARAMETER_PATH, "r")
-        existing_parameters = fout.read()
-        fout.close()
+    CUSTOM_PATH = os.path.join(config.user_folder, "custom_materials")
 
-        if not '[' + mat_name + ']' in existing_parameters:
-            # make sure the names match
-            if parameter_source is not None:
-                fin = open(parameter_source, "r")
-                parameters = fin.read() + '\n\n'
-                parameters = sub("\[[^]]*\]", lambda x: x.group(0).replace(x.group(0), '[' + mat_name + ']'), parameters)
-                fin.close()
-            else:
-                parameters = '[' + mat_name + ']\n\n'
-                print('Material created with optical constants n and k only, no other parameters provided.')
+    # check if there is already a material with this name
+    if mat_name in sorted(ParameterSystem().database.sections()) or mat_name in config.materials():
+        answer = input(f"A material named {mat_name} already exists in the database."
+                       f"Do you want to overwrite it [y/n]?")
+        if answer.lower() != "y":
+            return
 
-            fout = open(PARAMETER_PATH, "a")
-            fout.write(parameters)
-            fout.close()
-        else:
-            print('There are already parameters for this material in the custom parameter file at ' + PARAMETER_PATH)
+    # create a folder in the custom materials folders
+    folder = os.path.join(CUSTOM_PATH, mat_name + '-Material')
+    if not os.path.exists(folder) and folder != "":
+        os.makedirs(folder)
 
-        # modify the user's config file (in their home folder) to include the relevant paths
-        new_entry = mat_name + ' = ' + config['Others']['custom_mats'] + '/' + mat_name + '-Material\n'
-        home_folder = os.path.expanduser('~')
-        user_config = os.path.join(home_folder, '.solcore_config.txt')
-        existing_config = open(user_config, 'r').read()
-        if not new_entry in existing_config:
+    # copy n and k data files to the material's folder
+    copyfile(n_source, os.path.join(folder, 'n.txt'))
+    copyfile(k_source, os.path.join(folder, 'k.txt'))
 
-            add_source('Materials', mat_name, config['Others']['custom_mats'] + '/' + mat_name + '-Material')
+    config["Materials", mat_name] = folder
 
-        else:
-            print('A path for this material was already added to the Solcore config file in the home directory.')
-
+    # append the parameters for the new material
+    params = ConfigParser()
+    params.optionxform = str
+    if parameter_source is not None:
+        params.read([PARAMETER_PATH, parameter_source])
+        with open(PARAMETER_PATH, "w") as fp:
+            params.write(fp)
     else:
-        print('There is already a material with this name - choose a different one.')
+        params.read([PARAMETER_PATH])
+        params[mat_name] = {}
+        with open(PARAMETER_PATH, "w") as fp:
+            params.write(fp)
+        print('Material created with optical constants n and k only.')
 
-        # # Finally add the relevant paths to the MANIFEST.in file.
-        # # Don't need to add the full path, just relative to where the MANIFEST file is.
-        # Don't think this is necessary if it's installed as a package?
-        #
-        # path_toadd = folder.replace(SOLCORE_ROOT, 'solcore')
-        # new_entry = '\ninclude ' + os.path.join(path_toadd, 'n.txt').replace("\\","/") +' \ninclude ' + os.path.join(path_toadd, 'k.txt').replace("\\","/")
-        #
-        # MANIFEST_PATH = os.path.join(os.path.dirname(SOLCORE_ROOT), 'MANIFEST.in')
-        #
-        # existing_manifest = open(MANIFEST_PATH, 'r').read()
-        #
-        # # check if it's already been added
-        # if not new_entry in existing_manifest:
-        #     fout = open(MANIFEST_PATH, "a")
-        #     fout.write(new_entry)
-        #     fout.close()
-        # else:
-        #     print('A path for this material was already added to the MANIFEST.in file in the package directory')
+    ParameterSystem().read()

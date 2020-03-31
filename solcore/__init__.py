@@ -24,35 +24,35 @@ if config.welcome_message():
 from solcore.units_system import UnitsSystem
 
 # First we populate the Units system:
-units_system = UnitsSystem(config.units)
-config.register_observer("Units", units_system.read)
+us = UnitsSystem(config.units)
+config.register_observer("Units", us.read)
 
 # And now we load some functions form it.
-si = units_system.si
-asUnit = units_system.asUnit
-siUnits = units_system.siUnits
-sensibleUnits = units_system.sensibleUnits
-siUnitFromString = units_system.siUnitFromString
-convert = units_system.convert
-guess_dimension = units_system.guess_dimension
-nmJ = units_system.nmJ
-mJ = units_system.mJ
-eVnm = units_system.eVnm
-nmHz = units_system.nmHz
-spectral_conversion_nm_ev = units_system.spectral_conversion_nm_ev
-spectral_conversion_nm_hz = units_system.spectral_conversion_nm_hz
-eV = units_system.eV
+si = us.si
+asUnit = us.asUnit
+siUnits = us.siUnits
+sensibleUnits = us.sensibleUnits
+siUnitFromString = us.siUnitFromString
+convert = us.convert
+guess_dimension = us.guess_dimension
+nmJ = us.nmJ
+mJ = us.mJ
+eVnm = us.eVnm
+nmHz = us.nmHz
+spectral_conversion_nm_ev = us.spectral_conversion_nm_ev
+spectral_conversion_nm_hz = us.spectral_conversion_nm_hz
+eV = us.eV
 
 # And the same with the Parameter system
 from solcore.parameter_system import ParameterSystem
 
-parameters_system = ParameterSystem(config.parameters)
-config.register_observer("Parameters", parameters_system.read)
-get_parameter = parameters_system.get_parameter
+ps = ParameterSystem(config.parameters)
+config.register_observer("Parameters", ps.read)
+get_parameter = ps.get_parameter
 
 # And the same with the Materials system
 from solcore.material_system import MaterialSystem
 
-materials_system = MaterialSystem(config.materials)
-config.register_observer("Materials", materials_system.read)
-material = materials_system.material
+ms = MaterialSystem(config.materials)
+config.register_observer("Materials", ms.read)
+material = ms.material
