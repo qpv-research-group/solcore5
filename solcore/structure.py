@@ -139,11 +139,8 @@ def SolcoreMaterialToStr(material_input):
     material_string = material_input.__str__().strip('<>').split(" ")
     material_name = material_string[0].strip("'")
     composition = {'material': material_name}
-
     if len(material_name) > 4:
-
         material_composition = material_string[2].split("=")
-
         for i, comp in enumerate(material_composition):
             if comp in material_name:
                 composition['element'] = material_composition[i]
