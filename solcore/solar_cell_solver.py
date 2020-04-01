@@ -238,17 +238,19 @@ def prepare_solar_cell(solar_cell, options):
     :return: None
     """
     offset = 0
+    layer_widths = []
     for j, layer_object in enumerate(solar_cell):
 
         # Independent layers, for example in a AR coating
         if type(layer_object) is Layer:
-            pass
+            layer_widths.append(layer_object.width)
 
         # Each Tunnel junctions can also have some layers with a given thickness.
         elif type(layer_object) is TunnelJunction:
             junction_width = 0
             for i, layer in enumerate(layer_object):
                 junction_width += layer.width
+                layer_widths.append(layer.width)
             solar_cell[j].width = junction_width
 
         # For each junction, and layer within the junction, we get the layer width.
@@ -262,6 +264,7 @@ def prepare_solar_cell(solar_cell, options):
 
             # This junctions will not, typically, have a width
             if kind in ['2D', 'DB']:
+                layer_widths.append(1e-6)
                 # 2D and DB junctions do not often have a width (or need it) so we set an arbitrary width
                 if not hasattr(layer_object, 'width'):
                     solar_cell[j].width = 1e-6  # 1 µm
@@ -269,6 +272,7 @@ def prepare_solar_cell(solar_cell, options):
             else:
                 junction_width = 0
                 for i, layer in enumerate(layer_object):
+                    layer_widths.append(layer.width)
                     junction_width += layer.width
                 solar_cell[j].width = junction_width
 
@@ -279,3 +283,15 @@ def prepare_solar_cell(solar_cell, options):
 
     if options.position is None:
         options.position = np.arange(0, solar_cell.width, 1e-10)
+
+    elif isinstance(options.position, int) or isinstance(options.position, float):
+        options.position = np.arange(0, solar_cell.width, options.position)
+
+    elif isinstance(options.position, list) or isinstance(options.position, np.ndarray):
+        if len(options.position) == len(solar_cell):
+            options.position = np.hstack([np.arange(layer_object.offset, layer_object.offset + layer_object.width, options.position[j]) for j, layer_object in enumerate(solar_cell)])
+
+        elif len(options.position) == len(layer_widths):
+            layer_offsets = np.insert(np.cumsum(layer_widths), 0, 0)
+            options.position = np.hstack([np.arange(layer_offsets[j], layer_offsets[j] + layer_width, options.position[j]) for j, layer_width in enumerate(layer_widths)])
+
