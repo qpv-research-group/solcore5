@@ -232,7 +232,9 @@ def solve_short_circuit(solar_cell, options):
 
 
 def prepare_solar_cell(solar_cell, options):
-    """ This function scans all the layers and junctions of the cell, calculating the relative possition of each of them with respect the front surface (offset). This information will later be use by the optical calculators, for example.
+    """ This function scans all the layers and junctions of the cell, calculating the relative position of each of them with respect the front surface (offset).
+    This information will later be use by the optical calculators, for example. It also processes the 'position' option, which determines the spacing used if the
+    solver is going to calculate depth-dependent absorption.
 
     :param solar_cell: A solar_cell object
     :return: None
