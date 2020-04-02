@@ -294,6 +294,9 @@ def prepare_solar_cell(solar_cell, options):
         options.position = np.arange(0, solar_cell.width, options.position)
 
     elif isinstance(options.position, list) or isinstance(options.position, np.ndarray):
+        if len(options.position) == 1:
+            options.position = np.arange(0, solar_cell.width, options.position[0])
+
         if len(options.position) == len(solar_cell):
             options.position = np.hstack([np.arange(layer_object.offset, layer_object.offset + layer_object.width, options.position[j]) for j, layer_object in enumerate(solar_cell)])
 
