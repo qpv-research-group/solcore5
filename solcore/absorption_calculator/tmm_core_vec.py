@@ -584,8 +584,6 @@ class absorp_analytic_fn:
         """
 
         if np.all(b.a1 != self.a1) or np.all(b.a3 != self.a3):
-            print(b.a1, self.a1)
-            print(b.a3, self.a3)
             raise ValueError('Incompatible absorption analytical functions!')
 
         self.A1 += b.A1
