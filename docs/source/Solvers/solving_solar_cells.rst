@@ -70,7 +70,11 @@ The options available as well as the default values are:
         The voltages at which the IV curve of *each of the junctions* inside the cell have to be calculated. This range has to be wider than the **voltages** above, in general. The same voltage range will be used in all junctions.
 
     - **position** = np.arange(0, solar_cell.width, 1e-10)
-        Positions inside the solar cell structure in which to calculate the absorption. By default, it is calculated each angstrom for the whole width of the cell.
+        Positions inside the solar cell structure in which to calculate the absorption. By default, it is calculated each angstrom for the whole width of the cell. To control the depth spacing, the user can pass:
+
+        #. a vector which specifies each position (in m) at which the depth should be calculated
+        #. a single number which specifies the spacing (in m) to generate the position vector, e.g. 1e-9 for 1 nm spacing
+        #. a list of numbers which specify the spacing (in m) to be used in each layer. This list can have EITHER the length of the number of individual layers + the number of junctions in the cell object, OR the length of the total number of individual layers including layers inside junctions.
 
     - **radiative_coupling** = False
         If radiative coupling has to be included in the calculation.

@@ -232,23 +232,28 @@ def solve_short_circuit(solar_cell, options):
 
 
 def prepare_solar_cell(solar_cell, options):
-    """ This function scans all the layers and junctions of the cell, calculating the relative possition of each of them with respect the front surface (offset). This information will later be use by the optical calculators, for example.
+    """ This function scans all the layers and junctions of the cell, calculating the relative position of each of them with respect the front surface (offset).
+    This information will later be use by the optical calculators, for example. It also processes the 'position' option, which determines the spacing used if the
+    solver is going to calculate depth-dependent absorption.
 
     :param solar_cell: A solar_cell object
+    :param options: an options (State) object with user/default options
     :return: None
     """
     offset = 0
+    layer_widths = []
     for j, layer_object in enumerate(solar_cell):
 
         # Independent layers, for example in a AR coating
         if type(layer_object) is Layer:
-            pass
+            layer_widths.append(layer_object.width)
 
         # Each Tunnel junctions can also have some layers with a given thickness.
         elif type(layer_object) is TunnelJunction:
             junction_width = 0
             for i, layer in enumerate(layer_object):
                 junction_width += layer.width
+                layer_widths.append(layer.width)
             solar_cell[j].width = junction_width
 
         # For each junction, and layer within the junction, we get the layer width.
@@ -262,6 +267,7 @@ def prepare_solar_cell(solar_cell, options):
 
             # This junctions will not, typically, have a width
             if kind in ['2D', 'DB']:
+                layer_widths.append(1e-6)
                 # 2D and DB junctions do not often have a width (or need it) so we set an arbitrary width
                 if not hasattr(layer_object, 'width'):
                     solar_cell[j].width = 1e-6  # 1 µm
@@ -269,6 +275,7 @@ def prepare_solar_cell(solar_cell, options):
             else:
                 junction_width = 0
                 for i, layer in enumerate(layer_object):
+                    layer_widths.append(layer.width)
                     junction_width += layer.width
                 solar_cell[j].width = junction_width
 
@@ -277,5 +284,38 @@ def prepare_solar_cell(solar_cell, options):
 
     solar_cell.width = offset
 
+    process_position(solar_cell, options, layer_widths)
+
+
+
+def process_position(solar_cell, options, layer_widths):
+    """
+    To control the depth spacing, the user can pass:
+        - a vector which specifies each position (in m) at which the depth should be calculated
+        - a single number which specifies the spacing (in m) to generate the position vector, e.g. 1e-9 for 1 nm spacing
+        - a list of numbers which specify the spacing (in m) to be used in each layer. This list can have EITHER the length
+        of the number of individual layers + the number of junctions in the cell object, OR the length of the total number of individual layers including layers inside junctions.
+
+    :param solar_cell: a SolarCell object
+    :param options: aan options (State) object with user/default options
+    :param layer_widths: list of widths of the individual layers in the stack, treating the layers within junctions as individual layers
+    :return: None
+    """
+
     if options.position is None:
         options.position = np.arange(0, solar_cell.width, 1e-10)
+
+    elif isinstance(options.position, int) or isinstance(options.position, float):
+        options.position = np.arange(0, solar_cell.width, options.position)
+
+    elif isinstance(options.position, list) or isinstance(options.position, np.ndarray):
+        if len(options.position) == 1:
+            options.position = np.arange(0, solar_cell.width, options.position[0])
+
+        if len(options.position) == len(solar_cell):
+            options.position = np.hstack([np.arange(layer_object.offset, layer_object.offset + layer_object.width, options.position[j]) for j, layer_object in enumerate(solar_cell)])
+
+        elif len(options.position) == len(layer_widths):
+            layer_offsets = np.insert(np.cumsum(layer_widths), 0, 0)
+            options.position = np.hstack([np.arange(layer_offsets[j], layer_offsets[j] + layer_width, options.position[j]) for j, layer_width in enumerate(layer_widths)])
+
