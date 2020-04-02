@@ -234,13 +234,10 @@ def solve_short_circuit(solar_cell, options):
 def prepare_solar_cell(solar_cell, options):
     """ This function scans all the layers and junctions of the cell, calculating the relative position of each of them with respect the front surface (offset).
     This information will later be use by the optical calculators, for example. It also processes the 'position' option, which determines the spacing used if the
-    solver is going to calculate depth-dependent absorption. To control the depth spacing, the user can pass:
-        - a vector which specifies each position (in m) at which the depth should be calculated
-        - a single number which specifies the spacing (in m) to generate the position vector, e.g. 1e-9 for 1 nm spacing
-        - a list of numbers which specify the spacing (in m) to be used in each layer. This list can have EITHER the length
-        of the number of individual layers + the number of junctions in the cell object, OR the length of the total number of individual layers including layers inside junctions.
+    solver is going to calculate depth-dependent absorption.
 
     :param solar_cell: A solar_cell object
+    :param options: an options (State) object with user/default options
     :return: None
     """
     offset = 0
@@ -286,6 +283,24 @@ def prepare_solar_cell(solar_cell, options):
         offset += solar_cell[j].width
 
     solar_cell.width = offset
+
+    process_position(solar_cell, options, layer_widths)
+
+
+
+def process_position(solar_cell, options, layer_widths):
+    """
+    To control the depth spacing, the user can pass:
+        - a vector which specifies each position (in m) at which the depth should be calculated
+        - a single number which specifies the spacing (in m) to generate the position vector, e.g. 1e-9 for 1 nm spacing
+        - a list of numbers which specify the spacing (in m) to be used in each layer. This list can have EITHER the length
+        of the number of individual layers + the number of junctions in the cell object, OR the length of the total number of individual layers including layers inside junctions.
+
+    :param solar_cell: a SolarCell object
+    :param options: aan options (State) object with user/default options
+    :param layer_widths: list of widths of the individual layers in the stack, treating the layers within junctions as individual layers
+    :return: None
+    """
 
     if options.position is None:
         options.position = np.arange(0, solar_cell.width, 1e-10)
