@@ -4,9 +4,12 @@
 
 import os
 import sqlite3
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from solcore.material_data.refractiveindex_info_DB import dboperations as DB
 from solcore import config, SOLCORE_ROOT
+
 
 def download_db(url = None, interpolation_points = 200, confirm = False):
     """
@@ -18,23 +21,30 @@ def download_db(url = None, interpolation_points = 200, confirm = False):
     :param confirm: if True, will not ask if you want to download database again even if it has been downloaded previously
     :return:
     """
-    NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
+    if "nk" not in config.sources("Others"):
+        NK_PATH = os.path.join(config.user_folder, "nk", "nk.db")
+        if not os.path.exists(NK_PATH):
+            os.makedirs(Path(NK_PATH).parent)
+        config["Others", "nk"] = NK_PATH
+    else:
+        NK_PATH = config["Others", "nk"]
 
     if os.path.isfile(NK_PATH) and not confirm:
-        response = input('There is already a downloaded database file.'
-                         'Do you want to download it again (Y/n)?')
+        response = input('There is already a downloaded database file. '
+                         'Do you want to download it again (Y/n)? ')
 
-        if response in 'Yy':
-            confirm = True
+        if response not in 'Yy':
+            return
     else:
         confirm = True
 
     if confirm:
         db = DB.Database(NK_PATH)
-        if url is None:
-            db.create_database_from_url(interpolation_points)
-        else:
-            db.create_database_from_url(interpolation_points, url)
+        with TemporaryDirectory() as output:
+            if url is None:
+                db.create_database_from_url(interpolation_points, outputfolder=output)
+            else:
+                db.create_database_from_url(interpolation_points, url, outputfolder=output)
 
 
 def search_db(term="", exact=False):
@@ -47,7 +57,7 @@ def search_db(term="", exact=False):
     The first entry of each tuple is the pageid of the database entry.
     """
 
-    NK_PATH = os.path.abspath(config['Others']['nk'].replace('SOLCORE_ROOT', SOLCORE_ROOT))
+    NK_PATH = config["Others", "nk"]
 
     db = DB.Database(NK_PATH)
     conn = sqlite3.connect(db.db_path)

@@ -274,10 +274,6 @@ def test_substrate_presence_profile():
     assert all([d == approx(o) for d, o in zip(profile, profile_data)])
 
 
-# TODO: the following tests for custom materials do not work as they require changes to the user config file.
-# It is possible the downloading of the database for test_database_materials is also an issue.
-
-
 def test_inc_coh_tmm():
     GaInP = material("GaInP")(In=0.5)
     GaAs = material("GaAs")()
@@ -326,36 +322,24 @@ def test_inc_coh_tmm():
     assert A_calc == approx(A_data)
 
 
-@mark.skip
 def test_define_material():
-    home_folder = os.path.expanduser("~")
-    custom_nk_path = os.path.join(home_folder, "Solcore/custommats")
-    param_path = os.path.join(home_folder, "Solcore/custom_params.txt")
-
-    add_source("Others", "custom_mats", custom_nk_path)
-    add_source("Parameters", "custom", param_path)
+    from solcore import ParameterSystem, MaterialSystem
     this_dir = os.path.split(__file__)[0]
     create_new_material(
         "SiGeSn",
-        os.path.join(this_dir, "SiGeSn_n.txt"),
-        os.path.join(this_dir, "SiGeSn_k.txt"),
-        os.path.join(this_dir, "SiGeSn_params.txt"),
+        os.path.join(this_dir, "data", "SiGeSn_n.txt"),
+        os.path.join(this_dir, "data", "SiGeSn_k.txt"),
+        os.path.join(this_dir, "data", "SiGeSn_params.txt"),
     )
+    assert "SiGeSn" in ParameterSystem().database.sections()
+    assert "SiGeSn".lower() in MaterialSystem().sources
 
-
-@mark.skip
-def test_use_material():
     SiGeSn = material("SiGeSn")()
     assert SiGeSn.n(400e-9) == approx(4.175308391752484)
     assert SiGeSn.k(400e-9) == approx(2.3037424963866306)
 
 
-@mark.skip
 def test_database_materials():
-    home_folder = os.path.expanduser("~")
-    nk_db_path = os.path.join(home_folder, "Solcore/NK.db")
-
-    add_source("Others", "nk", nk_db_path)
     download_db(confirm=True)
     wl, n = nkdb_load_n(2683)  # Should be carbon, from Phillip
 

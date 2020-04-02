@@ -7,7 +7,7 @@ import platform
 import solcore
 from datetime import datetime
 
-smarts = solcore.config.get('External programs', 'smarts').replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)
+smarts = solcore.config.smarts().replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)
 
 system = platform.system()
 if system == 'Windows':

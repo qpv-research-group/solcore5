@@ -1,12 +1,11 @@
 from collections import defaultdict
 import re  # tools to manage regular expresions
 import numpy as np
-import os
+from typing import Optional, Callable
 
 import solcore
 from solcore.source_managed_class import SourceManagedClass
 from solcore.constants import *
-from solcore.singleton import Singleton
 
 
 class UnitError(Exception):
@@ -41,22 +40,19 @@ class UnitsSystem(SourceManagedClass):
     """ Contains all the functions related with the conversion of units. While defined inside this class, most of these
     functions are available outside it, being decorated with 'breakout' (see 'Singleton')"""
 
-    def __init__(self, sources=None):
-        SourceManagedClass.__init__(self)
+    def __init__(self, sources: Optional[Callable] = None):
+        super().__init__({k: sources(k) for k in sources()})
         self.separate_value_and_unit_RE = re.compile(u"([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)(?:[ \t]*(.*))?")
         self.split_units_RE = re.compile(u"(?:([^ \+\-\^\.0-9]+)[\^]?([\-\+]?[^ \-\+]*)?)")
         self.siConversions = {}
         self.dimensions = defaultdict(dict)
-
-        for name, path in sources.items():
-            self.add_source(name, os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)))
-
         self.read()
 
-    def read(self, name=None):
+    def read(self, source=None, value=None):
         """ Reads the units file and creates a database with all units and conversion factors. """
-        SourceManagedClass.read(self, name)
-        self.si_conversions = {}
+        if source is not None:
+            super().read(source, value)
+
         for dimension in self.database.sections():
             units = self.database.options(dimension)
             for unit in units:

@@ -1,5 +1,11 @@
 from pytest import fixture
 import numpy as np
+import os
+import tempfile
+
+temp_folder = tempfile.TemporaryDirectory()
+SOLCORE_USER_DATA = temp_folder.name
+os.environ["SOLCORE_USER_DATA"] = SOLCORE_USER_DATA
 
 
 @fixture

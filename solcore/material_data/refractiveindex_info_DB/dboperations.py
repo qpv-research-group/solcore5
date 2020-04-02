@@ -29,9 +29,10 @@ class Database:
     def create_database_from_folder(self, yml_database_path, interpolation_points=100):
         create_sqlite_database(yml_database_path, self.db_path,interpolation_points=interpolation_points)
 
-    def create_database_from_url(self,interpolation_points=100,riiurl=_riiurl):
-        Database.DownloadRIIzip(riiurl=riiurl)
-        self.create_database_from_folder("database", interpolation_points=interpolation_points)
+    def create_database_from_url(self,interpolation_points=100,riiurl=_riiurl, outputfolder=""):
+        Database.DownloadRIIzip(riiurl=riiurl, outputfolder=outputfolder)
+        outputfolder = os.path.join(outputfolder, "database")
+        self.create_database_from_folder(outputfolder, interpolation_points=interpolation_points)
         pass
 
     def check_url_version(self):
@@ -261,19 +262,22 @@ class Database:
 
     @staticmethod
     def DownloadRIIzip(outputfolder="", riiurl=_riiurl):
-        import requests, zipfile, io
-        print("Making request to",riiurl)
-        r = requests.get(riiurl)
-        if r.ok:
-            print("Downloaded and extracting...")
-            z = zipfile.ZipFile(io.BytesIO(r.content))
-            z.extractall(path=outputfolder)
-            print("Wrote",outputfolder+"/database","from",riiurl)
-            #The destination+database is the result.
-            return True
-        else:
-            print("There was a problem with the request.")
-            return False
+        import requests, zipfile, io, tempfile
+
+        with tempfile.TemporaryDirectory() as fp:
+            print("Making request to",riiurl)
+            r = requests.get(riiurl)
+            if r.ok:
+                print("Downloaded and extracting...")
+                z = zipfile.ZipFile(io.BytesIO(r.content))
+                z.extractall(path=outputfolder)
+                print("Wrote",outputfolder+"/database","from",riiurl)
+                #The destination+database is the result.
+                result = True
+            else:
+                print("There was a problem with the request.")
+                result = False
+        return result
 
 def extract_entry_list(db_path):
     entries = []

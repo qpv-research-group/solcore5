@@ -4,12 +4,11 @@ import math  # hyperbolic functions etc in parameterisation
 import re  # parsing material string
 from functools import lru_cache  # cache function calls to stop things taking forever / recalculating smae things
 import numpy
-import os
+from typing import Optional, Callable
 
 import solcore
 from solcore import siUnits
 from solcore.source_managed_class import SourceManagedClass
-from solcore.singleton import Singleton
 
 
 def safe_cacher(maxsize):
@@ -38,24 +37,20 @@ def bow(parent_0_value, parent_1_value, bowing_parameter, x):
 
 
 class ParameterSystem(SourceManagedClass):
-    """Parameter database/bowing system for compound materials, principally after Vurgaftman et al. 
+    """Parameter database/bowing system for compound materials.
     
-    Once instantiated, this plugin loads the materials parameterisations defined with a call to p.add_source(filepath).
-    
-    Parameters for compound materials can be retrieved with the get_parameter function.
-
+    Once instantiated, this plugin loads the materials parameterisations Parameters for
+    compound materials can be retrieved with the get_parameter function.
     """
 
-    def __init__(self, sources=None):
-        self.__assemble_builtins()  # create a dictionary that's safe for the eval function to use, so
-        # that config files don't have access to all of python
-        self.element_RE = re.compile("([A-Z][a-z]*)")  # Matches capital letter + n * small letter, e.g.: In, Ga, As
-        SourceManagedClass.__init__(self)
-
-        for name, path in sources.items():
-            self.add_source(name, os.path.abspath(path.replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)))
-
-        self.read()
+    def __init__(self, sources: Optional[Callable] = None):
+        super().__init__({k: sources(k) for k in sources()})
+        # create a dictionary that's safe for the eval function to use, so that config
+        # files don't have access to all of python
+        self.__assemble_builtins()
+        # Matches capital letter + n * small letter, e.g.: In, Ga, As
+        self.element_RE = re.compile(
+            "([A-Z][a-z]*)")
 
     def get_parameter(self, material, parameter, verbose=False, **others):
         """Calculate/look up parameters for materials, returns in SI units
@@ -183,10 +178,6 @@ class ParameterSystem(SourceManagedClass):
     def __assemble_builtins(self):
         self.builtins_replacement = {"max": numpy.max, "min": numpy.min}
         self.builtins_replacement.update(math.__dict__)
-
-    def initialise_cache(self):
-        # self.get_parameter.cache_clear()
-        SourceManagedClass.initialise_cache(self)
 
 
 if __name__ == "__main__":
