@@ -1,11 +1,24 @@
 from pytest import fixture
 import numpy as np
+from unittest.mock import patch
 import os
 import tempfile
 
 temp_folder = tempfile.TemporaryDirectory()
 SOLCORE_USER_DATA = temp_folder.name
 os.environ["SOLCORE_USER_DATA"] = SOLCORE_USER_DATA
+
+
+def patch_plots(function):
+    from functools import wraps
+
+    @wraps(function)
+    def decorated(*args, **kwargs):
+
+        with patch("matplotlib.pyplot.show", lambda *x, **y: None):
+            return function(*args, **kwargs)
+
+    return decorated
 
 
 @fixture
@@ -32,6 +45,7 @@ def da_light_source():
 
 def da_options():
     from solcore.state import State
+
     options = State()
     wl = np.linspace(290, 700, 150) * 1e-9
     options.T = np.random.uniform(250, 350)
@@ -93,7 +107,6 @@ def np_junction():
 
     test_junc, options = junction(Nd_top, Na_top, Nd_bottom, Na_bottom)
     return test_junc, options
-
 
 
 @fixture
