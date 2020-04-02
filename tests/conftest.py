@@ -101,3 +101,33 @@ def pn_junction():
 
     test_junc, options = junction(Nd_top, Na_top, Nd_bottom, Na_bottom)
     return test_junc, options
+
+
+@fixture
+def prepare_test_cell():
+
+    from solcore import material, si
+    from solcore.structure import Junction, Layer, TunnelJunction
+    from solcore.solar_cell import SolarCell
+
+    GaAs = material('GaAs')()
+    MgF2 = material('MgF2')()
+    TiO2 = material('TiO2')()
+    Ge = material('Ge')()
+
+    widths = np.random.rand(9)*200
+
+    solar_cell = SolarCell([
+        Layer(si(widths[0], 'nm'), material=MgF2),
+        Layer(si(widths[1], 'nm'), material=TiO2),
+        Junction([Layer(si(widths[2], 'nm'), material=GaAs, role='window'),
+                  Layer(si(widths[3], 'nm'), material=GaAs, role='emitter'),
+                  Layer(si(widths[4], 'nm'), material=GaAs, role='base'),
+                  ], kind='DA'),
+        TunnelJunction([Layer(si(widths[5], 'nm'), material=GaAs),
+                  Layer(si(widths[6], 'nm'), material=GaAs)]),
+        Junction([Layer(si(widths[7], 'nm'), material=Ge, role='emitter'),
+                  Layer(si(widths[8], 'nm'), material=Ge, role='base'),
+                  ], kind='PDD')])
+
+    return solar_cell, widths
