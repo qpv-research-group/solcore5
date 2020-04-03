@@ -143,8 +143,6 @@ def SolcoreMaterialToStr(material_input):
 
     alloy = True if len(material_input.composition) > 0 else False
 
-    print(material_name, alloy)
-
     if alloy:
         material_composition = material_string[2].split("=")
         for i, comp in enumerate(material_composition):
