@@ -337,7 +337,7 @@ class calc_min_Jsc_DA():
 
         solar_cell = self.make_cell(x)
 
-        position = [1e-10, 1e-10] + [1e-9]*8 + [1e-8]
+        position = [1e-10] * 10 + [5e-8]
 
         V = np.linspace(0, 3.5, 300)
         solar_cell_solver(solar_cell, 'iv',
@@ -358,7 +358,7 @@ class calc_min_Jsc_DA():
 
         solar_cell = self.make_cell(x)
 
-        position = [1e-10] * 10 + [1e-8]
+        position = [1e-10] * 10 + [5e-8]
 
         V = np.linspace(0, 3.5, 300)
         solar_cell_solver(solar_cell, 'iv',
@@ -425,7 +425,7 @@ res_DA = PDE_obj_DA.solve(show_progress=True)
 
 best_pop_DA = res_DA[0]
 
-print('parameters for best result:', best_pop_DA, res[1])
+print('parameters for best result:', best_pop_DA, res_DA[1])
 
 # plot the result at these best parameters
 DE_class_DA.plot(best_pop_DA)
