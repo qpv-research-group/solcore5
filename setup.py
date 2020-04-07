@@ -73,7 +73,7 @@ install_requires = [
     "cycler",
     "pyyaml",
 ]
-tests_require = ["pytest", "pytest-cov", "pytest-mock"]
+tests_require = ["pytest", "pytest-cov", "pytest-mock", "yabox"]
 extras_require = {"dev": tests_require + ["Sphinx", "pre-commit"]}
 
 
