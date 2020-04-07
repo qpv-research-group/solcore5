@@ -21,11 +21,19 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install fortran in Linux
+    - name: Install system dependencies in Linux
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install -y gfortran
+      run: sudo apt install -y gfortran ngspice
 
-    - name: Install dependencies
+    - name: Install system dependencies in MacOS
+      if: matrix.os == 'macos-latest'
+      run: brew install ngspice
+
+    - name: Install system dependencies in Windows
+      if: matrix.os == 'windows-latest'
+      run: choco install ngspice
+
+    - name: Install python dependencies
       run: |
         python -m pip install --upgrade setuptools wheel pip twine numpy
         pip install -e .[dev]
@@ -45,7 +53,10 @@ jobs:
       shell: powershell
 
     - name: Test with pytest
-      run: pytest --cov=solcore/
+      env:
+        SOLCORE_SPICE: ngspice
+      run: |
+        pytest --cov=solcore/
 
     - name: Build package
       if: success() && startsWith(github.event.ref, 'refs/tags')
