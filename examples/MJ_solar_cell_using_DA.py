@@ -81,9 +81,10 @@ solar_cell = SolarCell(
         Junction([Layer(si("200nm"), material=mid_cell_n_material, role='emitter'),
                   Layer(si("3000nm"), material=mid_cell_p_material, role='base'),
                   ], sn=1, sp=1, kind='DA'),
-        Junction([Layer(si("400nm"), material=bot_cell_n_material, role='emitter'),
-                  Layer(si("100um"), material=bot_cell_p_material, role='base'),
-                  ], sn=1, sp=1, kind='DA'),
+        # Uncomment the following to add the Ge junction. The calculation will be MUCH longer.
+        # Junction([Layer(si("400nm"), material=bot_cell_n_material, role='emitter'),
+        #           Layer(si("100um"), material=bot_cell_p_material, role='base'),
+        #           ], sn=1, sp=1, kind='DA'),
     ], reflectivity=ref, shading=0.08, cell_area=0.7 * 0.7 / 1e4)
 
 wl = np.linspace(300, 1800, 700) * 1e-9
@@ -92,7 +93,8 @@ solar_cell_solver(solar_cell, 'qe', user_options={'wavelength': wl})
 plt.figure(1)
 plt.plot(wl * 1e9, solar_cell[0].eqe(wl) * 100, 'b', label='GaInP')
 plt.plot(wl * 1e9, solar_cell[1].eqe(wl) * 100, 'g', label='InGaAs')
-plt.plot(wl * 1e9, solar_cell[2].eqe(wl) * 100, 'r', label='Ge')
+# Uncomment to plot the Ge junction
+# plt.plot(wl * 1e9, solar_cell[2].eqe(wl) * 100, 'r', label='Ge')
 
 plt.legend()
 plt.ylim(0, 100)
@@ -106,7 +108,8 @@ plt.figure(2)
 plt.plot(V, solar_cell.iv['IV'][1], 'k', linewidth=3, label='Total')
 plt.plot(V, -solar_cell[0].iv(V), 'b', label='GaInP')
 plt.plot(V, -solar_cell[1].iv(V), 'g', label='InGaAs')
-plt.plot(V, -solar_cell[2].iv(V), 'r', label='Ge')
+# Uncomment to plot the Ge junction
+# plt.plot(V, -solar_cell[2].iv(V), 'r', label='Ge')
 
 plt.legend()
 plt.ylim(0, 200)

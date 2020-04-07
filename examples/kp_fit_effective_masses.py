@@ -11,7 +11,7 @@ InGaAs = material("InGaAs")
 
 # As a test, we solve the problem for an intermediate indium composition
 InGaAs2 = InGaAs(In=0.15, T=300)
-masses = kp_bands(InGaAs2, GaAs, graph=True, fit_effective_mass=True, effective_mass_direction="L", return_so=True)
+masses = kp_bands(InGaAs2, GaAs, graph=False, fit_effective_mass=True, effective_mass_direction="L", return_so=True)
 
 comp = np.linspace(0.01, 0.25, 15)
 me = []

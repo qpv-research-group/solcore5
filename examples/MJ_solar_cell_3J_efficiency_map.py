@@ -34,9 +34,9 @@ def solve_MJ(EgBot, EgMid, EgTop):
 
 
 # We create an efficiency map using Eg0 as the bandgap of the bottom junction and scanning the bandgaps of the middle
-# and top junctions
-N1 = 30
-N2 = 30
+# and top junctions. Increase N1 and N2 to have higher resolution.
+N1 = 4
+N2 = 4
 Eg0 = 1.12
 
 all_Eg1 = np.linspace(1.3, 1.8, N1)

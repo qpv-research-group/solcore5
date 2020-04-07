@@ -13,7 +13,7 @@ class SpiceSolverError(Exception):
 
 
 class spice:
-    engine = solcore.config.get('External programs', 'spice')
+    engine = solcore.config.spice()
     input_file = "current_spice.cir"
     output_file = "current_spice.out"
 

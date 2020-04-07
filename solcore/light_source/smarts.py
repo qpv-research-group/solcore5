@@ -12,7 +12,7 @@ class SmartsSolverError(Exception):
     pass
 
 
-smarts = solcore.config.smarts().replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)
+smarts = solcore.config.smarts()
 
 
 system = platform.system()

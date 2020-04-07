@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 T = 298
-wl = np.linspace(350, 1050, 601) * 1e-9
+wl = np.linspace(350, 1050, 301) * 1e-9
 
 # First, we create the materials of the QW
 QWmat = material('InGaAs')(T=T, In=0.2, strained=True)
@@ -36,7 +36,8 @@ bsf_bottom = material('GaInP')(T=T, Na=5e24, In=0.49)
 # If you want to test the code without QWs, to make ti a bit faster, comment the line with QW_list
 GaAs_junction = Junction([Layer(width=10e-9, material=window_bottom, role="Window"),
                           Layer(width=150e-9, material=n_GaAs, role="Emitter")] +
-                         QW_list +
+                          # Uncomment next line to add the QWs
+                          # QW_list +
                          [Layer(width=2000e-9, material=p_GaAs, role="Base"),
                           Layer(width=200e-9, material=bsf_bottom, role="BSF")],
                          sn=1e6, sp=1e6, T=T, kind='PDD')
