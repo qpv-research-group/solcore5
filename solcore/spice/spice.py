@@ -13,7 +13,7 @@ class SpiceSolverError(Exception):
 
 
 class spice:
-    engine = solcore.config.spice()
+    engine = os.environ.get("SOLCORE_SPICE") if os.environ.get("SOLCORE_SPICE") is not None else solcore.config.spice()
     input_file = "current_spice.cir"
     output_file = "current_spice.out"
 
