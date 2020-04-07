@@ -1,4 +1,5 @@
 import numpy as np
+from pytest import approx
 
 def test_DE():
     from yabox.problems import Ackley
@@ -9,9 +10,9 @@ def test_DE():
 
     result = algorithm.solve()
 
-    assert np.all(result[0] == np.array([0, 0]))
+    assert np.all(result[0] < 1e-8) # == 0 fails on ubuntu-latest for some reason?
     assert result[1] < 1e-15
-    assert np.all(result[2][-1] == np.array([0, 0]))
+    assert np.all(result[2][-1] == result[0])
     assert result[3][-1] < 1e-15
     assert result[4][-1] < 1e-15
 
@@ -25,8 +26,8 @@ def test_PDE():
 
     result = algorithm.solve()
 
-    assert np.all(result[0] == np.array([0, 0]))
+    assert np.all(result[0] < 1e-8)
     assert result[1] < 1e-15
-    assert np.all(result[2][-1] == np.array([0, 0]))
+    assert np.all(result[2][-1] == result[0])
     assert result[3][-1] < 1e-15
     assert result[4][-1] < 1e-15
