@@ -23,7 +23,7 @@ class SolarCell(Structure):
     """ This class is almost identical to the basic Structure class in Solcore (it is a subclass of it, actually) but implementing some default parameter values and control about the types of layers. It should work anywhere where a Structure object works.
     """
 
-    def __init__(self, layers=None, T=298, cell_area=1, reflectivity=None, shading=0, substrate=None,
+    def __init__(self, layers=None, T=298, cell_area=1, reflectivity=None, shading=0, substrate=None, incidence=None,
                  R_series=0, **kwargs):
         """ Constructor of the class.
 
@@ -33,6 +33,7 @@ class SolarCell(Structure):
         :param reflectivity: Function that calculates the reflectivity as a function of energy.
         :param shading: Shading losses due to the front metal contacts.
         :param substrate: Substrate of the solar cell.
+        :param incidence: Material above the solar cell. Nominally air.
         :param R_series: Series resistance of the structure
         :param kwargs: Other possible attributes.
         """
@@ -50,6 +51,7 @@ class SolarCell(Structure):
         self.junction_indices = []
         self.tunnel_indices = []
         self.substrate = substrate
+        self.incidence = incidence
         self.R_series = R_series
 
         for i, element in enumerate(layers):
