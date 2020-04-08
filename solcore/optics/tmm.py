@@ -64,7 +64,7 @@ def solve_tmm(solar_cell, options):
         no_back_reflection = options.no_back_reflexion
 
 
-    full_stack = OptiStack(all_layers, no_back_reflection=no_back_reflection, substrate=solar_cell.substrate)
+    full_stack = OptiStack(all_layers, no_back_reflection=no_back_reflection, substrate=solar_cell.substrate, incidence=solar_cell.incidence)
 
     if 'coherency_list' in options.keys():
         coherency_list = options.coherency_list
