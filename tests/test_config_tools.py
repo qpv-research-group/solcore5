@@ -85,8 +85,6 @@ def test_restore_default_source(config):
 def test_restore_defaults(config):
     from random import choice
 
-    config["Configuration", "version"] = ""
-
     s = choice(config.sections)
     o = choice(config.sources(s))
     value = config[s, o]
