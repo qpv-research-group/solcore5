@@ -1,5 +1,3 @@
-# try optimizing an anti-reflection coating
-
 import numpy as np
 
 from solcore import material, si

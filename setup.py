@@ -72,8 +72,9 @@ install_requires = [
     "regex",
     "cycler",
     "pyyaml",
+    "yabox",
 ]
-tests_require = ["pytest", "pytest-cov", "pytest-mock", "yabox"]
+tests_require = ["pytest", "pytest-cov", "pytest-mock"]
 extras_require = {"dev": tests_require + ["Sphinx", "pre-commit"]}
 
 
