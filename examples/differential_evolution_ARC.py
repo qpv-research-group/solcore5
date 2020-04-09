@@ -58,7 +58,8 @@ class CalcRDiff:
         self.spectrum = spectr / max(spectr)
 
     def reflectance(self, x: Sequence[float]) -> float:
-        """ Create a list with the format [thickness, wavelengths, n_data, k_data] for each layer.
+        """ Create a list with the format [thickness, wavelengths, n_data, k_data] for
+        each layer.
 
         This is one of the acceptable formats in which OptiStack can take information
         (look at the Solcore documentation or at the OptiStack code for more info)
@@ -68,8 +69,8 @@ class CalcRDiff:
         :param x: List with the thicknesses of the two layers in the ARC.
         :return: Array with the reflection at each wavelength
         """
-        ARC = [[x[0]] + self.MgF2, [x[1]] + self.Ta2O5, self.GaAs]
-        full_stack = OptiStack(ARC, no_back_reflection=True)
+        arc = [[x[0]] + self.MgF2, [x[1]] + self.Ta2O5, self.GaAs]
+        full_stack = OptiStack(arc, no_back_reflection=True)
         return calculate_rat(full_stack, self.wl, no_back_reflection=True)["R"]
 
     def evaluate(self, x: Sequence[float]) -> float:
@@ -126,7 +127,8 @@ res = PDE_obj.solve()
 PDE_obj.solve() returns 5 things:
 - res[0] is a list of the parameters which gave the minimized value
 - res[1] is that minimized value
-- res[2] is the evolution of the best population (the best population from each iteration
+- res[2] is the evolution of the best population (the best population from each 
+    iteration
 - res[3] is the evolution of the minimized value, i.e. the fitness over each iteration
 - res[4] is the evolution of the mean fitness over the iterations
 """
@@ -144,4 +146,3 @@ plt.xlabel("iteration")
 plt.ylabel("fitness")
 plt.legend()
 plt.show()
-
