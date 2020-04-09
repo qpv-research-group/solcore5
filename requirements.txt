@@ -106,4 +106,5 @@ wcwidth==0.1.9
 webencodings==0.5.1
 widgetsnbextension==3.5.1
 wrapt==1.12.1
+yabox==1.0.4
 zipp==3.1.0

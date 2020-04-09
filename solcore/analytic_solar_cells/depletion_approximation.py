@@ -343,6 +343,7 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
     :return: out
     """
+
     zz = np.linspace(xa, xb, 1001)
     gg = g(zz) * ph
 
