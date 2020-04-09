@@ -5,21 +5,19 @@ To use yabox for the DE, we need to define a class which sets up the problem and
 'evaluate' function within it, which will actually calculate the value we are trying to
 minimize for each set of parameters.
 """
-import numpy as np
 from typing import Sequence
-
-from solcore import material
+import numpy as np
 import matplotlib.pyplot as plt
 
-from solcore.optics.tmm import OptiStack
-from solcore.optics.tmm import calculate_rat
+from solcore import material
+from solcore.optics.tmm import OptiStack, calculate_rat
+from solcore.light_source import LightSource
 
 # Import the DE implementations
 from solcore.optimization import PDE
-from solcore.light_source import LightSource
 
 
-class calc_R_diff:
+class CalcRDiff:
     def __init__(self):
         """ Make the wavelength and the materials n and k data object attributes.
 
@@ -113,7 +111,7 @@ class calc_R_diff:
 maxiters = 100
 
 # class the DE algorithm is going to use, as defined above
-PDE_class = calc_R_diff()
+PDE_class = CalcRDiff()
 
 # Pass the function which will be minimized to the PDE (parallel differential evolution)
 # solver. PDE calculates the results for each population in parallel to speed up the
