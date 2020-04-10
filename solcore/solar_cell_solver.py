@@ -306,7 +306,13 @@ def process_position(solar_cell, options, layer_widths):
     """
 
     if options.position is None:
-        options.position = np.arange(0, solar_cell.width, 1e-10)
+        options.position = [max(1e-10, width/1000) for width in layer_widths]
+
+        layer_offsets = np.insert(np.cumsum(layer_widths), 0, 0)
+        options.position = np.hstack([np.arange(layer_offsets[j],
+                                                layer_offsets[j] + layer_width,
+                                                options.position[j]) for j, layer_width
+                                      in enumerate(layer_widths)])
 
     elif isinstance(options.position, int) or isinstance(options.position, float):
         options.position = np.arange(0, solar_cell.width, options.position)

@@ -16,6 +16,8 @@ def patch_plots(function):
     def decorated(*args, **kwargs):
 
         with patch("matplotlib.pyplot.show", lambda *x, **y: None):
+            import matplotlib
+            matplotlib.use("Agg")
             return function(*args, **kwargs)
 
     return decorated

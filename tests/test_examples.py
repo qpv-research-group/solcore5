@@ -20,6 +20,7 @@ def examples_directory(tmp_path_factory):
 def example_scripts():
     exdir = Path(__file__).parent.parent / "examples"
     scripts = sorted([os.path.basename(f) for f in glob(str(exdir / "*.py"))])
+    # scripts.remove("differential_evolution_ARC.py")
     return scripts
 
 
@@ -35,10 +36,11 @@ def test_example_scripts(example, examples_directory, monkeypatch):
     from solcore.spice import SpiceSolverError
     from solcore.light_source import SmartsSolverError
     from solcore.optics import RCWASolverError
+    from subprocess import check_call, CalledProcessError
     import sys
 
     os.chdir(examples_directory)
-    monkeypatch.setattr('builtins.input', lambda *x, **y: "y")
+    monkeypatch.setattr("builtins.input", lambda *x, **y: "y")
 
     script = str(examples_directory / Path(example))
     try:
@@ -76,6 +78,16 @@ def test_example_scripts(example, examples_directory, monkeypatch):
         os.chdir(cwd)
         skip("No RCWA solver found.")
 
+    except Exception:
+        # If none of the above apply, we try to execute the script as a subprocess.
+        try:
+            check_call(["python", script], shell=True)
+            os.chdir(cwd)
+
+        except SystemExit:
+            os.chdir(cwd)
+            pass
+
 
 @patch_plots
 @mark.parametrize("example", example_notebooks())
@@ -88,7 +100,7 @@ def test_example_notebooks(example, examples_directory, monkeypatch):
 
     notebooks_folder = examples_directory / "notebooks"
     os.chdir(notebooks_folder)
-    monkeypatch.setattr('builtins.input', lambda *x, **y: "y")
+    monkeypatch.setattr("builtins.input", lambda *x, **y: "y")
 
     script = str(notebooks_folder / Path(example))
     exporter = nbconvert.PythonExporter()
@@ -124,4 +136,3 @@ def test_example_notebooks(example, examples_directory, monkeypatch):
     except SmartsSolverError:
         os.chdir(cwd)
         skip("No SMARTS solver found.")
-
