@@ -73,7 +73,7 @@ install_requires = [
     "cycler",
     "pyyaml",
     "yabox",
-
+]
 tests_require = [
     "pytest",
     "pytest-cov",
