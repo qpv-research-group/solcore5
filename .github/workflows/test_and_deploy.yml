@@ -42,7 +42,7 @@ jobs:
       shell: powershell
 
     - name: Test with pytest
-      run: pytest -s -r a -v tests/test_pdd.py
+      run: pytest -s -r a -v
 
     - name: Build package
       if: success() && startsWith(github.event.ref, 'refs/tags')
