@@ -9,15 +9,17 @@ def test_light_iv(AlGaAs, light_source):
     from solcore import material
     from solcore.solar_cell_solver import solar_cell_solver
 
-    answer = [
-        142.68025180227374,
-        2.519346556870366,
-        0.9169672186977382,
-        329.61395441947565,
-        2.347826086956522,
-        140.3911287342211,
-        0.3294918264376029,
-    ]
+    expected = np.array(
+        [
+            142.68025180227374,
+            2.519346556870366,
+            0.9169672186977382,
+            329.61395441947565,
+            2.347826086956522,
+            140.3911287342211,
+            0.3294918264376029,
+        ]
+    )
 
     T = AlGaAs.T
     Vin = np.linspace(-2, 2.61, 201)
@@ -54,8 +56,7 @@ def test_light_iv(AlGaAs, light_source):
         my_solar_cell.iv.Eta,
     ]
 
-    for i in range(len(output)):
-        assert output[i] == approx(answer[i], rel=1e-2)
+    assert np.array(output) == approx(expected, rel=1e-2)
 
 
 def test_quantum_efficiency(AlGaAs, light_source):
@@ -64,12 +65,14 @@ def test_quantum_efficiency(AlGaAs, light_source):
     from solcore import material
     from solcore.solar_cell_solver import solar_cell_solver
 
-    answer = [
-        0.9866334968497021,
-        2.1512408472022467e-14,
-        0.9779769012349702,
-        0.03506561338387434,
-    ]
+    expected = np.array(
+        [
+            0.9866334968497021,
+            2.1512408472022467e-14,
+            0.9779769012349702,
+            0.03506561338387434,
+        ]
+    )
     T = AlGaAs.T
     Vin = np.linspace(-2, 2.61, 201)
     V = np.linspace(0, 2.6, 300)
@@ -102,6 +105,4 @@ def test_quantum_efficiency(AlGaAs, light_source):
         my_solar_cell[1].eqe(700e-9),
         my_solar_cell[1].eqe(900e-9),
     ]
-
-    for i in range(len(output)):
-        assert output[i] == approx(answer[i], abs=1e-3)
+    assert np.array(output) == approx(expected, abs=1e-3)
