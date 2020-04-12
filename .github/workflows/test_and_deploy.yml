@@ -45,7 +45,7 @@ jobs:
       shell: powershell
 
     - name: Test with pytest
-      run: pytest -r a -v
+      run: pytest -r a -v --cov=solcore/
 
     - name: Build package
       if: success() && startsWith(github.event.ref, 'refs/tags')
