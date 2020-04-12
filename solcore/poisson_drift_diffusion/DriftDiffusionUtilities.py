@@ -89,7 +89,7 @@ def ProcessStructure(device, meshpoints, wavelengths=None):
     # to consider other boundary conditions
     dd.frontboundary("ohmic", device['sn'], device['sp'], 0)
     dd.backboundary("ohmic", device['sn'], device['sp'], 0)
-
+    print(meshpoints)
     dd.initdevice(meshpoints)
     print('...done!\n')
 
