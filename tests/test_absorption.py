@@ -244,7 +244,7 @@ def test_substrate_presence_profile():
         user_options={
             "wavelength": wavelength,
             "optics_method": "TMM",
-            "no_back_reflexion": False,
+            "no_back_reflection": False,
         },
     )
 
@@ -260,18 +260,18 @@ def test_substrate_presence_profile():
         user_options={
             "wavelength": wavelength,
             "optics_method": "TMM",
-            "no_back_reflexion": False,
+            "no_back_reflection": False,
         },
     )
 
     profile_nosubs = my_structure[0].absorbed(z_pos)
-
     profile = np.vstack((profile_subs, profile_nosubs))
 
     data_path = Path(__file__).parent / "data" / "substrate_presence_profile.csv"
-    profile_data = np.genfromtxt(data_path, delimiter=",")
+    expected = np.loadtxt(data_path, delimiter=",")
 
-    assert all([d == approx(o) for d, o in zip(profile, profile_data)])
+    assert profile.shape == expected.shape
+    assert profile == approx(expected)
 
 
 def test_inc_coh_tmm():
