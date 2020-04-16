@@ -4,6 +4,10 @@ GaAs. Minimize reflection * AM0 spectrum (weighted reflectance).
 To use yabox for the DE, we need to define a class which sets up the problem and has an
 'evaluate' function within it, which will actually calculate the value we are trying to
 minimize for each set of parameters.
+
+The "if __name__ == "__main__" construction is used to avoid issues with parallel processing on Windows.
+The issues arises because the multiprocessing module uses a different process on Windows than on UNIX
+systems which will throw errors if this construction is not used.
 """
 from typing import Sequence
 import numpy as np
@@ -108,41 +112,48 @@ class CalcRDiff:
         plt.show()
 
 
-# number of iterations for Differential Evolution
-maxiters = 100
+def main():
 
-# class the DE algorithm is going to use, as defined above
-PDE_class = CalcRDiff()
 
-# Pass the function which will be minimized to the PDE (parallel differential evolution)
-# solver. PDE calculates the results for each population in parallel to speed up the
-# overall process
+    # number of iterations for Differential Evolution
+    maxiters = 100
 
-PDE_obj = PDE(PDE_class.evaluate, bounds=[[0, 400], [0, 400]], maxiters=maxiters)
+    # class the DE algorithm is going to use, as defined above
+    PDE_class = CalcRDiff()
 
-# solve, i.e. minimize the problem
-res = PDE_obj.solve()
+    # Pass the function which will be minimized to the PDE (parallel differential evolution)
+    # solver. PDE calculates the results for each population in parallel to speed up the
+    # overall process
 
-"""
-PDE_obj.solve() returns 5 things:
-- res[0] is a list of the parameters which gave the minimized value
-- res[1] is that minimized value
-- res[2] is the evolution of the best population (the best population from each 
-    iteration
-- res[3] is the evolution of the minimized value, i.e. the fitness over each iteration
-- res[4] is the evolution of the mean fitness over the iterations
-"""
-best_pop = res[0]
-print("Parameters for best result:", best_pop, res[1])
+    PDE_obj = PDE(PDE_class.evaluate, bounds=[[0, 400], [0, 400]], maxiters=maxiters)
 
-PDE_class.plot(best_pop)
-PDE_class.plot_weighted(best_pop)
+    # solve, i.e. minimize the problem
+    res = PDE_obj.solve()
 
-# plot evolution of the best and mean fitness of the population per iteration
-plt.figure()
-plt.plot(res[3], "-k", label="Best fitness")
-plt.plot(res[4], "-r", label="Mean fitness")
-plt.xlabel("iteration")
-plt.ylabel("fitness")
-plt.legend()
-plt.show()
+    """
+    PDE_obj.solve() returns 5 things:
+    - res[0] is a list of the parameters which gave the minimized value
+    - res[1] is that minimized value
+    - res[2] is the evolution of the best population (the best population from each 
+        iteration
+    - res[3] is the evolution of the minimized value, i.e. the fitness over each iteration
+    - res[4] is the evolution of the mean fitness over the iterations
+    """
+    best_pop = res[0]
+    print("Parameters for best result:", best_pop, res[1])
+
+    PDE_class.plot(best_pop)
+    PDE_class.plot_weighted(best_pop)
+
+    # plot evolution of the best and mean fitness of the population per iteration
+    plt.figure()
+    plt.plot(res[3], "-k", label="Best fitness")
+    plt.plot(res[4], "-r", label="Mean fitness")
+    plt.xlabel("iteration")
+    plt.ylabel("fitness")
+    plt.legend()
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()
