@@ -36,7 +36,8 @@ from solcore.material_system import create_new_material
 # will actually calculate the value we are trying to minimize for a set of parameters.
 
 # add SiGeSn optical constants to the database
-# create_new_material('SiGeSn', 'SiGeSn_n.txt', 'SiGeSn_k.txt', 'SiGeSn_params.txt')
+create_new_material('SiGeSn', 'SiGeSn_n.txt', 'SiGeSn_k.txt', 'SiGeSn_params.txt') # Note: comment out this line after the material
+# has been added to avoid being asked if you want to overwrite it.
 
 # define class for the optimization:
 class calc_min_Jsc():
