@@ -10,6 +10,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.7, 3.8]
+        exclude:
+          - os: windows-latest
+            python-version: 3.8
 
     steps:
     - uses: actions/checkout@v1
@@ -53,7 +56,7 @@ jobs:
       env:
         SOLCORE_SPICE: ngspice
       run: |
-        pytest --cov=solcore/
+        pytest -r a -v --cov=solcore/
 
     - name: Build package
       if: success() && startsWith(github.event.ref, 'refs/tags')

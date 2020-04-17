@@ -36,7 +36,6 @@ def test_example_scripts(example, examples_directory, monkeypatch):
     from solcore.spice import SpiceSolverError
     from solcore.light_source import SmartsSolverError
     from solcore.optics import RCWASolverError
-    from subprocess import check_call, CalledProcessError
     import sys
 
     os.chdir(examples_directory)
@@ -77,16 +76,6 @@ def test_example_scripts(example, examples_directory, monkeypatch):
     except RCWASolverError:
         os.chdir(cwd)
         skip("No RCWA solver found.")
-
-    except Exception:
-        # If none of the above apply, we try to execute the script as a subprocess.
-        try:
-            check_call(["python", script], shell=True)
-            os.chdir(cwd)
-
-        except SystemExit:
-            os.chdir(cwd)
-            pass
 
 
 @patch_plots

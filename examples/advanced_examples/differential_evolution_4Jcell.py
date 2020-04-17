@@ -17,6 +17,9 @@ from solcore.solar_cell_solver import solar_cell_solver
 from solcore.constants import q, kb
 from solcore.material_system import create_new_material
 
+# The "if __name__ == "__main__" construction is used to avoid issues with parallel processing on Windows.
+# The issue arises because the multiprocessing module uses a different process on Windows than on UNIX
+# systems which will throw errors if this construction is not used.
 
 # Optimizing a four-junction cell using SiGeSn as the second-lowest bandgap material.
 
@@ -33,7 +36,8 @@ from solcore.material_system import create_new_material
 # will actually calculate the value we are trying to minimize for a set of parameters.
 
 # add SiGeSn optical constants to the database
-create_new_material('SiGeSn', 'SiGeSn_n.txt', 'SiGeSn_k.txt', 'SiGeSn_params.txt')
+create_new_material('SiGeSn', 'SiGeSn_n.txt', 'SiGeSn_k.txt', 'SiGeSn_params.txt') # Note: comment out this line after the material
+# has been added to avoid being asked if you want to overwrite it.
 
 # define class for the optimization:
 class calc_min_Jsc():
@@ -144,101 +148,6 @@ class calc_min_Jsc():
         plt.xlabel('Wavelength (nm)')
         plt.ylabel('R/A/T')
         plt.show()
-
-
-
-# number of iterations for Differential Evolution optimization of the optical stack
-maxiters=300
-
-# make an instance of the class the DE algorithm is going to use, as defined above
-DE_class = calc_min_Jsc()
-
-# pass the function which will be minimized to the PDE (parallel differential evolution) solver. PDE calculates the
-# results for each population in parallel to speed up the overall process. The bounds argument sets upper and lower bounds
-# for each parameter. PDE_obj contains all the information to run the DE but does not actually invoke the calculation....
-PDE_obj = PDE(DE_class.evaluate, bounds=[[10,150], [10,105], [200, 1000], [500, 10000], [500, 10000]], maxiters=maxiters)
-
-# this will run the calculation in parallel, with all the cores available. If you don't want this, use 'DE' instead of 'PDE'
-
-# to run the DE, use the .solve() function of the PDE object class
-res = PDE_obj.solve()
-
-# PDE_obj.solve() returns 5 things:
-# res[0] is a list of the parameters which gave the minimized value
-# res[1] is that minimized value
-# res[2] is the evolution of the best population (the best population from each iteration
-# res[3] is the evolution of the minimized value, i.e. the fitness over each iteration
-# res[4] is the evolution of the mean fitness over the iterations
-
-# best population:
-best_pop = res[0]
-
-print('parameters for best result:', best_pop, '\n', 'optimized Jsc value (mA/cm2):', -res[1])
-
-# plot the result at these best parameters
-DE_class.plot(best_pop)
-
-best_pop_evo = res[2]
-best_fitn_evo = res[3]
-mean_fitn_evo = res[4]
-final_fitness = res[1]
-
-# plot evolution of the fitness of the best population per iteration
-
-plt.figure()
-plt.plot(-best_fitn_evo, '-k')
-plt.xlabel('iteration')
-plt.ylabel('fitness')
-plt.title('Best fitness')
-plt.show()
-
-# plot evolution of the mean fitness of the population per iteration
-
-plt.figure()
-plt.plot(-mean_fitn_evo, '-k')
-plt.xlabel('iteration')
-plt.ylabel('fitness')
-plt.title('Mean fitness')
-plt.show()
-
-# these plots show that the fitness of the best population 'jumps' every few iterations as a new best population is found,
-# while the mean fitness converges slowly as the whole population gradually improves
-
-
-## Now that the layer thicknesses have been optimized from an optical point of view, we want to design the device (or
-# at least a simplified version, by calculating a more realistic EQE. Obviously additional parameters like the doping of the
-# layers could be varied too.
-
-# x[0]: total InGaP thickness
-# x[1]: total InGaAs thickness
-# x[2]: total SiGeSn thickness
-# x[3]: total Ge thickness
-
-# x[4]: InGaP n thickness
-# x[5]: InGaAs n thickness
-# x[6]: SiGeSn n thickness
-# x[7]: Ge n thickness
-
-# keep the ARC thicknesses fixed at the values obtained in the optical simulation
-
-# generate upper and lower bounds: total layer thickness between 75% and 125% of values fitted in TMM calculation. Ge
-# starting value is 200 um
-starting_params = np.append(best_pop[2:], [200000])
-
-lower = 0.75*starting_params
-upper = 1.25*starting_params
-
-# upper and lower bounds for the n-type (highly doped) layers
-lower_ntype = [20, 20, 20, 20]
-
-upper_ntype = [200, 300, 300, 500]
-
-all_lower = np.append(lower, lower_ntype)
-
-all_upper = np.append(upper, upper_ntype)
-
-# full list of bounds
-all_bounds = np.stack((all_lower, all_upper)).T
 
 
 class calc_min_Jsc_DA():
@@ -441,42 +350,140 @@ class calc_min_Jsc_DA():
         plt.show()
 
 
-# DE calculation for the electrical simulation
-maxiters_DA = 10
-DE_class_DA = calc_min_Jsc_DA(best_pop[0:2])
+def main():
+    # number of iterations for Differential Evolution optimization of the optical stack
+    maxiters=300
+
+    # make an instance of the class the DE algorithm is going to use, as defined above
+    DE_class = calc_min_Jsc()
+
+    # pass the function which will be minimized to the PDE (parallel differential evolution) solver. PDE calculates the
+    # results for each population in parallel to speed up the overall process. The bounds argument sets upper and lower bounds
+    # for each parameter. PDE_obj contains all the information to run the DE but does not actually invoke the calculation....
+    PDE_obj = PDE(DE_class.evaluate, bounds=[[10,150], [10,105], [200, 1000], [500, 10000], [500, 10000]], maxiters=maxiters)
+
+    # this will run the calculation in parallel, with all the cores available. If you don't want this, use 'DE' instead of 'PDE'
+
+    # to run the DE, use the .solve() function of the PDE object class
+    res = PDE_obj.solve()
+
+    # PDE_obj.solve() returns 5 things:
+    # res[0] is a list of the parameters which gave the minimized value
+    # res[1] is that minimized value
+    # res[2] is the evolution of the best population (the best population from each iteration
+    # res[3] is the evolution of the minimized value, i.e. the fitness over each iteration
+    # res[4] is the evolution of the mean fitness over the iterations
+
+    # best population:
+    best_pop = res[0]
+
+    print('parameters for best result:', best_pop, '\n', 'optimized Jsc value (mA/cm2):', -res[1])
+
+    # plot the result at these best parameters
+    DE_class.plot(best_pop)
+
+    best_pop_evo = res[2]
+    best_fitn_evo = res[3]
+    mean_fitn_evo = res[4]
+    final_fitness = res[1]
+
+    # plot evolution of the fitness of the best population per iteration
+
+    plt.figure()
+    plt.plot(-best_fitn_evo, '-k')
+    plt.xlabel('iteration')
+    plt.ylabel('fitness')
+    plt.title('Best fitness')
+    plt.show()
+
+    # plot evolution of the mean fitness of the population per iteration
+
+    plt.figure()
+    plt.plot(-mean_fitn_evo, '-k')
+    plt.xlabel('iteration')
+    plt.ylabel('fitness')
+    plt.title('Mean fitness')
+    plt.show()
+
+    # these plots show that the fitness of the best population 'jumps' every few iterations as a new best population is found,
+    # while the mean fitness converges slowly as the whole population gradually improves
 
 
-# default population size = 5*number of params
-PDE_obj_DA = PDE(DE_class_DA.evaluate, bounds=all_bounds, maxiters=maxiters_DA)
+    ## Now that the layer thicknesses have been optimized from an optical point of view, we want to design the device (or
+    # at least a simplified version, by calculating a more realistic EQE. Obviously additional parameters like the doping of the
+    # layers could be varied too.
+
+    # x[0]: total InGaP thickness
+    # x[1]: total InGaAs thickness
+    # x[2]: total SiGeSn thickness
+    # x[3]: total Ge thickness
+
+    # x[4]: InGaP n thickness
+    # x[5]: InGaAs n thickness
+    # x[6]: SiGeSn n thickness
+    # x[7]: Ge n thickness
+
+    # keep the ARC thicknesses fixed at the values obtained in the optical simulation
+
+    # generate upper and lower bounds: total layer thickness between 75% and 125% of values fitted in TMM calculation. Ge
+    # starting value is 200 um
+    starting_params = np.append(best_pop[2:], [200000])
+
+    lower = 0.75*starting_params
+    upper = 1.25*starting_params
+
+    # upper and lower bounds for the n-type (highly doped) layers
+    lower_ntype = [20, 20, 20, 20]
+
+    upper_ntype = [200, 300, 300, 500]
+
+    all_lower = np.append(lower, lower_ntype)
+
+    all_upper = np.append(upper, upper_ntype)
+
+    # full list of bounds
+    all_bounds = np.stack((all_lower, all_upper)).T
+
+    # DE calculation for the electrical simulation
+    maxiters_DA = 10
+    DE_class_DA = calc_min_Jsc_DA(best_pop[0:2])
 
 
-# solve, i.e. minimize the problem
-res_DA = PDE_obj_DA.solve(show_progress=True)
+    # default population size = 5*number of params
+    PDE_obj_DA = PDE(DE_class_DA.evaluate, bounds=all_bounds, maxiters=maxiters_DA)
 
-best_pop_DA = res_DA[0]
 
-print('parameters for best result:', best_pop_DA, 'optimized efficiency (%)', res_DA[1]*100)
+    # solve, i.e. minimize the problem
+    res_DA = PDE_obj_DA.solve()
 
-# plot the result at these best parameters
-DE_class_DA.plot(best_pop_DA)
+    best_pop_DA = res_DA[0]
 
-best_pop_evo = res_DA[2]
-best_fitn_evo = res_DA[3]
-mean_fitn_evo = res_DA[4]
-final_fitness = res_DA[1]
+    print('parameters for best result:', best_pop_DA, 'optimized efficiency (%)', res_DA[1]*100)
 
-# plot evolution of the fitness of the best population per iteration, and the mean fitness
+    # plot the result at these best parameters
+    DE_class_DA.plot(best_pop_DA)
 
-plt.figure()
-plt.plot(-best_fitn_evo, '-k')
-plt.xlabel('iteration')
-plt.ylabel('fitness')
-plt.title('Best fitness')
-plt.show()
+    best_pop_evo = res_DA[2]
+    best_fitn_evo = res_DA[3]
+    mean_fitn_evo = res_DA[4]
+    final_fitness = res_DA[1]
 
-plt.figure()
-plt.plot(-mean_fitn_evo, '-k')
-plt.xlabel('iteration')
-plt.ylabel('fitness')
-plt.title('Mean fitness')
-plt.show()
+    # plot evolution of the fitness of the best population per iteration, and the mean fitness
+
+    plt.figure()
+    plt.plot(-best_fitn_evo, '-k')
+    plt.xlabel('iteration')
+    plt.ylabel('fitness')
+    plt.title('Best fitness')
+    plt.show()
+
+    plt.figure()
+    plt.plot(-mean_fitn_evo, '-k')
+    plt.xlabel('iteration')
+    plt.ylabel('fitness')
+    plt.title('Mean fitness')
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()

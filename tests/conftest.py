@@ -73,22 +73,42 @@ def junction(nd_top, na_top, nd_bottom, na_bottom):
     AlInP = material("AlInP")
     InGaP = material("GaInP")
     window_material = AlInP(Al=0.52)
-    top_cell_n_material = InGaP(In=0.48, Nd=nd_top, Na=na_top,
-                                hole_diffusion_length=Lp, electron_diffusion_length=Ln)
-    top_cell_p_material = InGaP(In=0.48, Nd=nd_bottom, Na=na_bottom,
-                                hole_diffusion_length=Lp, electron_diffusion_length=Ln)
+    top_cell_n_material = InGaP(
+        In=0.48,
+        Nd=nd_top,
+        Na=na_top,
+        hole_diffusion_length=Lp,
+        electron_diffusion_length=Ln,
+    )
+    top_cell_p_material = InGaP(
+        In=0.48,
+        Nd=nd_bottom,
+        Na=na_bottom,
+        hole_diffusion_length=Lp,
+        electron_diffusion_length=Ln,
+    )
 
-    rel_perm = np.random.uniform(1,20)
+    rel_perm = np.random.uniform(1, 20)
     for mat in [top_cell_n_material, top_cell_p_material]:
         mat.permittivity = rel_perm * vacuum_permittivity
 
-    n_width = np.random.uniform(500, 1000)*1e-9
-    p_width = np.random.uniform(3000, 5000)*1e-9
+    n_width = np.random.uniform(500, 1000) * 1e-9
+    p_width = np.random.uniform(3000, 5000) * 1e-9
 
-    test_junc = SolarCell([Junction([Layer(si("25nm"), material=window_material, role='window'),
-                  Layer(n_width, material=top_cell_n_material, role='emitter'),
-                  Layer(p_width, material=top_cell_p_material, role='base'),
-                 ], sn=1, sp=1, kind='DA')])
+    test_junc = SolarCell(
+        [
+            Junction(
+                [
+                    Layer(si("25nm"), material=window_material, role="window"),
+                    Layer(n_width, material=top_cell_n_material, role="emitter"),
+                    Layer(p_width, material=top_cell_p_material, role="base"),
+                ],
+                sn=1,
+                sp=1,
+                kind="DA",
+            )
+        ]
+    )
 
     options = da_options()
     options.light_source = da_light_source()
@@ -131,24 +151,79 @@ def prepare_test_cell():
     from solcore.structure import Junction, Layer, TunnelJunction
     from solcore.solar_cell import SolarCell
 
-    GaAs = material('GaAs')()
-    MgF2 = material('MgF2')()
-    TiO2 = material('TiO2')()
-    Ge = material('Ge')()
+    GaAs = material("GaAs")()
+    MgF2 = material("MgF2")()
+    TiO2 = material("TiO2")()
+    Ge = material("Ge")()
 
-    widths = np.random.rand(9)*200
+    widths = np.random.rand(9) * 200
 
-    solar_cell = SolarCell([
-        Layer(si(widths[0], 'nm'), material=MgF2),
-        Layer(si(widths[1], 'nm'), material=TiO2),
-        Junction([Layer(si(widths[2], 'nm'), material=GaAs, role='window'),
-                  Layer(si(widths[3], 'nm'), material=GaAs, role='emitter'),
-                  Layer(si(widths[4], 'nm'), material=GaAs, role='base'),
-                  ], kind='DA'),
-        TunnelJunction([Layer(si(widths[5], 'nm'), material=GaAs),
-                  Layer(si(widths[6], 'nm'), material=GaAs)]),
-        Junction([Layer(si(widths[7], 'nm'), material=Ge, role='emitter'),
-                  Layer(si(widths[8], 'nm'), material=Ge, role='base'),
-                  ], kind='PDD')])
+    solar_cell = SolarCell(
+        [
+            Layer(si(widths[0], "nm"), material=MgF2),
+            Layer(si(widths[1], "nm"), material=TiO2),
+            Junction(
+                [
+                    Layer(si(widths[2], "nm"), material=GaAs, role="window"),
+                    Layer(si(widths[3], "nm"), material=GaAs, role="emitter"),
+                    Layer(si(widths[4], "nm"), material=GaAs, role="base"),
+                ],
+                kind="DA",
+            ),
+            TunnelJunction(
+                [
+                    Layer(si(widths[5], "nm"), material=GaAs),
+                    Layer(si(widths[6], "nm"), material=GaAs),
+                ]
+            ),
+            Junction(
+                [
+                    Layer(si(widths[7], "nm"), material=Ge, role="emitter"),
+                    Layer(si(widths[8], "nm"), material=Ge, role="base"),
+                ],
+                kind="PDD",
+            ),
+        ]
+    )
 
     return solar_cell, widths
+
+
+@fixture
+def AlGaAs():
+    from solcore import material
+    from solcore.structure import Layer, Junction
+    from solcore import si
+
+    T = 298
+    # We create the other materials we need for the device
+    window = material("AlGaAs")(T=T, Na=5e24, Al=0.8)
+    p_AlGaAs = material("AlGaAs")(T=T, Na=1e24, Al=0.4)
+    n_AlGaAs = material("AlGaAs")(T=T, Nd=8e22, Al=0.4)
+    bsf = material("AlGaAs")(T=T, Nd=2e24, Al=0.6)
+
+    return Junction(
+        [
+            Layer(width=si("30nm"), material=window, role="Window"),
+            Layer(width=si("150nm"), material=p_AlGaAs, role="Emitter"),
+            Layer(width=si("1000nm"), material=n_AlGaAs, role="Base"),
+            Layer(width=si("200nm"), material=bsf, role="BSF"),
+        ],
+        sn=1e6,
+        sp=1e6,
+        T=T,
+        kind="PDD",
+    )
+
+
+@fixture
+def light_source(wavelength):
+    from solcore.light_source import LightSource
+
+    return LightSource(
+        source_type="standard",
+        version="AM1.5g",
+        x=np.linspace(350, 1000, 301) * 1e-9,
+        output_units="photon_flux_per_m",
+        concentration=1,
+    )
