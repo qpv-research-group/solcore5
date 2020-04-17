@@ -8,8 +8,12 @@ import tempfile
 import solcore
 
 
+class SpiceSolverError(Exception):
+    pass
+
+
 class spice:
-    engine = solcore.config.get('External programs', 'spice')
+    engine = os.environ.get("SOLCORE_SPICE") if os.environ.get("SOLCORE_SPICE") is not None else solcore.config.spice()
     input_file = "current_spice.cir"
     output_file = "current_spice.out"
 
@@ -30,6 +34,8 @@ def solve_circuit(spice_file_contents, engine=spice.engine, raw=True):
     """
 
     spice.engine = engine
+    if not spice.engine:
+        raise SpiceSolverError("Spice solver not found.")
 
     with tempfile.TemporaryDirectory(prefix="tmp", suffix="_sc3NGSPICE") as working_directory:
 

@@ -15,7 +15,7 @@ opts.optics_method = 'TMM'
 opts.wavelength = wl
 # Download the database from refractiveindex.info. This only needs to be done once.
 # Can specify the source URL and number of interpolation points.
-# download_db()
+download_db()
 
 # Can search the database to select an appropriate entry. Search by element/chemical formula.
 # In this case, look for silver.

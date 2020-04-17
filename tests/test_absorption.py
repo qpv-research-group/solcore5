@@ -293,7 +293,7 @@ def test_inc_coh_tmm():
     options = State()
     options.wavelength = wl
     options.optics_method = "TMM"
-    options.no_back_reflexion = False
+    options.no_back_reflection = False
     options.BL_correction = True
     options.recalculate_absorption = True
 

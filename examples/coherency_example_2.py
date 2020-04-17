@@ -1,17 +1,13 @@
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 
 from solcore import siUnits, material, si
-from solcore.interpolate import interp1d
 from solcore.solar_cell import SolarCell
 from solcore.structure import Junction, Layer
-from solcore.solar_cell_solver import solar_cell_solver, default_options, prepare_solar_cell
+from solcore.solar_cell_solver import solar_cell_solver, default_options
 from solcore.light_source import LightSource
 from solcore.state import State
 
-def this_dir_file(f):  # this is just Python stuff, so it can find external files containing optical constant data which are in the same folder as this file.
-    return os.path.join(os.path.split(__file__)[0], f)
 
 incidence_angle = 45 # should be in degrees
 wl = np.linspace(290, 1900, 400) * 1e-9
@@ -170,8 +166,3 @@ plt.ylim(0,100)
 plt.ylabel('EQE (%)')
 plt.xlabel('Wavelength (nm)')
 plt.show()
-
-#plt.figure(1)
-#plt.plot(np.linspace(0, 3000, 100),
-#         optical_struct[1].absorbed(np.linspace(0, 3000, 100)*1e-9)[:,0])
-#plt.show()

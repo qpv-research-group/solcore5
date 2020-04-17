@@ -3,7 +3,7 @@ import numpy as np
 import solcore.analytic_solar_cells as ASC
 from solcore.light_source import LightSource
 from solcore.state import State
-from solcore.optics import solve_beer_lambert, solve_tmm, solve_rcwa, rcwa_options, solve_external_optics
+from solcore.optics import solve_beer_lambert, solve_tmm, solve_rcwa, rcwa_options, solve_external_optics, RCWASolverError
 from solcore.structure import Layer, Junction, TunnelJunction
 
 try:
@@ -111,7 +111,10 @@ def solve_optics(solar_cell, options):
         elif options.optics_method == 'TMM':
             solve_tmm(solar_cell, options)
         elif options.optics_method == 'RCWA':
-            solve_rcwa(solar_cell, options)
+            if solve_rcwa is not None:
+                solve_rcwa(solar_cell, options)
+            else:
+                raise RCWASolverError("RCWA optical solver not available!!")
         else:
             raise ValueError(
                 'ERROR in "solar_cell_solver":\n\tOptics solver method must be None, "external", "BL", "TMM" or "RCWA".')

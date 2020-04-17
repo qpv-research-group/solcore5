@@ -1,6 +1,11 @@
 name: testing_and_deploy
 
-on: [push]
+on:
+  push:
+
+  # everyday at 3 am UTC
+  schedule:
+    - cron:  '* 3 * * *'
 
 jobs:
   testing:
@@ -21,11 +26,19 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install fortran in Linux
+    - name: Install system dependencies in Linux
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install -y gfortran
+      run: sudo apt install -y gfortran ngspice
 
-    - name: Install dependencies
+    - name: Install system dependencies in MacOS
+      if: matrix.os == 'macos-latest'
+      run: brew install ngspice
+
+    - name: Install system dependencies in Windows
+      if: matrix.os == 'windows-latest'
+      run: choco install ngspice
+
+    - name: Install python dependencies
       run: |
         python -m pip install --upgrade setuptools wheel pip twine numpy
         pip install -e .[dev]
@@ -45,7 +58,18 @@ jobs:
       shell: powershell
 
     - name: Test with pytest
-      run: pytest -r a -v --cov=solcore/
+      if: github.event_name != 'schedule'
+      env:
+        SOLCORE_SPICE: ngspice
+      run: |
+        pytest -r a -v --cov=solcore/ --ignore tests/test_examples.py
+
+    - name: Test with examples
+      if: github.event_name == 'schedule'
+      env:
+        SOLCORE_SPICE: ngspice
+      run: |
+        pytest -r a -v --cov=solcore/
 
     - name: Build package
       if: success() && startsWith(github.event.ref, 'refs/tags')

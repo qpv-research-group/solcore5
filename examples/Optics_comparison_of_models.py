@@ -6,6 +6,8 @@ from solcore.structure import Junction, Layer
 from solcore.solar_cell import SolarCell
 from solcore.solar_cell_solver import solar_cell_solver, default_options
 from solcore.light_source import LightSource
+from solcore.constants import vacuum_permittivity
+from solcore.optics import RCWASolverError
 
 # user options
 T = 298
@@ -28,7 +30,7 @@ TiO2 = material('TiO2', sopra=True)(T=T)  # for the nanoparticles
 
 # some parameters for the QE solver
 for mat in [n_GaAs, p_GaAs]:
-    mat.hole_mobility, mat.electron_mobility, mat.permittivity = 3.4e-3, 5e-2, 9
+    mat.hole_mobility, mat.electron_mobility, mat.permittivity = 3.4e-3, 5e-2, 9 * vacuum_permittivity
     n_GaAs.hole_diffusion_length, p_GaAs.electron_diffusion_length = si("500nm"), si("5um")
 
 # Define the different parts of the structure we will use. For the GaAs junction, we use the depletion approximation
@@ -69,11 +71,6 @@ TMM_EQE_DBR = solar_cell[1].eqe(opts.wavelength)
 # cell with TiO2 nanocylinder array on the front
 solar_cell = SolarCell(NP_layer + spacer + GaAs_junction + DBR + substrate)
 
-opts.optics_method = 'RCWA'
-opts.orders = 49  # number of diffraction orders to keep in the RCWA solver
-solar_cell_solver(solar_cell, 'qe', opts)
-RCWA_EQE_NP = solar_cell[2].eqe(opts.wavelength)
-
 opts.optics_method = 'TMM'
 solar_cell_solver(solar_cell, 'qe', opts)
 TMM_EQE_NP = solar_cell[2].eqe(opts.wavelength)
@@ -82,10 +79,21 @@ opts.optics_method = 'BL'
 solar_cell_solver(solar_cell, 'qe', opts)
 BL_EQE_NP = solar_cell[2].eqe(opts.wavelength)
 
+try:
+    opts.optics_method = 'RCWA'
+    opts.orders = 49  # number of diffraction orders to keep in the RCWA solver
+    solar_cell_solver(solar_cell, 'qe', opts)
+    RCWA_EQE_NP = solar_cell[2].eqe(opts.wavelength)
+    RCWA_legend = 'RCWA (GaAs SC + NP array + DBR)'
+except RCWASolverError:
+    RCWA_EQE_NP = np.zeros_like(BL_EQE_NP)
+    RCWA_legend = '(RCWA solver S4 not available)'
+
+
 plt.figure()
 plt.plot(wl * 1e9, BL_EQE_NP, wl * 1e9, TMM_EQE, wl * 1e9, TMM_EQE_DBR, wl * 1e9, RCWA_EQE_NP)
 plt.legend(labels=['Beer-Lambert law (all structures)', 'TMM (GaAs SC)', 'TMM (GaAs SC + DBR)',
-                   'RCWA (GaAs SC + NP array + DBR)'])
+                   RCWA_legend])
 plt.xlabel("Wavelength (nm)")
 plt.ylabel("Quantum efficiency")
 plt.show()

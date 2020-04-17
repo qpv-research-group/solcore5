@@ -7,7 +7,13 @@ import platform
 import solcore
 from datetime import datetime
 
-smarts = solcore.config.smarts().replace('SOLCORE_ROOT', solcore.SOLCORE_ROOT)
+
+class SmartsSolverError(Exception):
+    pass
+
+
+smarts = solcore.config.smarts()
+
 
 system = platform.system()
 if system == 'Windows':
@@ -46,6 +52,9 @@ def calculate_spectrum_smarts(smarts_file_contents=None, filename='smarts295', t
     :param target_directory:
     :return:
     """
+    if not smarts:
+        raise SmartsSolverError(f"Smarts installation not found in {smarts}")
+
     if smarts_file_contents is None:
         smarts_file_contents = build_smarts_file(**get_default_smarts_object())
     else:

@@ -440,12 +440,14 @@ def qe_depletion(junction, options):
     # The contribution from the Emitter (top side).
     xa = cum_widths[id_top]
     xb = cum_widths[id_top + 1] - w_top
+
     deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
     j_sc_top = d_top * abs(deriv)
 
     # The contribution from the Base (bottom side).
     xa = cum_widths[id_bottom] + w_bottom
     xb = cum_widths[id_bottom + 1]
+
     deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
     j_sc_bot = d_bottom * abs(deriv)
 
