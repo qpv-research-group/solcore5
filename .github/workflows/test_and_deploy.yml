@@ -1,6 +1,11 @@
 name: testing_and_deploy
 
-on: [push]
+on:
+  push:
+
+  # everyday at 3 am UTC
+  schedule:
+    - cron:  '* 3 * * *'
 
 jobs:
   testing:
@@ -53,6 +58,14 @@ jobs:
       shell: powershell
 
     - name: Test with pytest
+      if: github.event_name != 'schedule'
+      env:
+        SOLCORE_SPICE: ngspice
+      run: |
+        pytest -r a -v --cov=solcore/ --ignore tests/test_examples.py
+
+    - name: Test with examples
+      if: github.event_name == 'schedule'
       env:
         SOLCORE_SPICE: ngspice
       run: |
