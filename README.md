@@ -3,7 +3,9 @@
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
 [![Documentation Status](http://readthedocs.org/projects/solcore5/badge/?version=latest)](http://solcore5.readthedocs.io/en/latest/?badge=latest)
 ![Solcore](https://github.com/qpv-research-group/solcore5/workflows/Solcore/badge.svg)
-[![image](https://coveralls.io/repos/github/qpv-research-group/solcore5/badge.svg?branch=devel)](https://coveralls.io/github/qpv-research-group/solcore5?branch=devel)
+[![codecov](https://codecov.io/gh/qpv-research-group/solcore5/branch/devel/graph/badge.svg)](https://codecov.io/gh/qpv-research-group/solcore5)
+
+
 
 Solcore
 =======
