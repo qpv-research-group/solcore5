@@ -63,8 +63,21 @@ if "update_manifest" in sys.argv:
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+
+
+    class bdist_wheel(_bdist_wheel):
+        def finalize_options(self):
+            _bdist_wheel.finalize_options(self)
+            self.root_is_pure = False
+
+except ImportError:
+    bdist_wheel = None
+
 
 install_requires = [
+    "numpy",
     "matplotlib",
     "scipy",
     "tmm",
@@ -117,4 +130,5 @@ setup(
     install_requires=install_requires,
     tests_require=tests_require,
     extras_require=extras_require,
+    cmdclass={'bdist_wheel': bdist_wheel},
 )
