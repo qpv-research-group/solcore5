@@ -86,11 +86,11 @@ jobs:
         
     - name: Publish package to TestPyPI
       if: success()
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.TEST_PYPI_PASSWORD }}
-        repository_url: https://test.pypi.org/legacy/
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}
+        TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+      run: twine upload --skip-existing dist/*
 
     - name: Codecov
       if: matrix.os == 'ubuntu-latest'
