@@ -392,6 +392,9 @@ def position_resolved(layer, dist, coh_tmm_data):
     Ef = (vw.T[0] * np.exp(1j * kz.T * dist)).T
     Eb = (vw.T[1] * np.exp(-1j * kz.T * dist)).T
 
+    print(layer)
+    #print(vw.shape, kz.shape, th.shape, n.shape)
+
     # Poynting vector
     if (pol == 's'):
         poyn = ((n * np.cos(th) * np.conj(Ef + Eb) * (Ef - Eb)).real) / (n_0 * np.cos(th_0)).real
@@ -406,6 +409,10 @@ def position_resolved(layer, dist, coh_tmm_data):
         absor = (n * np.conj(np.cos(th)) *
                  (kz * abs(Ef - Eb) ** 2 - np.conj(kz) * abs(Ef + Eb) ** 2)
                  ).imag / (n_0 * np.conj(np.cos(th_0))).real
+
+
+    print(absor.shape) # indexing is (position, wl)
+    print('max absor', np.max(absor[0:50]))
     return ({'poyn': poyn.T, 'absor': absor.T})
 
 
@@ -1042,7 +1049,7 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas):
     Starting with output of inc_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """
-
+    print('inc psoition resolved')
     layers = list(set(layer)) # unique layer indices
     A_per_layer = np.array(inc_absorp_in_each_layer(inc_tmm_data))
     fraction_reaching = 1 - np.cumsum(A_per_layer, axis = 0)

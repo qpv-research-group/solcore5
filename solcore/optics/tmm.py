@@ -110,15 +110,20 @@ def solve_tmm(solar_cell, options):
     A_per_layer = np.array(RAT['A_per_layer'][1:-1]) # first entry is R, last entry is T
     for j in range(len(solar_cell)):
 
+        solar_cell[j].layer_absorption = initial*np.sum(A_per_layer[layer:(layer+n_layers_junction[j])], axis = 0)
+
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
-        solar_cell[j].layer_absorption = initial*np.sum(A_per_layer[layer:(layer+n_layers_junction[j])], axis = 0)
+
         layer = layer + n_layers_junction[j]
 
     solar_cell.reflected = RAT['R'] * initial
     solar_cell.absorbed = sum([solar_cell[x].layer_absorption for x in np.arange(len(solar_cell))])
     solar_cell.transmitted = initial - solar_cell.reflected - solar_cell.absorbed
 
+
+def zero_func(x):
+    return 0
 
 def absorbed(self, z):
     out = self.diff_absorption(self.offset + z) * (z < self.width)
