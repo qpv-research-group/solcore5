@@ -30,6 +30,7 @@ import scipy as sp
 import numpy as np
 
 import sys
+import matplotlib.pyplot as plt
 
 EPSILON = sys.float_info.epsilon  # typical floating-point calculation error
 
@@ -379,6 +380,7 @@ def position_resolved(layer, dist, coh_tmm_data):
     Starting with output of coh_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """
+
     vw = coh_tmm_data['vw_list'][layer]
     kz = coh_tmm_data['kz_list'][layer]
     th = coh_tmm_data['th_list'][layer]
@@ -392,8 +394,8 @@ def position_resolved(layer, dist, coh_tmm_data):
     Ef = (vw.T[0] * np.exp(1j * kz.T * dist)).T
     Eb = (vw.T[1] * np.exp(-1j * kz.T * dist)).T
 
-    print(layer)
-    #print(vw.shape, kz.shape, th.shape, n.shape)
+
+    #print('vw', vw)
 
     # Poynting vector
     if (pol == 's'):
@@ -410,9 +412,25 @@ def position_resolved(layer, dist, coh_tmm_data):
                  (kz * abs(Ef - Eb) ** 2 - np.conj(kz) * abs(Ef + Eb) ** 2)
                  ).imag / (n_0 * np.conj(np.cos(th_0))).real
 
+    #if np.any(dist != 0):
 
-    print(absor.shape) # indexing is (position, wl)
-    print('max absor', np.max(absor[0:50]))
+
+     #   print('plot')
+        #plt.figure()
+        #plt.plot(dist, Ef[:,0])
+
+        #plt.ylim([0,0.05])
+        #plt.show()
+      #  plt.figure()
+       # plt.plot(dist, Eb[:,0])
+
+        #plt.ylim([0,0.2])
+        #plt.show()
+        #print(absor[1000:1250, 0])
+        #print('int',np.trapz(absor[:,0], dist))
+    #print('ashape', absor.shape)
+
+
     return ({'poyn': poyn.T, 'absor': absor.T})
 
 
@@ -545,7 +563,7 @@ class absorp_analytic_fn:
         Calculates absorption at a given depth z, where z=0 is the start of the
         layer.
         """
-
+        print(self.A1)
         if 'ndarray' in str(type(z)) and z.ndim > 0:
             part1 = self.A1[:, None] * np.exp(self.a1[:, None] * z[None, :])
             part2 = self.A2[:, None] * np.exp(-self.a1[:, None] * z[None, :])
@@ -554,9 +572,12 @@ class absorp_analytic_fn:
 
             part1[self.A1 < 1e-100, :] = 0
             return (part1 + part2 + part3 + part4)
+
         else:
             return (self.A1 * np.exp(self.a1 * z) + self.A2 * np.exp(-self.a1 * z)
                     + self.A3 * np.exp(1j * self.a3 * z) + np.conj(self.A3) * np.exp(-1j * self.a3 * z))
+
+
 
     def flip(self):
         """
@@ -1049,7 +1070,7 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas):
     Starting with output of inc_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """
-    print('inc psoition resolved')
+
     layers = list(set(layer)) # unique layer indices
     A_per_layer = np.array(inc_absorp_in_each_layer(inc_tmm_data))
     fraction_reaching = 1 - np.cumsum(A_per_layer, axis = 0)

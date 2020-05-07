@@ -352,7 +352,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
     :return: A dictionary with the R, A and T at the specified wavelengths and angle.
     """
     num_wl = len(wavelength)
-    print('coherent RAT', coherent)
+    #print('coherent RAT', coherent)
 
     if 'no_back_reflexion' in kwargs:
         warn('The no_back_reflexion warning is deprecated. Use no_back_reflection instead.', FutureWarning)
@@ -385,7 +385,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
     if pol in 'sp':
         if coherent:
             out = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-            A_per_layer =  tmm.absorp_in_each_layer(out)
+            A_per_layer = tmm.absorp_in_each_layer(out)
             output['R'] = out['R']
             output['A'] = 1 - out['R'] - out['T']
             output['T'] = out['T']
@@ -423,6 +423,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['all_p'] = out_p['power_entering_list']
             output['all_s'] = out_s['power_entering_list']
             output['A_per_layer'] = 0.5*(A_per_layer_p + A_per_layer_s)
+
 
     return output
 
@@ -501,7 +502,9 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     function of the position and the wavelength.
     """
 
-    print('coherent RATprof', coherent)
+    #print('coherent RATprof', coherent)
+
+
 
     if 'no_back_reflexion' in kwargs:
         warn('The no_back_reflexion warning is deprecated. Use no_back_reflection instead.', FutureWarning)
@@ -533,6 +536,22 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
                             'coherency_list parameter with as many elements as the number of layers in the '
                             'structure')
 
+    ## dealing with overflow issues. Sometimes in a highly absorbing medium, the backwards travelling amplitudes in the vw list
+    # become unphysically large towards the back of the layer. Since this only happens if the layer is highly absorbing, these
+    # values shouldn't affect the result, can set them to zero.
+    #print('width', stack.get_widths())
+    OD_per_layer = np.exp(-np.array(stack.get_widths()[1:-1])[:,None]*np.imag(stack.get_indices(wavelength)[1:-1])*4*np.pi/wavelength)
+    print(OD_per_layer.shape)
+
+    opaque = np.where(OD_per_layer < 1e-8)
+
+
+    #opaque_above = np.cumsum(1-OD_per_layer, axis=0)
+    #print(OD_per_layer)
+    #print(opaque_above)
+    #print(opaque)
+
+
     output = {'position': dist, 'absorption': np.zeros((num_wl, len(dist)))}
 
     if pol in 'sp':
@@ -540,15 +559,27 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
         if coherent:
             print('coh pol')
             out = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
-
+            A_per_layer = tmm.absorp_in_each_layer(out)
+            #print(np.cumsum(A_per_layer, axis=0).shape)
+            #print(np.cumsum(A_per_layer, axis=0))
+            #print(A_per_layer)
+            absorbed_above = np.cumsum(A_per_layer,axis=0)[:-1, :]
+            #print('absaboveshape', absorbed_above.shape)
+            #print(out['vw_list'].shape)
+            all_absorbed = np.where(absorbed_above > 0.9999)
+            #layer_all_absorbed = all_absorbed[0]
+            #print(absorbed_above.shape)
+            out['vw_list'][opaque[0], opaque[1], 1] = 0
+            out['vw_list'][all_absorbed[0]+1, all_absorbed[1], :] = 0
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
             data = tmm.position_resolved(layer, d_in_layer, out)
             output['absorption'] = data['absor']
 
         else:
-            print('incoh pol')
+            #print('incoh pol')
             out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
                               wavelength)
+            out['vw_list'][opaque[0], opaque[1], 1] = 0
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
             data = tmm.inc_position_resolved(layer, d_in_layer, out, coherency_list,
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
@@ -556,10 +587,11 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
 
     else:
         if coherent:
-            print('coh unpol')
+            #print('coh unpol')
             out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
             out2 = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-
+            out1['vw_list'][opaque[0], opaque[1], 1] = 0
+            out2['vw_list'][opaque[0], opaque[1], 1] = 0
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
             print('trans mat layer', layer)
             data_s = tmm.position_resolved(layer, d_in_layer, out1)
@@ -568,11 +600,13 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
             output['absorption'] = 0.5*(data_s['absor'] + data_p['absor'])
 
         else:
-            print('incoh unpol')
+            #print('incoh unpol')
             out1 = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
                               wavelength)
             out2 = tmm.inc_tmm('p', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
                               wavelength)
+            out1['vw_list'][opaque[0], opaque[1], 1] = 0
+            out2['vw_list'][opaque[0], opaque[1], 1] = 0
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
             data_s = tmm.inc_position_resolved(layer, d_in_layer, out1, coherency_list,
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
@@ -580,11 +614,6 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
 
             output['absorption'] = 0.5*(data_s + data_p)
-
-    print(output['absorption'][0,]) # 1st wavelength, all positions
-    a = output['absorption'] < 1e-50
-    print(a)
-    output['absorption'][a] == 0
 
     return output
 
