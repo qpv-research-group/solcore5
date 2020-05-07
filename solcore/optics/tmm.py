@@ -96,7 +96,7 @@ def solve_tmm(solar_cell, options):
                         pol=pol)
 
     print('Calculating absorption profile...')
-    out = calculate_absorption_profile(full_stack, wl * 1e9, dist=profile_position,
+    out = calculate_absorption_profile(full_stack, wl * 1e9, RAT, dist=profile_position,
                                        angle=theta, no_back_reflection=no_back_reflection,
                                        pol=pol, coherent=coherent,
                                        coherency_list=coherency_list)

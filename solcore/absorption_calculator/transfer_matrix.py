@@ -380,7 +380,8 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
                             'coherency_list parameter with as many elements as the number of layers in the '
                             'structure')
 
-    output = {'R': np.zeros(num_wl), 'A': np.zeros(num_wl), 'T': np.zeros(num_wl), 'all_p': [], 'all_s': []}
+    output = {'R': np.zeros(num_wl), 'A': np.zeros(num_wl), 'T': np.zeros(num_wl), 'all_p': [], 'all_s': [], 'out': [],
+              'out_s': [], 'out_p': [],  'A_per_layer_s': [], 'A_per_layer_p': []}
 
     if pol in 'sp':
         if coherent:
@@ -390,6 +391,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['A'] = 1 - out['R'] - out['T']
             output['T'] = out['T']
             output['A_per_layer'] = A_per_layer
+            output['out'] = out
         else:
             out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
             A_per_layer = np.array(tmm.inc_absorp_in_each_layer(out))
@@ -397,6 +399,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['A'] = 1 - out['R'] - out['T']
             output['T'] = out['T']
             output['A_per_layer'] = A_per_layer
+            output['out'] = out
     else:
         if coherent:
             out_p = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
@@ -407,6 +410,11 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['T'] = 0.5 * (out_p['T'] + out_s['T'])
             output['A'] = 1 - output['R'] - output['T']
             output['A_per_layer'] = 0.5*(A_per_layer_p + A_per_layer_s)
+
+            output['out_s'] = out_s
+            output['out_p'] = out_p
+            output['A_per_layer_s'] =  A_per_layer_s
+            output['A_per_layer_p'] = A_per_layer_p
 
         else:
 
@@ -423,6 +431,11 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['all_p'] = out_p['power_entering_list']
             output['all_s'] = out_s['power_entering_list']
             output['A_per_layer'] = 0.5*(A_per_layer_p + A_per_layer_s)
+
+            output['out_s'] = out_s
+            output['out_p'] = out_p
+            output['A_per_layer_s'] =  A_per_layer_s
+            output['A_per_layer_p'] = A_per_layer_p
 
 
     return output
@@ -476,7 +489,8 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflection=True
     return output
 
 
-def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size=2, dist=None,
+
+def calculate_absorption_profile(structure, wavelength, RAT_out, z_limit=None, steps_size=2, dist=None,
                                    no_back_reflection=True, angle=0, pol = 'u',
                                  coherent=True, coherency_list=None, **kwargs):
     """ It calculates the absorbed energy density within the material. From the documentation:
@@ -539,78 +553,73 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     ## dealing with overflow issues. Sometimes in a highly absorbing medium, the backwards travelling amplitudes in the vw list
     # become unphysically large towards the back of the layer. Since this only happens if the layer is highly absorbing, these
     # values shouldn't affect the result, can set them to zero.
-    #print('width', stack.get_widths())
+
     OD_per_layer = np.exp(-np.array(stack.get_widths()[1:-1])[:,None]*np.imag(stack.get_indices(wavelength)[1:-1])*4*np.pi/wavelength)
-    print(OD_per_layer.shape)
-
     opaque = np.where(OD_per_layer < 1e-8)
-
-
-    #opaque_above = np.cumsum(1-OD_per_layer, axis=0)
-    #print(OD_per_layer)
-    #print(opaque_above)
-    #print(opaque)
-
 
     output = {'position': dist, 'absorption': np.zeros((num_wl, len(dist)))}
 
     if pol in 'sp':
 
+
+
+
         if coherent:
             print('coh pol')
-            out = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
-            A_per_layer = tmm.absorp_in_each_layer(out)
-            #print(np.cumsum(A_per_layer, axis=0).shape)
-            #print(np.cumsum(A_per_layer, axis=0))
-            #print(A_per_layer)
-            absorbed_above = np.cumsum(A_per_layer,axis=0)[:-1, :]
-            #print('absaboveshape', absorbed_above.shape)
-            #print(out['vw_list'].shape)
+            A_per_layer = RAT_out['A_per_layer']
+            absorbed_above = np.cumsum(A_per_layer, axis=0)[:-1, :]
             all_absorbed = np.where(absorbed_above > 0.9999)
-            #layer_all_absorbed = all_absorbed[0]
-            #print(absorbed_above.shape)
-            out['vw_list'][opaque[0], opaque[1], 1] = 0
-            out['vw_list'][all_absorbed[0]+1, all_absorbed[1], :] = 0
+            RAT_out['out']['vw_list'][opaque[0], opaque[1], 1] = 0
+            RAT_out['out']['vw_list'][all_absorbed[0] + 1, all_absorbed[1], :] = 0
+            #print(print(RAT_out['out']['vw_list'].shape))
+            #out = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
+
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-            data = tmm.position_resolved(layer, d_in_layer, out)
+            data = tmm.position_resolved(layer, d_in_layer, RAT_out['out'])
             output['absorption'] = data['absor']
 
         else:
-            #print('incoh pol')
-            out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
-                              wavelength)
-            out['vw_list'][opaque[0], opaque[1], 1] = 0
+
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-            data = tmm.inc_position_resolved(layer, d_in_layer, out, coherency_list,
+            data = tmm.inc_position_resolved(layer, d_in_layer, RAT_out['out'], coherency_list,
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
             output['absorption'] = data
 
     else:
+
+
+
         if coherent:
-            #print('coh unpol')
-            out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-            out2 = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-            out1['vw_list'][opaque[0], opaque[1], 1] = 0
-            out2['vw_list'][opaque[0], opaque[1], 1] = 0
+            print('coh unpol')
+            A_per_layer_s = RAT_out['A_per_layer_s']
+            A_per_layer_p = RAT_out['A_per_layer_p']
+            absorbed_above_s = np.cumsum(A_per_layer_s, axis=0)[:-1, :]
+            absorbed_above_p = np.cumsum(A_per_layer_p, axis=0)[:-1, :]
+            all_absorbed_s = np.where(absorbed_above_s > 0.9999)
+            all_absorbed_p = np.where(absorbed_above_p > 0.9999)
+            RAT_out['out_s']['vw_list'][opaque[0], opaque[1], 1] = 0
+            RAT_out['out_p']['vw_list'][opaque[0], opaque[1], 1] = 0
+            RAT_out['out_s']['vw_list'][all_absorbed_s[0] + 1, all_absorbed_s[1], :] = 0
+            RAT_out['out_p']['vw_list'][all_absorbed_p[0] + 1, all_absorbed_p[1], :] = 0
+            #out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+            #out2 = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+            #out1['vw_list'][opaque[0], opaque[1], 1] = 0
+            #out2['vw_list'][opaque[0], opaque[1], 1] = 0
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-            print('trans mat layer', layer)
-            data_s = tmm.position_resolved(layer, d_in_layer, out1)
-            data_p = tmm.position_resolved(layer, d_in_layer, out2)
+            #print('trans mat layer', layer)
+            data_s = tmm.position_resolved(layer, d_in_layer, RAT_out['out_s'])
+            data_p = tmm.position_resolved(layer, d_in_layer, RAT_out['out_p'])
 
             output['absorption'] = 0.5*(data_s['absor'] + data_p['absor'])
 
         else:
-            #print('incoh unpol')
-            out1 = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
-                              wavelength)
-            out2 = tmm.inc_tmm('p', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
-                              wavelength)
-            out1['vw_list'][opaque[0], opaque[1], 1] = 0
-            out2['vw_list'][opaque[0], opaque[1], 1] = 0
+            print('incoh unpol')
+
+
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-            data_s = tmm.inc_position_resolved(layer, d_in_layer, out1, coherency_list,
+            data_s = tmm.inc_position_resolved(layer, d_in_layer, RAT_out['out_s'], coherency_list,
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
-            data_p = tmm.inc_position_resolved(layer, d_in_layer, out2, coherency_list,
+            data_p = tmm.inc_position_resolved(layer, d_in_layer, RAT_out['out_p'], coherency_list,
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
 
             output['absorption'] = 0.5*(data_s + data_p)
