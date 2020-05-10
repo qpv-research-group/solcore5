@@ -394,10 +394,6 @@ def position_resolved(layer, dist, coh_tmm_data):
     Ef = (vw.T[0] * np.exp(1j * kz.T * dist)).T
     Eb = (vw.T[1] * np.exp(-1j * kz.T * dist)).T
 
-    #print('Ef', Ef[layer==6][:, 23])
-    #print('Eb', Eb[layer==6][:, 23])
-    #print('vw', vw[layer==6][:, 23])
-    #print('vw', vw)
 
     # Poynting vector
     if (pol == 's'):
@@ -413,25 +409,6 @@ def position_resolved(layer, dist, coh_tmm_data):
         absor = (n * np.conj(np.cos(th)) *
                  (kz * abs(Ef - Eb) ** 2 - np.conj(kz) * abs(Ef + Eb) ** 2)
                  ).imag / (n_0 * np.conj(np.cos(th_0))).real
-
-
-    #if np.any(dist != 0):
-
-
-     #   print('plot')
-        #plt.figure()
-        #plt.plot(dist, Ef[:,0])
-
-        #plt.ylim([0,0.05])
-        #plt.show()
-      #  plt.figure()
-       # plt.plot(dist, Eb[:,0])
-
-        #plt.ylim([0,0.2])
-        #plt.show()
-        #print(absor[1000:1250, 0])
-        #print('int',np.trapz(absor[:,0], dist))
-    #print('ashape', absor.shape)
 
 
     return ({'poyn': poyn.T, 'absor': absor.T})
@@ -566,7 +543,7 @@ class absorp_analytic_fn:
         Calculates absorption at a given depth z, where z=0 is the start of the
         layer.
         """
-        #print(self.A1)
+
         if 'ndarray' in str(type(z)) and z.ndim > 0:
             part1 = self.A1[:, None] * np.exp(self.a1[:, None] * z[None, :])
             part2 = self.A2[:, None] * np.exp(-self.a1[:, None] * z[None, :])
@@ -1073,7 +1050,7 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     return forwardfunc.add(backfunc)
 
 
-def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas):
+def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zero_threshold=1e-6):
     """
     This function is vectorized. Analogous to position_resolved, but
     for layers (incoherent or coherent) in (partly) incoherent stacks.
@@ -1091,15 +1068,11 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas):
 
             fn = inc_find_absorp_analytic_fn(l, inc_tmm_data)
             A_layer = fn.run(dist[layer == l])
-            #A_local[:, layer == l] = fn.run(dist[layer == l])
 
         else:
             A_layer = beer_lambert(alphas[l] * 1e9, fraction_reaching[i], dist[layer == l] * 1e-9)
 
-            #A_local[:, layer == l] = beer_lambert(alphas[l]*1e9, fraction_reaching[i], dist[layer == l]*1e-9)
-
-        A_layer[fraction_reaching[i] < 1e-5, :] = 0
-
+        A_layer[fraction_reaching[i] < zero_threshold, :] = 0
         A_local[:, layer == l] = A_layer
 
     return A_local

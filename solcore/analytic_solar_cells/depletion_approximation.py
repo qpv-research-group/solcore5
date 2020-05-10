@@ -224,7 +224,6 @@ def iv_depletion(junction, options):
         xb = cum_widths[id_bottom + 1]
         deriv = get_J_sc_diffusion(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
         J_sc_bot = q * d_bottom * abs(deriv)
-        #print(q, d_bottom, abs(deriv))
 
         # The contribution from the SCR (includes the intrinsic region, if present).
         xa = cum_widths[id_top + 1] - w_top[id_v0]
@@ -232,7 +231,6 @@ def iv_depletion(junction, options):
         J_sc_scr = q * get_J_sc_SCR(xa, xb, g, wl, ph)
 
     # And, finally, we output the currents
-    #print(J_sc_top, J_sc_bot, J_sc_scr)
     junction.current = Jrec + JnDark + JpDark + V / R_shunt - J_sc_top - J_sc_bot - J_sc_scr
     junction.iv = interp1d(junction.voltage, junction.current, kind='linear', bounds_error=False, assume_sorted=True,
                            fill_value=(junction.current[0], junction.current[-1]))
@@ -352,8 +350,6 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
     g_vs_z = np.trapz(gg, wl, axis=1)
 
-    #print(gg[0:100, :])
-    #print(g_vs_z[0:100])
     g_vs_z[np.isnan(g_vs_z)] = 0
 
     A = lambda x: np.interp(x, zz, g_vs_z) / D + y0 / L ** 2
@@ -442,7 +438,6 @@ def qe_depletion(junction, options):
 
     g = junction.absorbed
     wl = options.wavelength
-    #wl_sp, ph = options.light_source.spectrum(output_units='photon_flux_per_m', x=wl)
     wl_sp, ph = LightSource(source_type='black body', x=wl, T=6000).spectrum(output_units='photon_flux_per_m', x=wl)
 
     # The contribution from the Emitter (top side).
@@ -450,7 +445,6 @@ def qe_depletion(junction, options):
     xb = cum_widths[id_top + 1] - w_top
 
     deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
-    #print('deriv', deriv)
     j_sc_top = d_top * abs(deriv)
 
 
@@ -477,12 +471,9 @@ def qe_depletion(junction, options):
     j_sc = j_sc_top + j_sc_bot + j_sc_scr
 
     eqe = j_sc / ph
-    print(j_sc[434:437], ph[434:437])
     eqe_emitter = j_sc_top / ph
     eqe_base = j_sc_bot / ph
     eqe_scr = j_sc_scr / ph
-
-    #print('top, bpt, scr', j_sc_top, j_sc_bot, j_sc_scr)
 
     junction.iqe = interp1d(wl, j_sc / current_absorbed)
 
@@ -507,15 +498,13 @@ def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
 
 
 def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
-    zz = np.linspace(xa, xb, 1002)[:-1]
-    #print('xa xb', xa, xb)
+    zz = np.linspace(xa, xb, 1002)[:-1] # excluding the last point - depending on the mesh/floating point errors, sometimes this is actually in the next layer
     gg = g(zz) * ph
     out = np.zeros_like(wl)
 
     for i in range(len(wl)):
 
-        if np.all(gg[:,i] == 0):
-            #print('no gen', i)
+        if np.all(gg[:,i] == 0): # no reason to solve anything if no generation at this wavelength
             out[i] = 0
 
         else:
@@ -546,7 +535,6 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
             else:
                 out[i] = solution.y[1][0]
 
-    #print('out', out)
     return out
 
 
