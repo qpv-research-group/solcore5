@@ -5,6 +5,7 @@ from scipy.integrate import solve_bvp
 from solcore.constants import kb, q
 from solcore.science_tracker import science_reference
 from solcore.state import State
+from solcore.light_source import LightSource
 
 
 def identify_layers(junction):
@@ -346,7 +347,7 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
     :return: out
     """
 
-    zz = np.linspace(xa, xb-1.5e-9, 1001)
+    zz = np.linspace(xa, xb, 1002)[:-1]
     gg = g(zz) * ph
 
     g_vs_z = np.trapz(gg, wl, axis=1)
@@ -387,7 +388,7 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
 
 def get_J_sc_SCR(xa, xb, g, wl, ph):
-    zz = np.linspace(xa, xb-1.5e-9, 1001)
+    zz = np.linspace(xa, xb, 1002)[:-1]
     gg = g(zz) * ph
     out = np.trapz(np.trapz(gg, wl, axis=1), zz)
 
@@ -441,7 +442,8 @@ def qe_depletion(junction, options):
 
     g = junction.absorbed
     wl = options.wavelength
-    wl_sp, ph = options.light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+    #wl_sp, ph = options.light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+    wl_sp, ph = LightSource(source_type='black body', x=wl, T=6000).spectrum(output_units='photon_flux_per_m', x=wl)
 
     # The contribution from the Emitter (top side).
     xa = cum_widths[id_top]
@@ -475,6 +477,7 @@ def qe_depletion(junction, options):
     j_sc = j_sc_top + j_sc_bot + j_sc_scr
 
     eqe = j_sc / ph
+    print(j_sc[434:437], ph[434:437])
     eqe_emitter = j_sc_top / ph
     eqe_base = j_sc_bot / ph
     eqe_scr = j_sc_scr / ph
@@ -496,7 +499,7 @@ def qe_depletion(junction, options):
                          'EQE_base': junction.eqe_base(wl), 'EQE_scr': junction.eqe_scr(wl)})
 
 def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
-    zz = np.linspace(xa, xb - 1.5e-9, 1001)
+    zz = np.linspace(xa, xb, 1002)[:-1]
     gg = g(zz) * ph
     out = np.trapz(gg, zz, axis=0)
 
@@ -504,7 +507,7 @@ def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
 
 
 def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
-    zz = np.linspace(xa, xb-1.5e-9, 1001)
+    zz = np.linspace(xa, xb, 1002)[:-1]
     #print('xa xb', xa, xb)
     gg = g(zz) * ph
     out = np.zeros_like(wl)

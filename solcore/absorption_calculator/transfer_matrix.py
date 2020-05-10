@@ -554,9 +554,9 @@ def calculate_absorption_profile(structure, wavelength, RAT_out, z_limit=None, s
     # become unphysically large towards the back of the layer. Since this only happens if the layer is highly absorbing, these
     # values shouldn't affect the result, can set them to zero.
 
-    OD_per_layer = np.exp(-np.array(stack.get_widths()[1:-1])[:,None]*np.imag(stack.get_indices(wavelength)[1:-1])*4*np.pi/wavelength)
-    opaque = np.where(OD_per_layer < 1e-3)
-    print('OD', OD_per_layer[:, 0])
+    #OD_per_layer = np.exp(-np.array(stack.get_widths()[1:-1])[:,None]*np.imag(stack.get_indices(wavelength)[1:-1])*4*np.pi/wavelength)
+    #opaque = np.where(OD_per_layer < 1e-3)
+    #print('OD', OD_per_layer[:, 0])
 
     output = {'position': dist, 'absorption': np.zeros((num_wl, len(dist)))}
 
