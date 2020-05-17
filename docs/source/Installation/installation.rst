@@ -1,6 +1,18 @@
 Installation and configuration
 ==============================
 
+Trying Solcore
+^^^^^^^^^^^^^^
+
+You can try Solcore without installing anything in your computer by using the online service `MyBinder.org <https://mybinder.org/>`_. To do so, just click in the following badge:
+
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/qpv-research-group/solcore5/devel
+
+It might take a few minutes to start the server. Be patient! Once launched, this service offers a full-feature Jupyter server with Solcore and all its dependencies installed on it. You can use it to try different features and run the examples shipped with Solcore, but it is not recommended for production: resources in MyBinder are limited and the execution depends on a reliable internet connexion.
+
+Once you are ready to install it in your own machine, go to the next section.
+
 Installing Solcore
 ^^^^^^^^^^^^^^^^^^
 
@@ -23,7 +35,7 @@ Now, installing Solcore should be as easy as writing in the terminal::
 This will download Solcore form the Pypi repository and install the package within the Python packages tree, but it will *NOT* install the PDD solver, for which you need a suitable Fortran compiler :doc:`(read this to install your Fortran compiler) <compilation>`. Assuming you have a Fortran compiler correctly installed and configured, you can install Solcore with the PDD solver by doing::
 
     pip install solcore
-	pip install --no-deps --force-reinstall --upgrade --install-option="--with_pdd" solcore
+	pip install --no-deps --force-reinstall --install-option="--with_pdd" solcore
 
 **NOTE**: Pip passes the --install-option to all the dependencies of the package and therefore the installation will fail since those dependencies do not have the option "--with_pdd". That is the reason why, for now, Solcore needs to be installed twice: the first one install Solcore normally with all the dependencies and the second one re-installs Solcore with PDD support. 
 
