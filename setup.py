@@ -63,18 +63,6 @@ if "update_manifest" in sys.argv:
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
-
-    class bdist_wheel(_bdist_wheel):
-        def finalize_options(self):
-            _bdist_wheel.finalize_options(self)
-            self.root_is_pure = False
-
-except ImportError:
-    bdist_wheel = None
-
 
 install_requires = [
     "numpy",
@@ -96,8 +84,8 @@ setup(
     version=config.get("Configuration", "version"),
     description="Python-based solar cell simulator",
     long_description=long_description,
-    url="https://github.com/dalonsoa/solcore5",
-    download_url="https://github.com/dalonsoa/solcore5/archive/v{}.tar.gz".format(
+    url="https://github.com/qpv-research-group/solcore5",
+    download_url="https://github.com/qpv-research-group/solcore5/archive/v{}.tar.gz".format(
         config.get("Configuration", "version")
     ),
     project_urls={
@@ -130,5 +118,4 @@ setup(
     install_requires=install_requires,
     tests_require=tests_require,
     extras_require=extras_require,
-    cmdclass={'bdist_wheel': bdist_wheel},
 )

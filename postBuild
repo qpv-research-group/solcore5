@@ -1,0 +1,4 @@
+set -ex
+
+apt install gfortran
+pip install --no-deps --force-reinstall --install-option="--with_pdd" -e .
