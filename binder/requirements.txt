@@ -1,1 +1,9 @@
 numpy
+matplotlib
+scipy
+tmm
+natsort
+regex
+cycler
+pyyaml
+yabox
