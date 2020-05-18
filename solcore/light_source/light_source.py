@@ -31,7 +31,9 @@ REGISTERED_CONVERTERS: dict = {}
 def reference_spectra():
     """ Function providing the standard reference spectra: AM0, AM1.5g and AM1.5d.
 
-    :return: A 2D array with 4 columns representing the wavelength, AM0, AM1.5g and AM1.5d standard spectra."""
+    :return: A 2D array with 4 columns representing the wavelength, AM0, AM1.5g and
+    AM1.5d standard spectra.
+    """
 
     science_reference(
         "Standard solar spectra",
@@ -49,7 +51,11 @@ def reference_spectra():
 
 
 class LightSource:
-    """ This is a common interface to access all types of light sources supported by Solcore: standard solar spectra (AM0, AM1.5g, and AM1.5d), blackbody radiation, laser light or spectra created from atmospheric data using SPECTRAL2 or SMARTS. Aditionally, it can also use experimentally measured spectra.
+    """ Common interface to access all types of light sources supported by Solcore.
+
+    It includes standard solar spectra (AM0, AM1.5g, and AM1.5d), blackbody radiation,
+    laser light or spectra created from atmospheric data using SPECTRAL2 or SMARTS.
+    Additionally, it can also use experimentally measured spectra.
     """
 
     type_of_source = [
@@ -390,6 +396,12 @@ class LightSource:
             elif units == "photon_flux_per_nm":
                 wl = x_data
                 spectrum = y_data * (c * h * 1e9 / wl)
+            elif units == "power_density_per_m":
+                wl = x_data * 1e-9
+                spectrum = y_data * 1e-9
+            elif units == "photon_flux_per_m":
+                wl = x_data * 1e-9
+                spectrum = y_data * (c * h / wl)
             elif units == "power_density_per_eV":
                 wl, spectrum = spectral_conversion_nm_ev(x_data, y_data)
             elif units == "photon_flux_per_eV":
