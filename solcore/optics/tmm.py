@@ -97,10 +97,10 @@ def solve_tmm(solar_cell, options):
                         pol=pol)
 
     print('Calculating absorption profile...')
-    out = calculate_absorption_profile(full_stack, wl * 1e9, RAT, dist=profile_position,
+    out = calculate_absorption_profile(full_stack, wl * 1e9, dist=profile_position,
                                        angle=theta, no_back_reflection=no_back_reflection,
                                        pol=pol, coherent=coherent,
-                                       coherency_list=coherency_list, zero_threshold=zero_threshold)
+                                       coherency_list=coherency_list, zero_threshold=zero_threshold, RAT_out=RAT)
 
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_tmm(out, initial)

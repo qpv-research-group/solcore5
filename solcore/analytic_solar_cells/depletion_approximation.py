@@ -475,7 +475,10 @@ def qe_depletion(junction, options):
     eqe_base = j_sc_bot / ph
     eqe_scr = j_sc_scr / ph
 
-    junction.iqe = interp1d(wl, j_sc / current_absorbed)
+    iqe =  j_sc / current_absorbed
+    iqe[np.isnan(iqe)] = 0 # if zero current_absorbed, get NaN in previous line; want 0 IQE
+
+    junction.iqe = interp1d(wl, iqe)
 
     junction.eqe = interp1d(wl, eqe, kind='linear', bounds_error=False, assume_sorted=True,
                             fill_value=(eqe[0], eqe[-1]))

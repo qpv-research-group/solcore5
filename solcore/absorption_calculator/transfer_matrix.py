@@ -490,9 +490,9 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflection=True
 
 
 
-def calculate_absorption_profile(structure, wavelength, RAT_out, z_limit=None, steps_size=2, dist=None,
-                                   no_back_reflection=True, pol = 'u',
-                                 coherent=True, coherency_list=None, zero_threshold=1e-6, **kwargs):
+def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size=2, dist=None,
+                                   no_back_reflection=True, angle=0, pol = 'u',
+                                 coherent=True, coherency_list=None, zero_threshold=1e-6, RAT_out=None, **kwargs):
     """ It calculates the absorbed energy density within the material. From the documentation:
 
     'In principle this has units of [power]/[volume], but we can express it as a multiple of incoming light power
@@ -504,12 +504,11 @@ def calculate_absorption_profile(structure, wavelength, RAT_out, z_limit=None, s
 
     :param structure: A solcore structure with layers and materials.
     :param wavelength: Wavelengths in which calculate the data (in nm). An array
-    :param output from calculate_rat for the same stack & options
     :param z_limit: Maximum value in the z direction
     :param steps_size: if the dist is not specified, the step size in nm to use in the depth-dependent calculation
     :param dist: the positions (in nm) at which to calculate depth-dependent absorption
     :param no_back_reflection: whether to suppress reflections from the back interface (True) or not (False)
-    :param angle: incidence angle in degrees
+    :param angle: incidence of angle in degrees
     :param pol: polarization of incident light: 's', 'p' or 'u' (unpolarized)
     :param coherent: True if all the layers are to be treated coherently, False otherwise
     :param coherency_list: if coherent is False, a list of 'c' (coherent) or 'i' (incoherent) for each layer
@@ -517,14 +516,20 @@ def calculate_absorption_profile(structure, wavelength, RAT_out, z_limit=None, s
     profile is completely set to zero for both coherent and incoherent calculations. This is applied on a wavelength-by-wavelength
     basis and is intended to prevent errors where integrating a weak absorption profile in a layer over many points leads to
     calculated EQE > total absorption in that layer.
+    :param RAT_out: output from calculate_rat for the same stack & options
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.
     """
 
-
     if 'no_back_reflexion' in kwargs:
         warn('The no_back_reflexion warning is deprecated. Use no_back_reflection instead.', FutureWarning)
         no_back_reflection = kwargs['no_back_reflexion']
+
+    if RAT_out is None:
+        print('need to calculate')
+        # R, A per layer, T not yet calculated, calculate now
+        RAT_out = calculate_rat(structure, wavelength, angle, pol=pol, coherent=coherent, coherency_list=coherency_list,
+                                no_back_reflection=no_back_reflection)
 
     num_wl = len(wavelength)
 

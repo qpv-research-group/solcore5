@@ -190,7 +190,7 @@ def test_get_J_sc_diffusion_top():
     gen_prof = interp1d(dist, output, axis = 0)
 
 
-    zz = np.linspace(xa, xb, 1001)
+    zz = np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
 
     g_vs_z = np.trapz(gg, wl, axis=1)
@@ -250,7 +250,7 @@ def test_get_J_sc_diffusion_bottom():
     gen_prof = interp1d(dist, output, axis = 0)
 
 
-    zz = np.linspace(xa, xb, 1001)
+    zz = np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
 
     g_vs_z = np.trapz(gg, wl, axis=1)
@@ -303,7 +303,7 @@ def test_get_J_sc_SCR():
     output = output.T
     gen_prof = interp1d(dist, output, axis = 0)
 
-    zz = np.linspace(xa, xb, 1001)
+    zz = np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
     expected = np.trapz(np.trapz(gg, wl, axis=1), zz)
 
@@ -335,7 +335,7 @@ def test_get_J_sc_SCR_vs_WL():
     output = output.T
     gen_prof = interp1d(dist, output, axis = 0)
 
-    zz = np.linspace(xa, xb, 1001)
+    zz = np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
     expected = np.trapz(gg, zz, axis=0)
 
@@ -374,12 +374,16 @@ def test_get_J_sc_diffusion_vs_WL_top():
     gen_prof = interp1d(dist, output, axis = 0)
 
 
-    zz = np.linspace(xa, xb, 1001)
+    zz =  np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
 
     expected = np.zeros_like(wl)
 
     for i in range(len(wl)):
+
+        if np.all(gg[:,i] == 0): # no reason to solve anything if no generation at this wavelength
+            expected[i] = 0
+
         A = lambda x: np.interp(x, zz, gg[:, i]) / D + minority / L ** 2
 
         def fun(x, y):
@@ -433,12 +437,15 @@ def test_get_J_sc_diffusion_vs_WL_bottom():
     output = output.T
     gen_prof = interp1d(dist, output, axis=0)
 
-    zz = np.linspace(xa, xb, 1001)
+    zz = np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
 
     expected = np.zeros_like(wl)
 
     for i in range(len(wl)):
+        if np.all(gg[:, i] == 0):  # no reason to solve anything if no generation at this wavelength
+            expected[i] = 0
+
         A = lambda x: np.interp(x, zz, gg[:, i]) / D + minority / L ** 2
 
         def fun(x, y):
