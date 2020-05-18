@@ -50,6 +50,8 @@ jobs:
         cd S4
         make boost
         make S4_pyext
+        cd ..
+        rm -rf S4
 
     - name: Install Solcore Linux and MacOS
       if: matrix.os != 'windows-latest'
