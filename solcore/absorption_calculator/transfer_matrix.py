@@ -352,10 +352,9 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
     :return: A dictionary with the R, A and T at the specified wavelengths and angle.
     """
     num_wl = len(wavelength)
-    #print('coherent RAT', coherent)
 
     if 'no_back_reflexion' in kwargs:
-        warn('The no_back_reflexion warning is deprecated. Use no_back_reflection instead.', FutureWarning)
+        warn('The no_back_reflexion argument is deprecated. Use no_back_reflection instead.', FutureWarning)
         no_back_reflection = kwargs['no_back_reflexion']
 
     if 'OptiStack' in str(type(structure)):
@@ -457,7 +456,7 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflection=True
     """
 
     if 'no_back_reflexion' in kwargs:
-        warn('The no_back_reflexion warning is deprecated. Use no_back_reflection instead.', FutureWarning)
+        warn('The no_back_reflexion argument is deprecated. Use no_back_reflection instead.', FutureWarning)
         no_back_reflection = kwargs['no_back_reflexion']
 
     num_wl = len(wavelength)
@@ -526,7 +525,6 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
         no_back_reflection = kwargs['no_back_reflexion']
 
     if RAT_out is None:
-        print('need to calculate')
         # R, A per layer, T not yet calculated, calculate now
         RAT_out = calculate_rat(structure, wavelength, angle, pol=pol, coherent=coherent, coherency_list=coherency_list,
                                 no_back_reflection=no_back_reflection)
@@ -562,8 +560,6 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     if pol in 'sp':
 
         if coherent:
-            print('coh pol')
-
             A_per_layer = RAT_out['A_per_layer']
             no_abs_in_layer = np.where(A_per_layer[:-1,:] < zero_threshold)
             RAT_out['out']['vw_list'][no_abs_in_layer[0], no_abs_in_layer[1], :] = 0
@@ -573,7 +569,6 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
             output['absorption'] = data['absor']
 
         else:
-            print('incoh pol')
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
             data = tmm.inc_position_resolved(layer, d_in_layer, RAT_out['out'], coherency_list,
                                              4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength, zero_threshold)

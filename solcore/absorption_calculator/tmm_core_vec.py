@@ -30,7 +30,6 @@ import scipy as sp
 import numpy as np
 
 import sys
-import matplotlib.pyplot as plt
 
 EPSILON = sys.float_info.epsilon  # typical floating-point calculation error
 

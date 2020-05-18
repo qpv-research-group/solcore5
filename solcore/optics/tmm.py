@@ -123,9 +123,6 @@ def solve_tmm(solar_cell, options):
     solar_cell.transmitted = initial - solar_cell.reflected - solar_cell.absorbed
 
 
-def zero_func(x):
-    return 0
-
 def absorbed(self, z):
     out = self.diff_absorption(self.offset + z) * (z < self.width)
 
