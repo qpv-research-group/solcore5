@@ -32,8 +32,8 @@ AlInP: SOLCORE_ROOT/material_data/AlInP-Material
 sopra: SOLCORE_ROOT/material_data/SOPRA_DB
 
 [External programs]
-spice:
-smarts:
+spice:/usr/bin/ngspice
+smarts:/root/SMAR22TS_295_Mac
 
 
 
