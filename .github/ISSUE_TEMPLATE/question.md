@@ -9,8 +9,8 @@ assignees: ''
 
 **Please, confirm the following:**
 
-- [ ] I have checked Solcore’s documentation and could not find the answer.
-- [ ] I haven’t found any other issue on a related topic.
+- [ ] I have checked [Solcore’s documentation](http://docs.solcore.solar/en/master/) and could not find the answer.
+- [ ] I haven’t found any [other issue](https://github.com/qpv-research-group/solcore5/issues?q=) on a related topic.
 
 **What’s the question?**
 Please, be concise and straight to the point
