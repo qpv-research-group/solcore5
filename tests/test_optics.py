@@ -1,3 +1,8 @@
+import sys
+from pytest import mark
+
+
+@mark.skipif(sys.platform != "linux")
 def test_calculate_rat_rcwa():
     import numpy as np
 

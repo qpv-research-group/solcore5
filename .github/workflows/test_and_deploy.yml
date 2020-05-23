@@ -28,7 +28,7 @@ jobs:
 
     - name: Install system dependencies in Linux
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install -y gfortran ngspice python3-tk libopenblas-dev libfftw3-dev libsuitesparse-dev
+      run: sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
     - name: Install system dependencies in MacOS
       if: matrix.os == 'macos-latest'
@@ -48,7 +48,7 @@ jobs:
       run: |
         git clone https://github.com/phoebe-p/S4
         cd S4
-        make boost
+        #make boost
         make S4_pyext
         cd ..
         rm -rf S4
