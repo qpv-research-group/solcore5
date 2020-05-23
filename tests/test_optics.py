@@ -24,7 +24,7 @@ def test_calculate_rat_rcwa():
     wl = np.linspace(300, 1000, 150)
 
     rat_np = calculate_rat_rcwa(
-        np_struct, size=(400, 400), orders=10, wavelength=wl, substrate=GaAs
+        np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl, substrate=GaAs
     )
 
     assert sorted(list(rat_np.keys())) == ["A", "R", "T"]
