@@ -345,7 +345,7 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
     :return: out
     """
 
-    zz = np.linspace(xa, xb, 1002)[:-1]
+    zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
 
     g_vs_z = np.trapz(gg, wl, axis=1)
@@ -384,7 +384,7 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
 
 def get_J_sc_SCR(xa, xb, g, wl, ph):
-    zz = np.linspace(xa, xb, 1002)[:-1]
+    zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
     out = np.trapz(np.trapz(gg, wl, axis=1), zz)
 
@@ -493,7 +493,7 @@ def qe_depletion(junction, options):
                          'EQE_base': junction.eqe_base(wl), 'EQE_scr': junction.eqe_scr(wl)})
 
 def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
-    zz = np.linspace(xa, xb, 1002)[:-1]
+    zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
     out = np.trapz(gg, zz, axis=0)
 
@@ -501,7 +501,7 @@ def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
 
 
 def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
-    zz = np.linspace(xa, xb, 1002)[:-1] # excluding the last point - depending on the mesh/floating point errors, sometimes this is actually in the next layer
+    zz = np.linspace(xa, xb, 1001, endpoint=False) # excluding the last point - depending on the mesh/floating point errors, sometimes this is actually in the next layer
     gg = g(zz) * ph
     out = np.zeros_like(wl)
 
