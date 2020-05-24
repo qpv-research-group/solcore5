@@ -32,6 +32,7 @@ def solve_tmm(solar_cell, options):
     BL_correction = options.BL_correction if 'BL_correction' in options.keys() else True
     theta = options.theta if 'theta' in options.keys() else 0 # angle IN DEGREES
     pol = options.pol if 'pol' in options.keys() else 'u'
+    zero_threshold = options.get("zero_threshold", 1e-5)
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1
@@ -99,7 +100,7 @@ def solve_tmm(solar_cell, options):
     out = calculate_absorption_profile(full_stack, wl * 1e9, dist=profile_position,
                                        angle=theta, no_back_reflection=no_back_reflection,
                                        pol=pol, coherent=coherent,
-                                       coherency_list=coherency_list)
+                                       coherency_list=coherency_list, zero_threshold=zero_threshold, RAT_out=RAT)
 
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_tmm(out, initial)
@@ -110,9 +111,11 @@ def solve_tmm(solar_cell, options):
     A_per_layer = np.array(RAT['A_per_layer'][1:-1]) # first entry is R, last entry is T
     for j in range(len(solar_cell)):
 
+        solar_cell[j].layer_absorption = initial*np.sum(A_per_layer[layer:(layer+n_layers_junction[j])], axis = 0)
+
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
-        solar_cell[j].layer_absorption = initial*np.sum(A_per_layer[layer:(layer+n_layers_junction[j])], axis = 0)
+
         layer = layer + n_layers_junction[j]
 
     solar_cell.reflected = RAT['R'] * initial
