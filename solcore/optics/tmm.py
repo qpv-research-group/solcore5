@@ -32,7 +32,7 @@ def solve_tmm(solar_cell, options):
     BL_correction = options.BL_correction if 'BL_correction' in options.keys() else True
     theta = options.theta if 'theta' in options.keys() else 0 # angle IN DEGREES
     pol = options.pol if 'pol' in options.keys() else 'u'
-    zero_threshold = options.zero_threshold if 'zero_threshold' in options.keys() else 1e-5
+    zero_threshold = options.get("zero_threshold", 1e-5)
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1
