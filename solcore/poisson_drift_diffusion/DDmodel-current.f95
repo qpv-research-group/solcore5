@@ -1861,7 +1861,8 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
         CHARACTER(50) :: OutputCode
         
         IF (info==1) THEN
-            OutputCode = 'Reached Maximum number of iterations.'
+            OutputCode = 'Not converging: Reached Maximum iterations.'
+            ERROR STOP OutputCode
         ELSE IF (info==2) THEN
             OutputCode = 'Reached Absolute Tolerance.'
         ELSE IF (info==3) THEN
