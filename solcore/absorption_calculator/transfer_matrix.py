@@ -6,6 +6,7 @@ import numpy as np
 import solcore
 
 from warnings import warn
+from collections.abc import Hashable
 
 from solcore.interpolate import interp1d
 from solcore.structure import ToStructure
@@ -21,6 +22,8 @@ def np_cache(function):
     Creates a cacheable version of a function which takes a 1D numpy array as input, by using a wrapping function
     which converts the array to a tuple. It returns a function which returns the same output as the input function,
     but can be cached, avoiding a bottleneck when optical constants in a material are looked up repeatedly.
+    
+    If the input argument is hashable already - eg. a single float number - then the function is not chached and is returned "as is".
 
     :param: function: the function of which a cacheable version is to be created
     :return: wrapper: the cacheable version of the function"""
@@ -31,7 +34,10 @@ def np_cache(function):
 
     @wraps(function)
     def wrapper(array):
-        return cached_wrapper(tuple(array))
+        if isinstance(array, Hashable):
+            return function(array)
+        else:
+            return cached_wrapper(tuple(array))
 
     # copy lru_cache attributes over too
     wrapper.cache_info = cached_wrapper.cache_info
