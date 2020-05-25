@@ -27,4 +27,7 @@ def test_calculate_rat_rcwa():
         np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl, substrate=GaAs
     )
 
-    assert sorted(list(rat_np.keys())) == ["A", "R", "T"]
+    assert sorted(list(rat_np.keys())) == ["A", "A_layer", "R", "T"]
+    for v in rat_np.values():
+        assert len(v) == len(wl)
+
