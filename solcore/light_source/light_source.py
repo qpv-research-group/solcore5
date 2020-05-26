@@ -74,8 +74,12 @@ class LightSource:
         :param kwargs:
         """
         msg = f"Unknown source {source_type}. " \
-              f"Valid options are: {tuple(REGISTERED_CONVERTERS.keys())}"
+              f"Valid options are: {self.type_of_source}"
         assert source_type in self.type_of_source, msg
+
+        msg = f"Unknown output units {output_units}. " \
+              f"Valid options are: {tuple(REGISTERED_CONVERTERS.keys())}"
+        assert output_units in REGISTERED_CONVERTERS, msg
 
         self.source_type = source_type
         self.x = x
