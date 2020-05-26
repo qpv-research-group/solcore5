@@ -67,7 +67,7 @@ class LightSource:
         "custom",
     ]
 
-    def __init__(self, source_type, x=None, concentration=1, **kwargs):
+    def __init__(self, source_type, x=None, output_units = "power_density_per_nm", concentration=1, **kwargs):
         """
 
         :param source_type:
@@ -87,7 +87,7 @@ class LightSource:
         self.power_density = 0
 
         self.options = {}
-        self.output_units = "power_density_per_nm"
+        self.output_units = output_units
         self.concentration = concentration
         self.options.update(kwargs)
         self._spectrum = None
