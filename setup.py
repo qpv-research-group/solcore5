@@ -75,7 +75,9 @@ install_requires = [
     "yabox",
 ]
 tests_require = ["pytest", "pytest-cov", "pytest-mock", "nbconvert", "nbformat"]
-extras_require = {"dev": tests_require + ["Sphinx", "pre-commit"]}
+docs_require = ["Sphinx", "recommonmark"]
+extras_require = {"dev": tests_require + docs_require + ["pre-commit"], 
+                  "docs": docs_require, "test": tests_require}
 
 
 setup(
