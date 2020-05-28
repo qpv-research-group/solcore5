@@ -1,10 +1,11 @@
-import os
 from scipy.interpolate import interp1d
 import numpy as np
-from typing import Callable, Optional
+from typing import Callable, Union, Optional
 from functools import wraps
+from abc import ABC, abstractmethod
+from copy import deepcopy
+from pytest import approx
 
-from solcore.science_tracker import science_reference
 from solcore import (
     spectral_conversion_nm_ev,
     spectral_conversion_nm_hz,
@@ -14,40 +15,9 @@ from solcore import (
 )
 from solcore.constants import q, h, c, kb
 
-from solcore.light_source.spectral2 import (
-    get_default_spectral2_object,
-    calculate_spectrum_spectral2,
-)
-from solcore.light_source.smarts import (
-    get_default_smarts_object,
-    calculate_spectrum_smarts,
-)
-
 
 REGISTERED_CONVERTERS: dict = {}
 """ Registered spectrum conversion functions."""
-
-
-def reference_spectra():
-    """ Function providing the standard reference spectra: AM0, AM1.5g and AM1.5d.
-
-    :return: A 2D array with 4 columns representing the wavelength, AM0, AM1.5g and
-    AM1.5d standard spectra.
-    """
-
-    science_reference(
-        "Standard solar spectra",
-        "ASTM G173-03(2012), Standard Tables for Reference Solar Spectral Irradiances: "
-        "Direct Normal and Hemispherical on 37° Tilted Surface, ASTM International, "
-        "West Conshohocken, PA, 2012, www.astm.org",
-    )
-
-    this_dir = os.path.split(__file__)[0]
-    output = np.loadtxt(
-        os.path.join(this_dir, "astmg173.csv"), dtype=float, delimiter=",", skiprows=2
-    )
-
-    return output
 
 
 class LightSource:
@@ -67,18 +37,29 @@ class LightSource:
         "custom",
     ]
 
-    def __init__(self, source_type, x=None, output_units = "power_density_per_nm", concentration=1, **kwargs):
+    def __init__(
+        self,
+        source_type,
+        x=None,
+        output_units="power_density_per_nm",
+        concentration=1,
+        **kwargs,
+    ):
         """
 
         :param source_type:
         :param kwargs:
         """
-        msg = f"Unknown source {source_type}. " \
-              f"Valid options are: {self.type_of_source}"
+        msg = (
+            f"Unknown source {source_type}. "
+            f"Valid options are: {self.type_of_source}"
+        )
         assert source_type in self.type_of_source, msg
 
-        msg = f"Unknown output units {output_units}. " \
-              f"Valid options are: {tuple(REGISTERED_CONVERTERS.keys())}"
+        msg = (
+            f"Unknown output units {output_units}. "
+            f"Valid options are: {tuple(REGISTERED_CONVERTERS.keys())}"
+        )
         assert output_units in REGISTERED_CONVERTERS, msg
 
         self.source_type = source_type
@@ -188,6 +169,7 @@ class LightSource:
         :param options: A dictionary that contains the 'version' of the standard spectrum: 'AM0', 'AM1.5g' or 'AM1.5d'
         :return: A function that takes as input the wavelengths and return the standard spectrum at those wavelengths.
         """
+        from solcore.light_source import reference_spectra
 
         try:
             version = options["version"]
@@ -208,9 +190,7 @@ class LightSource:
                 )
 
             self.x_internal = wl
-            self.power_density = (
-                np.trapz(y=spectrum, x=wl) * self.concentration
-            )
+            self.power_density = np.trapz(y=spectrum, x=wl) * self.concentration
             output = interp1d(
                 x=wl, y=spectrum, bounds_error=False, fill_value=0, assume_sorted=True
             )
@@ -234,7 +214,7 @@ class LightSource:
                 out = (
                     power
                     / np.sqrt(2 * np.pi * sigma2)
-                    * np.exp(-(x - center) ** 2 / 2 / sigma2)
+                    * np.exp(-((x - center) ** 2) / 2 / sigma2)
                 )
                 return out
 
@@ -290,9 +270,7 @@ class LightSource:
             wl_max = 2.897_772_9e6 / T
             self.x_internal = np.arange(0, wl_max * 10, wl_max / 100)
             sigma = 5.670_367e-8
-            self.power_density = (
-                sigma * T ** 4 * entendue / np.pi * self.concentration
-            )
+            self.power_density = sigma * T ** 4 * entendue / np.pi * self.concentration
 
             return BB
 
@@ -309,6 +287,11 @@ class LightSource:
         :param options: A dictionary that contain all the options for the calculator.
         :return: A function that takes as input the wavelengths and return the SPECTRAL2 calculated spectrum at those wavelengths.
         """
+        from solcore.light_source.spectral2 import (
+            get_default_spectral2_object,
+            calculate_spectrum_spectral2,
+        )
+
         default = get_default_spectral2_object()
 
         for opt in options:
@@ -320,9 +303,7 @@ class LightSource:
         wl, irradiance = calculate_spectrum_spectral2(options, power_density_in_nm=True)
 
         self.x_internal = wl
-        self.power_density = (
-            np.trapz(y=irradiance, x=wl) * self.concentration
-        )
+        self.power_density = np.trapz(y=irradiance, x=wl) * self.concentration
         output = interp1d(
             x=wl, y=irradiance, bounds_error=False, fill_value=0, assume_sorted=True
         )
@@ -334,6 +315,11 @@ class LightSource:
         :param options: A dictionary that contain all the options for the calculator.
         :return: A function that takes as input the wavelengths and return the SMARTS calculated spectrum at those wavelengths.
         """
+        from solcore.light_source.smarts import (
+            get_default_smarts_object,
+            calculate_spectrum_smarts,
+        )
+
         outputs = {
             "Extraterrestial": 2,
             "True direct": 2,
@@ -359,9 +345,7 @@ class LightSource:
             out = calculate_spectrum_smarts(options)
 
             self.x_internal = out[0]
-            self.power_density = (
-                np.trapz(y=out[output], x=out[0]) * self.concentration
-            )
+            self.power_density = np.trapz(y=out[output], x=out[0]) * self.concentration
             output = interp1d(
                 x=out[0],
                 y=out[output],
@@ -431,9 +415,7 @@ class LightSource:
                 )
 
             self.x_internal = wl
-            self.power_density = (
-                np.trapz(y=spectrum, x=wl) * self.concentration
-            )
+            self.power_density = np.trapz(y=spectrum, x=wl) * self.concentration
             output = interp1d(
                 x=wl, y=spectrum, bounds_error=False, fill_value=0, assume_sorted=True
             )
@@ -441,6 +423,90 @@ class LightSource:
 
         except KeyError as err:
             print(err)
+
+
+SPECTRUM_SIGNATURE = Callable[[Union[np.ndarray, float]], Union[np.ndarray, float]]
+"""Signature for the spectrum functions."""
+
+
+class SourceBase(ABC):
+    def __init__(
+        self,
+        output_units="power_density_per_nm",
+        concentration=1,
+        **kwargs,
+    ):
+        """ Base class for all light sources
+
+        :param x: Array with the spectral range in which to calculate the
+        spectrum. It must be in the "units" defined by the output_units parameter.
+        :param output_units: Units of the output spectrum.
+        :param concentration: Concentration of the light source.
+        :param kwargs: Options to update the light source.
+        """
+        msg = (
+            f"Unknown output units {output_units}. "
+            f"Valid options are: {tuple(REGISTERED_CONVERTERS.keys())}"
+        )
+        assert output_units in REGISTERED_CONVERTERS, msg
+
+        self.power_density = 0
+        self.output_units = output_units
+        self.concentration = concentration
+        self.options = deepcopy(kwargs)
+        self.cache = None
+
+    def spectrum(
+        self,
+        x: Optional[np.ndarray, float],
+        output_units: str = None,
+        concentration: Union[float, int] = None,
+        **kwargs,
+    ):
+        """ Returns the spectrum of the light in the requested units. Internally,
+        the spectrum is always managed in power density per nanometers, but the
+        output can be provided in other compatible units, such as power density per
+        Hertz or photon flux per eV.
+
+        :param x: (Default=None) If "x" is provided, it must be an array with the
+        spectral range in which to calculate the spectrum. It must be in the "units"
+        defined when creating the light source, or in those required by the
+        output_units parameter, if provided.
+        :param output_units: Units of the output spectrum.
+        :param concentration: Concentration of the light source.
+        :param kwargs: Options to update the light source. It can be any of the
+        options specific to the chosen type of light already defined source.
+        :return: Array with the spectrum in the requested units.
+        """
+        if (
+            self.cache
+            and not output_units
+            and not concentration
+            and not kwargs
+            and x == approx(self.cache[0])
+        ):
+            return self.cache
+
+        output_units = output_units if output_units is not None else self.output_units
+        con = concentration if concentration is not None else self.concentration
+
+        msg = f"Valid units are: {list(REGISTERED_CONVERTERS.keys())}."
+        assert output_units in REGISTERED_CONVERTERS, msg
+
+        self.options.update({k: v for k, v in kwargs.items() if k in self.options})
+        self.cache = (x, REGISTERED_CONVERTERS[output_units](self._spectrum, x) * con)
+        return self.cache
+
+    @abstractmethod
+    def _spectrum(self) -> SPECTRUM_SIGNATURE:
+        """Provides the callable that calculates the spectrum at the given inputs.
+
+        The callable will be passed to the conversion function corresponding
+        to the requested output units and, therefore, it MUST accept one single input
+        parameter, the wavelengths in nm, and provide as output the spectrum in
+        power_density_per_nm.
+        """
+        pass
 
 
 def register_conversion_function(fun: Callable):
