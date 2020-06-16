@@ -1,7 +1,6 @@
 from .adachi_alpha import create_adachi_alpha
 from .absorption_QW import calc_alpha, calc_emission
 from .transfer_matrix import calculate_absorption_profile, calculate_rat, calculate_ellipsometry, OptiStack
-from .rigorous_coupled_wave import calculate_rat_rcwa, calculate_absorption_profile_rcwa
 from .dielectric_constant_models import DielectricConstantModel
 from .sopra_db import sopra_database
 from .nk_db import download_db, search_db, create_nk_txt
