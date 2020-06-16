@@ -98,10 +98,11 @@ class OptiStack(object):
         flexibility.
 
         :param structure: A list with one or more layers.
-        :param no_back_reflexion: If reflexion from the back must be suppressed. Default=False.
+        :param no_back_reflection: If reflection from the back must be suppressed. Default=False.
         :param substrate: a semi-infinite transmission medium. Note that if no_back_reflection is set to True,
         adding a substrate won't make any difference.
-        :param: no_back_reflection: correction to no_back_reflex
+        :param incidence: a semi-infinite transmission medium. Note that add things may happen if
+        this material is absorbing
         """
 
         self.widths = []

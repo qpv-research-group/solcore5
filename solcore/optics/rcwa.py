@@ -5,6 +5,7 @@ import numpy as np
 import types
 from solcore.state import State
 
+
 rcwa_options = State()
 rcwa_options.size = [500, 500]
 rcwa_options.orders = 4
@@ -22,6 +23,7 @@ def solve_rcwa(solar_cell, options):
     """
     wl = options.wavelength
     solar_cell.wavelength = options.wavelength
+    parallel = options.parallel
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1
@@ -49,15 +51,24 @@ def solve_rcwa(solar_cell, options):
     # size = options.size if 'size' in options.keys() else [500, 500]
     # orders = options.orders if 'orders' in options.keys() else 4
     substrate = solar_cell.substrate
+    incidence = solar_cell.incidence
 
+    geom_list = [layer.geometry for layer in stack]
+    geom_list.insert(0, {})  # incidence medium
+    geom_list.append({})  # transmission medium
+
+    print(geom_list)
     print('Calculating RAT...')
-    RAT = calculate_rat_rcwa(stack, options.size, options.orders, wl * 1e9, theta=options.theta,
-                             phi=options.phi, pol=options.pol, substrate=substrate)
+    RAT = calculate_rat_rcwa(stack, options.size, geom_list, options.orders, wl * 1e9, incidence, substrate, theta=options.theta,
+                             phi=options.phi, pol=options.pol, parallel=parallel)
+
 
     print('Calculating absorption profile...')
-    out = calculate_absorption_profile_rcwa(stack, options.size, options.orders, wl * 1e9, RAT,
-                                            dist=position, theta=options.theta, phi=options.phi, pol=options.pol, substrate=substrate)
-
+    print(geom_list)
+    out = calculate_absorption_profile_rcwa(stack, options.size, geom_list, options.orders, wl*1e9, RAT['A'],
+                                      dist=position, theta=options.theta, phi=options.phi, pol=options.pol, incidence=incidence,
+                                      substrate=substrate,
+                                      parallel=options.parallel, n_jobs=options.n_jobs)
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_rcwa(out, initial)
 
