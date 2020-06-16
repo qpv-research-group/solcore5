@@ -361,7 +361,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
     num_wl = len(wavelength)
 
     if 'no_back_reflexion' in kwargs:
-        warn('The no_back_reflexion warning is deprecated. Use no_back_reflection instead.', FutureWarning)
+        warn('The no_back_reflexion argument is deprecated. Use no_back_reflection instead.', FutureWarning)
         no_back_reflection = kwargs['no_back_reflexion']
 
     if 'OptiStack' in str(type(structure)):
@@ -386,16 +386,18 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
                             'coherency_list parameter with as many elements as the number of layers in the '
                             'structure')
 
-    output = {'R': np.zeros(num_wl), 'A': np.zeros(num_wl), 'T': np.zeros(num_wl), 'all_p': [], 'all_s': []}
+    output = {'R': np.zeros(num_wl), 'A': np.zeros(num_wl), 'T': np.zeros(num_wl), 'all_p': [], 'all_s': [], 'out': [],
+              'out_s': [], 'out_p': [],  'A_per_layer_s': [], 'A_per_layer_p': []}
 
     if pol in 'sp':
         if coherent:
             out = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-            A_per_layer =  tmm.absorp_in_each_layer(out)
+            A_per_layer = tmm.absorp_in_each_layer(out)
             output['R'] = out['R']
             output['A'] = 1 - out['R'] - out['T']
             output['T'] = out['T']
             output['A_per_layer'] = A_per_layer
+            output['out'] = out
         else:
             out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree, wavelength)
             A_per_layer = np.array(tmm.inc_absorp_in_each_layer(out))
@@ -403,6 +405,7 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['A'] = 1 - out['R'] - out['T']
             output['T'] = out['T']
             output['A_per_layer'] = A_per_layer
+            output['out'] = out
     else:
         if coherent:
             out_p = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
@@ -413,6 +416,11 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['T'] = 0.5 * (out_p['T'] + out_s['T'])
             output['A'] = 1 - output['R'] - output['T']
             output['A_per_layer'] = 0.5*(A_per_layer_p + A_per_layer_s)
+
+            output['out_s'] = out_s
+            output['out_p'] = out_p
+            output['A_per_layer_s'] = A_per_layer_s
+            output['A_per_layer_p'] = A_per_layer_p
 
         else:
 
@@ -429,6 +437,12 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
             output['all_p'] = out_p['power_entering_list']
             output['all_s'] = out_s['power_entering_list']
             output['A_per_layer'] = 0.5*(A_per_layer_p + A_per_layer_s)
+
+            output['out_s'] = out_s
+            output['out_p'] = out_p
+            output['A_per_layer_s'] =  A_per_layer_s
+            output['A_per_layer_p'] = A_per_layer_p
+
 
     return output
 
@@ -449,7 +463,7 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflection=True
     """
 
     if 'no_back_reflexion' in kwargs:
-        warn('The no_back_reflexion warning is deprecated. Use no_back_reflection instead.', FutureWarning)
+        warn('The no_back_reflexion argument is deprecated. Use no_back_reflection instead.', FutureWarning)
         no_back_reflection = kwargs['no_back_reflexion']
 
     num_wl = len(wavelength)
@@ -481,9 +495,10 @@ def calculate_ellipsometry(structure, wavelength, angle, no_back_reflection=True
     return output
 
 
+
 def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size=2, dist=None,
                                    no_back_reflection=True, angle=0, pol = 'u',
-                                 coherent=True, coherency_list=None, **kwargs):
+                                 coherent=True, coherency_list=None, zero_threshold=1e-6, RAT_out=None, **kwargs):
     """ It calculates the absorbed energy density within the material. From the documentation:
 
     'In principle this has units of [power]/[volume], but we can express it as a multiple of incoming light power
@@ -499,10 +514,15 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     :param steps_size: if the dist is not specified, the step size in nm to use in the depth-dependent calculation
     :param dist: the positions (in nm) at which to calculate depth-dependent absorption
     :param no_back_reflection: whether to suppress reflections from the back interface (True) or not (False)
-    :param angle: incidence angle in degrees
+    :param angle: incidence of angle in degrees
     :param pol: polarization of incident light: 's', 'p' or 'u' (unpolarized)
     :param coherent: True if all the layers are to be treated coherently, False otherwise
     :param coherency_list: if coherent is False, a list of 'c' (coherent) or 'i' (incoherent) for each layer
+    :param zero_threshold: when the fraction of incident light absorbed in a layer is less than this value, the absorption
+    profile is completely set to zero for both coherent and incoherent calculations. This is applied on a wavelength-by-wavelength
+    basis and is intended to prevent errors where integrating a weak absorption profile in a layer over many points leads to
+    calculated EQE > total absorption in that layer.
+    :param RAT_out: output from calculate_rat for the same stack & options
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.
     """
@@ -510,6 +530,11 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     if 'no_back_reflexion' in kwargs:
         warn('The no_back_reflexion warning is deprecated. Use no_back_reflection instead.', FutureWarning)
         no_back_reflection = kwargs['no_back_reflexion']
+
+    if RAT_out is None:
+        # R, A per layer, T not yet calculated, calculate now
+        RAT_out = calculate_rat(structure, wavelength, angle, pol=pol, coherent=coherent, coherency_list=coherency_list,
+                                no_back_reflection=no_back_reflection)
 
     num_wl = len(wavelength)
 
@@ -542,41 +567,47 @@ def calculate_absorption_profile(structure, wavelength, z_limit=None, steps_size
     if pol in 'sp':
 
         if coherent:
-            out = tmm.coh_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), angle*degree, wavelength)
+            A_per_layer = RAT_out['A_per_layer']
+            no_abs_in_layer = np.where(A_per_layer[:-1,:] < zero_threshold)
+            RAT_out['out']['vw_list'][no_abs_in_layer[0], no_abs_in_layer[1], :] = 0
 
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-            data = tmm.position_resolved(layer, d_in_layer, out)
+            data = tmm.position_resolved(layer, d_in_layer, RAT_out['out'])
             output['absorption'] = data['absor']
 
         else:
-            out = tmm.inc_tmm(pol, stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
-                              wavelength)
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-            data = tmm.inc_position_resolved(layer, d_in_layer, out, coherency_list,
-                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
+            data = tmm.inc_position_resolved(layer, d_in_layer, RAT_out['out'], coherency_list,
+                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength, zero_threshold)
             output['absorption'] = data
 
     else:
+
+
+
         if coherent:
-            out1 = tmm.coh_tmm('s', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
-            out2 = tmm.coh_tmm('p', stack.get_indices(wavelength), stack.get_widths(), angle * degree, wavelength)
+
+            A_per_layer_s = RAT_out['A_per_layer_s']
+            A_per_layer_p = RAT_out['A_per_layer_p']
+            no_abs_in_layer_s = np.where(A_per_layer_s[:-1,:] < zero_threshold)
+            no_abs_in_layer_p = np.where(A_per_layer_p[:-1, :] < zero_threshold)
+            RAT_out['out_s']['vw_list'][no_abs_in_layer_s[0], no_abs_in_layer_s[1], :] = 0
+            RAT_out['out_p']['vw_list'][no_abs_in_layer_p[0], no_abs_in_layer_p[1], :] = 0
 
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-            data_s = tmm.position_resolved(layer, d_in_layer, out1)
-            data_p = tmm.position_resolved(layer, d_in_layer, out2)
+
+            data_s = tmm.position_resolved(layer, d_in_layer, RAT_out['out_s'])
+            data_p = tmm.position_resolved(layer, d_in_layer, RAT_out['out_p'])
 
             output['absorption'] = 0.5*(data_s['absor'] + data_p['absor'])
 
         else:
-            out1 = tmm.inc_tmm('s', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
-                              wavelength)
-            out2 = tmm.inc_tmm('p', stack.get_indices(wavelength), stack.get_widths(), coherency_list, angle * degree,
-                              wavelength)
+
             layer, d_in_layer = tmm.find_in_structure_with_inf(stack.get_widths(), dist)
-            data_s = tmm.inc_position_resolved(layer, d_in_layer, out1, coherency_list,
-                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
-            data_p = tmm.inc_position_resolved(layer, d_in_layer, out2, coherency_list,
-                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength)
+            data_s = tmm.inc_position_resolved(layer, d_in_layer, RAT_out['out_s'], coherency_list,
+                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength, zero_threshold)
+            data_p = tmm.inc_position_resolved(layer, d_in_layer, RAT_out['out_p'], coherency_list,
+                                             4*np.pi*np.imag(stack.get_indices(wavelength))/wavelength, zero_threshold)
 
             output['absorption'] = 0.5*(data_s + data_p)
 

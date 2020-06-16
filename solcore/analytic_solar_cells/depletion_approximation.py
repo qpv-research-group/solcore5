@@ -5,6 +5,7 @@ from scipy.integrate import solve_bvp
 from solcore.constants import kb, q
 from solcore.science_tracker import science_reference
 from solcore.state import State
+from solcore.light_source import LightSource
 
 
 def identify_layers(junction):
@@ -344,10 +345,12 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
     :return: out
     """
 
-    zz = np.linspace(xa, xb, 1001)
+    zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
 
     g_vs_z = np.trapz(gg, wl, axis=1)
+
+    g_vs_z[np.isnan(g_vs_z)] = 0
 
     A = lambda x: np.interp(x, zz, g_vs_z) / D + y0 / L ** 2
 
@@ -381,7 +384,7 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
 
 def get_J_sc_SCR(xa, xb, g, wl, ph):
-    zz = np.linspace(xa, xb, 1001)
+    zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
     out = np.trapz(np.trapz(gg, wl, axis=1), zz)
 
@@ -435,7 +438,7 @@ def qe_depletion(junction, options):
 
     g = junction.absorbed
     wl = options.wavelength
-    wl_sp, ph = options.light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+    wl_sp, ph = LightSource(source_type='black body', x=wl, T=6000).spectrum(output_units='photon_flux_per_m', x=wl)
 
     # The contribution from the Emitter (top side).
     xa = cum_widths[id_top]
@@ -443,6 +446,7 @@ def qe_depletion(junction, options):
 
     deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
     j_sc_top = d_top * abs(deriv)
+
 
     # The contribution from the Base (bottom side).
     xa = cum_widths[id_bottom] + w_bottom
@@ -471,7 +475,11 @@ def qe_depletion(junction, options):
     eqe_base = j_sc_bot / ph
     eqe_scr = j_sc_scr / ph
 
-    junction.iqe = interp1d(wl, j_sc / current_absorbed)
+    iqe =  j_sc / current_absorbed
+    iqe[np.isnan(iqe)] = 0 # if zero current_absorbed, get NaN in previous line; want 0 IQE
+
+    junction.iqe = interp1d(wl, iqe)
+
     junction.eqe = interp1d(wl, eqe, kind='linear', bounds_error=False, assume_sorted=True,
                             fill_value=(eqe[0], eqe[-1]))
     junction.eqe_emitter = interp1d(wl, eqe_emitter, kind='linear', bounds_error=False, assume_sorted=True,
@@ -485,7 +493,7 @@ def qe_depletion(junction, options):
                          'EQE_base': junction.eqe_base(wl), 'EQE_scr': junction.eqe_scr(wl)})
 
 def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
-    zz = np.linspace(xa, xb, 1001)
+    zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
     out = np.trapz(gg, zz, axis=0)
 
@@ -493,38 +501,42 @@ def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
 
 
 def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
-    zz = np.linspace(xa, xb, 1001)
+    zz = np.linspace(xa, xb, 1001, endpoint=False) # excluding the last point - depending on the mesh/floating point errors, sometimes this is actually in the next layer
     gg = g(zz) * ph
-
     out = np.zeros_like(wl)
 
     for i in range(len(wl)):
-        A = lambda x: np.interp(x, zz, gg[:, i]) / D + y0 / L ** 2
 
-        def fun(x, y):
-            out1 = y[1]
-            out2 = y[0] / L ** 2 - A(x)
-            return np.vstack((out1, out2))
+        if np.all(gg[:,i] == 0): # no reason to solve anything if no generation at this wavelength
+            out[i] = 0
 
-        if side == 'top':
-            def bc(ya, yb):
-                left = ya[1] - S / D * (ya[0] - y0)
-                right = yb[0]
-                return np.array([left, right])
         else:
-            def bc(ya, yb):
-                left = ya[0]
-                right = yb[1] - S / D * (yb[0] - y0)
-                return np.array([left, right])
+            A = lambda x: np.interp(x, zz, gg[:, i]) / D + y0 / L ** 2
 
-        guess = y0 * np.ones((2, zz.size))
-        guess[1] = np.zeros_like(guess[0])
-        solution = solve_bvp(fun, bc, zz, guess)
+            def fun(x, y):
+                out1 = y[1]
+                out2 = y[0] / L ** 2 - A(x)
+                return np.vstack((out1, out2))
 
-        if side == 'top':
-            out[i] = solution.y[1][-1]
-        else:
-            out[i] = solution.y[1][0]
+            if side == 'top':
+                def bc(ya, yb):
+                    left = ya[1] - S / D * (ya[0] - y0)
+                    right = yb[0]
+                    return np.array([left, right])
+            else:
+                def bc(ya, yb):
+                    left = ya[0]
+                    right = yb[1] - S / D * (yb[0] - y0)
+                    return np.array([left, right])
+
+            guess = y0 * np.ones((2, zz.size))
+            guess[1] = np.zeros_like(guess[0])
+            solution = solve_bvp(fun, bc, zz, guess)
+
+            if side == 'top':
+                out[i] = solution.y[1][-1]
+            else:
+                out[i] = solution.y[1][0]
 
     return out
 

@@ -139,7 +139,7 @@ def test_prepare_solar_cell_position(prepare_test_cell):
     options.position = None
     process_position(solar_cell, options, layer_widths)
     layer_offsets = np.insert(np.cumsum(layer_widths), 0, 0)
-    pos = [max(1e-10, width / 1000) for width in layer_widths]
+    pos = [max(1e-10, width / 5000) for width in layer_widths]
     expected = np.hstack(
         [
             np.arange(layer_offsets[j], layer_offsets[j] + layer_width, pos[j])
