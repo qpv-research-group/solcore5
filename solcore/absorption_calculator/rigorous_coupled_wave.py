@@ -123,6 +123,7 @@ def initialise_S(size, orders, geom_list, mats_oc, shapes_oc, shape_mats, widths
     # pass widths
     #print(widths)
     S = S4.New(size, orders)
+
     S.SetOptions(
         LatticeTruncation = options['LatticeTruncation'],
         DiscretizedEpsilon = options['DiscretizedEpsilon'],
