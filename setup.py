@@ -73,6 +73,7 @@ install_requires = [
     "cycler",
     "pyyaml",
     "yabox",
+    "joblib"
 ]
 tests_require = ["pytest", "pytest-cov", "pytest-mock", "nbconvert", "nbformat"]
 extras_require = {"dev": tests_require + ["Sphinx", "pre-commit"]}

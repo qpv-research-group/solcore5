@@ -12,6 +12,17 @@ rcwa_options.orders = 4
 rcwa_options.theta = 0
 rcwa_options.phi = 0
 rcwa_options.pol = 'u'
+rcwa_options.parallel = False
+rcwa_options.n_jobs = -1
+rcwa_options.rcwa_options = dict(LatticeTruncation='Circular',
+                        DiscretizedEpsilon=False,
+                        DiscretizationResolution=8,
+                        PolarizationDecomposition=False,
+                        PolarizationBasis='Default',
+                        LanczosSmoothing=False,
+                        SubpixelSmoothing=False,
+                        ConserveMemory=False,
+                        WeismannFormulation=False)
 
 
 def solve_rcwa(solar_cell, options):
@@ -45,30 +56,20 @@ def solve_rcwa(solar_cell, options):
     stack = all_layers
 
     position = options.position * 1e9
-    # angle_theta = options.angle_theta if 'angle_theta' in options.keys() else 0
-    # angle_phi = options.angle_phi if 'angle_phi' in options.keys() else 0
-    # pol = options.pol if 'pol' in options.keys() else 'u'
-    # size = options.size if 'size' in options.keys() else [500, 500]
-    # orders = options.orders if 'orders' in options.keys() else 4
+
     substrate = solar_cell.substrate
     incidence = solar_cell.incidence
 
-    geom_list = [layer.geometry for layer in stack]
-    geom_list.insert(0, {})  # incidence medium
-    geom_list.append({})  # transmission medium
-
-    print(geom_list)
     print('Calculating RAT...')
-    RAT = calculate_rat_rcwa(stack, options.size, geom_list, options.orders, wl * 1e9, incidence, substrate, theta=options.theta,
-                             phi=options.phi, pol=options.pol, parallel=parallel)
+    RAT = calculate_rat_rcwa(stack, options.size, options.orders, wl * 1e9, incidence, substrate, theta=options.theta,
+                             phi=options.phi, pol=options.pol, parallel=parallel, user_options=options.rcwa_options)
 
 
     print('Calculating absorption profile...')
-    print(geom_list)
-    out = calculate_absorption_profile_rcwa(stack, options.size, geom_list, options.orders, wl*1e9, RAT['A'],
+    out = calculate_absorption_profile_rcwa(stack, options.size, options.orders, wl*1e9, RAT['A'],
                                       dist=position, theta=options.theta, phi=options.phi, pol=options.pol, incidence=incidence,
                                       substrate=substrate,
-                                      parallel=options.parallel, n_jobs=options.n_jobs)
+                                      parallel=options.parallel, n_jobs=options.n_jobs, user_options=options.rcwa_options)
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_rcwa(out, initial)
 

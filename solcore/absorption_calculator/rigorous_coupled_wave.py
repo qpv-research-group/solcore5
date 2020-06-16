@@ -9,11 +9,19 @@ try:
 except ModuleNotFoundError:
     raise
 
+default_options = dict(LatticeTruncation='Circular',
+                        DiscretizedEpsilon=False,
+                        DiscretizationResolution=8,
+                        PolarizationDecomposition=False,
+                        PolarizationBasis='Default',
+                        LanczosSmoothing=False,
+                        SubpixelSmoothing=False,
+                        ConserveMemory=False,
+                        WeismannFormulation=False)
 
 
-
-def calculate_rat_rcwa(structure, size, geom_list, orders, wavelength, incidence, substrate, theta=0, phi=0, pol='u',
-                       parallel=False, n_jobs=-1, rcwa_options={}):
+def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate, theta=0, phi=0, pol='u',
+                       parallel=False, n_jobs=-1, user_options={}):
     """ Calculates the reflected, absorbed and transmitted intensity of the structure for the wavelengths and angles
     defined using an RCWA method implemented using the S4 package.
 
@@ -34,6 +42,10 @@ def calculate_rat_rcwa(structure, size, geom_list, orders, wavelength, incidence
     # write a separate function that makes the OptiStack structure into an S4 object, defined materials etc.
 
     ## Materials for the shapes need to be defined before you can do .SetRegion
+
+    geom_list = [layer.geometry for layer in structure]
+    geom_list.insert(0, {})  # incidence medium
+    geom_list.append({})  # transmission medium
 
     shape_mats, geom_list_str = necessary_materials(geom_list)
 
@@ -62,17 +74,7 @@ def calculate_rat_rcwa(structure, size, geom_list, orders, wavelength, incidence
 
     shapes_names = [str(x) for x in shape_mats]
 
-    rcwa_options = dict(LatticeTruncation='Circular',
-                        DiscretizedEpsilon=False,
-                        DiscretizationResolution=8,
-                        PolarizationDecomposition=False,
-                        PolarizationBasis='Default',
-                        LanczosSmoothing=False,
-                        SubpixelSmoothing=False,
-                        ConserveMemory=False,
-                        WeismannFormulation=False)
-
-    user_options = rcwa_options
+    rcwa_options = default_options
     rcwa_options.update(user_options)
 
     if parallel:
@@ -121,7 +123,7 @@ def initialise_S(size, orders, geom_list, mats_oc, shapes_oc, shape_mats, widths
     # pass widths
     #print(widths)
     S = S4.New(size, orders)
-    S.SetOptions(  # these are the default
+    S.SetOptions(
         LatticeTruncation = options['LatticeTruncation'],
         DiscretizedEpsilon = options['DiscretizedEpsilon'],
         DiscretizationResolution = options['DiscretizationResolution'],
@@ -134,18 +136,11 @@ def initialise_S(size, orders, geom_list, mats_oc, shapes_oc, shape_mats, widths
     )
 
 
-    for i1 in range(len(shapes_oc)):  # create the materials needed for all the shapes in S4
+    for i1 in range(len(shapes_oc)):
         S.SetMaterial('shape_mat_' + str(i1 + 1), shapes_oc[i1])
-        #print('shape_mat_' + str(i1+1), shapes_oc[i1])
 
-    ## Make the layers
-    #stack_OS = OptiStack(stack, bo_back_reflection=False, substrate=substrate)
-    #widths = stack_OS.get_widths()
-
-    for i1 in range(len(widths)):  # create 'dummy' materials for base layers including incidence and transmission media
-        S.SetMaterial('layer_' + str(i1 + 1), mats_oc[i1])  # This is not strictly necessary but it means S.SetExcitationPlanewave
-        # can be done outside the wavelength loop in calculate_rat_rcwa
-        #print('layer_' + str(i1 + 1), mats_oc[i1])
+    for i1 in range(len(widths)):
+        S.SetMaterial('layer_' + str(i1 + 1), mats_oc[i1])
 
     for i1 in range(len(widths)):  # set base layers
         layer_name = 'layer_' + str(i1 + 1)
@@ -196,20 +191,14 @@ def update_epsilon(S, stack_OS, shape_mats_OS, wl):
 
     return S
 
-def calculate_absorption_profile_rcwa(structure, size, geom_list, orders, wavelength, rat_output_A,
+def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_output_A,
                                       z_limit=None, steps_size=2, dist=None, theta=0, phi=0, pol='u', incidence=None,
                                       substrate=None,
-                                      parallel=False, n_jobs=-1):
-    """ It calculates the absorbed energy density within the material. From the documentation:
-
-    'In principle this has units of [power]/[volume], but we can express it as a multiple of incoming light power
-    density on the material, which has units [power]/[area], so that absorbed energy density has units of 1/[length].'
-
+                                      parallel=False, n_jobs=-1, user_options={}):
+    """ It calculates the absorbed energy density within the material.
     Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
-    calculate_rat as long as the spacial mesh (controlled by steps_thinest_layer) is fine enough. If the structure is
-    very thick and the mesh not thin enough, the calculation might diverege at short wavelengths.
-
-    For now, it only works for normal incident, coherent light.
+    calculate_rat as long as the spatial mesh is fine enough. If the structure is
+    very thick and the mesh not thin enough, the calculation might diverge at short wavelengths.
 
     :param structure: A solcore structure with layers and materials.
     :param size: list with 2 entries, size of the unit cell (right now, can only be rectangular
@@ -229,6 +218,9 @@ def calculate_absorption_profile_rcwa(structure, size, geom_list, orders, wavele
 
     num_wl = len(wavelength)
 
+    geom_list = [layer.geometry for layer in structure]
+    geom_list.insert(0, {})  # incidence medium
+    geom_list.append({})  # transmission medium
     # write a separate function that makes the OptiStack structure into an S4 object, defined materials etc.
     # write a separate function that makes the OptiStack structure into an S4 object, defined materials etc.
 
@@ -258,18 +250,7 @@ def calculate_absorption_profile_rcwa(structure, size, geom_list, orders, wavele
         layers_oc[:, i1 + 1] = (x.material.n(wavelength/1e9) + 1j * x.material.k(wavelength/1e9)) ** 2
 
     shapes_names = [str(x) for x in shape_mats]
-
-    rcwa_options = dict(LatticeTruncation='Circular',
-                        DiscretizedEpsilon=False,
-                        DiscretizationResolution=8,
-                        PolarizationDecomposition=False,
-                        PolarizationBasis='Default',
-                        LanczosSmoothing=False,
-                        SubpixelSmoothing=False,
-                        ConserveMemory=False,
-                        WeismannFormulation=False)
-
-    user_options = rcwa_options
+    rcwa_options = default_options
     rcwa_options.update(user_options)
 
     if dist is None:
