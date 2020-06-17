@@ -47,7 +47,7 @@ def test_calculate_absorption_profile_rcwa():
     NP_layer = Layer(
         si(th, "nm"),
         Air,
-        geometry=[{"type": "ellipse", "mat": TiO2, "center": (200, 200), "halfwidths": [70, 100]}],
+        geometry=[{"type": "ellipse", "mat": TiO2, "center": (200, 200), "halfwidths": [70, 100], "angle": 30}],
     )
     np_struct = Structure([NP_layer])
     wl = np.linspace(300, 1000, 10)
