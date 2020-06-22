@@ -28,7 +28,7 @@ def test_calculate_rat_rcwa():
 
     assert sorted(list(rat_np.keys())) == ["A", "A_per_layer", "A_pol", "R", "T"]
     for v in rat_np.values():
-        assert len(v) == len(wl)
+        assert v.shape[0] == len(wl)
 
 
 @mark.skipif(sys.platform != "linux", reason="Only works under linux")

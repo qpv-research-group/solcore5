@@ -79,7 +79,7 @@ def solve_rcwa(solar_cell, options):
 
 
     layer = 0
-    A_per_layer = np.array(RAT['A_per_layer'])
+    A_per_layer = np.array(RAT['A_per_layer'].T)
 
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.

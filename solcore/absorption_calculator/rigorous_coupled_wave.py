@@ -1,6 +1,5 @@
 import numpy as np
 import tmm
-from solcore.structure import Layer
 from solcore.absorption_calculator import OptiStack
 from joblib import Parallel, delayed
 from copy import deepcopy
@@ -55,13 +54,10 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
     at s and p polarizations if pol = 'u' was specified (this information is needed for the absorption profile calculation). Otherwise, A_pol is
     the same as A.
     """
-
     num_wl = len(wavelength)
 
     # write a separate function that makes the OptiStack structure into an S4 object, defined materials etc.
-    # write a separate function that makes the OptiStack structure into an S4 object, defined materials etc.
-
-    ## Materials for the shapes need to be defined before you can do .SetRegion
+    # Materials for the shapes need to be defined before you can do .SetRegion
 
     geom_list = [layer.geometry for layer in structure]
     geom_list.insert(0, {})  # incidence medium
@@ -119,7 +115,6 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
     R = np.stack([item[0] for item in allres])
     T = np.stack([item[1] for item in allres])
     A_mat = np.stack([item[2] for item in allres])
-
     if pol == 'u':
         A_per_layer = np.mean(A_mat, axis=1)
         A_pol = np.sum(A_mat, 2)
@@ -129,7 +124,7 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
 
 
     output = {'R': R, 'A': np.sum(A_per_layer, 1), 'T': T,
-              'A_per_layer': A_per_layer.T, 'A_pol': A_pol}
+              'A_per_layer': A_per_layer, 'A_pol': A_pol}
 
     return output
 
