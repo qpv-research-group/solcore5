@@ -48,17 +48,17 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
+    'recommonmark'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-source_parsers = {
-   '.md': 'recommonmark.parser.CommonMarkParser',
-}
-
 # The suffix of source filenames.
-source_suffix = ['.rst', '.md']
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'

@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 SOLCORE_ROOT = os.path.split(__file__)[0]
 default_config = os.path.join(SOLCORE_ROOT, "solcore_config.txt")
@@ -13,11 +14,12 @@ from .config_tools import SolcoreConfig
 
 config = SolcoreConfig(default_config, user_config)
 verbose = config.verbose_loading()
+__version__ = config.version()
 
 if config.welcome_message():
     print(
         f"""\n\tWelcome to Solcore - version {config.version()}
-\tCopyright (c) 2019, Imperial College London. All rights reserved.
+\tCopyright (c) {datetime.today().year}, Imperial College London. All rights reserved.
 \tSoftware released under the GNU Lesser General Public License.\n"""
     )
 
