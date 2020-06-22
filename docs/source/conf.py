@@ -68,7 +68,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Solcore'
-copyright = u'2018, Quantum Photovoltaics Group, Imperial College London'
+copyright = u'2020, Quantum Photovoltaics Group, Imperial College London'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -151,7 +151,7 @@ html_theme = 'sphinxdoc'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = 'header2.png'
+html_logo = 'header.png'
 
 
 # The name of an image file (within the static path) to use as favicon of the
