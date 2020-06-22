@@ -378,7 +378,7 @@ def RCWA_wl(wl, geom_list, l_oc, s_oc, s_names, pol, theta, phi, widths, size, o
             R_s, T_s, A_layer_s = vs_pol(1, 0)
             R_p, T_p, A_layer_p = vs_pol(0, 1)
             R = (R_s + R_p) / 2
-            T = (R_s + R_p) / 2
+            T = (T_s + T_p) / 2
             A_layer = np.stack([A_layer_s, A_layer_p])
 
     T = n_inc * T / np.cos(theta * np.pi / 180)
