@@ -26,7 +26,7 @@ rcwa_options.n_jobs = -1
 
 
 def solve_rcwa(solar_cell, options):
-    """ Calculates the reflection, transmission and absorption of a solar cell object using the rigorous coupled-wave analysis solver.
+    """Calculates the reflection, transmission and absorption of a solar cell object using the rigorous coupled-wave analysis solver.
 
     :param solar_cell: A solar_cell object
     :param options: Options for the solver

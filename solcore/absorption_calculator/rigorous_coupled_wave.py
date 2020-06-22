@@ -21,7 +21,7 @@ DEFAULT_OPTIONS = dict(LatticeTruncation='Circular',
 
 def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate, theta=0, phi=0, pol='u',
                        parallel=False, n_jobs=-1, user_options=None):
-    """ Calculates the reflected, absorbed and transmitted intensity of the structure for the wavelengths and angles
+    """Calculates the reflected, absorbed and transmitted intensity of the structure for the wavelengths and angles
     defined using an RCWA method implemented using the S4 package.
 
     :param structure: A solcore Structure object with layers and materials or a OptiStack object.
@@ -144,7 +144,7 @@ def rcwa_rat(S, n_layers):
 
 
 def initialise_S(size, orders, geom_list, mats_oc, shapes_oc, shape_mats, widths, options):
-    """ Makes an S4 simulation object using S4.New() according to the user's specified structure and options.
+    """Makes an S4 simulation object using S4.New() according to the user's specified structure and options.
 
     :param size: a tuple of 2-D vectors in the format ((ux, uy), (vx, vy)) given the x and y components of the lattice unit vectors.
     :param orders: number of Fourier orders to be retained in the RCWA/FMM calculation
@@ -232,7 +232,7 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
                                       z_limit=None, steps_size=2, dist=None, theta=0, phi=0, pol='u', incidence=None,
                                       substrate=None,
                                       parallel=False, n_jobs=-1, user_options=None):
-    """ It calculates the absorbed energy density within the material.
+    """It calculates the absorbed energy density within the material.
     Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
     calculate_rat as long as the spatial mesh is fine enough. If the structure is
     very thick and the mesh not thin enough, the calculation might diverge at short wavelengths.
