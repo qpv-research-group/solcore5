@@ -35,7 +35,7 @@ def solve_rcwa(solar_cell, options):
     wl = options.wavelength
     solar_cell.wavelength = options.wavelength
     parallel = options.parallel
-    rcwa_options = options.get("rcwa_options", {})
+    rcwa_options = options.get("rcwa_options", None)
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1

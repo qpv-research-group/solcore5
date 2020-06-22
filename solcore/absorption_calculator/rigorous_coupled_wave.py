@@ -21,7 +21,7 @@ DEFAULT_OPTIONS = dict(LatticeTruncation='Circular',
 
 
 def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate, theta=0, phi=0, pol='u',
-                       parallel=False, n_jobs=-1, user_options={}):
+                       parallel=False, n_jobs=-1, user_options=None):
     """ Calculates the reflected, absorbed and transmitted intensity of the structure for the wavelengths and angles
     defined using an RCWA method implemented using the S4 package.
 
@@ -95,7 +95,8 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
     shapes_names = [str(x) for x in shape_mats]
 
     rcwa_options = DEFAULT_OPTIONS
-    rcwa_options.update(user_options)
+    if user_options is not None:
+        rcwa_options.update(user_options)
 
     if parallel:
         allres = Parallel(n_jobs=n_jobs)(delayed(RCWA_wl)
@@ -177,21 +178,21 @@ def initialise_S(size, orders, geom_list, mats_oc, shapes_oc, shape_mats, widths
     )
 
 
-    for i1 in range(len(shapes_oc)):
-        S.SetMaterial('shape_mat_' + str(i1 + 1), shapes_oc[i1])
+    for i1, shape in enumerate(shapes_oc):
+        S.SetMaterial('shape_mat_' + str(i1 + 1), shape)
 
     for i1 in range(len(widths)):
         S.SetMaterial('layer_' + str(i1 + 1), mats_oc[i1])
 
-    for i1 in range(len(widths)):  # set base layers
+    for i1, width in enumerate(widths):  # set base layers
         layer_name = 'layer_' + str(i1 + 1)
         #print(layer_name)
-        if widths[i1] == float('Inf'):
+        if width == float('Inf'):
             #print('zero width')
             S.AddLayer(layer_name, 0, layer_name)  # Solcore4 has incidence and transmission media widths set to Inf;
             # in S4 they have zero width
         else:
-            S.AddLayer(layer_name, widths[i1], layer_name)
+            S.AddLayer(layer_name, width, layer_name)
 
         geometry = geom_list[i1]
 
@@ -235,7 +236,7 @@ def update_epsilon(S, stack_OS, shape_mats_OS, wl):
 def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_output_A,
                                       z_limit=None, steps_size=2, dist=None, theta=0, phi=0, pol='u', incidence=None,
                                       substrate=None,
-                                      parallel=False, n_jobs=-1, user_options={}):
+                                      parallel=False, n_jobs=-1, user_options=None):
     """ It calculates the absorbed energy density within the material.
     Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
     calculate_rat as long as the spatial mesh is fine enough. If the structure is
@@ -256,7 +257,6 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
     function of the position and the wavelength.
     """
-
     num_wl = len(wavelength)
 
     geom_list = [layer.geometry for layer in structure]
@@ -292,7 +292,9 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
 
     shapes_names = [str(x) for x in shape_mats]
     rcwa_options = DEFAULT_OPTIONS
-    rcwa_options.update(user_options)
+
+    if user_options is not None:
+        rcwa_options.update(user_options)
 
     if dist is None:
         if z_limit is None:

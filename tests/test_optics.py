@@ -26,7 +26,7 @@ def test_calculate_rat_rcwa():
         np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl, substrate=GaAs, incidence=Air
     )
 
-    assert sorted(list(rat_np.keys())) == ["A", "A_per_layer", "R", "T"]
+    assert sorted(list(rat_np.keys())) == ["A", "A_per_layer", "A_pol", "R", "T"]
     for v in rat_np.values():
         assert len(v) == len(wl)
 
@@ -56,7 +56,7 @@ def test_calculate_absorption_profile_rcwa():
         np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl, substrate=GaAs, incidence=Air
     )
 
-    A_output = rat_np['A']
+    A_output = rat_np['A_pol']
     step_size = 2
     dist = np.arange(0, th, step_size)
     result = calculate_absorption_profile_rcwa(np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl,
@@ -102,7 +102,7 @@ def test_pol_rcwa():
         np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl, substrate=GaAs, incidence=Air, pol='u'
     )
 
-    A_output_u = rat_np_u['A']
+    A_output_u = rat_np_u['A_pol']
     result_u = calculate_absorption_profile_rcwa(np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl,
                                                  rat_output_A=A_output_u, parallel=True, steps_size=step_size,
                                                  pol='u')
@@ -111,7 +111,7 @@ def test_pol_rcwa():
         np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl, substrate=GaAs, incidence=Air, pol='s'
     )
 
-    A_output_s = rat_np_s['A']
+    A_output_s = rat_np_s['A_pol']
     result_s = calculate_absorption_profile_rcwa(np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl,
                                                  rat_output_A=A_output_s, parallel=True, steps_size=step_size,
                                                  pol='s')
@@ -120,7 +120,7 @@ def test_pol_rcwa():
         np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl, substrate=GaAs, incidence=Air, pol='p'
     )
 
-    A_output_p = rat_np_p['A']
+    A_output_p = rat_np_p['A_pol']
     result_p = calculate_absorption_profile_rcwa(np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl,
                                                  rat_output_A=A_output_p, parallel=True, steps_size=step_size,
                                                  pol='p')
@@ -159,7 +159,7 @@ def test_arbitrary_pol_rcwa():
         pol=[1, 0]
     )
 
-    A_output = rat_np['A']
+    A_output = rat_np['A_pol']
     result = calculate_absorption_profile_rcwa(np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl,
                                                  rat_output_A=A_output, parallel=True, steps_size=step_size,
                                                  pol=[1, 0])
@@ -168,7 +168,7 @@ def test_arbitrary_pol_rcwa():
         np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl, substrate=GaAs, incidence=Air, pol='s'
     )
 
-    A_output_s = rat_np_s['A']
+    A_output_s = rat_np_s['A_pol']
     result_s = calculate_absorption_profile_rcwa(np_struct, size=((400, 0), (0, 400)), orders=10, wavelength=wl,
                                                  rat_output_A=A_output_s, parallel=True, steps_size=step_size,
                                                  pol='s')
@@ -218,7 +218,7 @@ def test_rcwa_polygon():
         pol=[1, 0]
     )
 
-    A_output_sq = rat_np_sq['A']
+    A_output_sq = rat_np_sq['A_pol']
     result_square = calculate_absorption_profile_rcwa(np_struct_square, size=((400, 0), (0, 400)), orders=10, wavelength=wl,
                                                  rat_output_A=A_output_sq, parallel=True, steps_size=step_size,
                                                  pol=[1, 0])
@@ -228,7 +228,7 @@ def test_rcwa_polygon():
         pol=[1, 0]
     )
 
-    A_output_pol = rat_np_pol['A']
+    A_output_pol = rat_np_pol['A_pol']
     result_polygon = calculate_absorption_profile_rcwa(np_struct_polygon, size=((400, 0), (0, 400)), orders=10, wavelength=wl,
                                                  rat_output_A=A_output_pol, parallel=True, steps_size=step_size,
                                                  pol=[1, 0])
