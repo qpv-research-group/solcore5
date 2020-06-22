@@ -9,7 +9,7 @@ try:
 except ModuleNotFoundError:
     raise
 
-default_options = dict(LatticeTruncation='Circular',
+DEFAULT_OPTIONS = dict(LatticeTruncation='Circular',
                         DiscretizedEpsilon=False,
                         DiscretizationResolution=8,
                         PolarizationDecomposition=False,
@@ -29,11 +29,31 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
     :param size: list with 2 entries, size of the unit cell (right now, can only be rectangular
     :param orders: number of orders to retain in the RCWA calculations.
     :param wavelength: Wavelengths (in nm) in which calculate the data.
+    :param incidence: a Solcore material describing the semi-infinite incidence medium
+    :param substrate: a Solcore material describing the semi-infinite transmission medium
     :param theta: polar incidence angle (in degrees) of the incident light. Default: 0 (normal incidence)
     :param phi: azimuthal incidence angle in degrees. Default: 0
     :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
-    :param substrate: semi-infinite transmission medium
-    :return: A dictionary with the R, A and T at the specified wavelengths and angle.
+    :param parallel: whether or not to execute calculation in parallel (over wavelengths), True or False. Default is False
+    :param n_jobs: the 'n_jobs' argument passed to Parallel from the joblib package. If set to -1, all available CPUs are used,
+    if set to 1 no parallel computing is executed. The number of CPUs used is given by n_cpus + 1 + n_jobs. Default is -1.
+    :param user_options: dictionary of options for S4. The list of possible entries and their values is:
+            LatticeTruncation: 'Circular' or 'Parallelogramic'
+            DiscretizedEpsilon: True or False
+            DiscretizationResolution: integer, default value 8
+            PolarizationDecomposition: True or False
+            PolarizationBasis: 'Default' or 'Normal' or 'Jones'
+            LanczosSmoothing: True or False
+            SubpixelSmoothing: True or False
+            ConserveMemory: True or False
+            WeismannFormulation: True or False
+
+            Further information on the function of these options can be found in the S4 Python API documentation. If no
+            options are provided, those from DEFAULT_OPTIONS are used.
+
+    :return: A dictionary with the R, total A and T at the specified wavelengths and angle. A_pol lists total absorption
+    at s and p polarizations if pol = 'u' was specified (this information is needed for the absorption profile calculation). Otherwise, A_pol is
+    the same as A.
     """
 
     num_wl = len(wavelength)
@@ -74,7 +94,7 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
 
     shapes_names = [str(x) for x in shape_mats]
 
-    rcwa_options = default_options
+    rcwa_options = DEFAULT_OPTIONS
     rcwa_options.update(user_options)
 
     if parallel:
@@ -99,8 +119,16 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
     T = np.stack([item[1] for item in allres])
     A_mat = np.stack([item[2] for item in allres])
 
-    output = {'R': R, 'A': np.sum(A_mat, 1), 'T': T,
-              'A_per_layer': A_mat}
+    if pol == 'u':
+        A_per_layer = np.mean(A_mat, axis=1)
+        A_pol = np.sum(A_mat, 2)
+    else:
+        A_per_layer = A_mat
+        A_pol = np.sum(A_per_layer, 1)
+
+
+    output = {'R': R, 'A': np.sum(A_per_layer, 1), 'T': T,
+              'A_per_layer': A_per_layer.T, 'A_pol': A_pol}
 
     return output
 
@@ -120,8 +148,20 @@ def rcwa_rat(S, n_layers):
 
 
 def initialise_S(size, orders, geom_list, mats_oc, shapes_oc, shape_mats, widths, options):
-    # pass widths
-    #print(widths)
+    """ Makes an S4 simulation object using S4.New() according to the user's specified structure and options.
+
+    :param size: a tuple of 2-D vectors in the format ((ux, uy), (vx, vy)) given the x and y components of the lattice unit vectors.
+    :param orders: number of Fourier orders to be retained in the RCWA/FMM calculation
+    :param: geom_list: list containing shape information fpr each layer. Format is a list of lists; entries of inner lists are one dictionary
+    per shape containing the shape information relevant for that shape.
+    :param: mats_oc: complex dielectric constant for each of the base layers (including incidence and transmission media)
+    :param: shapes_oc: complex dielectric constants for materials in the shapes inside layers
+    :param: shape_mats: names of the shape materials
+    :param: widths: widths of the layers, including the semi-infinite incidence and transmission medium
+    :param: options: S4 options (dictionary)
+
+    :return: S4 simulation object
+    """
     S = S4.New(size, orders)
 
     S.SetOptions(
@@ -251,7 +291,7 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
         layers_oc[:, i1 + 1] = (x.material.n(wavelength/1e9) + 1j * x.material.k(wavelength/1e9)) ** 2
 
     shapes_names = [str(x) for x in shape_mats]
-    rcwa_options = default_options
+    rcwa_options = DEFAULT_OPTIONS
     rcwa_options.update(user_options)
 
     if dist is None:
@@ -313,112 +353,67 @@ def rcwa_absorption_per_layer(S, n_layers):
 
 def RCWA_wl(wl, geom_list, l_oc, s_oc, s_names, pol, theta, phi, widths, size, orders, rcwa_options):
 
+    def vs_pol(s, p):
+        S.SetExcitationPlanewave((theta, phi), s, p, 0)
+        S.SetFrequency(1 / wl)
+        out = rcwa_rat(S, len(widths))
+        R = out['R']
+        T = out['T']
+        A_layer = rcwa_absorption_per_layer(S, len(widths))
+        return R, T, A_layer
+
     S = initialise_S(size, orders, geom_list, l_oc, s_oc, s_names, widths, rcwa_options)
 
     n_inc = np.real(np.sqrt(l_oc[0]))
 
     if len(pol) == 2:
 
-        S.SetExcitationPlanewave((theta, phi), pol[0], pol[1], 0)
-        S.SetFrequency(1 / wl)
-        out = rcwa_rat(S, len(widths))
-        R = out['R']
-        T = out['T']
-        A_layer = rcwa_absorption_per_layer(S, len(widths))
+        R, T, A_layer = vs_pol(pol[0], pol[1])
 
     else:
         if pol in 'sp':
-            if pol == 's':
-                s = 1
-                p = 0
-            elif pol == 'p':
-                s = 0
-                p = 1
-
-            S.SetExcitationPlanewave((theta, phi), s, p, 0)
-            S.SetFrequency(1 / wl)
-            out = rcwa_rat(S, len(widths))
-            R = out['R']
-            T = out['T']
-            A_layer = rcwa_absorption_per_layer(S, len(widths))
+            R, T, A_layer = vs_pol(int(pol == "s"), int(pol == "p"))
 
         else:
-
-            S.SetFrequency(1 / wl)
-            S.SetExcitationPlanewave((theta, phi), 0, 1, 0)  # p-polarization
-            out_p = rcwa_rat(S, len(widths))
-            A_layer_p = rcwa_absorption_per_layer(S, len(widths))
-
-
-            S.SetExcitationPlanewave((theta, phi), 1, 0, 0)  # s-polarization
-            out_s = rcwa_rat(S, len(widths))
-            A_layer_s = rcwa_absorption_per_layer(S, len(widths))
-
-            R = 0.5 * (out_p['R'] + out_s['R'])  # average
-            T = 0.5 * (out_p['T'] + out_s['T'])
-            A_layer = 0.5 * (A_layer_s + A_layer_p)
+            R_s, T_s, A_layer_s = vs_pol(1, 0)
+            R_p, T_p, A_layer_p = vs_pol(0, 1)
+            R = (R_s + R_p) / 2
+            T = (R_s + R_p) / 2
+            A_layer = np.stack([A_layer_s, A_layer_p])
 
     T = n_inc * T / np.cos(theta * np.pi / 180)
     A_layer = n_inc * A_layer / np.cos(theta * np.pi / 180)
     return R, T, A_layer
 
 
-def RCWA_wl_prof(wl, rat_output_A, dist, geom_list, layers_oc, shapes_oc, s_names, pol, theta, phi, widths, size, orders, rcwa_options):
-
-    S = initialise_S(size, orders, geom_list, layers_oc, shapes_oc, s_names, widths, rcwa_options)
-    profile_data = np.zeros(len(dist))
-
-
-    A = rat_output_A
-
-    if len(pol) == 2:
-
-        S.SetExcitationPlanewave((theta, phi), pol[0], pol[1], 0)
+def RCWA_wl_prof(wl, A, dist, geom_list, layers_oc, shapes_oc, s_names, pol, theta, phi, widths, size, orders, rcwa_options):
+    def vs_pol_prof(s, p, A_total):
+        profile = np.zeros(len(dist))
+        S.SetExcitationPlanewave((theta, phi), s, p, 0)
         S.SetFrequency(1 / wl)
         for j, d in enumerate(dist):
-            layer, d_in_layer = tmm.find_in_structure_with_inf(widths,
-                                                               d)  # don't need to change this
+            layer, d_in_layer = tmm.find_in_structure_with_inf(widths, d)
             layer_name = 'layer_' + str(layer + 1)  # layer_1 is air above so need to add 1
-            data = rcwa_position_resolved(S, layer_name, d_in_layer, A)
-            profile_data[j] = data
+            data = rcwa_position_resolved(S, layer_name, d_in_layer, A_total)
+            profile[j] = data
 
+        return profile
+
+    S = initialise_S(size, orders, geom_list, layers_oc, shapes_oc, s_names, widths, rcwa_options)
+    n_inc = np.real(np.sqrt(layers_oc[0]))
+    if len(pol) == 2:
+
+        profile_data = vs_pol_prof(pol[0], pol[1], A)
 
     else:
         if pol in 'sp':
-            if pol == 's':
-                s = 1
-                p = 0
-            elif pol == 'p':
-                s = 0
-                p = 1
-
-            S.SetExcitationPlanewave((theta, phi), s, p, 0)
-
-
-            S.SetFrequency(1 / wl)
-
-            for j, d in enumerate(dist):
-                layer, d_in_layer = tmm.find_in_structure_with_inf(widths,
-                                                                   d)  # don't need to change this
-                layer_name = 'layer_' + str(layer + 1)  # layer_1 is air above so need to add 1
-                data = rcwa_position_resolved(S, layer_name, d_in_layer, A)
-                profile_data[j] = data
+            profile_data = vs_pol_prof(int(pol == "s"), int(pol == "p"), A)
 
         else:
+            profile_s = vs_pol_prof(1, 0, A[0])
+            profile_p = vs_pol_prof(0, 1, A[1])
+            profile_data = 0.5*(profile_s + profile_p)
 
-
-            S.SetFrequency(1 / wl)
-            A = rat_output_A
-
-            for j, d in enumerate(dist):
-                layer, d_in_layer = tmm.find_in_structure_with_inf(widths,
-                                                                   d)  # don't need to change this
-                layer_name = 'layer_' + str(layer + 1)  # layer_1 is air above so need to add 1
-                S.SetExcitationPlanewave((theta, phi), 0, 1, 0)  # p-polarization
-                data_p = rcwa_position_resolved(S, layer_name, d_in_layer, A)
-                S.SetExcitationPlanewave((theta, phi), 1, 0, 0)  # p-polarization
-                data_s = rcwa_position_resolved(S, layer_name, d_in_layer, A)
-                profile_data[j] = 0.5*(data_s + data_p)
-
+    profile_data = n_inc * profile_data / np.cos(theta * np.pi / 180)
     return profile_data
 
