@@ -12,7 +12,7 @@ all_materials = []
 
 
 def this_dir_file(f):
-    return os.path.join(os.path.split(__file__)[0], f)
+    return "data/" + f
 
 
 # We need to build the solar cell layer by layer.
