@@ -67,15 +67,19 @@ class LightSource:
         "custom",
     ]
 
-    def __init__(self, source_type, x=None, **kwargs):
+    def __init__(self, source_type, x=None, output_units = "power_density_per_nm", concentration=1, **kwargs):
         """
 
         :param source_type:
         :param kwargs:
         """
         msg = f"Unknown source {source_type}. " \
-              f"Valid options are: {tuple(REGISTERED_CONVERTERS.keys())}"
+              f"Valid options are: {self.type_of_source}"
         assert source_type in self.type_of_source, msg
+
+        msg = f"Unknown output units {output_units}. " \
+              f"Valid options are: {tuple(REGISTERED_CONVERTERS.keys())}"
+        assert output_units in REGISTERED_CONVERTERS, msg
 
         self.source_type = source_type
         self.x = x
@@ -83,8 +87,8 @@ class LightSource:
         self.power_density = 0
 
         self.options = {}
-        self.output_units = "power_density_per_nm"
-        self.concentration = 1
+        self.output_units = output_units
+        self.concentration = concentration
         self.options.update(kwargs)
         self._spectrum = None
 

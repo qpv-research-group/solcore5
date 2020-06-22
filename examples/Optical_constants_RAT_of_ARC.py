@@ -23,11 +23,11 @@ def nk_convert(fname, energy):
 
 
 # Load nk data using nk_convert function...
-alinp_nk = nk_convert("AlInP_nk.csv", energy=E_eV)
-gainp_nk = nk_convert("GaInP_nk.csv", energy=E_eV)
-mgf_nk = nk_convert("MgF_nk.csv", energy=E_eV)
-sic_nk = nk_convert("SiCx_nk.csv", energy=E_eV)
-zns_nk = nk_convert("ZnS_nk.csv", energy=E_eV)
+alinp_nk = nk_convert("data/AlInP_nk.csv", energy=E_eV)
+gainp_nk = nk_convert("data/GaInP_nk.csv", energy=E_eV)
+mgf_nk = nk_convert("data/MgF_nk.csv", energy=E_eV)
+sic_nk = nk_convert("data/SiCx_nk.csv", energy=E_eV)
+zns_nk = nk_convert("data/ZnS_nk.csv", energy=E_eV)
 
 # Build the optical stack...
 stack = Structure([

@@ -12,11 +12,11 @@ from solcore.absorption_calculator.dielectric_constant_models import Oscillator
 E_eV = np.linspace(0.7, 4.2, 1000)
 
 # Load in ellipsomery data from file...
-Exp_Data = EllipsometryData("ge_ellipsometry_data.dat")
+Exp_Data = EllipsometryData("data/ge_ellipsometry_data.dat")
 Exp_Angles = Exp_Data.angles
 
 # Load in some experimental Ge n-k to compare fit with this...
-Ge_nk_Exp = np.loadtxt("Ge_nk.csv", delimiter=",", unpack=False)
+Ge_nk_Exp = np.loadtxt("data/Ge_nk.csv", delimiter=",", unpack=False)
 
 # Smooth the data with spline fitting...
 n_spline = InterpolatedUnivariateSpline(x=Ge_nk_Exp[::5, 0], y=Ge_nk_Exp[::5, 1], k=3)(E_eV)

@@ -1,6 +1,18 @@
 Installation and configuration
 ==============================
 
+Trying Solcore
+^^^^^^^^^^^^^^
+
+You can try Solcore without installing anything in your computer by using the online service `MyBinder.org <https://mybinder.org/>`_. To do so, just click in the following badge:
+
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/qpv-research-group/solcore5/devel
+
+It might take a few minutes to start the server. Be patient! Once launched, this service offers a full-feature Jupyter server with Solcore and all its dependencies installed on it. You can use it to try different features and run the examples shipped with Solcore, but it is not recommended for production: resources in MyBinder are limited and the execution depends on a reliable internet connexion.
+
+Once you are ready to install it in your own machine, go to the next section.
+
 Installing Solcore
 ^^^^^^^^^^^^^^^^^^
 
