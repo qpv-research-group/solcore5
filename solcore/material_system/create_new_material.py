@@ -33,11 +33,11 @@ def create_new_material(mat_name, n_source, k_source, parameter_source = None):
     CUSTOM_PATH = os.path.join(config.user_folder, "custom_materials")
 
     # check if there is already a material with this name
-    if mat_name in sorted(ParameterSystem().database.sections()) or mat_name in config.materials():
-        answer = input(f"A material named {mat_name} already exists in the database."
-                       f"Do you want to overwrite it [y/n]?")
-        if answer.lower() != "y":
-            return
+    #if mat_name in sorted(ParameterSystem().database.sections()) or mat_name in config.materials():
+    #    answer = input(f"A material named {mat_name} already exists in the database."
+    ##                   f"Do you want to overwrite it [y/n]?")
+    #   if answer.lower() != "y":
+    #        return
 
     # create a folder in the custom materials folders
     folder = os.path.join(CUSTOM_PATH, mat_name + '-Material')

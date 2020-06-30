@@ -343,8 +343,8 @@ class LightSource:
 
         try:
             output = outputs[options["output"]]
-
-            out = calculate_spectrum_smarts(options)
+            output = 1#int(options['IOUT'])-1
+            out_old,out = calculate_spectrum_smarts(options)
 
             self.x_internal = out[0]
             self.power_density = (

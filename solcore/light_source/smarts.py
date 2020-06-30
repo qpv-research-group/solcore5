@@ -95,12 +95,14 @@ def calculate_spectrum_smarts(smarts_file_contents=None, filename='smarts295', t
             data = []
             if os.path.exists(scn_file):
                 data = np.loadtxt(skipper(scn_file), unpack=True)
+                #print(data)
                 if target_directory is not None:
                     shutil.copy2(scn_file, scn_file.replace(working_directory, target_directory))
             if os.path.exists(inp_file):
                 if target_directory is not None:
                     shutil.copy2(inp_file, inp_file.replace(working_directory, target_directory))
             if os.path.exists(ext_file):
+                data_ext = np.loadtxt(ext_file,skiprows=1, unpack=True)
                 if target_directory is not None:
                     shutil.copy2(ext_file, ext_file.replace(working_directory, target_directory))
             if os.path.exists(out_file):
@@ -120,7 +122,7 @@ def calculate_spectrum_smarts(smarts_file_contents=None, filename='smarts295', t
     if len(data) == 0:
         raise ValueError('ERROR in SMARTS: Output file is empty. Likely error in the input parameters.')
 
-    return data
+    return data,data_ext
 
 
 def build_smarts_file(**kwargs):

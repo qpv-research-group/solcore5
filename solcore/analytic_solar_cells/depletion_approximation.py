@@ -117,7 +117,6 @@ def identify_parameters(junction, T, pRegion, nRegion, iRegion):
         dn = nRegion.material.hole_mobility * kbT / q
 
     ni = nRegion.material.ni
-
     Na = pRegion.material.Na
     Nd = nRegion.material.Nd
 
@@ -145,7 +144,7 @@ def iv_depletion(junction, options):
     niSquared = ni**2
 
     Vbi = (kbT / q) * np.log(Nd * Na / niSquared) if not hasattr(junction, "Vbi") else junction.Vbi  # Jenny p146
-
+    
     #Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, Vbi, pn_or_np = process_junction(junction, options)
 
     R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, 'R_shunt') else 1e14
@@ -154,7 +153,7 @@ def iv_depletion(junction, options):
     V = np.where(junction.voltage < Vbi - 0.001, junction.voltage, Vbi - 0.001)
 
     wn, wp = get_depletion_widths(junction, es, Vbi, V, Na, Nd, xi)
-
+    
     w = wn + wp + xi
 
     # Now it is time to calculate currents
@@ -214,7 +213,7 @@ def iv_depletion(junction, options):
         # The contribution from the Emitter (top side).
         xa = cum_widths[id_top]
         xb = cum_widths[id_top + 1] - w_top[id_v0]
-
+        
         deriv = get_J_sc_diffusion(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
         J_sc_top = q * d_top * abs(deriv)
 
@@ -343,7 +342,7 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
     :return: out
     """
-
+    
     zz = np.linspace(xa, xb, 1001)
     gg = g(zz) * ph
 
@@ -369,7 +368,7 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
     guess = y0 * np.ones((2, zz.size))
     guess[1] = np.zeros_like(guess[0])
-
+    
     solution = solve_bvp(fun, bc, zz, guess)
 
     if side == 'top':
@@ -545,11 +544,11 @@ def get_depletion_widths(junction, es, Vbi, V, Na, Nd, xi):
                               "Sze: The Physics of Semiconductor Devices, 2nd edition, John Wiley & Sons, Inc (2007)")
             wn = np.sqrt(2 * es * (Vbi - V) / (q * Nd))
             wp = np.sqrt(2 * es * (Vbi - V) / (q * Na))
-
+            
         else:
             wn = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
             wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
-
+           
     wn = wn if not hasattr(junction, "wn") else junction.wn
     wp = wp if not hasattr(junction, "wp") else junction.wp
 
