@@ -176,31 +176,3 @@ Junction = TypeVar("Junction", bound=JunctionBase)
 
 JUNCTIONS_REGISTRY: Dict[str, Type[Junction]] = {}
 """ Registry of all junctions available in Solcore. """
-
-
-if __name__ == "__main__":
-
-    class MyJunction(JunctionBase):
-        @property
-        def total_width(self) -> Optional[float]:
-            return None
-
-        @property
-        def widths(self) -> Optional[xr.DataArray]:
-            return None
-
-        def solve_iv(
-            self,
-            voltage: np.ndarray,
-            absorption: Optional[xr.DataArray] = None,
-            light_source: Optional[Type[LightSource]] = None,
-            **kwargs,
-        ) -> xr.Dataset:
-            return None
-
-        def solve_qe(
-            self, absorption: xr.DataArray, light_source: Type[LightSource], **kwargs,
-        ) -> xr.Dataset:
-            return None
-
-    print(JUNCTIONS_REGISTRY)
