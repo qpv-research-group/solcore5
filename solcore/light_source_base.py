@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Callable, Union, Optional
+from typing import Callable, Union, TypeVar
 from functools import wraps
 from abc import ABC, abstractmethod
 from copy import deepcopy
@@ -98,6 +98,9 @@ class LightSourceBase(ABC):
         power_density_per_nm.
         """
         pass
+
+
+LightSource = TypeVar("LightSource", bound=LightSourceBase)
 
 
 def register_conversion_function(fun: Callable):

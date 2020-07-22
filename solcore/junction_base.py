@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import Optional, Type
 from abc import ABC, abstractmethod
 
 import numpy as np
 import xarray as xr
+
+from .light_source_base import LightSource
 
 
 class JunctionBase(ABC):
@@ -61,15 +63,42 @@ class JunctionBase(ABC):
 
         Args:
             wavelength (np.ndarray): Array with the wavelengths in meters.
-            angle (Optional[np.ndarray]): Array with the angles in radians.
+            angle (np.ndarray, optional): Array with the angles in radians.
 
         Returns:
             A xr.DataArray with the absorptivity as a function of two coordinates,
             'wavelength' and 'angle'.
         """
 
-    def solve_iv(self):
-        raise NotImplementedError
+    @abstractmethod
+    def solve_iv(
+        self,
+        voltage: np.ndarray,
+        light_source: Optional[Type[LightSource]] = None,
+        absorption: Optional[xr.DataArray] = None,
+    ) -> xr.Dataset:
+        """ Calculates the IV curve of the junction.
+
+        If light_source is provided, then absorption must also be provided and the
+        light IV curve should be calculated instead. In this case, parameters like
+        Voc, Isc, fill factor, etc. are also provided.
+
+        Args:
+            voltage (np.ndarray): Array of voltages at which to calculate the IV curve.
+            light_source (LightSource, optional): Light source to be used in the case of
+                light IV.
+            absorption (xr.DataArray, optional): Array with the fraction of absorbed
+                light as a function of 'wavelength' and 'position'.
+
+        Returns:
+            A xr.Dataset with the output of the calculation. At a minimum, it must
+            contain a 'current' DataArray giving the current in amps as a function of
+            the input 'voltage'. If light IV is calculated, the curve parameters (Voc,
+            Isc, FF, Vmpp, Impp, Pmpp and eta) must be provided as attributes of the
+            Dataset.
+            Other DataArrays containing extra information resulting from the calculation
+            might be available, depending on the junction.
+        """
 
     def solve_qe(self):
         raise NotImplementedError
