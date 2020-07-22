@@ -74,21 +74,22 @@ class JunctionBase(ABC):
     def solve_iv(
         self,
         voltage: np.ndarray,
-        light_source: Optional[Type[LightSource]] = None,
         absorption: Optional[xr.DataArray] = None,
+        light_source: Optional[Type[LightSource]] = None,
+        **kwargs,
     ) -> xr.Dataset:
         """ Calculates the IV curve of the junction.
 
-        If light_source is provided, then absorption must also be provided and the
+        If absorption is provided, then light_source must also be provided and the
         light IV curve should be calculated instead. In this case, parameters like
-        Voc, Isc, fill factor, etc. are also provided.
+        Voc, Isc, fill factor, etc. are also calculated.
 
         Args:
             voltage (np.ndarray): Array of voltages at which to calculate the IV curve.
-            light_source (LightSource, optional): Light source to be used in the case of
-                light IV.
             absorption (xr.DataArray, optional): Array with the fraction of absorbed
                 light as a function of 'wavelength' and 'position'.
+            light_source (LightSource, optional): Light source to be used in the case of
+                light IV.
 
         Returns:
             A xr.Dataset with the output of the calculation. At a minimum, it must
@@ -100,11 +101,64 @@ class JunctionBase(ABC):
             might be available, depending on the junction.
         """
 
-    def solve_qe(self):
-        raise NotImplementedError
+    @abstractmethod
+    def solve_qe(
+        self, absorption: xr.DataArray, light_source: Type[LightSource], **kwargs,
+    ) -> xr.Dataset:
+        """ Calculates the external and internal quantum efficiency of the junction.
+
+        Args:
+            absorption (xr.DataArray, optional): Array with the fraction of absorbed
+                light as a function of 'wavelength' and 'position'.
+            light_source (LightSource, optional): Light source to use in the
+                calculation.
+
+        Returns:
+            A xr.Dataset with the output of the calculation. At a minimum, it must
+            contain 'eqe' and 'iqe' DataArrays giving the external and internal quantum
+            efficiencies, respectively, as a function of 'wavelength'.
+            Other DataArrays containing extra information resulting from the calculation
+            might be available, depending on the junction.
+        """
 
     def solve_equilibrium(self):
+        """ Calculates the junction band structure at equilibrium.
+
+        Args:
+
+        Raises:
+            NotImplementedError: If the junction does not implement this method.
+
+        Returns:
+            A xr.Dataset with the output of the calculation. At a minimum, it must
+            contain 'conduction_band' and 'valence_band' DataArrays giving the
+            conduction and valence band profiles, respectively, as a function of
+            'position'.
+            Other DataArrays containing extra information resulting from the calculation
+            might be available, depending on the junction.
+        """
         raise NotImplementedError
 
-    def solve_short_circuit(self):
+    def solve_short_circuit(
+        self, absorption: xr.DataArray, light_source: Type[LightSource], **kwargs,
+    ) -> xr.Dataset:
+        """ Calculates the junction band structure at short circuit.
+
+        Args:
+            absorption (xr.DataArray, optional): Array with the fraction of absorbed
+                light as a function of 'wavelength' and 'position'.
+            light_source (LightSource, optional): Light source to use in the
+                calculation.
+
+        Raises:
+            NotImplementedError: If the junction does not implement this method.
+
+        Returns:
+            A xr.Dataset with the output of the calculation. At a minimum, it must
+            contain 'conduction_band' and 'valence_band' DataArrays giving the
+            conduction and valence band profiles, respectively, as a function of
+            'position'.
+            Other DataArrays containing extra information resulting from the calculation
+            might be available, depending on the junction.
+        """
         raise NotImplementedError
