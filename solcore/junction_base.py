@@ -1,13 +1,21 @@
-from typing import Optional, Type
+from __future__ import annotations
+
+from typing import Optional, Type, Dict, TypeVar
 from abc import ABC, abstractmethod
 
 import numpy as np
 import xarray as xr
 
-from .light_source_base import LightSource
+from solcore.light_source_base import LightSource
 
 
 class JunctionBase(ABC):
+    def __init_subclass__(cls, **kwargs):
+        """ Registers any subclass of JunctionBase in the Junctions registry. """
+        if cls not in JUNCTIONS_REGISTRY:
+            JUNCTIONS_REGISTRY[cls.__name__] = cls
+        super().__init_subclass__(**kwargs)
+
     @property
     @abstractmethod
     def total_width(self) -> Optional[float]:
@@ -162,3 +170,37 @@ class JunctionBase(ABC):
             might be available, depending on the junction.
         """
         raise NotImplementedError
+
+
+Junction = TypeVar("Junction", bound=JunctionBase)
+
+JUNCTIONS_REGISTRY: Dict[str, Type[Junction]] = {}
+""" Registry of all junctions available in Solcore. """
+
+
+if __name__ == "__main__":
+
+    class MyJunction(JunctionBase):
+        @property
+        def total_width(self) -> Optional[float]:
+            return None
+
+        @property
+        def widths(self) -> Optional[xr.DataArray]:
+            return None
+
+        def solve_iv(
+            self,
+            voltage: np.ndarray,
+            absorption: Optional[xr.DataArray] = None,
+            light_source: Optional[Type[LightSource]] = None,
+            **kwargs,
+        ) -> xr.Dataset:
+            return None
+
+        def solve_qe(
+            self, absorption: xr.DataArray, light_source: Type[LightSource], **kwargs,
+        ) -> xr.Dataset:
+            return None
+
+    print(JUNCTIONS_REGISTRY)
