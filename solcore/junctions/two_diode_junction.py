@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional, Type, Mapping, NamedTuple
-from collections import ChainMap
+from copy import deepcopy
 import numpy as np
 import xarray as xr
 from scipy.optimize import root
 
 from ..junction_base import JunctionBase
 from ..light_source_base import LightSource
-from ..constants import q, kb
+from ..constants import q, kb, hbar, c
 
 
 class TwoDiodeData(NamedTuple):
@@ -40,11 +40,12 @@ class TwoDiodeData(NamedTuple):
 class TwoDiodeJunction(JunctionBase):
     """Junction class for the two diode model.
 
-    data (TwoDiodeData): Object storing the parameters of a 2 diode equation.
-    params (Mapping): Other parameters with physical information, possibly used during
-        the construction of the TwoDiodeData object.
-    options (Mapping): Options to pass to the iv calculator - used if series resistance
-        is not None.
+    Attributes:
+        data (TwoDiodeData): Object storing the parameters of a 2 diode equation.
+        params (Mapping): Other parameters with physical information, possibly used
+            during the construction of the TwoDiodeData object.
+        options (Mapping): Options to pass to the iv calculator - used if series
+            resistance is not None.
     """
 
     data: TwoDiodeData = TwoDiodeData()
@@ -52,7 +53,7 @@ class TwoDiodeJunction(JunctionBase):
     options: Optional[Mapping] = None
 
     @classmethod
-    def from_reference(
+    def from_reference_temperature(
         cls,
         band_gap: float,
         t: float,
@@ -60,7 +61,7 @@ class TwoDiodeJunction(JunctionBase):
         params: Optional[Mapping] = None,
         options: Optional[Mapping] = None,
     ):
-        """Initialises a TwoDiodeJunction out of TwoDiodeData at different temperature.
+        """Creates a TwoDiodeJunction from TwoDiodeData at different temperature.
 
         We want the junction to be defined at a certain temperature t, but we know
         the parameters at a different temperature, contained in the data object.
@@ -68,12 +69,11 @@ class TwoDiodeJunction(JunctionBase):
         parameters using the bandgap of the junction.
 
         Args:
-            band_gap: Bandgap associated to the junction.
+            band_gap: Bandgap associated to the junction, in J.
             t: Temperature of interest.
             data (TwoDiodeData): Object storing the parameters of a 2 diode equation at
                 a reference temperature.
-            params (Mapping): Other parameters with physical information, possibly used
-                during the construction of the TwoDiodeData object.
+            params (Mapping): Other parameters with physical information.
             options (Mapping): Options to pass to the iv calculator - used if series
                 resistance is not None.
 
@@ -83,18 +83,131 @@ class TwoDiodeJunction(JunctionBase):
         j01 = (
             data.j01
             * (t / data.t) ** 3
-            * np.exp(-q * band_gap / (data.n1 * kb) * (1 / t - 1 / data.t))
+            * np.exp(-band_gap / (data.n1 * kb) * (1 / t - 1 / data.t))
         )
         j02 = (
             data.j02
             * (t / data.t) ** (5.0 / 3.0)
-            * np.exp(-q * band_gap / (data.n2 * kb) * (1 / t - 1 / data.t))
+            * np.exp(-band_gap / (data.n2 * kb) * (1 / t - 1 / data.t))
         )
-        parameters = ChainMap(
-            {"band_gap": band_gap, "t_ref": data.t},
-            params if params is not None else {},
-        )
+
+        parameters = deepcopy(params) if params is not None else {}
+        parameters.update({"band_gap": band_gap, "t_ref": data.t})
         return cls(data._replace(t=t, j01=j01, j02=j02), parameters, options)
+
+    @classmethod
+    def from_bandgap_absorption(
+        cls,
+        band_gap: float,
+        n: float,
+        data: TwoDiodeData = TwoDiodeData(),
+        params: Optional[Mapping] = None,
+        options: Optional[Mapping] = None,
+    ):
+        """Creates a TwoDiodeJunction calculating j01 out of the bandgap absorption.
+
+        Calculate the reverse saturation current j01, assumed radiative, considering an
+        absorption equal to 1 above the bandgap. Light trapping is included by
+        considering the refractive index of the material:
+
+        .. math:: J_{01} = \\frac {q n^2 k_b T} {2 \\pi ^2 c^2 \\hbar ^3}
+        e^{\\frac{-E_g}{k_b T}} (E_g^2 + 2 k_b T E_g + 2 k_b^2 T^2)
+
+        Args:
+            band_gap (float): Bandgap associated to the junction, in J.
+            n (float): Refractive index of the junction.
+            data (TwoDiodeData): Object storing the parameters of a 2 diode equation.
+            params (Mapping): Other parameters with physical information.
+            options (Mapping): Options to pass to the iv calculator - used if series
+                resistance is not None.
+
+        Returns:
+            New instance of a TwoDiodeJunction
+        """
+        term1 = 2 * np.pi * n ** 2 * q / (4 * np.pi ** 3 * hbar ** 3 * c ** 2)
+        term2 = kb * data.t * np.exp(-band_gap / (kb * data.t))
+        term3 = (
+            band_gap ** 2 + (2 * band_gap * kb * data.t) + (2 * kb ** 2 * data.t ** 2)
+        )
+
+        parameters = deepcopy(params) if params is not None else {}
+        parameters.update({"band_gap": band_gap})
+        return cls(data._replace(j01=term1 * term2 * term3), parameters, options)
+
+    @classmethod
+    def from_voc(
+        cls,
+        voc: float,
+        data: TwoDiodeData = TwoDiodeData(),
+        params: Optional[Mapping] = None,
+        options: Optional[Mapping] = None,
+    ):
+        """Creates a TwoDiodeJunction calculating j02 based on the j01, jsc and the Voc.
+
+        It is just the result of solving the 2-diode equation for j02. Series resistance
+        is set to zero.
+
+        Args:
+            voc (float): Open circuit voltage, in V.
+            data (TwoDiodeData): Object storing the parameters of a 2 diode equation.
+            params (Mapping): Other parameters with physical information.
+            options (Mapping): Options to pass to the iv calculator - used if series
+                resistance is not None.
+
+        Returns:
+            New instance of a TwoDiodeJunction
+        """
+        if data.jsc is None:
+            msg = "'jsc' cannot be None when creating a TwoDiodeJunction from Voc."
+            raise ValueError(msg)
+
+        term1 = (
+            data.jsc
+            - data.j01 * (np.exp(q * voc / (data.n1 * kb * data.t)) - 1)
+            - voc / data.rsh
+        )
+        term2 = np.exp(q * voc / (data.n2 * kb * data.t)) - 1
+
+        parameters = deepcopy(params) if params is not None else {}
+        parameters.update({"Voc": voc})
+        return cls(data._replace(j02=term1 / term2, rs=0.0), parameters, options)
+
+    @classmethod
+    def from_radiative_efficiency(
+        cls,
+        v_ref: float,
+        reff: float,
+        data: TwoDiodeData = TwoDiodeData(),
+        params: Optional[Mapping] = None,
+        options: Optional[Mapping] = None,
+    ):
+        """Creates 2D junction calculating j02 based on j01 and radiative efficiency.
+
+        Series resistance is set to zero.
+
+        Args:
+            v_ref (float): Reference voltage at which the radiative efficiency is known.
+            reff (float): Radiative efficiency.
+            data (TwoDiodeData): Object storing the parameters of a 2 diode equation.
+            params (Mapping): Other parameters with physical information.
+            options (Mapping): Options to pass to the iv calculator - used if series
+                resistance is not None.
+
+        Returns:
+            New instance of a TwoDiodeJunction
+        """
+
+        term1 = data.j01 * (np.exp(q * v_ref / (data.n1 * kb * data.t)) - 1)
+        term2 = 1 / reff - 1
+        term3 = np.exp(q * v_ref / (data.n2 * kb * data.t)) - 1
+
+        parameters = deepcopy(params) if params is not None else {}
+        parameters.update({"Vref": v_ref, "Reff": reff})
+        return cls(
+            data._replace(j02=(term1 * term2 + v_ref / data.rsh) / term3, rs=0.0),
+            parameters,
+            options,
+        )
 
     def solve_iv(
         self,
