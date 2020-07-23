@@ -86,7 +86,6 @@ class JunctionBase(ABC):
         voltage: np.ndarray,
         absorption: Optional[xr.DataArray] = None,
         light_source: Optional[Type[LightSource]] = None,
-        **kwargs,
     ) -> xr.Dataset:
         """ Calculates the IV curve of the junction.
 
@@ -113,7 +112,7 @@ class JunctionBase(ABC):
 
     @abstractmethod
     def solve_qe(
-        self, absorption: xr.DataArray, light_source: Type[LightSource], **kwargs,
+        self, absorption: xr.DataArray, light_source: Type[LightSource],
     ) -> xr.Dataset:
         """ Calculates the external and internal quantum efficiency of the junction.
 
@@ -150,7 +149,7 @@ class JunctionBase(ABC):
         raise NotImplementedError
 
     def solve_short_circuit(
-        self, absorption: xr.DataArray, light_source: Type[LightSource], **kwargs,
+        self, absorption: xr.DataArray, light_source: Type[LightSource],
     ) -> xr.Dataset:
         """ Calculates the junction band structure at short circuit.
 
