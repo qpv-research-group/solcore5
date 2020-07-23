@@ -1,4 +1,9 @@
+from typing import Type
+
+import xarray as xr
 from pytest import raises, approx
+
+from solcore.light_source_base import LightSource
 
 
 def test_registry():
@@ -14,6 +19,11 @@ def test_not_overwritten_behavior():
     from solcore.junction_base import JunctionBase
 
     class MyJunction(JunctionBase):
+        def solve_equilibrium(self):
+            return None
+
+        def solve_short_circuit(self):
+            return None
 
         def solve_iv(self):
             return None
@@ -22,11 +32,6 @@ def test_not_overwritten_behavior():
             return None
 
     junc = MyJunction()
-    with raises(NotImplementedError):
-        junc.solve_equilibrium()
-
-    with raises(NotImplementedError):
-        junc.solve_short_circuit(None, None)
 
     assert junc.total_width is None
     assert junc.widths is None
@@ -42,7 +47,9 @@ def test_iv_parameters():
     voltage = np.arange(-1, 2, 0.05)
     current = s - voltage
 
-    expected = dict(Isc=s, Voc=s, Pmmp=(s/2)**2, Impp=(s/2), Vmpp=(s/2), FF=1/4)
+    expected = dict(
+        Isc=s, Voc=s, Pmmp=(s / 2) ** 2, Impp=(s / 2), Vmpp=(s / 2), FF=1 / 4
+    )
     actual1 = iv_parameters(voltage, current)
     actual2 = JunctionBase.iv_parameters(voltage, current)
     for k, v in expected.items():

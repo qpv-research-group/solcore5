@@ -107,7 +107,7 @@ class JunctionBase(ABC):
 
     @abstractmethod
     def solve_qe(
-        self, absorption: xr.DataArray, light_source: Type[LightSource],
+        self, absorption: xr.DataArray, light_source: Optional[Type[LightSource]] = None
     ) -> xr.Dataset:
         """Calculates the external and internal quantum efficiency of the junction.
 
@@ -124,13 +124,9 @@ class JunctionBase(ABC):
             Other DataArrays containing extra information resulting from the calculation
             might be available, depending on the junction."""
 
+    @abstractmethod
     def solve_equilibrium(self):
         """Calculates the junction band structure at equilibrium.
-
-        Args:
-
-        Raises:
-            NotImplementedError: If the junction does not implement this method.
 
         Returns:
             A xr.Dataset with the output of the calculation. At a minimum, it must
@@ -139,8 +135,8 @@ class JunctionBase(ABC):
             'position'.
             Other DataArrays containing extra information resulting from the calculation
             might be available, depending on the junction."""
-        raise NotImplementedError
 
+    @abstractmethod
     def solve_short_circuit(
         self, absorption: xr.DataArray, light_source: Type[LightSource],
     ) -> xr.Dataset:
@@ -152,9 +148,6 @@ class JunctionBase(ABC):
             light_source (LightSource, optional): Light source to use in the
                 calculation.
 
-        Raises:
-            NotImplementedError: If the junction does not implement this method.
-
         Returns:
             A xr.Dataset with the output of the calculation. At a minimum, it must
             contain 'conduction_band' and 'valence_band' DataArrays giving the
@@ -162,7 +155,6 @@ class JunctionBase(ABC):
             'position'.
             Other DataArrays containing extra information resulting from the calculation
             might be available, depending on the junction."""
-        raise NotImplementedError
 
     @staticmethod
     def iv_parameters(voltage: np.ndarray, current: np.ndarray) -> dict:
