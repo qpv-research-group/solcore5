@@ -100,7 +100,7 @@ class JunctionBase(ABC):
             A xr.Dataset with the output of the calculation. At a minimum, it must
             contain a 'current' DataArray giving the current in amps as a function of
             the input 'voltage'. If light IV is calculated, the curve parameters (Voc,
-            Isc, FF, Vmpp, Impp, Pmpp and eta) must be provided as attributes of the
+            Isc, FF, Vmpp, Impp and Pmpp) must be provided as attributes of the
             Dataset.
             Other DataArrays containing extra information resulting from the calculation
             might be available, depending on the junction."""
@@ -164,8 +164,47 @@ class JunctionBase(ABC):
             might be available, depending on the junction."""
         raise NotImplementedError
 
+    @staticmethod
+    def iv_parameters(voltage: np.ndarray, current: np.ndarray) -> dict:
+        """Calculates Voc, Isc, FF, Vmpp, Impp and Pmpp.
+
+        Args:
+            voltage (np.ndarray):
+            current (np.ndarray):
+
+        Returns:
+            A dictionary with the calculated parameters.
+        """
+        return iv_parameters(voltage, current)
+
 
 Junction = TypeVar("Junction", bound=JunctionBase)
 
 JUNCTIONS_REGISTRY: Dict[str, Type[Junction]] = {}
 """Registry of all junctions available in Solcore."""
+
+
+def iv_parameters(voltage: np.ndarray, current: np.ndarray) -> Dict[str, float]:
+    """Calculates Voc, Isc, FF, Vmpp, Impp and Pmpp.
+
+    Args:
+        voltage (np.ndarray):
+        current (np.ndarray):
+
+    Returns:
+        A dictionary with the calculated parameters.
+    """
+    i0 = np.abs(voltage).argmin()
+    iVoc = np.abs(current).argmin()
+    step = 1 if iVoc > i0 else -1
+    q = slice(i0, iVoc, step)
+    power = np.abs(voltage * current)[q]
+
+    Isc = current[i0]
+    Voc = voltage[iVoc]
+    Pmmp = power.max()
+    Impp = current[q][power.argmax()]
+    Vmpp = voltage[q][power.argmax()]
+    FF = Pmmp / (Isc * Voc)
+
+    return dict(Isc=Isc, Voc=Voc, Pmmp=Pmmp, Impp=Impp, Vmpp=Vmpp, FF=FF)

@@ -1,4 +1,4 @@
-from pytest import raises
+from pytest import raises, approx
 
 
 def test_registry():
@@ -32,3 +32,19 @@ def test_not_overwritten_behavior():
     assert junc.widths is None
     assert junc.nk(None) is None
     assert junc.absorptivity(None, None) is None
+
+
+def test_iv_parameters():
+    from solcore.junction_base import iv_parameters, JunctionBase
+    import numpy as np
+
+    s = 1.5
+    voltage = np.arange(-1, 2, 0.05)
+    current = s - voltage
+
+    expected = dict(Isc=s, Voc=s, Pmmp=(s/2)**2, Impp=(s/2), Vmpp=(s/2), FF=1/4)
+    actual1 = iv_parameters(voltage, current)
+    actual2 = JunctionBase.iv_parameters(voltage, current)
+    for k, v in expected.items():
+        assert actual1[k] == approx(v, abs=0.025)
+        assert actual2[k] == approx(v, abs=0.025)
