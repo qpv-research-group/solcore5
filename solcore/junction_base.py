@@ -158,7 +158,7 @@ class JunctionBase(ABC):
 
     @staticmethod
     def iv_parameters(voltage: np.ndarray, current: np.ndarray) -> dict:
-        """Calculates Voc, Isc, FF, Vmpp, Impp and Pmpp.
+        """Calculates Voc, Jsc, FF, Vmpp, Jmpp and Pmpp.
 
         Args:
             voltage (np.ndarray):
@@ -177,7 +177,7 @@ JUNCTIONS_REGISTRY: Dict[str, Type[Junction]] = {}
 
 
 def iv_parameters(voltage: np.ndarray, current: np.ndarray) -> Dict[str, float]:
-    """Calculates Voc, Isc, FF, Vmpp, Impp and Pmpp.
+    """Calculates Voc, Jsc, FF, Vmpp, Jmpp and Pmpp.
 
     Args:
         voltage (np.ndarray):
@@ -192,11 +192,11 @@ def iv_parameters(voltage: np.ndarray, current: np.ndarray) -> Dict[str, float]:
     q = slice(i0, iVoc, step)
     power = np.abs(voltage * current)[q]
 
-    Isc = current[i0]
+    Jsc = current[i0]
     Voc = voltage[iVoc]
     Pmmp = power.max()
-    Impp = current[q][power.argmax()]
+    Jmpp = current[q][power.argmax()]
     Vmpp = voltage[q][power.argmax()]
-    FF = Pmmp / (Isc * Voc)
+    FF = Pmmp / (Jsc * Voc)
 
-    return dict(Isc=Isc, Voc=Voc, Pmmp=Pmmp, Impp=Impp, Vmpp=Vmpp, FF=FF)
+    return dict(Jsc=Jsc, Voc=Voc, Pmmp=Pmmp, Impp=Jmpp, Vmpp=Vmpp, FF=FF)
