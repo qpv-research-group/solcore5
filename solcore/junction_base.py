@@ -23,8 +23,7 @@ class JunctionBase(ABC):
         If this quantity is meaningless for the junction, it should return None.
 
         Returns:
-            The total width of the junction or None.
-        """
+            The total width of the junction or None."""
         return None
 
     @property
@@ -35,8 +34,7 @@ class JunctionBase(ABC):
 
         Returns:
             An xr.DataArray with the widths or None. The only coordinate must be
-            'layer'.
-        """
+            'layer'."""
         return None
 
     def nk(self, wavelength: np.ndarray) -> Optional[xr.DataArray]:
@@ -54,8 +52,7 @@ class JunctionBase(ABC):
 
         Returns:
             A xr.DataArray with the complex refractive index as a function of two
-            coordinates, 'wavelength' and 'layer'.
-        """
+            coordinates, 'wavelength' and 'layer'."""
         return None
 
     def absorptivity(
@@ -76,8 +73,7 @@ class JunctionBase(ABC):
 
         Returns:
             A xr.DataArray with the absorptivity as a function of two coordinates,
-            'wavelength' and 'angle'.
-        """
+            'wavelength' and 'angle'."""
         return None
 
     @abstractmethod
@@ -107,8 +103,7 @@ class JunctionBase(ABC):
             Isc, FF, Vmpp, Impp, Pmpp and eta) must be provided as attributes of the
             Dataset.
             Other DataArrays containing extra information resulting from the calculation
-            might be available, depending on the junction.
-        """
+            might be available, depending on the junction."""
 
     @abstractmethod
     def solve_qe(
@@ -127,8 +122,7 @@ class JunctionBase(ABC):
             contain 'eqe' and 'iqe' DataArrays giving the external and internal quantum
             efficiencies, respectively, as a function of 'wavelength'.
             Other DataArrays containing extra information resulting from the calculation
-            might be available, depending on the junction.
-        """
+            might be available, depending on the junction."""
 
     def solve_equilibrium(self):
         """Calculates the junction band structure at equilibrium.
@@ -144,8 +138,7 @@ class JunctionBase(ABC):
             conduction and valence band profiles, respectively, as a function of
             'position'.
             Other DataArrays containing extra information resulting from the calculation
-            might be available, depending on the junction.
-        """
+            might be available, depending on the junction."""
         raise NotImplementedError
 
     def solve_short_circuit(
@@ -168,12 +161,11 @@ class JunctionBase(ABC):
             conduction and valence band profiles, respectively, as a function of
             'position'.
             Other DataArrays containing extra information resulting from the calculation
-            might be available, depending on the junction.
-        """
+            might be available, depending on the junction."""
         raise NotImplementedError
 
 
 Junction = TypeVar("Junction", bound=JunctionBase)
 
 JUNCTIONS_REGISTRY: Dict[str, Type[Junction]] = {}
-""" Registry of all junctions available in Solcore. """
+"""Registry of all junctions available in Solcore."""
