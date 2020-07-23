@@ -17,7 +17,6 @@ class JunctionBase(ABC):
         super().__init_subclass__(**kwargs)
 
     @property
-    @abstractmethod
     def total_width(self) -> Optional[float]:
         """ Provides the total width of the junction in meters.
 
@@ -26,9 +25,9 @@ class JunctionBase(ABC):
         Returns:
             The total width of the junction or None.
         """
+        return None
 
     @property
-    @abstractmethod
     def widths(self) -> Optional[xr.DataArray]:
         """ Provides the widths of all layers the junction contains in meters.
 
@@ -38,6 +37,7 @@ class JunctionBase(ABC):
             An xr.DataArray with the widths or None. The only coordinate must be
             'layer'.
         """
+        return None
 
     def nk(self, wavelength: np.ndarray) -> Optional[xr.DataArray]:
         """ Provides the complex refractive index of all layers of the junction.
@@ -56,6 +56,7 @@ class JunctionBase(ABC):
             A xr.DataArray with the complex refractive index as a function of two
             coordinates, 'wavelength' and 'layer'.
         """
+        return None
 
     def absorptivity(
         self, wavelength: np.ndarray, angle: Optional[np.ndarray] = None
@@ -77,6 +78,7 @@ class JunctionBase(ABC):
             A xr.DataArray with the absorptivity as a function of two coordinates,
             'wavelength' and 'angle'.
         """
+        return None
 
     @abstractmethod
     def solve_iv(
