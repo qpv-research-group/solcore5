@@ -11,14 +11,14 @@ from solcore.light_source_base import LightSource
 
 class JunctionBase(ABC):
     def __init_subclass__(cls, **kwargs):
-        """ Registers any subclass of JunctionBase in the Junctions registry. """
+        """Registers any subclass of JunctionBase in the Junctions registry."""
         if cls not in JUNCTIONS_REGISTRY:
             JUNCTIONS_REGISTRY[cls.__name__] = cls
         super().__init_subclass__(**kwargs)
 
     @property
     def total_width(self) -> Optional[float]:
-        """ Provides the total width of the junction in meters.
+        """Provides the total width of the junction in meters.
 
         If this quantity is meaningless for the junction, it should return None.
 
@@ -29,7 +29,7 @@ class JunctionBase(ABC):
 
     @property
     def widths(self) -> Optional[xr.DataArray]:
-        """ Provides the widths of all layers the junction contains in meters.
+        """Provides the widths of all layers the junction contains in meters.
 
         If this quantity is meaningless for the junction, it should return None.
 
@@ -40,7 +40,7 @@ class JunctionBase(ABC):
         return None
 
     def nk(self, wavelength: np.ndarray) -> Optional[xr.DataArray]:
-        """ Provides the complex refractive index of all layers of the junction.
+        """Provides the complex refractive index of all layers of the junction.
 
         This function collects the n and k data of each material of each layer and
         returns a xr.DataArray with the refractive index in complex form interpolated
@@ -61,7 +61,7 @@ class JunctionBase(ABC):
     def absorptivity(
         self, wavelength: np.ndarray, angle: Optional[np.ndarray] = None
     ) -> Optional[xr.DataArray]:
-        """ Provides the absorptivity of the junction.
+        """Provides the absorptivity of the junction.
 
         For those junctions not based on layers and materials, the absorptivity
         represents the fraction of light that is absorbed in the junction as a function
@@ -87,7 +87,7 @@ class JunctionBase(ABC):
         absorption: Optional[xr.DataArray] = None,
         light_source: Optional[Type[LightSource]] = None,
     ) -> xr.Dataset:
-        """ Calculates the IV curve of the junction.
+        """Calculates the IV curve of the junction.
 
         If absorption is provided, then light_source must also be provided and the
         light IV curve should be calculated instead. In this case, parameters like
@@ -114,7 +114,7 @@ class JunctionBase(ABC):
     def solve_qe(
         self, absorption: xr.DataArray, light_source: Type[LightSource],
     ) -> xr.Dataset:
-        """ Calculates the external and internal quantum efficiency of the junction.
+        """Calculates the external and internal quantum efficiency of the junction.
 
         Args:
             absorption (xr.DataArray, optional): Array with the fraction of absorbed
@@ -131,7 +131,7 @@ class JunctionBase(ABC):
         """
 
     def solve_equilibrium(self):
-        """ Calculates the junction band structure at equilibrium.
+        """Calculates the junction band structure at equilibrium.
 
         Args:
 
@@ -151,7 +151,7 @@ class JunctionBase(ABC):
     def solve_short_circuit(
         self, absorption: xr.DataArray, light_source: Type[LightSource],
     ) -> xr.Dataset:
-        """ Calculates the junction band structure at short circuit.
+        """Calculates the junction band structure at short circuit.
 
         Args:
             absorption (xr.DataArray, optional): Array with the fraction of absorbed

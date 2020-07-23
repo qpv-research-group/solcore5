@@ -16,7 +16,7 @@ from solcore.constants import q, h, c
 
 
 REGISTERED_CONVERTERS: dict = {}
-""" Registered spectrum conversion functions."""
+"""Registered spectrum conversion functions."""
 
 
 SPECTRUM_SIGNATURE = Callable[[Union[np.ndarray, float]], Union[np.ndarray, float]]
@@ -27,7 +27,7 @@ class LightSourceBase(ABC):
     def __init__(
         self, output_units="power_density_per_nm", concentration=1, **kwargs,
     ):
-        """ Base class for all light sources
+        """Base class for all light sources
 
         :param x: Array with the spectral range in which to calculate the
         spectrum. It must be in the "units" defined by the output_units parameter.
@@ -54,9 +54,10 @@ class LightSourceBase(ABC):
         concentration: Union[float, int] = None,
         **kwargs,
     ):
-        """ Returns the spectrum of the light in the requested units. Internally,
-        the spectrum is always managed in power density per nanometers, but the
-        output can be provided in other compatible units, such as power density per
+        """Returns the spectrum of the light in the requested units.
+
+        Internally,the spectrum is always managed in power density per nanometers, but
+        the output can be provided in other compatible units, such as power density per
         Hertz or photon flux per eV.
 
         :param x: (Default=None) If "x" is provided, it must be an array with the
@@ -104,7 +105,7 @@ LightSource = TypeVar("LightSource", bound=LightSourceBase)
 
 
 def register_conversion_function(fun: Callable):
-    """Registers a view method that will trigger an event. """
+    """Registers a view method that will trigger an event."""
 
     @wraps(fun)
     def wrapper(*args, **kwargs):
@@ -117,7 +118,7 @@ def register_conversion_function(fun: Callable):
 
 @register_conversion_function
 def power_density_per_nm(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in power density per nanometer.
+    """Function that returns the spectrum in power density per nanometer.
 
     The input spectrum is assumed to be in power density per nanometer.
 
@@ -130,7 +131,7 @@ def power_density_per_nm(spectrum: Callable[[np.ndarray], np.ndarray], x: np.nda
 
 @register_conversion_function
 def photon_flux_per_nm(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per nanometer.
+    """Function that returns the spectrum in photon flux per nanometer.
 
     The input spectrum is assumed to be in power density per nanometer.
 
@@ -143,7 +144,7 @@ def photon_flux_per_nm(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarr
 
 @register_conversion_function
 def power_density_per_m(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in power density per meter.
+    """Function that returns the spectrum in power density per meter.
 
     The input spectrum is assumed to be in power density per nanometer.
 
@@ -156,7 +157,7 @@ def power_density_per_m(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndar
 
 @register_conversion_function
 def photon_flux_per_m(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per meter.
+    """Function that returns the spectrum in photon flux per meter.
 
     The input spectrum is assumed to be in power density per nanometer.
 
@@ -169,7 +170,7 @@ def photon_flux_per_m(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarra
 
 @register_conversion_function
 def power_density_per_ev(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in power density per eV.
+    """Function that returns the spectrum in power density per eV.
 
     The input spectrum is assumed to be in power density per nanometer.
 
@@ -185,7 +186,7 @@ def power_density_per_ev(spectrum: Callable[[np.ndarray], np.ndarray], x: np.nda
 
 @register_conversion_function
 def photon_flux_per_ev(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per eV.
+    """Function that returns the spectrum in photon flux per eV.
 
     The input spectrum is assumed to be in power density per nanometer.
 
@@ -203,7 +204,7 @@ def photon_flux_per_ev(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarr
 def power_density_per_joule(
     spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray
 ):
-    """ Function that returns the spectrum in power density per Joule.
+    """Function that returns the spectrum in power density per Joule.
 
     The input spectrum is assumed to be in power density per nanometer.
 
@@ -219,7 +220,7 @@ def power_density_per_joule(
 
 @register_conversion_function
 def photon_flux_per_joule(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per Joule.
+    """Function that returns the spectrum in photon flux per Joule.
 
     The input spectrum is assumed to be in power density per nanometer.
 
@@ -235,7 +236,7 @@ def photon_flux_per_joule(spectrum: Callable[[np.ndarray], np.ndarray], x: np.nd
 
 @register_conversion_function
 def power_density_per_hz(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in power density per hertz.
+    """Function that returns the spectrum in power density per hertz.
 
     The input spectrum is assumed to be in power density per nanometer.
 
@@ -251,7 +252,7 @@ def power_density_per_hz(spectrum: Callable[[np.ndarray], np.ndarray], x: np.nda
 
 @register_conversion_function
 def photon_flux_per_hz(spectrum: Callable[[np.ndarray], np.ndarray], x: np.ndarray):
-    """ Function that returns the spectrum in photon flux per hertz.
+    """Function that returns the spectrum in photon flux per hertz.
 
     The input spectrum is assumed to be in power density per nanometer.
 
