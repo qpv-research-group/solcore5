@@ -141,9 +141,9 @@ class JunctionBase(ABC):
         """Calculates the junction band structure at short circuit.
 
         Args:
-            absorption (xr.DataArray, optional): Array with the fraction of absorbed
+            absorption (xr.DataArray): Array with the fraction of absorbed
                 light as a function of 'wavelength' and 'position'.
-            source (xr.DataArray, optional): Light source to use providing the number
+            source (xr.DataArray): Light source to use providing the number
                 of photons as a junction of 'wavelength'.
 
         Returns:

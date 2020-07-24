@@ -8,7 +8,6 @@ import xarray as xr
 from scipy.optimize import root
 
 from ..junction_base import JunctionBase
-from ..light_source_base import LightSource
 from ..constants import q, kb, hbar, c
 
 
@@ -213,7 +212,7 @@ class TwoDiodeJunction(JunctionBase):
         self,
         voltage: np.ndarray,
         absorption: Optional[xr.DataArray] = None,
-        light_source: Optional[Type[LightSource]] = None,
+        source: Optional[xr.DataArray] = None,
     ) -> xr.Dataset:
         """Calculates the IV curve of the junction.
 
@@ -225,8 +224,8 @@ class TwoDiodeJunction(JunctionBase):
             voltage (np.ndarray): Array of voltages at which to calculate the IV curve.
             absorption (xr.DataArray, optional): Array with the fraction of absorbed
                 light as a function of 'wavelength' and 'position'.
-            light_source (LightSource, optional): Light source to be used in the case of
-                light IV.
+            source (xr.DataArray, optional): Light source to use providing the number
+                of photons as a junction of 'wavelength'.
 
         Returns:
             A xr.Dataset with the output of the calculation. Contains a 'current'
@@ -237,7 +236,7 @@ class TwoDiodeJunction(JunctionBase):
         jsc = (
             self.data.jsc
             if self.data.jsc is not None
-            else self._get_jsc(absorption, light_source)
+            else self._get_jsc(absorption, source)
         )
 
         i = iv2diode(voltage, self.data._replace(jsc=jsc), **self.options)
@@ -247,15 +246,15 @@ class TwoDiodeJunction(JunctionBase):
         return xr.Dataset({"current": current}, attrs=parameters)
 
     def solve_qe(
-        self, absorption: xr.DataArray, light_source: Optional[Type[LightSource]] = None
+        self, absorption: xr.DataArray, source: Optional[xr.DataArray] = None
     ) -> xr.Dataset:
         """Calculates the external and internal quantum efficiency of the junction.
 
         Args:
             absorption (xr.DataArray, optional): Array with the fraction of absorbed
                 light as a function of 'wavelength' and 'position'.
-            light_source (LightSource, optional): Light source to use in the
-                calculation. Ignored.
+            source (xr.DataArray, optional): Light source to use providing the number
+                of photons as a junction of 'wavelength'.
 
         Returns:
             A xr.Dataset with the 'eqe' and 'iqe' DataArrays as a function of
@@ -270,36 +269,30 @@ class TwoDiodeJunction(JunctionBase):
         raise NotImplementedError
 
     def solve_short_circuit(
-        self, absorption: xr.DataArray, light_source: Type[LightSource]
+        self, absorption: xr.DataArray, light_source: xr.DataArray
     ) -> xr.Dataset:
         raise NotImplementedError
 
     def _get_jsc(
         self,
         absorption: Optional[xr.DataArray] = None,
-        light_source: Optional[Type[LightSource]] = None,
+        source: Optional[xr.DataArray] = None,
     ) -> float:
         """Calculates the short circuit current out of the absorption.
 
         Args:
             absorption (xr.DataArray, optional): Array with the fraction of absorbed
                 light as a function of 'wavelength' and 'position'.
-            light_source (LightSource, optional): Light source to use in the
-                calculation.
+            source (xr.DataArray, optional): Light source to use providing the number
+                of photons as a junction of 'wavelength'.
 
         Returns:
             The short circuit current.
         """
-        if absorption is None or light_source is None:
+        if absorption is None or source is None:
             return 0.0
 
-        sp = xr.DataArray(
-            light_source.spectrum(
-                absorption.wavelength, output_units="photon_flux_per_m"
-            ),
-            dims=["wavelength"],
-            coords={"wavelength": absorption.wavelength},
-        )
+        sp = source.interp({"wavelength": absorption.wavelength})
         return q * (self.solve_qe(absorption).eqe * sp).integrate("wavelength")
 
 
