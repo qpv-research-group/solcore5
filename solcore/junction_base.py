@@ -197,4 +197,4 @@ def iv_parameters(voltage: np.ndarray, current: np.ndarray) -> Dict[str, float]:
     Vmpp = voltage[q][power.argmax()]
     FF = Pmmp / (Jsc * Voc)
 
-    return dict(Jsc=Jsc, Voc=Voc, Pmmp=Pmmp, Impp=Jmpp, Vmpp=Vmpp, FF=FF)
+    return dict(Jsc=Jsc, Voc=Voc, Pmmp=Pmmp, Jmpp=Jmpp, Vmpp=Vmpp, FF=FF)
