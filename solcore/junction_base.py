@@ -6,8 +6,6 @@ from abc import ABC, abstractmethod
 import numpy as np
 import xarray as xr
 
-from solcore.light_source_base import LightSource
-
 
 class JunctionBase(ABC):
     def __init_subclass__(cls, **kwargs):
@@ -81,7 +79,7 @@ class JunctionBase(ABC):
         self,
         voltage: np.ndarray,
         absorption: Optional[xr.DataArray] = None,
-        light_source: Optional[Type[LightSource]] = None,
+        source: Optional[xr.DataArray] = None,
     ) -> xr.Dataset:
         """Calculates the IV curve of the junction.
 
@@ -93,8 +91,8 @@ class JunctionBase(ABC):
             voltage (np.ndarray): Array of voltages at which to calculate the IV curve.
             absorption (xr.DataArray, optional): Array with the fraction of absorbed
                 light as a function of 'wavelength' and 'position'.
-            light_source (LightSource, optional): Light source to be used in the case of
-                light IV.
+            source (xr.DataArray, optional): Light source to use providing the number
+                of photons as a junction of 'wavelength'.
 
         Returns:
             A xr.Dataset with the output of the calculation. At a minimum, it must
@@ -107,15 +105,15 @@ class JunctionBase(ABC):
 
     @abstractmethod
     def solve_qe(
-        self, absorption: xr.DataArray, light_source: Optional[Type[LightSource]] = None
+        self, absorption: xr.DataArray, source: Optional[xr.DataArray] = None
     ) -> xr.Dataset:
         """Calculates the external and internal quantum efficiency of the junction.
 
         Args:
             absorption (xr.DataArray, optional): Array with the fraction of absorbed
                 light as a function of 'wavelength' and 'position'.
-            light_source (LightSource, optional): Light source to use in the
-                calculation.
+            source (xr.DataArray, optional): Light source to use providing the number
+                of photons as a junction of 'wavelength'.
 
         Returns:
             A xr.Dataset with the output of the calculation. At a minimum, it must
@@ -138,15 +136,15 @@ class JunctionBase(ABC):
 
     @abstractmethod
     def solve_short_circuit(
-        self, absorption: xr.DataArray, light_source: Type[LightSource],
+        self, absorption: xr.DataArray, source: xr.DataArray,
     ) -> xr.Dataset:
         """Calculates the junction band structure at short circuit.
 
         Args:
             absorption (xr.DataArray, optional): Array with the fraction of absorbed
                 light as a function of 'wavelength' and 'position'.
-            light_source (LightSource, optional): Light source to use in the
-                calculation.
+            source (xr.DataArray, optional): Light source to use providing the number
+                of photons as a junction of 'wavelength'.
 
         Returns:
             A xr.Dataset with the output of the calculation. At a minimum, it must
