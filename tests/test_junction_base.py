@@ -1,9 +1,4 @@
-from typing import Type
-
-import xarray as xr
-from pytest import raises, approx
-
-from solcore.light_source_base import LightSource
+from pytest import approx
 
 
 def test_registry():
