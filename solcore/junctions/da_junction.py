@@ -71,17 +71,52 @@ class AbruptHomojunction(JunctionBase):
     intrinsic regions.
 
     Attributes:
-        data (TwoDiodeData): Object storing the parameters of a 2 diode equation.
-        solver (str): Name of the IV solver to use. Options are 'builtin' and 'spice'.
-        params (Dict): Other parameters with physical information, possibly used
-            during the construction of the TwoDiodeData object.
+        data (AbruptHomojunctionData): Object storing the parameters of the junction.
+        nk_data (xr.DataArray, Callable[[np.ndarray], xr.DataArray]): The refractive
+            index data for all layers. Can be provided as a DataArray with dimensions
+            'wavelength' and 'layer' or as a function that takes as input an array of
+            wavelengths and return the required DataArray.
+        points (np.ndarray): Array with the discrete points across the junction. When
+            creating the junction, either an integer with the total number of points,
+            a list with the points per layer or the complete array can be provided. In
+            the first two cases, the array of points will be created.
+        layer_widths (xr.DataArray): Widths of each of the layers of the junction. If
+            not provided, the information is extracted from the data attribute.
         options (Dict): Options to pass to the iv calculator.
     """
 
     data: AbruptHomojunctionData = AbruptHomojunctionData()
     nk_data: Union[xr.DataArray, NK_DATA_SIGNATURE, None] = None
+    points: Union[int, Sequence[int], np.ndarray] = 1001
     layer_widths: Optional[xr.DataArray] = None
     structure: Optional[Structure] = None
+
+    def __post_init__(self):
+        """Performs some checks on inputs and postprocessing."""
+        if self.data.polarity not in ("pn", "pin", "np", "nip"):
+            raise ValueError(f"Invalid polarity '{self.data.polarity}'.")
+
+        if self.layer_widths is None:
+            if self.data.polarity == "pn":
+                widths = [self.data.xp, self.data.xn]
+            elif self.data.polarity == "pin":
+                widths = [self.data.xp, self.data.xi, self.data.xn]
+            elif self.data.polarity == "np":
+                widths = [self.data.xn, self.data.xp]
+            else:
+                widths = [self.data.xn, self.data.xi, self.data.xp]
+            object.__setattr__(self, "layer_widths", xr.DataArray(widths, dims="layer"))
+
+        if isinstance(self.nk_data, xr.DataArray) and len(self.nk_data.layer) != len(
+            self.widths
+        ):
+            msg = (
+                f"nk data must have the same length than the number of layers "
+                f"along the 'layer' dimension."
+            )
+            raise ValueError(msg)
+
+        object.__setattr__(self, "points", self.create_mesh(self.points))
 
     @classmethod
     def from_structure(
@@ -213,14 +248,23 @@ class AbruptHomojunction(JunctionBase):
 
         return idx, polarity
 
-    def widths(self) -> Optional[xr.DataArray]:
+    @property
+    def total_width(self) -> float:
+        """Provides the total width of the junction in meters.
+
+        Returns:
+            The total width of the junction.
+        """
+        return float(self.widths.sum().values)
+
+    @property
+    def widths(self) -> xr.DataArray:
         """Provides the widths of all layers the junction, in m.
 
         Returns:
-            An xr.DataArray with the widths or None. The only coordinate must be
-            'layer'.
+            An xr.DataArray with the widths. The only coordinate must be 'layer'.
         """
-        return self.layer_widths if self.layer_widths else None
+        return self.layer_widths
 
     def nk(self, wavelength: np.ndarray) -> Optional[xr.DataArray]:
         """Provides the complex refractive index of all layers of the junction.
@@ -236,6 +280,11 @@ class AbruptHomojunction(JunctionBase):
             return self.nk_data.interp({"wavelength": wavelength})
         elif isinstance(self.nk_data, Callable):
             return self.nk_data(wavelength)
+
+    @property
+    def vbi(self) -> float:
+        """Built-in voltage of the junction."""
+        return built_in_voltage(self.data.t, self.data.Nd, self.data.Na, self.data.ni)
 
     def solve_iv(
         self,
@@ -269,57 +318,34 @@ class AbruptHomojunction(JunctionBase):
             If light IV is calculated:
             - The short circuit currents collected from the three regions.
             - The curve parameters (Voc, Isc, FF, Vmpp, Impp and Pmpp)
-            """
-        vbi = built_in_voltage(self.data.t, self.data.Nd, self.data.Na, self.data.ni)
-        v = np.clip(voltage, a_min=np.min(voltage), a_max=vbi - 0.001)
-        wn = depletion_widths(
-            v, vbi, self.data.Nd, self.data.Na, self.data.es, self.data.xi
-        )
-        wp = depletion_widths(
-            v, vbi, self.data.Na, self.data.Nd, self.data.es, self.data.xi
-        )
+        """
+        d = self.data
+
+        v = np.clip(voltage, a_min=np.min(voltage), a_max=self.vbi - 0.001)
+        wn = depletion_width(voltage, self.vbi, d.Nd, d.Na, d.es, d.xi)
+        wp = depletion_width(voltage, self.vbi, d.Na, d.Nd, d.es, d.xi)
 
         # Dark current from the N and P quasi neutral regions.
         jn_dark = xr.DataArray(
             current_quasi_neutral(
-                v,
-                self.data.xn,
-                wn,
-                self.data.ln,
-                self.data.sn,
-                self.data.dn,
-                self.data.ni ** 2 / self.data.Nd,
-                self.data.t,
+                voltage, d.xn, wn, d.ln, d.sn, d.dn, d.ni ** 2 / d.Nd, d.t,
             ),
             dims="voltage",
             coords={"voltage": voltage},
         )
         jp_dark = xr.DataArray(
             current_quasi_neutral(
-                v,
-                self.data.xp,
-                wp,
-                self.data.lp,
-                self.data.sp,
-                self.data.dp,
-                self.data.ni ** 2 / self.data.Na,
-                self.data.t,
+                voltage, d.xp, wp, d.lp, d.sp, d.dp, d.ni ** 2 / d.Na, d.t,
             ),
             dims="voltage",
             coords={"voltage": voltage},
         )
 
         # Dark current from the depleted region
-        j_depletion = xr.DataArray(
-            get_Jsrh(
-                self.data.ni,
-                v,
-                vbi,
-                self.data.lp ** 2 / self.data.dp,
-                self.data.ln ** 2 / self.data.dn,
-                wn + wp + self.data.xi,
-                kb * self.data.t,
-            ),
+        tp = d.lp ** 2 / d.dp
+        tn = d.ln ** 2 / d.dn
+        j_dep = xr.DataArray(
+            get_Jsrh(d.ni, v, self.vbi, tp, tn, wn + wp + d.xi, kb * d.t,),
             dims="voltage",
             coords={"voltage": voltage},
         )
@@ -331,10 +357,10 @@ class AbruptHomojunction(JunctionBase):
 
         return xr.Dataset(
             {
-                "current": jn_dark + jp_dark + j_depletion + j_shunt,
+                "current": jn_dark + jp_dark + j_dep + j_shunt,
                 "jn_dark": jn_dark,
                 "jp_dark": jp_dark,
-                "j_depletion": j_depletion,
+                "j_depletion": j_dep,
                 "j_shunt": j_shunt,
             }
         )
@@ -342,10 +368,10 @@ class AbruptHomojunction(JunctionBase):
     def solve_qe(
         self, absorption: xr.DataArray, source: Optional[xr.DataArray] = None
     ) -> xr.Dataset:
-        pass
+        raise NotImplementedError
 
     def solve_equilibrium(self):
-        pass
+        raise NotImplementedError
 
     def solve_short_circuit(
         self, absorption: xr.DataArray, source: xr.DataArray
@@ -368,9 +394,14 @@ def built_in_voltage(t: float, Nd: float, Na: float, ni: float) -> float:
     return (kb * t / q) * np.log(Nd * Na / ni ** 2)
 
 
-def depletion_widths(
-    v: np.ndarray, vbi: float, Nthis: float, Nother: float, es: float, xi: float = 0.0,
-) -> np.ndarray:
+def depletion_width(
+    v: Union[float, np.ndarray],
+    vbi: float,
+    Nthis: float,
+    Nother: float,
+    es: float,
+    xi: float = 0.0,
+) -> Union[float, np.ndarray]:
     """Calculates the depletion width of a region.
 
     Args:
