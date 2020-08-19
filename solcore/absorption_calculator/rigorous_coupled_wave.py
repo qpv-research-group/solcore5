@@ -2,7 +2,6 @@ import numpy as np
 import tmm
 from solcore.absorption_calculator import OptiStack
 from joblib import Parallel, delayed
-from copy import deepcopy
 try:
     import S4
 except ModuleNotFoundError:
@@ -238,8 +237,7 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
                                       z_limit=None, steps_size=2, dist=None, theta=0, phi=0, pol='u', incidence=None,
                                       substrate=None,
                                       parallel=False, n_jobs=-1, user_options=None):
-    """It calculates the absorbed energy density within the material.
-    Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
+    """It calculates the absorbed energy density within the material. Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
     calculate_rat as long as the spatial mesh is fine enough. If the structure is
     very thick and the mesh not thin enough, the calculation might diverge at short wavelengths.
 
