@@ -211,12 +211,18 @@ def initialise_S(size, orders, geom_list, mats_oc, shapes_oc, shape_mats, widths
 
 def necessary_materials(geom_list):
     shape_mats = []
-    geom_list_str = deepcopy(geom_list)
+    geom_list_str = [None] * len(geom_list)
     for i1, geom in enumerate(geom_list):
         if bool(geom):
             shape_mats.append([x['mat'] for x in geom])
+            geom_list_str[i1] = [{}] * len(geom)
             for i2, g in enumerate(geom):
-                geom_list_str[i1][i2]['mat'] = str(g['mat'])
+                for item in g.keys():
+                    if item != 'mat':
+                        geom_list_str[i1][i2][item] = geom_list[i1][i2][item]
+                    else:
+                        geom_list_str[i1][i2][item] = str(geom_list[i1][i2][item])
+
     return list(set([val for sublist in shape_mats for val in sublist])), geom_list_str
 
 
