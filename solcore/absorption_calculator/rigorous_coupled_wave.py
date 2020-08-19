@@ -2,7 +2,6 @@ import numpy as np
 import tmm
 from solcore.absorption_calculator import OptiStack
 from joblib import Parallel, delayed
-from copy import deepcopy
 try:
     import S4
 except ModuleNotFoundError:
@@ -219,9 +218,9 @@ def necessary_materials(geom_list):
             for i2, g in enumerate(geom):
                 for item in g.keys():
                     if item != 'mat':
-                        geom_list_str[i1][i2][item] = geom_list[i1][i2][item]
+                        geom_list_str[i1][i2][item] = g[item]
                     else:
-                        geom_list_str[i1][i2][item] = str(geom_list[i1][i2][item])
+                        geom_list_str[i1][i2][item] = str(g[item])
 
     return list(set([val for sublist in shape_mats for val in sublist])), geom_list_str
 
@@ -239,10 +238,10 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
                                       substrate=None,
                                       parallel=False, n_jobs=-1, user_options=None):
     """It calculates the absorbed energy density within the material.
+
     Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
     calculate_rat as long as the spatial mesh is fine enough. If the structure is
     very thick and the mesh not thin enough, the calculation might diverge at short wavelengths.
-
     :param structure: A solcore structure with layers and materials.
     :param size: list with 2 entries, size of the unit cell (right now, can only be rectangular
     :param orders: number of orders to retain in the RCWA calculations.
