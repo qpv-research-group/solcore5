@@ -239,7 +239,7 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
                                       parallel=False, n_jobs=-1, user_options=None):
     """It calculates the absorbed energy density within the material.
 
-    Integrating this absorption profile in the whole stack gives the same result that the absorption obtained with
+    Integrating this absorption profile in the whole stack gives the same result as the absorption obtained with
     calculate_rat as long as the spatial mesh is fine enough. If the structure is
     very thick and the mesh not thin enough, the calculation might diverge at short wavelengths.
     :param structure: A solcore structure with layers and materials.
