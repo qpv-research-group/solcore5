@@ -62,8 +62,23 @@ class Material:
             A new Material object.
         """
         composition = composition if composition else {}
-        nk_db, nk_data = get_nk_data(nk, name, composition, T)
-        params = get_parameters(param_db, name, composition, T, Na, Nd)
+        nk_db: Optional[str]
+        nk_data: Optional[xr.DataArray]
+        if isinstance(nk, str):
+            nk_db = nk
+            nk_data = get_nk_data(nk, name, composition, T)
+        elif isinstance(nk, xr.DataArray):
+            nk_db = None
+            nk_data = nk
+        else:
+            nk_db = None
+            nk_data = None
+
+        params = (
+            get_parameters(param_db, name, composition, T, Na, Nd)
+            if param_db is not None
+            else {}
+        )
         params.update(kwargs)
         return cls(name, composition, T, Na, Nd, params, nk_data, param_db, nk_db,)
 
@@ -116,43 +131,31 @@ def get_parameters(
 
 
 def get_nk_data(
-    nk: Union[xr.DataArray, str] = None,
-    name: str = "No name",
+    nk: str,
+    name: str,
     composition: Optional[dict] = None,
     T: float = 273.0,
-) -> (Optional[str], Optional[xr.DataArray]):
+) -> xr.DataArray:
     """Gets the complex refractive index from the database.
 
     Args:
-        nk (Optional, xr.DataArray, str): Either an DataArray with the complex
-            refractive index as function of wavelength, in m; or the name of the
-            database from where to retrieve the data.
+        nk (str): the name of the database from where to retrieve the data.
         name (str): Name of the material.
         composition (dict): Composition of the material, eg. {"In": 0.17}.
         T (float): Temperature, in K.
 
     Returns:
-        (Optional[str], Optional[xr.DataArray]) A tuple with the name of the database
-        and the complex refractive index as function of wavelength, in m.
+        DataArray with the complex refractive index as function of wavelength, in m.
     """
     composition = composition if composition else {}
-    if isinstance(nk, str):
-        if nk not in NK_DB:
-            msg = (
-                f"Unknown nk database '{nk}'. "
-                f"Available databases are '{list(NK_DB.keys())}'."
-            )
-            raise MaterialNKDatabaseError(msg)
-        nk_db = nk
-        nk_data = NK_DB[nk](name, composition, T)
-    elif isinstance(nk, xr.DataArray):
-        nk_db = None
-        nk_data = nk
-    else:
-        nk_db = None
-        nk_data = None
+    if nk not in NK_DB:
+        msg = (
+            f"Unknown nk database '{nk}'. "
+            f"Available databases are '{list(NK_DB.keys())}'."
+        )
+        raise MaterialNKDatabaseError(msg)
 
-    return nk_db, nk_data
+    return NK_DB[nk](name, composition, T)
 
 
 if __name__ == "__main__":
