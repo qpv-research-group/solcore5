@@ -27,8 +27,7 @@ class Material:
     Nd: float = 0.0
     params: dict = field(default_factory=dict)
     nk: Optional[xr.DataArray] = None
-    param_db: Optional[str] = None
-    nk_db: Optional[str] = None
+    metadata: dict = field(default_factory=dict)
 
     @classmethod
     def factory(
@@ -80,7 +79,8 @@ class Material:
             else {}
         )
         params.update(kwargs)
-        return cls(name, composition, T, Na, Nd, params, nk_data, param_db, nk_db,)
+        metadata = {"param_db": param_db, "nk_db": nk_db}
+        return cls(name, composition, T, Na, Nd, params, nk_data, metadata)
 
     def __getattr__(self, item: str) -> Any:
         """Retrieve attributes stored as parameters.
@@ -131,10 +131,7 @@ def get_parameters(
 
 
 def get_nk_data(
-    nk: str,
-    name: str,
-    composition: Optional[dict] = None,
-    T: float = 273.0,
+    nk: str, name: str, composition: Optional[dict] = None, T: float = 273.0,
 ) -> xr.DataArray:
     """Gets the complex refractive index from the database.
 
