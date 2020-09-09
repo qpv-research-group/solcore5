@@ -1,0 +1,588 @@
+[GaAs]
+lattice_constant = "5.65325+3.88e-5*(T-300) Angstrom"
+eg0_gamma = "1.519 eV"
+alpha_gamma = "0.5405 meV K-1"
+beta_gamma = "204 K"
+eg0_x = "1.981 eV"
+alpha_x = "0.460 meV K-1"
+beta_x = "204 K"
+eg0_l = "1.815 eV"
+alpha_l = "0.605 meV K-1"
+beta_l = "204 K"
+spin_orbit_splitting = "0.341 eV"
+eff_mass_electron_gamma = 0.067
+eff_mass_electron_long_l = 1.9
+eff_mass_electron_trans_l = 0.0754
+eff_mass_dos_l = 0.56
+eff_mass_electron_long_x = 1.3
+eff_mass_electron_trans_x = 0.23
+eff_mass_dos_x = 0.85
+gamma1 = 6.98
+gamma2 = 2.06
+gamma3 = 2.93
+eff_mass_split_off = 0.172
+interband_matrix_element = "28.8 eV"
+f = -1.94
+valence_band_offset = "-0.8 eV"
+a_c = "-7.17 eV"
+a_v = "-1.16 eV"
+b = "-2.0 eV"
+d = "-4.8 eV"
+c11 = "122.1 GPa"
+c12 = "56.6 GPa"
+c44 = "60.0 GPa"
+relative_permittivity = 10.9
+
+[AlN]
+lattice_constant = "4.38 Angstrom"
+eg0_gamma = "6.0 eV"
+alpha_gamma = "0.593 meV K-1"
+beta_gamma = "600 K"
+eg0_x = "4.9 eV"
+alpha_x = "0.593 meV K-1"
+beta_x = "600 K"
+eg0_l = "9.3 eV"
+alpha_l = "0.593 meV K-1"
+beta_l = "600 K"
+spin_orbit_splitting = "0.019 eV"
+eff_mass_electron_gamma = 0.25
+eff_mass_electron_long_x = 0.53
+eff_mass_electron_trans_x = 0.31
+gamma1 = 1.92
+gamma2 = 0.47
+gamma3 = 0.85
+eff_mass_split_off = 0.47
+interband_matrix_element = "27.1 eV"
+f = -0.76
+valence_band_offset = "-3.44 eV"
+a_c = "-6.0 eV"
+a_v = "-3.4 eV"
+b = "-1.9 eV"
+d = "-10 eV"
+c11 = "304 GPa"
+c12 = "160 GPa"
+c44 = "193 GPa"
+
+[InSb]
+lattice_constant = "6.4794+3.48e-5*(T-300) Angstrom"
+eg0_gamma = "0.235 eV"
+alpha_gamma = "0.32 meV K-1"
+beta_gamma = "170 K"
+eg0_x = "0.63 eV"
+alpha_x = "0.32 meV K-1"
+beta_x = "170 K"
+eg0_l = "0.93 eV"
+alpha_l = "0.32 meV K-1"
+beta_l = "170 K"
+spin_orbit_splitting = "0.81 eV"
+eff_mass_electron_gamma = 0.0135
+eff_mass_dos_l = 0.25
+gamma1 = 34.8
+gamma2 = 15.5
+gamma3 = 16.5
+eff_mass_split_off = 0.11
+interband_matrix_element = "23.3 eV"
+f = -0.23
+valence_band_offset = "0 eV"
+a_c = "-6.94 eV"
+a_v = "-0.36 eV"
+b = "-2.0 eV"
+d = "-4.7 eV"
+c11 = "68.47 GPa"
+c12 = "37.35 GPa"
+c44 = "31.11 GPa"
+
+[GaSb]
+lattice_constant = "6.0959+4.72e-5*(T-300) Angstrom"
+eg0_gamma = "0.812 eV"
+alpha_gamma = "0.417 meV K-1"
+beta_gamma = "140 K"
+eg0_x = "1.141 eV"
+alpha_x = "0.475 meV K-1"
+beta_x = "94 K"
+eg0_l = "0.875 eV"
+alpha_l = "0.597 meV K-1"
+beta_l = "140 K"
+spin_orbit_splitting = "0.76 eV"
+eff_mass_electron_gamma = 0.039
+eff_mass_electron_long_l = 1.3
+eff_mass_electron_trans_l = 0.1
+eff_mass_electron_long_x = 1.51
+eff_mass_electron_trans_x = 0.22
+gamma1 = 13.4
+gamma2 = 4.7
+gamma3 = 6.0
+eff_mass_split_off = 0.12
+interband_matrix_element = "27.0 eV"
+f = -1.63
+valence_band_offset = "-0.03 eV"
+a_c = "-7.5 eV"
+a_v = "-0.8 eV"
+b = "-2.0 eV"
+d = "-4.7 eV"
+c11 = "88.42 GPa"
+c12 = "40.26 GPa"
+c44 = "43.22 GPa"
+
+[InP]
+lattice_constant = "5.8697+2.79E-5*(T-300) Angstrom"
+eg0_gamma = "1.4236 eV"
+alpha_gamma = "0.363 meV K-1"
+beta_gamma = "162 K"
+eg_x = "2.384-3.7E-4*T eV"
+eg0_l = "2.014 eV"
+alpha_l = "0.363 meV K-1"
+beta_l = "162 K"
+spin_orbit_splitting = "0.108 eV"
+eff_mass_electron_gamma = 0.0795
+eff_mass_dos_l = 0.47
+eff_mass_dos_x = 0.88
+gamma1 = 5.08
+gamma2 = 1.6
+gamma3 = 2.1
+eff_mass_split_off = 0.21
+interband_matrix_element = "20.7 eV"
+f = -1.31
+valence_band_offset = "-0.94 eV"
+a_c = "-6.0 eV"
+a_v = "-0.6 eV"
+b = "-2.0 eV"
+d = "-5.0 eV"
+c11 = "101.1 GPa"
+c12 = "56.1 GPa"
+c44 = "45.6 GPa"
+relative_permittivity = 9.61
+
+[InAs]
+lattice_constant = "6.0583+2.74E-5*(T-300) Angstrom"
+eg0_gamma = "0.417 eV"
+alpha_gamma = "0.276 meV K-1"
+beta_gamma = "93 K"
+eg0_x = "1.433 eV"
+alpha_x = "0.276 meV K-1"
+beta_x = "93 K"
+eg0_l = "1.133 eV"
+alpha_l = "0.276 meV K-1"
+beta_l = "93 K"
+spin_orbit_splitting = "0.39 eV"
+eff_mass_electron_gamma = 0.026
+eff_mass_electron_long_l = 0.64
+eff_mass_electron_trans_l = 0.05
+eff_mass_dos_l = 0.29
+eff_mass_electron_long_x = 1.13
+eff_mass_electron_trans_x = 0.16
+eff_mass_dos_x = 0.64
+gamma1 = 20.0
+gamma2 = 8.5
+gamma3 = 9.2
+eff_mass_split_off = 0.14
+interband_matrix_element = "21.5 eV"
+f = -2.9
+valence_band_offset = "-0.59 eV"
+a_c = "-5.08 eV"
+a_v = "-1.00 eV"
+b = "-1.8 eV"
+d = "-3.6 eV"
+c11 = "83.29 GPa"
+c12 = "45.26 GPa"
+c44 = "39.59 GPa"
+relative_permittivity = 12.3
+
+[GaP]
+lattice_constant = "5.4505+2.92e-5*(T-300) Angstrom"
+eg_gamma = "2.886+0.1081*(1-1/tanh(164./T)) eV"
+eg0_x = "2.35 eV"
+alpha_x = "0.5771 meV K-1"
+beta_x = "372 K"
+eg0_l = "2.72 eV"
+alpha_l = "0.5771 meV K-1"
+beta_l = "372 K"
+spin_orbit_splitting = "0.08 eV"
+eff_mass_electron_gamma = 0.13
+eff_mass_electron_long_x = 2.0
+eff_mass_electron_trans_x = 0.253
+eff_mass_electron_long_l = 1.2
+eff_mass_electron_trans_l = 0.15
+gamma1 = 4.05
+gamma2 = 0.49
+gamma3 = 1.25
+eff_mass_split_off = 0.25
+interband_matrix_element = "31.4 eV"
+f = -2.04
+valence_band_offset = "-1.27 eV"
+a_c = "-8.2 eV"
+a_v = "-1.7 eV"
+b = "-1.6 eV"
+d = "-4.6 eV"
+c11 = "140.5 GPa"
+c12 = "62.03 GPa"
+c44 = "70.33 GPa"
+relative_permittivity = 9.11
+
+[GaN]
+lattice_constant = "4.5 Angstrom"
+eg0_gamma = "3.299 eV"
+alpha_gamma = "0.593 meV K-1"
+beta_gamma = "600 K"
+eg0_x = "4.52 eV"
+alpha_x = "0.593 meV K-1"
+beta_x = "600 K"
+eg0_l = "5.59 eV"
+alpha_l = "0.593 meV K-1"
+beta_l = "600 K"
+spin_orbit_splitting = "0.017 eV"
+eff_mass_electron_gamma = 0.15
+eff_mass_electron_long_x = 0.5
+eff_mass_electron_trans_x = 0.3
+gamma1 = 2.67
+gamma2 = 0.75
+gamma3 = 1.1
+eff_mass_split_off = 0.29
+interband_matrix_element = "25.0 eV"
+f = -0.92
+valence_band_offset = "-2.64 eV"
+a_c = "-2.2 eV"
+a_v = "-5.2 eV"
+b = "-2.2 eV"
+d = "-3.4 eV"
+c11 = "293 GPa"
+c12 = "159 GPa"
+c44 = "155 GPa"
+
+[InN]
+lattice_constant = "4.98 Angstrom"
+eg0_gamma = "1.94 eV"
+alpha_gamma = "0.245 meV K-1"
+beta_gamma = "624 K"
+eg0_x = "2.51 eV"
+alpha_x = "0.245 meV K-1"
+beta_x = "624 K"
+eg0_l = "5.82 eV"
+alpha_l = "0.245 meV K-1"
+beta_l = "624 K"
+spin_orbit_splitting = "0.006 eV"
+eff_mass_electron_gamma = 0.12
+eff_mass_electron_long_x = 0.48
+eff_mass_electron_trans_x = 0.27
+gamma1 = 3.72
+gamma2 = 1.26
+gamma3 = 1.63
+eff_mass_split_off = 0.3
+interband_matrix_element = "25.0 eV"
+f = -2.77
+valence_band_offset = "-2.38 eV"
+a_c = "-1.85 eV"
+a_v = "-1.5 eV"
+b = "-1.2 eV"
+d = "-9.3 eV"
+c11 = "187 GPa"
+c12 = "125 GPa"
+c44 = "86 GPa"
+
+[AlAs]
+lattice_constant = "5.6611+2.9e-5*(T-300) Angstrom"
+eg0_gamma = "3.099 eV"
+alpha_gamma = "0.885 meV K-1"
+beta_gamma = "530 K"
+eg0_x = "2.24 eV"
+alpha_x = "0.70 meV K-1"
+beta_x = "530 K"
+eg0_l = "2.46 eV"
+alpha_l = "0.605 meV K-1"
+beta_l = "204 K"
+spin_orbit_splitting = "0.28 eV"
+eff_mass_electron_gamma = 0.15
+eff_mass_electron_long_l = 1.32
+eff_mass_electron_trans_l = 0.15
+eff_mass_electron_long_x = 0.97
+eff_mass_electron_trans_x = 0.22
+gamma1 = 3.76
+gamma2 = 0.82
+gamma3 = 1.42
+eff_mass_split_off = 0.28
+interband_matrix_element = "21.1 eV"
+f = -0.48
+valence_band_offset = "-1.33 eV"
+a_c = "-5.64 eV"
+a_v = "-2.47 eV"
+b = "-2.3 eV"
+d = "-3.4 eV"
+c11 = "125.0 GPa"
+c12 = "53.4 GPa"
+c44 = "54.2 GPa"
+
+[AlSb]
+lattice_constant = "6.1355+2.60e-5*(T-300) Angstrom"
+eg0_gamma = "2.386 eV"
+alpha_gamma = "0.42 meV K-1"
+beta_gamma = "140 K"
+eg0_x = "1.696 eV"
+alpha_x = "0.39 meV K-1"
+beta_x = "140 K"
+eg0_l = "2.329 eV"
+alpha_l = "0.58 meV K-1"
+beta_l = "140 K"
+spin_orbit_splitting = "0.676 eV"
+eff_mass_electron_gamma = 0.14
+eff_mass_electron_long_l = 1.64
+eff_mass_electron_trans_l = 0.23
+eff_mass_electron_long_x = 1.357
+eff_mass_electron_trans_x = 0.123
+gamma1 = 5.18
+gamma2 = 1.19
+gamma3 = 1.97
+eff_mass_split_off = 0.22
+interband_matrix_element = "18.7 eV"
+f = -0.56
+valence_band_offset = "-0.41 eV"
+a_c = "-4.5 eV"
+a_v = "-1.4 eV"
+b = "-1.35 eV"
+d = "-4.3 eV"
+c11 = "87.69 GPa"
+c12 = "43.41 GPa"
+c44 = "40.76 GPa"
+
+[AlP]
+lattice_constant = "5.4672+2.92e-5*(T-300) Angstrom"
+eg0_gamma = "3.63 eV"
+alpha_gamma = "0.5771 meV K-1"
+beta_gamma = "372 K"
+eg0_x = "2.52 eV"
+alpha_x = "0.318 meV K-1"
+beta_x = "588 K"
+eg0_l = "3.57 eV"
+alpha_l = "0.318 meV K-1"
+beta_l = "588 K"
+spin_orbit_splitting = "0.07 eV"
+eff_mass_electron_gamma = 0.22
+eff_mass_electron_long_x = 2.68
+eff_mass_electron_trans_x = 0.155
+gamma1 = 3.35
+gamma2 = 0.71
+gamma3 = 1.23
+eff_mass_split_off = 0.3
+interband_matrix_element = "17.7 eV"
+f = -0.65
+valence_band_offset = "-1.74 eV"
+a_c = "-5.7 eV"
+a_v = "-3.0 eV"
+b = "-1.5 eV"
+d = "-4.6 eV"
+c11 = "133.0 GPa"
+c12 = "63.0 GPa"
+c44 = "61.5 GPa"
+
+[AlInAs]
+parent0 = "InAs"
+parent1 = "AlAs"
+x = "Al"
+eg_gamma = "0.70 eV"
+eg_x = "0 eV"
+spin_orbit_splitting = "0.15 eV"
+eff_mass_electron_gamma = 0.049
+interband_matrix_element = "-4.81 eV"
+f = -4.44
+valence_band_offset = "-0.64 eV"
+a_c = "-1.4 eV"
+
+[AlGaAs]
+parent0 = "GaAs"
+parent1 = "AlAs"
+x = "Al"
+eg_gamma = "-0.127+1.310*Al eV"
+eg_x = "0.55 eV"
+eg_l = "0 eV"
+spin_orbit_splitting = "0 eV"
+
+[GaPSb]
+parent0 = "GaSb"
+parent1 = "GaP"
+x = "P"
+eg_gamma = "2.7 eV"
+eg_x = "1.7 eV"
+eg_l = "1.7 eV"
+
+[GaInAs]
+parent0 = "GaAs"
+parent1 = "InAs"
+x = "In"
+eg_gamma = "0.477 eV"
+eg_x = "1.4 eV"
+eg_l = "0.33 eV"
+spin_orbit_splitting = "0.15 eV"
+eff_mass_electron_gamma = 0.0091
+eff_mass_hh_001 = -0.145
+eff_mass_lh_001 = 0.202
+gamma3_minus_gamma1 = 0.481
+interband_matrix_element = "-1.48 eV"
+f = 1.77
+valence_band_offset = "-0.38 eV"
+a_c = "2.61 eV"
+
+[InGaAs]
+parent0 = "GaAs"
+parent1 = "InAs"
+x = "In"
+eg_gamma = "0.477 eV"
+eg_x = "1.4 eV"
+eg_l = "0.33 eV"
+spin_orbit_splitting = "0.15 eV"
+eff_mass_electron_gamma = 0.0091
+eff_mass_hh_001 = -0.145
+eff_mass_lh_001 = 0.202
+gamma3_minus_gamma1 = 0.481
+interband_matrix_element = "-1.48 eV"
+f = 1.77
+valence_band_offset = "-0.38 eV"
+a_c = "2.61 eV"
+
+[GaInSb]
+parent0 = "GaSb"
+parent1 = "InSb"
+x = "In"
+eg_gamma = "0.415 eV"
+eg_x = "0.33 eV"
+eg_l = "0.4 eV"
+spin_orbit_splitting = "0.1 eV"
+eff_mass_electron_gamma = 0.0092
+eff_mass_lh_001 = 0.011
+f = -6.84
+
+[GaInP]
+parent0 = "GaP"
+parent1 = "InP"
+x = "In"
+eg_gamma = "0.65 eV"
+eg_x = "0.2 eV"
+eg_l = "1.03 eV"
+spin_orbit_splitting = "0 eV"
+eff_mass_electron_gamma = 0.051
+f = 0.78
+d = "0 eV"
+
+[GaAsN_zinc_blende]
+parent0 = "GaAs"
+parent1 = "GaN"
+x = "N"
+eg_gamma = "120.4-100.*x eV"
+spin_orbit_splitting = "0 eV"
+
+[AlGaP]
+parent0 = "AlP"
+parent1 = "GaP"
+x = "Ga"
+eg_gamma = "-0.48 eV"
+eg_x = "0.13 eV"
+
+[AlPSb]
+parent0 = "AlP"
+parent1 = "AlSb"
+x = "Sb"
+eg_gamma = "2.7 eV"
+eg_x = "2.7 eV"
+eg_l = "2.7 eV"
+
+[AlGaSb]
+parent0 = "GaSb"
+parent1 = "AlSb"
+x = "Al"
+eg_gamma = "-0.044+1.22*Al eV"
+eg_x = "0 eV"
+eg_l = "0 eV"
+spin_orbit_splitting = "0.3 eV"
+
+[AlAsP]
+parent0 = "AlP"
+parent1 = "AlAs"
+x = "As"
+eg_gamma = "0.22 eV"
+eg_x = "0.22 eV"
+eg_l = "0.22 eV"
+
+[AlInP]
+parent0 = "InP"
+parent1 = "AlP"
+x = "Al"
+eg_gamma = "-0.48 eV"
+eg_x = "0.38 eV"
+spin_orbit_splitting = "-0.19 eV"
+eff_mass_electron_gamma = 0.22
+
+[InAsP]
+parent0 = "InP"
+parent1 = "InAs"
+x = "As"
+eg_gamma = "0.1 eV"
+eg_x = "0.27 eV"
+eg_l = "0.27 eV"
+spin_orbit_splitting = "0.16 eV"
+
+[AlGaN]
+parent0 = "AlN"
+parent1 = "GaN"
+x = "Ga"
+eg_x = "0.61 eV"
+eg_l = "0.8 eV"
+eg_gamma = "0 eV"
+
+[GaAsSb]
+parent0 = "GaAs"
+parent1 = "GaSb"
+x = "Sb"
+eg_gamma = "1.43 eV"
+eg_x = "1.2 eV"
+eg_l = "1.2 eV"
+spin_orbit_splitting = "0.6 eV"
+valence_band_offset = "-1.06 eV"
+
+[GaInN]
+parent0 = "GaN"
+parent1 = "InN"
+x = "In"
+eg_x = "0.38 eV"
+eg_gamma = "3.0 eV"
+
+[GaAsP]
+parent0 = "GaAs"
+parent1 = "GaP"
+x = "P"
+eg_gamma = "0.19 eV"
+eg_x = "0.24 eV"
+eg_l = "0.16 eV"
+
+[AlInSb]
+parent0 = "AlSb"
+parent1 = "InSb"
+x = "In"
+eg_gamma = "0.43 eV"
+spin_orbit_splitting = "0.25 eV"
+
+[InAsSb]
+parent0 = "InAs"
+parent1 = "InSb"
+x = "Sb"
+eg_gamma = "0.67 eV"
+eg_x = "0.6 eV"
+eg_l = "0.6 eV"
+spin_orbit_splitting = "1.2 eV"
+eff_mass_electron_gamma = 0.035
+
+[InPSb]
+parent0 = "InP"
+parent1 = "InSb"
+x = "Sb"
+eg_gamma = "1.9 eV"
+eg_x = "1.9 eV"
+eg_l = "1.9 eV"
+spin_orbit_splitting = "0.75 eV"
+
+[AlAsSb]
+parent0 = "AlAs"
+parent1 = "AlSb"
+x = "Sb"
+eg_gamma = "0.19 eV"
+eg_x = "0.24 eV"
+eg_l = "0.16 eV"
+spin_orbit_splitting = "0.15 eV"
+eff_mass_electron_gamma = -1.71

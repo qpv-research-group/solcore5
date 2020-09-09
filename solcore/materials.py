@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from typing import Optional, Any, Union
 from dataclasses import dataclass, field
+from pathlib import Path
+from collections import ChainMap
 
 import xarray as xr
+import toml
 
 
 class MaterialParameterError(Exception):
@@ -16,6 +19,56 @@ class MaterialNKDatabaseError(Exception):
 
 NK_DB: dict = {}
 """Dictionary with the NK data databases."""
+
+
+class ParametersDB:
+    __instance = None
+
+    def __new__(cls, data: dict):
+        if ParametersDB.__instance is None:
+            ParametersDB.__instance = object.__new__(cls)
+            ParametersDB.__instance._data = data
+        return ParametersDB.__instance
+
+    @classmethod
+    def load_databases(cls):
+        from solcore import SOLCORE_ROOT
+
+        paths = sorted((Path(SOLCORE_ROOT) / "material_data").glob("*.toml"))
+
+        data: dict = {}
+        for filename in paths:
+            with filename.open("r") as f:
+                data[filename.stem] = toml.load(f)
+
+        return cls(data)
+
+    def get_raw_parameter(self, param, name, db="all"):
+        """Find the raw value of a parameter in the chosen database
+
+        Args:
+            param (str): Parameter name
+            name (str): Material name
+            db (str): Database to use to look for the parameter. Default: all.
+
+        Returns:
+            The raw value of the requested parameter.
+        """
+        return self.get_all_raw_parameters(name, db)[param]
+
+    def get_all_raw_parameters(self, name, db="all"):
+        """Find the raw value of all parameters in the chosen database.
+
+        Args:
+            name (str): Material name
+            db (str): Database to use to look for the parameters. Default: all.
+
+        Returns:
+            A ChainMap object with all the raw parameters found for that material in
+            the requested databases.
+        """
+        db_search = list(self._data.keys()) if db == "all" else (db,)
+        return ChainMap(*(self._data[d].get(name, {}) for d in db_search)).new_child()
 
 
 @dataclass(frozen=True)
@@ -156,6 +209,15 @@ def get_nk_data(
 
 
 if __name__ == "__main__":
-    InGaAs = Material(name="InGaAs", composition={"In": 0.17})
-    print(InGaAs.material_str)
-    print(InGaAs.cat)
+    from pprint import pprint
+
+    # InGaAs = Material(name="InGaAs", composition={"In": 0.17})
+    # print(InGaAs.material_str)
+    # print(InGaAs.cat)
+
+    db = ParametersDB.load_databases()
+    GaAs = db.get_all_raw_parameters("GaAs")
+    pprint(GaAs)
+    pprint(db.get_raw_parameter("eg0_gamma", "GaAs"))
+    for k, v in GaAs.items():
+        print(k, v)
