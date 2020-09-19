@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Any, Union
+from typing import Optional, Any, Union, NamedTuple, Tuple
 from dataclasses import dataclass, field
 from pathlib import Path
 from collections import ChainMap
@@ -19,6 +19,18 @@ class MaterialNKDatabaseError(Exception):
 
 NK_DB: dict = {}
 """Dictionary with the NK data databases."""
+
+
+class Composition(NamedTuple):
+    """Composition of the material.
+
+    In each field, the first component gives the element name and the second one gives
+    the composition as a float number between 0 and 1. For example, if we are talking
+    about InGaAs and composition has x = ("In", 0.52), it will be In0.52Ga0.48As.
+    """
+    x: Optional[Tuple[str, float]] = None
+    y: Optional[Tuple[str, float]] = None
+    z: Optional[Tuple[str, float]] = None
 
 
 class ParametersDB:
@@ -215,9 +227,12 @@ if __name__ == "__main__":
     # print(InGaAs.material_str)
     # print(InGaAs.cat)
 
-    db = ParametersDB.load_databases()
-    GaAs = db.get_all_raw_parameters("GaAs")
-    pprint(GaAs)
-    pprint(db.get_raw_parameter("eg0_gamma", "GaAs"))
-    for k, v in GaAs.items():
-        print(k, v)
+    # db = ParametersDB.load_databases()
+    # GaAs = db.get_all_raw_parameters("GaAs")
+    # pprint(GaAs)
+    # pprint(db.get_raw_parameter("eg0_gamma", "GaAs"))
+    # for k, v in GaAs.items():
+    #     print(k, v)
+
+    comp = Composition(("In", 0.52))
+    pprint(comp)
