@@ -28,9 +28,46 @@ class Composition(NamedTuple):
     the composition as a float number between 0 and 1. For example, if we are talking
     about InGaAs and composition has x = ("In", 0.52), it will be In0.52Ga0.48As.
     """
-    x: Optional[Tuple[str, float]] = None
-    y: Optional[Tuple[str, float]] = None
-    z: Optional[Tuple[str, float]] = None
+
+    x_element: Optional[str] = None
+    x: Optional[float] = None
+    y_element: Optional[str] = None
+    y: Optional[float] = None
+    z_element: Optional[str] = None
+    z: Optional[float] = None
+
+
+@dataclass(frozen=True)
+class ProxyDict:
+    _dict: dict = field(init=False)
+
+    def __init__(self, **kwargs):
+        object.__setattr__(self, "_dict", kwargs)
+
+    def __getattr__(self, item):
+        return self._dict[item]
+
+    def __getitem__(self, item):
+        return self._dict[item]
+
+    def __len__(self):
+        return self._dict.__len__()
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            + ", ".join([f"{k}='{v}'" for k, v in self._dict.items()])
+            + ")"
+        )
+
+    def items(self):
+        return self._dict.items()
+
+    def keys(self):
+        return self._dict.keys()
+
+    def values(self):
+        return self._dict.values()
 
 
 class ParametersDB:
@@ -86,13 +123,13 @@ class ParametersDB:
 @dataclass(frozen=True)
 class Material:
     name: str = "No name"
-    composition: dict = field(default_factory=dict)
+    composition: Composition = Composition()
     T: float = 273.0
     Na: float = 0.0
     Nd: float = 0.0
-    params: dict = field(default_factory=dict)
+    params: ProxyDict = ProxyDict()
     nk: Optional[xr.DataArray] = None
-    metadata: dict = field(default_factory=dict)
+    metadata: ProxyDict = ProxyDict()
 
     @classmethod
     def factory(
@@ -110,7 +147,9 @@ class Material:
 
         Args:
             name (str): Name of the material.
-            composition (dict): Composition of the material, eg. {"In": 0.17}.
+            composition (dict): Composition of the material, eg. {"In": 0.17}. If more
+                than one element is given, then the first one will become x, the
+                 second y, etc.
             T (float): Temperature, in K.
             Na (float): Density of acceptors, in m^-3
             Nd (float): Density of acceptors, in m^-3
@@ -222,6 +261,7 @@ def get_nk_data(
 
 if __name__ == "__main__":
     from pprint import pprint
+    from collections import namedtuple
 
     # InGaAs = Material(name="InGaAs", composition={"In": 0.17})
     # print(InGaAs.material_str)
@@ -234,5 +274,7 @@ if __name__ == "__main__":
     # for k, v in GaAs.items():
     #     print(k, v)
 
-    comp = Composition(("In", 0.52))
+    comp = Composition("In", 0.52)
+    tup = ProxyDict(bandgap=1.42, xe=4.5)
     pprint(comp)
+    print(tup)
