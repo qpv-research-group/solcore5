@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Any, Union, NamedTuple, Tuple
+from typing import Optional, Any, Union, NamedTuple
 from dataclasses import dataclass, field
 from pathlib import Path
 from collections import ChainMap
@@ -261,18 +261,6 @@ def get_nk_data(
 
 if __name__ == "__main__":
     from pprint import pprint
-    from collections import namedtuple
-
-    # InGaAs = Material(name="InGaAs", composition={"In": 0.17})
-    # print(InGaAs.material_str)
-    # print(InGaAs.cat)
-
-    # db = ParametersDB.load_databases()
-    # GaAs = db.get_all_raw_parameters("GaAs")
-    # pprint(GaAs)
-    # pprint(db.get_raw_parameter("eg0_gamma", "GaAs"))
-    # for k, v in GaAs.items():
-    #     print(k, v)
 
     comp = Composition("In", 0.52)
     tup = ProxyDict(bandgap=1.42, xe=4.5)
