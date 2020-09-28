@@ -22,7 +22,7 @@ create a new material, silicon-germanium-tin, from input files. Here,
 the parameters in SiGeSn_params.txt have been copied directly from Ge.
 """
 
-create_new_material('SiGeSn', 'SiGeSn_n.txt', 'SiGeSn_k.txt', 'SiGeSn_params.txt')
+create_new_material('SiGeSn', 'data/SiGeSn_n.txt', 'data/SiGeSn_k.txt', 'data/SiGeSn_params.txt')
 
 # can now create an instance of it like any Solcore material
 SiGeSn = material('SiGeSn')()

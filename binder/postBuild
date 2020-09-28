@@ -1,0 +1,3 @@
+set -ex
+
+pip install --no-deps --force-reinstall --install-option="--with_pdd" -e .

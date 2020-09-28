@@ -1,6 +1,18 @@
 Installation and configuration
 ==============================
 
+Trying Solcore
+^^^^^^^^^^^^^^
+
+You can try Solcore without installing anything in your computer by using the online service `MyBinder.org <https://mybinder.org/>`_. To do so, just click in the following badge:
+
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/qpv-research-group/solcore5/devel
+
+It might take a few minutes to start the server. Be patient! Once launched, this service offers a full-feature Jupyter server with Solcore and all its dependencies installed on it. You can use it to try different features and run the examples shipped with Solcore, but it is not recommended for production: resources in MyBinder are limited and the execution depends on a reliable internet connexion.
+
+Once you are ready to install it in your own machine, go to the next section.
+
 Installing Solcore
 ^^^^^^^^^^^^^^^^^^
 
@@ -23,9 +35,9 @@ Now, installing Solcore should be as easy as writing in the terminal::
 This will download Solcore form the Pypi repository and install the package within the Python packages tree, but it will *NOT* install the PDD solver, for which you need a suitable Fortran compiler :doc:`(read this to install your Fortran compiler) <compilation>`. Assuming you have a Fortran compiler correctly installed and configured, you can install Solcore with the PDD solver by doing::
 
     pip install solcore
-	pip install --no-deps --force-reinstall --upgrade --install-option="--with_pdd" solcore
+    pip install --no-deps --force-reinstall --install-option="--with_pdd" solcore
 
-**NOTE**: Pip passes the --install-option to all the dependencies of the package and therefore the installation will fail since those dependencies do not have the option "--with_pdd". That is the reason why, for now, Solcore needs to be installed twice: the first one install Solcore normally with all the dependencies and the second one re-installs Solcore with PDD support. 
+**NOTE**: Pip passes the --install-option to all the dependencies of the package and therefore the installation will fail since those dependencies do not have the option "--with_pdd". That is the reason why, for now, Solcore needs to be installed twice: the first one to install Solcore normally with all the dependencies and the second one re-installs Solcore with PDD support. 
 
 And that's all!! Solcore should be available to be used as with any Python package::
 
@@ -79,34 +91,36 @@ After installing Solcore (or even without installing it), there are a few things
 - :doc:`Windows 10 <Solcore_on_Windows>`
 - :doc:`Mac OS X <Solcore_on_MacOSX>`
 
-1. **Create a user configuration file:** This can be done automatically by importing the config_tools. If you do not already have a (hidden) solcore_config.txt file in your home directory, you will be asked if you want to create it::
+1. **Create a user configuration file:** The first time Solcore is run, it will create a hidden folder in your user directory. This folder will contain the local configuration and will store custom materials and other parameters. You can customize the location of by setting the environmental variable :code:`SOLCORE_USER_DATA`. You can check the current configuration with:
 
-    >>> import solcore.config_tools
+.. code:: python
 
-2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper in the `Journal of Computational Electronics (2018) <https://doi.org/10.1007/s10825-018-1171-3>`_ and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time.
+	from solcore import config
+	print(config)
+	
+You can find all the functionality of the :code:`config` object in `The config_tools`_
 
-3. **Check the Tutorial:** The :doc:`Tutorial <../Examples/tutorial>` (with the code available in the Examples folder) contains a step-by-step example on how to create a solar cell with multiple junctions and quantum wells, and calculate its quantum efficiency and current-voltage characteristics. While it does not cover every option - not even close! - it should give you a good idea on how things are done within Solcore and its possibilities.
+2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper in the `Journal of Computational Electronics (2018) <https://doi.org/10.1007/s10825-018-1171-3>`_ and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time. You can try directly the examples using `MyBinder.org <https://mybinder.org/v2/gh/qpv-research-group/solcore5/deployment>`_.
 
 3. **Set the location of a SPICE executable and the SMARTS folder:** You will need to do this eventually in order to use those tools::
 
-    >>> import solcore.config_tools as config
+.. code:: python
 
-    >>> config.set_location_of_spice('/path/to/the/SPICE/executable')
-    >>> config.set_location_of_smarts('/path/to/the/SMARTS/folder')
+	from solcore import config
+	
+	config.spice('/path/to/the/SPICE/executable')
+	config.smarts('/path/to/the/SMARTS/folder')
+
 
 4. **Installing S4:** The rigorous-coupled wave analysis (RCWA) solver S4, created by the Stanford University, needs to be installed separately using `the fork by Phoebe Pearce <http://github.com/phoebe-p/S4>`_. The original version **do not work** with Python 3.x, only with Python 2. You can find more information about the solver in the `project webpage <http://web.stanford.edu/group/fan/S4/>`_. An example of its use with Solcore is included in the examples folder, *Figure9.py*.
 
-5. **Getting specific information about Solcore:** Even though the documentation "should" be more complete, you can get information about any object in python (including any Solcore function, module and package) using the '__doc__' attribute, for example::
+5. **Getting specific information about Solcore:** Even though the documentation "should" be more complete, you can get information about any object in python (including any Solcore function, module and package) using the :code:`help` built-in function, for example::
 
-    >>> import solcore.config_tools as config
+.. code:: python
 
-    >>> print(config.get_current_config.__doc__)
+	from solcore import config
+	help(config)
 
-    Prints the current Solcore configuration
-
-        :return: None
-
-6. **Python editor:** Learning Python is easy, but some tools make it even easier. That is the case of PyCharm <https://www.jetbrains.com/pycharm/> (the community eddition is free and the other it is too if you are in academia). Selecting an editor is very personal choice, but PyCharm turns out to be quite useful to teach you good coding practices, reviewing your code for errors and, in general, checking that things will work. It will make your life easier. Give it a try. Solcore in its current form is, in part, the result of using PyCharm.
 
 Problems with the installation
 ------------------------------
@@ -115,13 +129,12 @@ There are several things that can go wrong in the above description, specially i
 
 1. **The tests associated with the Poisson-Drift-Diffusion solver fail**: This is usually the result of not having a Fortran compiler installed in your system, not being correctly configured or having a temperamental F2PY version, the tool - included in numpy - that makes Fotran code accesible from Python. Please, make sure you follow all the steps indicated in the :doc:`Fortran compiler section <compilation>` and above to have the PDD solver up and running.
 
-2. **Some of the dependencies fail to install**: That is rarely the case, as all dependencies are in the main Python repositories. However, there might be issues with Numpy, Matplotlib and Scipy. These packages need to be compiled and it is often easy to get them as a scientific bundle. You can check `Anaconda <https://www.continuum.io/downloads>`_ which provides all these packages together already configured for the correct OS.
+2. **Some of the dependencies fail to install**: That is rarely the case, as all dependencies are in the main Python repositories. However, there might be issues with Numpy, Matplotlib and Scipy. Depending on your Python distribution, some of these packages might need to be compiled and it is often easy to get them as a scientific bundle. You can check `Anaconda <https://www.continuum.io/downloads>`_ which provides all these packages together already configured for the correct OS.
 
 The config_tools
 ^^^^^^^^^^^^^^^^
 
-This module contains all the functions that will help you to setup and configure your Solcore installation, as it has been highlighted above. The full description of the funcitons included in this module are:
+This module contains all the functions that will help you to setup and configure your Solcore installation, as it has been highlighted above. The full description of the functions included in this module are:
 
-.. automodule:: solcore.config_tools
-    :members:
-    :undoc-members:
+.. autoclass:: solcore.config_tools.SolcoreConfig
+    :members: 

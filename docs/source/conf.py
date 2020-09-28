@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # config = ConfigParser()
 # config.read([default_config, ])
 # __version__ = config.get('Configuration', 'version')
-__version__ = '5.6.0'
+__version__ = '5.7.1'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -48,17 +48,17 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
+    'recommonmark'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-source_parsers = {
-   '.md': 'recommonmark.parser.CommonMarkParser',
-}
-
 # The suffix of source filenames.
-source_suffix = ['.rst', '.md']
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -68,7 +68,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Solcore'
-copyright = u'2018, Quantum Photovoltaics Group, Imperial College London'
+copyright = u'2020, Quantum Photovoltaics Group, Imperial College London'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -151,7 +151,7 @@ html_theme = 'sphinxdoc'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = 'header2.png'
+html_logo = 'header.png'
 
 
 # The name of an image file (within the static path) to use as favicon of the
