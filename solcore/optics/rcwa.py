@@ -14,16 +14,6 @@ rcwa_options.phi = 0
 rcwa_options.pol = 'u'
 rcwa_options.parallel = False
 rcwa_options.n_jobs = -1
-# rcwa_options.rcwa_options = dict(LatticeTruncation='Circular',
-#                         DiscretizedEpsilon=False,
-#                         DiscretizationResolution=8,
-#                         PolarizationDecomposition=False,
-#                         PolarizationBasis='Default',
-#                         LanczosSmoothing=False,
-#                         SubpixelSmoothing=False,
-#                         ConserveMemory=False,
-#                         WeismannFormulation=False)
-
 
 def solve_rcwa(solar_cell, options):
     """Calculates the reflection, transmission and absorption of a solar cell object using the rigorous coupled-wave analysis solver.

@@ -22,36 +22,38 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
                        parallel=False, n_jobs=-1, user_options=None):
     """Calculates the reflected, absorbed and transmitted intensity of the structure for the wavelengths and angles
     defined using an RCWA method implemented using the S4 package.
+    This function is analogous to calculate_rat from the transfer_matrix module.
 
-    :param structure: A solcore Structure object with layers and materials or a OptiStack object.
-    :param size: list with 2 entries, size of the unit cell (right now, can only be rectangular
+    :param structure: A Solcore Structure object with layers and materials or a OptiStack object.
+    :param size: a tuple of 2-D vectors in the format ((ux, uy), (vx, vy)) giving the x and y components of the lattice unit vectors in nm.
     :param orders: number of orders to retain in the RCWA calculations.
     :param wavelength: Wavelengths (in nm) in which calculate the data.
     :param incidence: a Solcore material describing the semi-infinite incidence medium
     :param substrate: a Solcore material describing the semi-infinite transmission medium
     :param theta: polar incidence angle (in degrees) of the incident light. Default: 0 (normal incidence)
-    :param phi: azimuthal incidence angle in degrees. Default: 0
+    :param phi: azimuthal incidence angle (in degrees). Default: 0
     :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
     :param parallel: whether or not to execute calculation in parallel (over wavelengths), True or False. Default is False
     :param n_jobs: the 'n_jobs' argument passed to Parallel from the joblib package. If set to -1, all available CPUs are used,
-    if set to 1 no parallel computing is executed. The number of CPUs used is given by n_cpus + 1 + n_jobs. Default is -1.
+            if set to 1 no parallel computing is executed. The number of CPUs used is given by n_cpus + 1 + n_jobs. Default is -1.
     :param user_options: dictionary of options for S4. The list of possible entries and their values is:
-            LatticeTruncation: 'Circular' or 'Parallelogramic'
-            DiscretizedEpsilon: True or False
-            DiscretizationResolution: integer, default value 8
-            PolarizationDecomposition: True or False
-            PolarizationBasis: 'Default' or 'Normal' or 'Jones'
-            LanczosSmoothing: True or False
-            SubpixelSmoothing: True or False
-            ConserveMemory: True or False
-            WeismannFormulation: True or False
 
-            Further information on the function of these options can be found in the S4 Python API documentation. If no
-            options are provided, those from DEFAULT_OPTIONS are used.
+            * LatticeTruncation: 'Circular' or 'Parallelogramic' (default 'Circular')
+            * DiscretizedEpsilon: True or False (default False)
+            * DiscretizationResolution: integer (default value 8)
+            * PolarizationDecomposition: True or False (default False)
+            * PolarizationBasis: 'Default' or 'Normal' or 'Jones' (default 'Default')
+            * LanczosSmoothing: True or False (default False)
+            * SubpixelSmoothing: True or False (default False)
+            * ConserveMemory: True or False (default False)
+            * WeismannFormulation: True or False (default False)
+
+        Further information on the function of these options can be found in the S4 Python API documentation. If no
+        options are provided, those from DEFAULT_OPTIONS are used.
 
     :return: A dictionary with the R, total A and T at the specified wavelengths and angle. A_pol lists total absorption
-    at s and p polarizations if pol = 'u' was specified (this information is needed for the absorption profile calculation). Otherwise, A_pol is
-    the same as A.
+       at s and p polarizations if pol = 'u' was specified (this information is needed for the absorption profile calculation).
+       Otherwise, A_pol is the same as A.
     """
     num_wl = len(wavelength)
 
@@ -145,14 +147,14 @@ def rcwa_rat(S, n_layers):
 def initialise_S(size, orders, geom_list, mats_oc, shapes_oc, shape_mats, widths, options):
     """Makes an S4 simulation object using S4.New() according to the user's specified structure and options.
 
-    :param size: a tuple of 2-D vectors in the format ((ux, uy), (vx, vy)) given the x and y components of the lattice unit vectors.
+    :param size: a tuple of 2-D vectors in the format ((ux, uy), (vx, vy)) giving the x and y components of the lattice unit vectors in nm.
     :param orders: number of Fourier orders to be retained in the RCWA/FMM calculation
     :param: geom_list: list containing shape information fpr each layer. Format is a list of lists; entries of inner lists are one dictionary
-    per shape containing the shape information relevant for that shape.
+            per shape containing the shape information relevant for that shape.
     :param: mats_oc: complex dielectric constant for each of the base layers (including incidence and transmission media)
     :param: shapes_oc: complex dielectric constants for materials in the shapes inside layers
     :param: shape_mats: names of the shape materials
-    :param: widths: widths of the layers, including the semi-infinite incidence and transmission medium
+    :param: widths: widths of the layers, including the semi-infinite incidence and transmission medium. In nm.
     :param: options: S4 options (dictionary)
 
     :return: S4 simulation object
@@ -237,16 +239,16 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
                                       z_limit=None, steps_size=2, dist=None, theta=0, phi=0, pol='u', incidence=None,
                                       substrate=None,
                                       parallel=False, n_jobs=-1, user_options=None):
-    """It calculates the absorbed energy density within the material.
-
-    Integrating this absorption profile in the whole stack gives the same result as the absorption obtained with
+    """It calculates the absorbed energy density within the material. Integrating this absorption profile in the whole stack gives the same result as the absorption obtained with
     calculate_rat as long as the spatial mesh is fine enough. If the structure is
     very thick and the mesh not thin enough, the calculation might diverge at short wavelengths.
-    :param structure: A solcore structure with layers and materials.
-    :param size: list with 2 entries, size of the unit cell (right now, can only be rectangular
+    This function is analogous to calculate_absorption_profile from the transfer_matrix module.
+
+    :param structure: A Solcore structure with layers and materials.
+    :param size: a tuple of 2-D vectors in the format ((ux, uy), (vx, vy)) giving the x and y components of the lattice unit vectors in nm.
     :param orders: number of orders to retain in the RCWA calculations.
     :param wavelength: Wavelengths (in nm) in which calculate the data.
-    :param rat_output: output from calculate_rat_rcwa
+    :param rat_output: A_pol' (polarization-dependent layer absorption) output from calculate_rat_rcwa
     :param z_limit: Maximum value in the z direction at which to calculate depth-dependent absorption (nm)
     :param steps_size: if the dist is not specified, the step size in nm to use in the depth-dependent calculation
     :param dist: the positions (in nm) at which to calculate depth-dependent absorption
@@ -255,7 +257,7 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
     :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
     :param substrate: semi-infinite transmission medium
     :return: A dictionary containing the positions (in nm) and a 2D array with the absorption in the structure as a
-    function of the position and the wavelength.
+        function of the position and the wavelength.
     """
     num_wl = len(wavelength)
 
@@ -355,6 +357,26 @@ def rcwa_absorption_per_layer(S, n_layers):
 
 def RCWA_wl(wl, geom_list, l_oc, s_oc, s_names, pol, theta, phi, widths, size, orders, rcwa_options):
 
+    """
+    Calculates the reflection, absorption per layer and transmission using RCWA per wavelength. Called from calculate_rat_rcwa,
+    can be used in parallel with joblib.
+
+    :param wl: wavelength in nm
+    :param geom_list: list containing shape information fpr each layer. Format is a list of lists; entries of inner lists are one dictionary
+        per shape containing the shape information relevant for that shape.
+    :param l_oc: list of optical constants of the main layers in the stack
+    :param s_oc: list of optical constants for the shapes inside the layers
+    :param s_names: list of names of the shapes
+    :param pol: polarization ('s', 'p' or 'u')
+    :param theta: polar incidence angle in degrees
+    :param phi: azimuthal angle (clockwise from y-axis) in degrees)
+    :param widths: layer widths in nm. Incidence and transmission medium have 0 thickness.
+    :param size: a tuple of 2-D vectors in the format ((ux, uy), (vx, vy)) giving the x and y components of the lattice unit vectors in nm.
+    :param orders: number of orders to retain in the RCWA calculations.
+    :param rcwa_options: S4 options (dictionary)
+    :return: R, T and A per layer at the specified wavelength
+    """
+
     def vs_pol(s, p):
         S.SetExcitationPlanewave((theta, phi), s, p, 0)
         S.SetFrequency(1 / wl)
@@ -389,6 +411,26 @@ def RCWA_wl(wl, geom_list, l_oc, s_oc, s_names, pol, theta, phi, widths, size, o
 
 
 def RCWA_wl_prof(wl, A, dist, geom_list, layers_oc, shapes_oc, s_names, pol, theta, phi, widths, size, orders, rcwa_options):
+    """
+    Calculates the depth-dependent absorption profile using RCWA per wavelength. Called from calculate_absorption_profile_rcwa,
+    can be used in parallel with joblib.
+
+    :param wl: wavelength in nm
+    :param A: 'A_pol' (polarization-dependent layer absorption) output from calculate_rat_rcwa
+    :param geom_list: list containing shape information fpr each layer. Format is a list of lists; entries of inner lists are one dictionary
+        per shape containing the shape information relevant for that shape.
+    :param layers_oc: list of optical constants of the main layers in the stack
+    :param shapes_oc: list of optical constants for the shapes inside the layers
+    :param s_names: list of names of the shapes
+    :param pol: polarization ('s', 'p' or 'u')
+    :param theta: polar incidence angle in degrees
+    :param phi: azimuthal angle (clockwise from y-axis) in degrees)
+    :param widths: layer widths in nm. Incidence and transmission medium have 0 thickness.
+    :param size: a tuple of 2-D vectors in the format ((ux, uy), (vx, vy)) giving the x and y components of the lattice unit vectors in nm.
+    :param orders: number of orders to retain in the RCWA calculations.
+    :param rcwa_options: S4 options (dictionary)
+    :return: profile data (absorbed energy density at each depth)
+    """
     def vs_pol_prof(s, p, A_total):
         profile = np.zeros(len(dist))
         S.SetExcitationPlanewave((theta, phi), s, p, 0)

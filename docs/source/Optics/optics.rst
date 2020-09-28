@@ -9,6 +9,6 @@ Solcore includes several methods to calculate the optical properties of individu
     material_optics
     qw_absorption
     tmm
-    S4doc
+    rcwa
     other_methods
 

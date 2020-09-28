@@ -16,7 +16,7 @@ light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
                            output_units='photon_flux_per_m', concentration=1)
 opts = default_options
 opts.wavelength, opts.no_back_reflection, opts.size, opts.light_source, opts.T_ambient = \
-    wl, False, [400, 400], light_source, T
+    wl, False, ((400, 0), (0, 400)), light_source, T
 opts.recalculate_absorption = True
 # The size of the unit cell for the RCWA structure is 400 x 400 nm
 
@@ -81,7 +81,7 @@ BL_EQE_NP = solar_cell[2].eqe(opts.wavelength)
 
 try:
     opts.optics_method = 'RCWA'
-    opts.orders = 49  # number of diffraction orders to keep in the RCWA solver
+    opts.orders = 19  # number of diffraction orders to keep in the RCWA solver
     solar_cell_solver(solar_cell, 'qe', opts)
     RCWA_EQE_NP = solar_cell[2].eqe(opts.wavelength)
     RCWA_legend = 'RCWA (GaAs SC + NP array + DBR)'
