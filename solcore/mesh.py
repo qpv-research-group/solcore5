@@ -32,8 +32,8 @@ def uniform(npoints: int, nodes: Sequence[float]):
         p,
         dims=["points"],
         coords={
-            "interval": ("points", np.ones_like(p).astype(int)),
-            "group": ("points", np.ones_like(p).astype(int)),
+            "interval": ("points", np.zeros_like(p).astype(int)),
+            "group": ("points", np.zeros_like(p).astype(int)),
         },
     )
     return Mesh(z, nodes)
@@ -70,7 +70,7 @@ def piecewise_uniform(npoints: Sequence[int], nodes: Sequence[float]):
         dims=["points"],
         coords={
             "interval": ("points", np.concatenate(intervals)),
-            "group": ("points", np.ones_like(p).astype(int)),
+            "group": ("points", np.zeros_like(p).astype(int)),
         },
     )
     return Mesh(z=z, nodes=nodes)
@@ -172,7 +172,7 @@ class Mesh:
             )
 
         z = self.z.where(self.z.group == i, drop=True)
-        nodes = self.nodes[(self.nodes >= min(z)) * (self.nodes <= max(z))]
+        nodes = self.nodes[(self.nodes >= min(z).item()) * (self.nodes <= max(z).item())]
         return Mesh(z, nodes)
 
     def split_in_intervals(self) -> Sequence[Mesh]:

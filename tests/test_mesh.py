@@ -1,4 +1,4 @@
-from pytest import raises
+from pytest import raises, approx
 
 
 def test_validate():
@@ -182,3 +182,23 @@ def test_concat_mesh():
         )
     )
 
+
+def test_select_group():
+    from solcore.mesh import uniform, piecewise_uniform, concat2mesh
+    import xarray as xr
+
+    nodes1 = [5, 40, 400]
+    mesh1 = piecewise_uniform([4, 40], nodes1)
+
+    nodes2 = [4, 20]
+    mesh2 = uniform(100, nodes2)
+
+    mesh = concat2mesh(mesh1, mesh2)
+    selected = mesh.select_group(0)
+    xr.testing.assert_equal(selected.z, mesh1.z)
+    assert selected.nodes == approx(mesh1.nodes)
+
+    # Only the number and relative separation of nodes and points is preserved.
+    selected = mesh.select_group(1)
+    assert selected.z.data == approx((mesh2.z - mesh2.z[0] + mesh1.z[-1]).data)
+    assert selected.nodes == approx(mesh2.nodes - mesh2.nodes[0] + mesh1.nodes[-1])
