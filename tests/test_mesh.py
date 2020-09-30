@@ -202,3 +202,22 @@ def test_select_group():
     selected = mesh.select_group(1)
     assert selected.z.data == approx((mesh2.z - mesh2.z[0] + mesh1.z[-1]).data)
     assert selected.nodes == approx(mesh2.nodes - mesh2.nodes[0] + mesh1.nodes[-1])
+
+
+def test_split_in_groups():
+    from solcore.mesh import uniform, piecewise_uniform, concat2mesh
+    import xarray as xr
+
+    nodes1 = [4, 40, 400]
+    mesh1 = piecewise_uniform([4, 40], nodes1)
+
+    nodes2 = [4, 20]
+    mesh2 = uniform(100, nodes2)
+
+    mesh = concat2mesh(mesh1, mesh2)
+
+    sel1, sel2 = mesh.split_in_groups()
+    xr.testing.assert_equal(sel1.z, mesh1.z)
+    assert sel1.nodes == approx(mesh1.nodes)
+    assert sel2.z.data == approx((mesh2.z - mesh2.z[0] + mesh1.z[-1]).data)
+    assert sel2.nodes == approx(mesh2.nodes - mesh2.nodes[0] + mesh1.nodes[-1])

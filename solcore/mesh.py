@@ -172,7 +172,9 @@ class Mesh:
             )
 
         z = self.z.where(self.z.group == i, drop=True)
-        nodes = self.nodes[(self.nodes >= min(z).item()) * (self.nodes <= max(z).item())]
+        nodes = self.nodes[
+            (self.nodes >= min(z).item()) * (self.nodes <= max(z).item())
+        ]
         return Mesh(z, nodes)
 
     def split_in_intervals(self) -> Sequence[Mesh]:
