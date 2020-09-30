@@ -76,6 +76,8 @@ class Material:
         Returns:
             A new Material object.
         """
+        from solcore import get_all_parameters
+
         composition = composition if composition else {}
 
         nk_data: Optional[xr.DataArray] = None
@@ -84,7 +86,7 @@ class Material:
         elif isinstance(nk, xr.DataArray):
             nk_data = nk
 
-        params = get_parameters(name, composition, T, Na, Nd)
+        params = get_all_parameters(name, composition, T, Na, Nd)
         params.update(kwargs)
 
         return cls(
@@ -120,46 +122,6 @@ class Material:
         return result
 
 
-def get_parameters(
-    name: str,
-    composition: Optional[dict] = None,
-    T: float = 273.0,
-    Na: float = 0.0,
-    Nd: float = 0.0,
-) -> dict:
-    """Extracts all the available parameters of the material from a database.
-
-    Args:
-        name (str): Name of the material.
-        composition (dict): Composition of the material, eg. {"In": 0.17}.
-        T (float): Temperature, in K.
-        Na (float): Density of acceptors, in m^-3
-        Nd (float): Density of acceptors, in m^-3
-
-    Returns:
-        A ProxyDict with the parameters extracted from the chosen database.
-    """
-    from solcore import ParameterSystem as PS
-
-    # First we retrieve all the available parameters
-    db = PS().database[name]
-    param_list = set(db.keys())
-    if "x" in db:
-        for key in (k for k in db if "parent" in k):
-            param_list.update(set(PS().database[db[key]].keys()))
-
-    # We include the immediate and final calculables
-    param_list.update(set(PS().database["Immediate Calculables"].keys()))
-    param_list.update(set(PS().database["Final Calculables"].keys()))
-
-    # Finally, we get the parameters
-    composition = composition if composition else {}
-    return {
-        p: PS().get_parameter(name, p, composition=composition, T=T, Na=Na, Nd=Nd)
-        for p in param_list
-    }
-
-
 def get_nk_data(
     nk: str, name: str, composition: Optional[dict] = None, T: float = 273.0,
 ) -> xr.DataArray:
@@ -188,4 +150,4 @@ def get_nk_data(
 if __name__ == "__main__":
     from pprint import pprint
 
-    print(get_parameters("GaAs"))
+    print(Material.factory("GaAs").params)

@@ -52,7 +52,6 @@ class ParameterSystem(SourceManagedClass):
         self.element_RE = re.compile(
             "([A-Z][a-z]*)")
 
-    @lru_cache
     def get_parameter(self, material, parameter, verbose=False, **others):
         """Calculate/look up parameters for materials, returns in SI units
         
@@ -129,6 +128,46 @@ class ParameterSystem(SourceManagedClass):
 
         raise ValueError(
             "Parameter '{}' not in material '{}', nor in calculable parameters.".format(parameter, material))
+
+    def get_all_parameters(
+            self,
+            name: str,
+            composition: Optional[dict] = None,
+            T: float = 273.0,
+            Na: float = 0.0,
+            Nd: float = 0.0,
+    ) -> dict:
+        """Extracts all the available parameters of the material from the database.
+
+        Args:
+            name (str): Name of the material.
+            composition (dict): Composition of the material, eg. {"In": 0.17}.
+            T (float): Temperature, in K.
+            Na (float): Density of acceptors, in m^-3
+            Nd (float): Density of acceptors, in m^-3
+
+        Returns:
+            A ProxyDict with the parameters extracted from the chosen database.
+        """
+        from solcore import ParameterSystem as PS
+
+        # First we retrieve all the available parameters
+        db = self.database[name]
+        param_list = set(db.keys())
+        if "x" in db:
+            for key in (k for k in db if "parent" in k):
+                param_list.update(set(self.database[db[key]].keys()))
+
+        # We include the immediate and final calculables
+        param_list.update(set(self.database["Immediate Calculables"].keys()))
+        param_list.update(set(self.database["Final Calculables"].keys()))
+
+        # Finally, we get the parameters
+        composition = composition if composition else {}
+        return {
+            p: self.get_parameter(name, p, composition=composition, T=T, Na=Na, Nd=Nd)
+            for p in param_list
+        }
 
     def __parse_material_string(self, material_string, other_parameters):
         """parses the material identifier strings of these types:

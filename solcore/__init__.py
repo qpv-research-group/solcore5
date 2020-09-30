@@ -51,6 +51,7 @@ from solcore.parameter_system import ParameterSystem
 ps = ParameterSystem(config.parameters)
 config.register_observer("Parameters", ps.read)
 get_parameter = ps.get_parameter
+get_all_parameters = ps.get_all_parameters
 
 # And the same with the Materials system
 from solcore.material_system import MaterialSystem
