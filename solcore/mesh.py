@@ -76,6 +76,36 @@ def piecewise_uniform(npoints: Sequence[int], nodes: Sequence[float]):
     return Mesh(z=z, nodes=nodes)
 
 
+def constrained(
+    npoints: int,
+    nodes: Sequence[float],
+    min_step: float = 1e-9,
+    max_step: float = 100e-9,
+):
+    """Creates a mesh with a number of points per interval constrained by step size.
+
+    Finds a mesh with npoints per interval, however, if this results in a step size
+    between points below min_step or above max_step, the number of points for that
+    interval is adjusted to a number that respects those two limits.
+
+    Args:
+        npoints (int): Number of target mesh points per interval.
+        nodes (Sequence[int]): The nodes of the mesh.
+        min_step (float): Minimum step size in an interval.
+        max_step (float): Maximum step size in an interval.
+
+    Returns:
+        A new Mesh object with a uniform mesh in each interval constrained by min and
+        max step sizes.
+    """
+    intervals = np.diff(nodes)
+    small = np.floor(intervals / min_step) - 1
+    big = np.ceil(intervals / max_step) + 1
+    points_per_interval = np.where(small < npoints, small, npoints)
+    points_per_interval = np.where(big > npoints, big, points_per_interval)
+    return piecewise_uniform(points_per_interval.astype(int).tolist(), nodes)
+
+
 class Mesh:
     __slots__ = ("nodes", "z")
 

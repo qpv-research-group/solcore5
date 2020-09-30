@@ -97,6 +97,21 @@ def test_piecewise_uniform():
     assert sum(mesh.z == nodes[1]) == 2
 
 
+def test_constrained():
+    from solcore.mesh import constrained
+    import numpy as np
+
+    nodes = np.array([0, 4, 200, 40000]) * 1e-9
+    npoints = 10
+    mini = 1e-9
+    maxi = 100e-9
+    mesh = constrained(npoints, nodes, mini, maxi)
+
+    for m in mesh.split_in_intervals():
+        assert all(np.diff(m.z.data) > mini)
+        assert all(np.diff(m.z.data) < maxi)
+
+
 def test_select_interval():
     from solcore.mesh import piecewise_uniform
 
