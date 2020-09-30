@@ -52,6 +52,7 @@ class ParameterSystem(SourceManagedClass):
         self.element_RE = re.compile(
             "([A-Z][a-z]*)")
 
+    @lru_cache
     def get_parameter(self, material, parameter, verbose=False, **others):
         """Calculate/look up parameters for materials, returns in SI units
         
