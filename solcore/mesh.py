@@ -191,12 +191,6 @@ class Mesh:
         """
         return tuple(self.select_group(i) for i in np.unique(self.z.group))
 
-    def broadcast(self, value, name=""):
-        out = value * xr.ones_like(self.z,)
-        out.name = name
-        out.coords["points"] = self.z
-        return out
-
 
 def concat_mesh(meshes: Sequence[Mesh]) -> Mesh:
     """Concatenate 2 or more Mesh objects.
