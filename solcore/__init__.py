@@ -59,3 +59,6 @@ from solcore.material_system import MaterialSystem
 ms = MaterialSystem(config.materials)
 config.register_observer("Materials", ms.read)
 material = ms.material
+
+# And the NK databases
+from solcore.material_data import NK

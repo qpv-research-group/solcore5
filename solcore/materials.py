@@ -10,14 +10,6 @@ class MaterialParameterError(Exception):
     pass
 
 
-class MaterialNKDatabaseError(Exception):
-    pass
-
-
-NK_DB: dict = {}
-"""Dictionary with the NK data databases."""
-
-
 class ReadOnlyDict(dict):
     def __readonly__(self, *args, **kwargs):
         raise RuntimeError("Cannot modify ReadOnlyDict")
@@ -76,13 +68,13 @@ class Material:
         Returns:
             A new Material object.
         """
-        from solcore import get_all_parameters
+        from . import get_all_parameters, NK
 
         composition = composition if composition else {}
 
         nk_data: Optional[xr.DataArray] = None
         if isinstance(nk, str):
-            nk_data = get_nk_data(nk, name, composition, T)
+            nk_data = NK.get_data(nk, name, composition, T)
         elif isinstance(nk, xr.DataArray):
             nk_data = nk
 
@@ -120,34 +112,3 @@ class Material:
         for k, v in self.composition.items():
             result = result.replace(k, f"{k}{v:.2}")
         return result
-
-
-def get_nk_data(
-    nk: str, name: str, composition: Optional[dict] = None, T: float = 273.0,
-) -> xr.DataArray:
-    """Gets the complex refractive index from the database.
-
-    Args:
-        nk (str): the name of the database from where to retrieve the data.
-        name (str): Name of the material.
-        composition (dict): Composition of the material, eg. {"In": 0.17}.
-        T (float): Temperature, in K.
-
-    Returns:
-        DataArray with the complex refractive index as function of wavelength, in m.
-    """
-    composition = composition if composition else {}
-    if nk not in NK_DB:
-        msg = (
-            f"Unknown nk database '{nk}'. "
-            f"Available databases are '{list(NK_DB.keys())}'."
-        )
-        raise MaterialNKDatabaseError(msg)
-
-    return NK_DB[nk](name, composition, T)
-
-
-if __name__ == "__main__":
-    from pprint import pprint
-
-    print(Material.factory("GaAs").params)
