@@ -199,12 +199,45 @@ class Mesh:
 
 
 def concat_mesh(meshes: Sequence[Mesh]) -> Mesh:
-    """Concatenate 2 or more Mesh1D objects."""
+    """Concatenate 2 or more Mesh objects.
+
+    It first concatenates the first two meshes with concat2mesh, then the result with
+    the third one, and so on and so forth. It uses functools.reduce.
+
+    Args:
+        meshes (Sequence[Mesh]): Sequence of meshes to concatenate.
+
+    Returns:
+        The concatenated mesh.
+    """
     return reduce(concat2mesh, meshes[1:], meshes[0])
 
 
 def concat2mesh(a: Mesh, b: Mesh) -> Mesh:
-    """Concatenate the two Mesh1D objects."""
+    """Concatenate the two Mesh objects.
+
+    The meshes are appended together, shifting the second mesh so its first point
+    duplicates the last point of the first mesh, as if they were independent intervals.
+    So if the original meshes are [1, 2, ... 49, 50] and [0.5, 1.5, ... 42.5], then the
+    output mesh will be [1, 2, ..., 49, 50, 50, 51, ... 92]. The nodes, originally at
+    [1, 50] and [0.5, 42.5] respectively, will then become [1, 50, 92].
+
+    Note that the original offset of the second mesh (in the above example, 0.5), is
+    lost and cannot be recovered.
+
+    Intervals will go from 0 to the total number of intervals between the two meshes and
+    groups will go from 0 to the number of groups between the two meshes. Therefore, if
+    intervals are [0, 1, 2] and [0, 1], the output will have [0, 1, 2, 3, 4] intervals.
+    Likewise, if groups are [0, 1] and [0], they will become [0, 1, 2] in the
+    concatenated mesh.
+
+    Args:
+        a (Mesh): First mesh to concatenate.
+        b (Mesh): Second mesh to concatenate.
+
+    Returns:
+        A Mesh object concatenating the other two.
+    """
     values = np.concatenate([a.z.values, b.z.values - b.z[0].values + a.z[-1].values])
 
     intervals = np.concatenate(
