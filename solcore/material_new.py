@@ -17,10 +17,10 @@ class ReadOnlyDict(dict):
 
     __setitem__ = __readonly__
     __delitem__ = __readonly__
-    pop = __readonly__
+    pop = __readonly__  # type: ignore
     popitem = __readonly__
     clear = __readonly__
-    update = __readonly__
+    update = __readonly__  # type: ignore
     setdefault = __readonly__
     del __readonly__
 
@@ -171,31 +171,36 @@ class Material:
         composition = data.loc[index, "composition"] if "composition" in data else {}
         result["composition"] = ReadOnlyDict(**composition)
 
+        _nk_cols: Tuple[str, str]
         if nk_cols == True:
             name = result.get("name", "No name")
             for k, v in result["composition"].items():
                 name = name.replace(k, f"{k}{v:.2}")
             wl_label = f"wavelength {name}"
             nk_label = f"nk {name}"
-            nk_cols = (wl_label, nk_label)
-
-        if nk_cols == False:
+            _nk_cols = (wl_label, nk_label)
+        elif nk_cols == False:
             result["nk"] = None
-            nk_cols = ("", "")
-        elif nk_cols[0] in data.columns and nk_cols[1] in data.columns:
+            _nk_cols = ("", "")
+        elif isinstance(nk_cols, tuple):
+            _nk_cols = nk_cols
+        else:
+            raise TypeError("'nk_cols' must be bool or a tuple with two elements.")
+
+        if _nk_cols[0] in data.columns and _nk_cols[1] in data.columns:
             result["nk"] = xr.DataArray(
-                data.loc[:, nk_cols[1]],
+                data.loc[:, _nk_cols[1]],
                 dims=["wavelength"],
-                coords={"wavelength": data.loc[:, nk_cols[0]]},
+                coords={"wavelength": data.loc[:, _nk_cols[0]]},
             )
         else:
-            msg = f"NK data columns {nk_cols[0]} and {nk_cols[1]} do not exist."
+            msg = f"NK data columns {_nk_cols[0]} and {_nk_cols[1]} do not exist."
             raise ValueError(msg)
 
         param_cols = [
             k
             for k in data.columns
-            if k not in ("name", "T", "Na", "Nd", "composition") + nk_cols
+            if k not in ("name", "T", "Na", "Nd", "composition") + _nk_cols
             and not k.startswith("wavelength")
             and not k.startswith("nk")
         ]
