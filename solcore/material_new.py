@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 import xarray as xr
 import pandas as pd
 
+from . import get_all_parameters, NK
+
 
 class MaterialParameterError(Exception):
     pass
@@ -73,8 +75,6 @@ class Material:
         Returns:
             A new Material object.
         """
-        from . import get_all_parameters, NK
-
         composition = composition if composition else {}
 
         nk_data: Optional[xr.DataArray] = None

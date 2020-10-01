@@ -214,7 +214,7 @@ if __name__ == "__main__":
 
     def animate(i):
         f = i / 100
-        resultx, resulty, crit = critical_point_interpolate(
+        _, resulty, crit = critical_point_interpolate(
             data, critical_points, f, nm * 1e-9
         )
         # crit = crit.transpose()

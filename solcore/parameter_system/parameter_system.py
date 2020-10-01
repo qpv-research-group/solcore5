@@ -115,7 +115,7 @@ class ParameterSystem(SourceManagedClass):
             try:
                 parent0_value = self.get_parameter(parent0, parameter, verbose=verbose, **relevant_parameters)
                 parent1_value = self.get_parameter(parent1, parameter, verbose=verbose, **relevant_parameters)
-            except ValueError as err:
+            except ValueError:
                 from warnings import warn
                 warn(f"Parameter '{parameter}' not found for '{material}' parent "
                      f"materials '{parent0}' or '{parent1}'. Set to 'None'")
@@ -156,7 +156,6 @@ class ParameterSystem(SourceManagedClass):
         Returns:
             A ProxyDict with the parameters extracted from the chosen database.
         """
-        from solcore import ParameterSystem as PS
 
         # First we retrieve all the available parameters
         db = self.database[name]
