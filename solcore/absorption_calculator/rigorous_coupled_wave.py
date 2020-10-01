@@ -1,11 +1,13 @@
 import numpy as np
 import tmm
-from solcore.absorption_calculator import OptiStack
+from solcore.absorption_calculator import OptiStack, RCWASolverError
 from joblib import Parallel, delayed
+
 try:
     import S4
 except ModuleNotFoundError:
-    raise
+    raise RCWASolverError
+
 
 DEFAULT_OPTIONS = dict(LatticeTruncation='Circular',
                         DiscretizedEpsilon=False,
@@ -460,4 +462,3 @@ def RCWA_wl_prof(wl, A, dist, geom_list, layers_oc, shapes_oc, s_names, pol, the
 
     profile_data = n_inc * profile_data / np.cos(theta * np.pi / 180)
     return profile_data
-
