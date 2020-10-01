@@ -62,3 +62,5 @@ material = ms.material
 
 # And the NK databases
 from solcore.material_data import NK
+
+__all__ = ("NK",)
