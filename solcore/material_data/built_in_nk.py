@@ -35,7 +35,7 @@ def get_built_in_nk_data(
     return xr.DataArray(n + 1.0j * k, dims=["wavelength"], coords={"wavelength": wl})
 
 
-@lru_cache
+@lru_cache(maxsize=128)
 def load_data(path: Path, composition: tuple = ()):
     from solcore.material_system.critical_point_interpolate import (
         load_data_from_directory,
