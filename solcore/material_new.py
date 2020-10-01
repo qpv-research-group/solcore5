@@ -31,11 +31,11 @@ class ReadOnlyDict(dict):
 @dataclass(frozen=True)
 class Material:
     name: str = "No name"
-    composition: ReadOnlyDict = field(default=ReadOnlyDict)
+    composition: ReadOnlyDict = field(default_factory=ReadOnlyDict)
     T: float = 273.0
     Na: float = 0.0
     Nd: float = 0.0
-    params: ReadOnlyDict = field(default=ReadOnlyDict)
+    params: ReadOnlyDict = field(default_factory=ReadOnlyDict)
     nk: Optional[xr.DataArray] = None
 
     @classmethod
@@ -81,6 +81,9 @@ class Material:
         if isinstance(nk, str):
             nk_data = NK.get_data(nk, name, composition, T)
         elif isinstance(nk, xr.DataArray):
+            if "wavelength" not in nk.dims or "wavelength" not in nk.coords:
+                msg = "'wavelength' is not a DataArray dimension and coordinate."
+                raise ValueError(msg)
             nk_data = nk
 
         if parametric:
@@ -107,6 +110,9 @@ class Material:
         Solcore's databases and it is up to the user to make sure the data is valid
         (units, format, etc.).
 
+        Any entry that is not "name", "T", "Na", "Nd", "composition" or "nk" is bundled
+        together as "params".
+
         Args:
             data (dict): A dictionary with all the material information. Composition
                 should be a dictionary itself, and the nk data should be either None
@@ -120,6 +126,17 @@ class Material:
         composition = d.pop("composition") if "composition" in d else {}
         result["composition"] = ReadOnlyDict(**composition)
         result["nk"] = d.pop("nk") if "nk" in d else None
+
+        if result["nk"] is not None and (
+            "wavelength" not in result["nk"].dims
+            or "wavelength" not in result["nk"].coords
+        ):
+            msg = (
+                "'nk' is not a DataArray or 'wavelength' is not a dimension and "
+                "coordinate."
+            )
+            raise ValueError(msg)
+
         result["params"] = ReadOnlyDict(**d)
         return cls(**result)
 
@@ -128,7 +145,7 @@ class Material:
         cls,
         data: pd.DataFrame,
         index: Hashable = 0,
-        nk_cols: Optional[Tuple[str, str]] = None,
+        nk_cols: Union[Tuple[str, str], bool] = False,
     ) -> Material:
         """Construct a material object from a pandas DataFrame.
 
@@ -138,13 +155,14 @@ class Material:
 
         Args:
             data (pd.DataFrame): A DataFrame with all the material information.
-                Composition should be a dictionary itself.
+                Composition entry should be a dictionary of key: value pairs.
             index (Hashable): Index label from where to retrieve the data. By default,
                 index = 0 is used.
-            nk_cols (Optional[Tuple[str, str]]): If provided, it should be a tuple with
-                the name of the column containing the wavelength and the one containing
-                the nk data, respectively. If not given, the column names are guessed
-                from the material string name.
+            nk_cols (Union[Tuple[str, str], bool]): It should be either a tuple with
+                the name of the columns containing the wavelength and the nk data,
+                respectively; or, if True, the column names are guessed
+                from the material string name and data attempted to be retrieved; or if
+                False, no nk data is retrieved from the dataframe.
 
         Returns:
             A new Material object.
@@ -153,28 +171,30 @@ class Material:
         composition = data.loc[index, "composition"] if "composition" in data else {}
         result["composition"] = ReadOnlyDict(**composition)
 
-        if nk_cols is None and "name" in result:
-            name = result["name"]
+        if nk_cols == True:
+            name = result.get("name", "No name")
             for k, v in result["composition"].items():
                 name = name.replace(k, f"{k}{v:.2}")
-            wl_label = f"wavelength{name}"
-            nk_label = f"nk{name}"
+            wl_label = f"wavelength {name}"
+            nk_label = f"nk {name}"
             nk_cols = (wl_label, nk_label)
-        else:
-            nk_cols = ("", "")
 
-        if nk_cols[0] in data.columns and nk_cols[1] in data.columns:
+        if nk_cols == False:
+            result["nk"] = None
+            nk_cols = ("", "")
+        elif nk_cols[0] in data.columns and nk_cols[1] in data.columns:
             result["nk"] = xr.DataArray(
                 data.loc[:, nk_cols[1]],
                 dims=["wavelength"],
-                coords={"coords": data.loc[:, nk_cols[0]]},
+                coords={"wavelength": data.loc[:, nk_cols[0]]},
             )
         else:
-            result["nk"] = None
+            msg = f"NK data columns {nk_cols[0]} and {nk_cols[1]} do not exist."
+            raise ValueError(msg)
 
         param_cols = [
             k
-            for k in data.cols
+            for k in data.columns
             if k not in ("name", "T", "Na", "Nd", "composition") + nk_cols
             and not k.startswith("wavelength")
             and not k.startswith("nk")
@@ -189,12 +209,12 @@ class Material:
             MaterialParameterError: If the requested attribute does not exists in the
             parameters dictionary.
         """
-        if item not in self.param:
+        if item not in self.params:
             raise MaterialParameterError(
                 f"Parameter '{item}' does not exist in "
                 f"material '{self.material_str}'."
             )
-        return self.param[item]
+        return self.params[item]
 
     @property
     def material_str(self) -> str:
@@ -204,7 +224,7 @@ class Material:
             result = result.replace(k, f"{k}{v:.2}")
         return result
 
-    def as_dict(self) -> dict:
+    def to_dict(self) -> dict:
         """ Provide all the Material information as a plain dictionary.
 
         Returns:
@@ -227,10 +247,18 @@ class Material:
         Returns:
             A DataFrame with the material information.
         """
-        asdict = self.as_dict()
+        asdict = self.to_dict()
+        asdict["composition"] = [asdict["composition"]]
         asdict.pop("nk")
-        if include_nk and self.nk is not None:
-            asdict[f"wavelength{self.material_str}"] = self.nk.wavelength.data
-            asdict[f"nk{self.material_str}"] = self.nk.data
+        data = pd.DataFrame.from_dict(asdict)
 
-        return pd.DataFrame.from_dict(asdict)
+        if include_nk and self.nk is not None:
+            nk = pd.DataFrame(
+                {
+                    f"wavelength {self.material_str}": self.nk.wavelength.data,
+                    f"nk {self.material_str}": self.nk.data,
+                }
+            )
+            return pd.concat((data, nk), axis=1)
+
+        return data

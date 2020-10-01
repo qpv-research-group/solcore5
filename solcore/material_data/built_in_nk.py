@@ -23,7 +23,7 @@ def get_built_in_nk_data(
 
     material_directory = config.materials(name)
     extension = ""
-    if composition is None:
+    if len(composition) == 0:
         extension = ".txt"
 
     n_path = Path(material_directory) / f"n{extension}"
@@ -42,7 +42,7 @@ def load_data(path: Path, composition: tuple = ()):
         critical_point_interpolate,
     )
 
-    if composition is None:
+    if len(composition) == 0:
         return np.loadtxt(str(path), unpack=True)
     else:
         data, critical_points = load_data_from_directory(str(path))

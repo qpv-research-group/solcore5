@@ -112,8 +112,15 @@ class ParameterSystem(SourceManagedClass):
                 bowing_parameter = 0
             del relevant_parameters[bowed_element]  # not propagating the element reduces cache misses
 
-            parent0_value = self.get_parameter(parent0, parameter, verbose=verbose, **relevant_parameters)
-            parent1_value = self.get_parameter(parent1, parameter, verbose=verbose, **relevant_parameters)
+            try:
+                parent0_value = self.get_parameter(parent0, parameter, verbose=verbose, **relevant_parameters)
+                parent1_value = self.get_parameter(parent1, parameter, verbose=verbose, **relevant_parameters)
+            except ValueError as err:
+                from warnings import warn
+                warn(f"Parameter '{parameter}' not found for '{material}' parent "
+                     f"materials '{parent0}' or '{parent1}'. Set to 'None'")
+                return None
+
             return bow(parent0_value, parent1_value, bowing_parameter, x)
 
         if parameter in self.database.options(material):
@@ -157,6 +164,8 @@ class ParameterSystem(SourceManagedClass):
         if "x" in db:
             for key in (k for k in db if "parent" in k):
                 param_list.update(set(self.database[db[key]].keys()))
+                param_list.remove(key)
+            param_list.remove("x")
 
         # We include the immediate and final calculables
         param_list.update(set(self.database["Immediate Calculables"].keys()))
@@ -165,7 +174,7 @@ class ParameterSystem(SourceManagedClass):
         # Finally, we get the parameters
         composition = composition if composition else {}
         return {
-            p: self.get_parameter(name, p, composition=composition, T=T, Na=Na, Nd=Nd)
+            p: self.get_parameter(name, p, **composition, T=T, Na=Na, Nd=Nd)
             for p in param_list
         }
 
