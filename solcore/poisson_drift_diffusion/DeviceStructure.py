@@ -123,6 +123,8 @@ def GetLayerProperties(layer, T):
     for key in DefaultProperties.keys():
         try:
             NewProperties[key] = getattr(layer.material, key)
+            if NewProperties[key] is None:
+                NewProperties[key] = DefaultProperties[key]
         except ValueError:
             NewProperties[key] = DefaultProperties[key]
 
