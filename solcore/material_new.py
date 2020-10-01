@@ -187,7 +187,9 @@ class Material:
         else:
             raise TypeError("'nk_cols' must be bool or a tuple with two elements.")
 
-        if _nk_cols[0] in data.columns and _nk_cols[1] in data.columns:
+        if not nk_cols:
+            pass
+        elif _nk_cols[0] in data.columns and _nk_cols[1] in data.columns:
             result["nk"] = xr.DataArray(
                 data.loc[:, _nk_cols[1]],
                 dims=["wavelength"],
