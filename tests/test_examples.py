@@ -58,7 +58,7 @@ def test_example_scripts(example, examples_directory, monkeypatch):
 
     except OSError as err:
         os.chdir(cwd)
-        sys.exit("Cannot run file %r because: %s" % (sys.argv[0], err))
+        skip("Cannot run file %r because: %s" % (sys.argv[0], err))
 
     except SystemExit:
         os.chdir(cwd)
