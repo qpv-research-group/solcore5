@@ -46,6 +46,7 @@ class Material:
         Na: float = 0.0,
         Nd: float = 0.0,
         nk: Union[xr.DataArray, str, None] = None,
+        parametric: bool = True,
         **kwargs,
     ) -> Material:
         """Create a material object out of the existing databases.
@@ -58,9 +59,12 @@ class Material:
             T (float): Temperature, in K.
             Na (float): Density of acceptors, in m^-3
             Nd (float): Density of acceptors, in m^-3
-            nk (Optional, xr.DataArray, str): Either a DataArray with the complex
+            nk (xr.DataArray, str): Either a DataArray with the complex
                 refractive index as function of wavelength, in m; or the name of the
                 database from where to retrieve the data.
+            parametric (bool): If true (default) material parameters from the parameters
+                DB will be retrieved. If this flag is set to True and the material
+                is not in the parameters DB, the creation of the material will fail.
             **kwargs: Any extra argument will be incorporated to the parameters
                 dictionary. If a parameter with the same name already exist, provided
                 by the chosen parameters database, it will be overwritten.
@@ -78,8 +82,11 @@ class Material:
         elif isinstance(nk, xr.DataArray):
             nk_data = nk
 
-        params = get_all_parameters(name, composition, T, Na, Nd)
-        params.update(kwargs)
+        if parametric:
+            params = get_all_parameters(name, composition, T, Na, Nd)
+            params.update(kwargs)
+        else:
+            params = kwargs
 
         return cls(
             name=name,
