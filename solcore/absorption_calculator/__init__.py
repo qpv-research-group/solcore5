@@ -15,5 +15,5 @@ class RCWASolverError(Exception):
 try:
     from .rigorous_coupled_wave import calculate_absorption_profile_rcwa, calculate_rat_rcwa, \
         rcwa_rat, initialise_S, necessary_materials, update_epsilon, rcwa_position_resolved
-except RCWASolverError as err:
+except RCWASolverError:
     print('WARNING: The RCWA solver will not be available because an S4 installation has not been found.')
