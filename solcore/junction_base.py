@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Type, Dict, TypeVar, Union, Sequence
+from typing import Optional, Type, Dict, TypeVar
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -166,66 +166,6 @@ class JunctionBase(ABC):
             A dictionary with the calculated parameters.
         """
         return iv_parameters(voltage, current)
-
-    def create_mesh(self, points: Union[int, Sequence[int], np.ndarray]) -> np.ndarray:
-        """Creates a 1D array of points, serving as spacial mesh for the calculations.
-
-        Args:
-            points (int, Sequence[int], np.ndarray): One of the following:
-                - Total number of points for the junction.
-                - A sequence with the number of points per layer.
-                - An array with the mesh already created.
-
-        Raises:
-            ValueError: If 'total_width' is None.
-            ValueError: If 'widths' is None when points is a Sequence.
-            ValueError: If 'widths' and 'points' have different length when points
-                is a Sequence.
-            ValueError: If points is and array and the first and last points are not
-                0 and 'total_width' respectively.
-
-        Returns:
-            An array with the mesh created according to the rules above.
-        """
-        if self.total_width is None:
-            msg = "Total junction width cannot be None when creating a mesh."
-            raise ValueError(msg)
-
-        if isinstance(points, int):
-            return np.linspace(0, self.total_width, points, endpoint=True)
-
-        elif isinstance(points, np.ndarray):
-            if points[0] != 0.0 or not np.isclose(points[-1], self.total_width):
-                msg = (
-                    "First and last elements of the points array must be 0 and "
-                    "the total junction width, respectively."
-                )
-                raise ValueError(msg)
-            return points
-
-        elif isinstance(points, Sequence):
-            if self.widths is None:
-                msg = (
-                    "Layer widths cannot be None when creating a mesh from a "
-                    "sequence."
-                )
-                raise ValueError(msg)
-            if len(self.widths) != len(points):
-                msg = (
-                    f"'widths' and 'points' have different length: "
-                    f"{len(self.widths)} and {len(points)}."
-                )
-                raise ValueError(msg)
-            w = np.cumsum([0] + list(self.widths))
-            return np.append(
-                np.concatenate(
-                    [
-                        np.linspace(start, stop, p, endpoint=False)
-                        for start, stop, p in zip(w[:-1], w[1:], points)
-                    ]
-                ),
-                self.total_width,
-            )
 
 
 Junction = TypeVar("Junction", bound=JunctionBase)
