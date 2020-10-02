@@ -74,6 +74,7 @@ install_requires = [
     "cycler",
     "pyyaml",
     "yabox",
+    "joblib"
 ]
 tests_require = ["pytest", "pytest-cov", "pytest-mock", "nbconvert", "nbformat"]
 docs_require = ["Sphinx", "recommonmark"]
