@@ -1,4 +1,3 @@
-import numpy as np
 from pytest import approx
 
 def test_DE():
@@ -10,11 +9,11 @@ def test_DE():
 
     result = algorithm.solve()
 
-    assert np.all(result[0] < 1e-8) # == 0 fails on ubuntu-latest for some reason?
-    assert result[1] < 1e-15
-    assert np.all(result[2][-1] == result[0])
-    assert result[3][-1] < 1e-15
-    assert result[4][-1] < 1e-15
+    assert result[0] == approx(0.0)
+    assert result[1] == approx(0.0)
+    assert result[2][-1] == approx(result[0])
+    assert result[3][-1] == approx(0.0)
+    assert result[4][-1] == approx(0.0)
 
 
 def test_PDE():
@@ -26,8 +25,8 @@ def test_PDE():
 
     result = algorithm.solve()
 
-    assert np.all(result[0] < 1e-8)
-    assert result[1] < 1e-15
-    assert np.all(result[2][-1] == result[0])
-    assert result[3][-1] < 1e-15
-    assert result[4][-1] < 1e-15
+    assert result[0] == approx(0.0)
+    assert result[1] == approx(0.0)
+    assert result[2][-1] == approx(result[0])
+    assert result[3][-1] == approx(0.0)
+    assert result[4][-1] == approx(0.0)
