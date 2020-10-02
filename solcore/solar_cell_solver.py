@@ -3,7 +3,8 @@ import numpy as np
 import solcore.analytic_solar_cells as ASC
 from solcore.light_source import LightSource
 from solcore.state import State
-from solcore.optics import solve_beer_lambert, solve_tmm, solve_rcwa, rcwa_options, solve_external_optics, RCWASolverError
+from solcore.optics import solve_beer_lambert, solve_tmm, solve_rcwa, rcwa_options, solve_external_optics
+from solcore.absorption_calculator import RCWASolverError
 from solcore.structure import Layer, Junction, TunnelJunction
 
 try:
