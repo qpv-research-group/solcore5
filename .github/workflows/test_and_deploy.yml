@@ -75,7 +75,6 @@ jobs:
       shell: powershell
 
     - name: Unit and functional tests
-      if: github.event_name == 'push'
       env:
         SOLCORE_SPICE: ngspice
       run: |
