@@ -9,9 +9,7 @@ from .nk_database import NK, MaterialNKDatabaseError
 
 
 @NK.register_database(name="built-in")
-def get_built_in_nk_data(
-    name: str, composition: Optional[dict] = None, T: float = 273.0
-):
+def get_built_in_nk_data(name: str, composition: Optional[dict] = None):
     from solcore import config
 
     if name not in config.materials():
@@ -23,14 +21,25 @@ def get_built_in_nk_data(
 
     material_directory = config.materials(name)
     extension = ""
-    if len(composition) == 0:
+    if not composition:
         extension = ".txt"
+        comp = ()
+    else:
+        comp = tuple(composition.values())
 
     n_path = Path(material_directory) / f"n{extension}"
     k_path = Path(material_directory) / f"k{extension}"
 
-    wl, n = load_data(n_path, tuple(composition.values()))
-    _, k = load_data(k_path, tuple(composition.values()))
+    try:
+        wl, n = load_data(n_path, comp)
+        _, k = load_data(k_path, comp)
+    except MaterialNKDatabaseError:
+        msg = (
+            f"Material '{name}' does not have composition "
+            f"information in the built-in database. Check material's list and "
+            f"composition element, currently '{tuple(composition.keys())[0]}'."
+        )
+        raise MaterialNKDatabaseError(msg)
 
     return xr.DataArray(n + 1.0j * k, dims=["wavelength"], coords={"wavelength": wl})
 
@@ -42,10 +51,12 @@ def load_data(path: Path, composition: tuple = ()):
         critical_point_interpolate,
     )
 
-    if len(composition) == 0:
+    if not composition:
         return np.loadtxt(str(path), unpack=True)
     else:
         data, critical_points = load_data_from_directory(str(path))
+        if not data:
+            raise MaterialNKDatabaseError
         wl = list(data.values())[0][0]
         _, value, critical_points = critical_point_interpolate(
             data, critical_points, composition[0], wl

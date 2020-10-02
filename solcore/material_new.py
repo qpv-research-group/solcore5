@@ -79,7 +79,7 @@ class Material:
 
         nk_data: Optional[xr.DataArray] = None
         if isinstance(nk, str):
-            nk_data = NK.get_data(nk, name, composition, T)
+            nk_data = NK.get_data(nk, name, composition)
         elif isinstance(nk, xr.DataArray):
             if "wavelength" not in nk.dims or "wavelength" not in nk.coords:
                 msg = "'wavelength' is not a DataArray dimension and coordinate."

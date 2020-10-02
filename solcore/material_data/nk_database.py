@@ -27,7 +27,7 @@ class NK:
 
     @staticmethod
     def get_data(
-        database: str, name: str, composition: Optional[dict] = None, T: float = 273.0,
+        database: str, name: str, composition: Optional[dict] = None,
     ) -> xr.DataArray:
         """Gets the complex refractive index from the database.
 
@@ -48,4 +48,4 @@ class NK:
             )
             raise MaterialNKDatabaseError(msg)
 
-        return NK._known_db[database](name, composition, T)
+        return NK._known_db[database](name, composition)
