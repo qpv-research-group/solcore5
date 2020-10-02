@@ -11,7 +11,6 @@ on:
 
 jobs:
   unit_testing:
-    if: github.event_name == 'push'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
