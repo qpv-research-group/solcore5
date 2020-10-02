@@ -1,9 +1,9 @@
-[![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/devel?urlpath=lab)
+[![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/develop?urlpath=lab)
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
 [![Documentation Status](http://readthedocs.org/projects/solcore5/badge/?version=latest)](http://solcore5.readthedocs.io/en/latest/?badge=latest)
 ![Solcore](https://github.com/qpv-research-group/solcore5/workflows/Solcore/badge.svg)
-[![codecov](https://codecov.io/gh/qpv-research-group/solcore5/branch/devel/graph/badge.svg)](https://codecov.io/gh/qpv-research-group/solcore5)
+[![codecov](https://codecov.io/gh/qpv-research-group/solcore5/branch/develop/graph/badge.svg)](https://codecov.io/gh/qpv-research-group/solcore5)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a1d2e6f702e64d878a67dcf85ce9b3b7)](https://app.codacy.com/gh/qpv-research-group/solcore5?utm_source=github.com&utm_medium=referral&utm_content=qpv-research-group/solcore5&utm_campaign=Badge_Grade_Settings)
 
 
