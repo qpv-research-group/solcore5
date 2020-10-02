@@ -14,17 +14,17 @@ jobs:
         with:
           python-version: '3.x'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade setuptools wheel pip twine numpy
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade setuptools wheel pip twine numpy
 
-    - name: Build package
-      run: |
-        python setup.py update_manifest
-        python setup.py sdist
+      - name: Build package
+        run: |
+          python setup.py update_manifest
+          python setup.py sdist
 
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_TOKEN }}
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}

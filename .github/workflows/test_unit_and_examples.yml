@@ -30,7 +30,7 @@ jobs:
 
     - name: Install system dependencies in Linux
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install -y gfortran ngspice
+      run: sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
     - name: Install system dependencies in MacOS
       if: matrix.os == 'macos-latest'
@@ -44,6 +44,16 @@ jobs:
       run: |
         python -m pip install --upgrade setuptools wheel pip twine numpy
         python -m pip install -e .[dev]
+
+    - name: Install S4 in Linux
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        git clone https://github.com/phoebe-p/S4
+        cd S4
+        #make boost
+        make S4_pyext
+        cd ..
+        rm -rf S4
 
     - name: Install Solcore Linux and MacOS
       if: matrix.os != 'windows-latest'

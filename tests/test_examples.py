@@ -20,7 +20,6 @@ def examples_directory(tmp_path_factory):
 def example_scripts():
     exdir = Path(__file__).parent.parent / "examples"
     scripts = sorted([os.path.basename(f) for f in glob(str(exdir / "*.py"))])
-    # scripts.remove("differential_evolution_ARC.py")
     return scripts
 
 
@@ -35,7 +34,7 @@ def example_notebooks():
 def test_example_scripts(example, examples_directory, monkeypatch):
     from solcore.spice import SpiceSolverError
     from solcore.light_source import SmartsSolverError
-    from solcore.optics import RCWASolverError
+    from solcore.absorption_calculator import RCWASolverError
     import sys
 
     os.chdir(examples_directory)
@@ -59,7 +58,7 @@ def test_example_scripts(example, examples_directory, monkeypatch):
 
     except OSError as err:
         os.chdir(cwd)
-        sys.exit("Cannot run file %r because: %s" % (sys.argv[0], err))
+        skip("Cannot run file %r because: %s" % (sys.argv[0], err))
 
     except SystemExit:
         os.chdir(cwd)
@@ -83,6 +82,7 @@ def test_example_scripts(example, examples_directory, monkeypatch):
 def test_example_notebooks(example, examples_directory, monkeypatch):
     from solcore.spice import SpiceSolverError
     from solcore.light_source import SmartsSolverError
+    from solcore.absorption_calculator import RCWASolverError
     import nbconvert
     import nbformat
     import sys
@@ -112,7 +112,7 @@ def test_example_notebooks(example, examples_directory, monkeypatch):
 
     except OSError as err:
         os.chdir(cwd)
-        sys.exit("Cannot run file %r because: %s" % (sys.argv[0], err))
+        skip("Cannot run file %r because: %s" % (sys.argv[0], err))
 
     except SystemExit:
         os.chdir(cwd)
@@ -125,3 +125,7 @@ def test_example_notebooks(example, examples_directory, monkeypatch):
     except SmartsSolverError:
         os.chdir(cwd)
         skip("No SMARTS solver found.")
+
+    except RCWASolverError:
+        os.chdir(cwd)
+        skip("No RCWA solver found.")
