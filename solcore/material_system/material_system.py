@@ -12,7 +12,7 @@ from solcore.material_system import critical_point_interpolate
 from solcore.parameter_system import ParameterSystem
 from solcore.constants import h, c, q, kb, pi, electron_mass as m0, vacuum_permittivity
 from solcore.singleton import Singleton
-from solcore.absorption_calculator.sopra_db import sopra_database, compounds_info
+from solcore.material_data.sopra_db import sopra_database, compounds_info
 from solcore.absorption_calculator.nk_db import nkdb_load_n, nkdb_load_k
 from solcore.material_data import calculate_mobility
 
@@ -96,7 +96,7 @@ class MaterialSystem(metaclass=Singleton):
                     sopra_database.material_list()
 
                 sys.exit()
-        except solcore.absorption_calculator.sopra_db.SOPRAError:
+        except solcore.material_data.sopra_db.SOPRAError:
             pass
 
         # Then we check if the material has already been created. If not, we create it.

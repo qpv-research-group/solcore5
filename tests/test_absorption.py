@@ -135,7 +135,7 @@ def test_TMM_dielectric_model():
 
 
 def test_sopra_absorption():
-    from solcore.absorption_calculator import sopra_database
+    from solcore.material_data.sopra_db import sopra_database
 
     # Import material constant data for Gallium Arsenide :: Do this by placing the
     # material name as the sole argument...
