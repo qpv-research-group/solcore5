@@ -74,12 +74,22 @@ install_requires = [
     "cycler",
     "pyyaml",
     "yabox",
-    "joblib"
+    "joblib",
 ]
-tests_require = ["pytest", "pytest-cov", "pytest-mock", "nbconvert", "nbformat"]
+tests_require = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "nbconvert",
+    "nbformat",
+    "pytest-rerunfailures",
+]
 docs_require = ["Sphinx", "recommonmark"]
-extras_require = {"dev": tests_require + docs_require + ["pre-commit"], 
-                  "docs": docs_require, "test": tests_require}
+extras_require = {
+    "dev": tests_require + docs_require + ["pre-commit"],
+    "docs": docs_require,
+    "test": tests_require,
+}
 
 
 setup(
