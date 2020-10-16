@@ -34,16 +34,16 @@ def example_notebooks():
 @mark.parametrize("example", example_scripts())
 def test_example_scripts(example, examples_directory):
 
-    os.environ["PYTHONWARNINGS"] = "ignore"
+    env = os.environ.copy()
+    env["PYTHONWARNINGS"] = "ignore"
     with open(examples_directory / example) as fp:
         script = "import matplotlib\nmatplotlib.use('Agg')\n" + fp.read()
         process = subprocess.run(
             ["python", "-c", script],
             capture_output=True,
-            input=b"n\n",
             cwd=str(examples_directory),
+            env=env,
         )
-    os.environ["PYTHONWARNINGS"] = "default"
 
     if b"SpiceSolverError" in process.stderr:
         skip("No SPICE solver found.")
@@ -63,7 +63,8 @@ def test_example_notebooks(example, examples_directory):
 
     exporter = nbconvert.PythonExporter()
     notebooks_folder = examples_directory / "notebooks"
-    os.environ["PYTHONWARNINGS"] = "ignore"
+    env = os.environ.copy()
+    env["PYTHONWARNINGS"] = "ignore"
     with open(notebooks_folder / example) as fp:
         nbcode = nbformat.reads(fp.read(), as_version=4)
         (code, _) = exporter.from_notebook_node(nbcode)
@@ -71,10 +72,9 @@ def test_example_notebooks(example, examples_directory):
         process = subprocess.run(
             ["python", "-c", script],
             capture_output=True,
-            input=b"n\n",
             cwd=str(notebooks_folder),
+            env=env,
         )
-    os.environ["PYTHONWARNINGS"] = "default"
 
     if b"SpiceSolverError" in process.stderr:
         skip("No SPICE solver found.")
