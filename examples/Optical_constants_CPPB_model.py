@@ -15,8 +15,8 @@ from solcore.absorption_calculator.dielectric_constant_models import Oscillator
 from solcore.structure import Structure
 
 # First, read in experimental data for GaAs dielectric function (from Palik)...
-Palik_Eps1 = np.loadtxt("Palik_GaAs_Eps1.csv", delimiter=',', unpack=False)
-Palik_Eps2 = np.loadtxt("Palik_GaAs_Eps2.csv", delimiter=',', unpack=False)
+Palik_Eps1 = np.loadtxt("data/Palik_GaAs_Eps1.csv", delimiter=',', unpack=False)
+Palik_Eps2 = np.loadtxt("data/Palik_GaAs_Eps2.csv", delimiter=',', unpack=False)
 
 # Generate a list of energies over which to calculate the model dielectric function.
 E = np.linspace(0.2, 5, 1000)

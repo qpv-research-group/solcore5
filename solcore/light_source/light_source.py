@@ -31,7 +31,9 @@ REGISTERED_CONVERTERS: dict = {}
 def reference_spectra():
     """ Function providing the standard reference spectra: AM0, AM1.5g and AM1.5d.
 
-    :return: A 2D array with 4 columns representing the wavelength, AM0, AM1.5g and AM1.5d standard spectra."""
+    :return: A 2D array with 4 columns representing the wavelength, AM0, AM1.5g and
+    AM1.5d standard spectra.
+    """
 
     science_reference(
         "Standard solar spectra",
@@ -49,7 +51,11 @@ def reference_spectra():
 
 
 class LightSource:
-    """ This is a common interface to access all types of light sources supported by Solcore: standard solar spectra (AM0, AM1.5g, and AM1.5d), blackbody radiation, laser light or spectra created from atmospheric data using SPECTRAL2 or SMARTS. Aditionally, it can also use experimentally measured spectra.
+    """ Common interface to access all types of light sources supported by Solcore.
+
+    It includes standard solar spectra (AM0, AM1.5g, and AM1.5d), blackbody radiation,
+    laser light or spectra created from atmospheric data using SPECTRAL2 or SMARTS.
+    Additionally, it can also use experimentally measured spectra.
     """
 
     type_of_source = [
@@ -61,60 +67,69 @@ class LightSource:
         "custom",
     ]
 
-    def __init__(self, source_type, x=None, **kwargs):
+    def __init__(self, source_type, x=None, output_units = "power_density_per_nm", concentration=1, **kwargs):
         """
 
         :param source_type:
         :param kwargs:
         """
+        msg = f"Unknown source {source_type}. " \
+              f"Valid options are: {self.type_of_source}"
+        assert source_type in self.type_of_source, msg
+
+        msg = f"Unknown output units {output_units}. " \
+              f"Valid options are: {tuple(REGISTERED_CONVERTERS.keys())}"
+        assert output_units in REGISTERED_CONVERTERS, msg
+
         self.source_type = source_type
         self.x = x
         self.x_internal = x
         self.power_density = 0
 
-        self.options = {"output_units": "power_density_per_nm", "concentration": 1}
+        self.options = {}
+        self.output_units = output_units
+        self.concentration = concentration
         self.options.update(kwargs)
+        self._spectrum = None
 
-        self._update_get_spectrum()
+        self._update_get_spectrum(self.output_units)
         self._update_spectrum_function()
 
         self.ready = False
         self.cache_spectrum = None
 
-    def spectrum(self, x=None, **kwargs):
-        """ Returns the spectrum of the light in the requested units. Internally, the spectrum is always managed in power density per nanometers, but the output can be provided in other compatible units, such as power density per Hertz or photon flux per eV.
+    def spectrum(self, x=None, output_units=None, concentration=None, **kwargs):
+        """ Returns the spectrum of the light in the requested units. Internally,
+        the spectrum is always managed in power density per nanometers, but the
+        output can be provided in other compatible units, such as power density per
+        Hertz or photon flux per eV.
 
-        :param x: (Default=None) If "x" is provided, it must be an array with the spectral range in which to calculate the spectrum. Depending on the "units" defined when creating the light source, this array must be in nm, m, eV, J or hz.
-        :param kwargs: Options to update the light source. It can be "units", "concentration" or any of the options specific to the chosen type of light source.
+        :param x: (Default=None) If "x" is provided, it must be an array with the
+        spectral range in which to calculate the spectrum. Depending on the "units"
+        defined when creating the light source, this array must be in nm, m, eV,
+        J or hz.
+        :param output_units: Units of the output spectrum
+        :param concentration: Concentration of the light source
+        :param kwargs: Options to update the light source. It can be "units",
+        "concentration" or any of the options specific to the chosen type of light
+        source.
         :return: Array with the spectrum in the requested units
         """
-        if x is not None:
-            self.x = x
-            self.ready = False
+        self.x = x if x is not None else self.x_internal
 
-        try:
-            if len(kwargs) > 0:
-                self._update(**kwargs)
-                self._update_spectrum_function()
-                output = self._get_spectrum(self._spectrum, self.x)
-                self.cache_spectrum = output
-            elif not self.ready:
-                self._update_spectrum_function()
-                output = self._get_spectrum(self._spectrum, self.x)
-                self.cache_spectrum = output
-            else:
-                output = self.cache_spectrum
+        output_units = output_units if output_units is not None else self.output_units
+        con = concentration if concentration is not None else self.concentration
 
-            return self.x, output * self.options["concentration"]
-
-        except AttributeError as err:
-            raise AttributeError(
-                'ERROR: No stored spectrum or "x" data not available.'
-                'You must call the "spectrum" function at least once with a value for the "x" argument.'
-            )
+        self._update_get_spectrum(output_units)
+        if kwargs:
+            self._update(**kwargs)
+            self._update_spectrum_function()
+        return self.x, self._get_spectrum(self._spectrum, self.x) * con
 
     def _update(self, **kwargs):
-        """ Updates the options of the light source with new values. It only updates existing options. No new options are added.
+        """ Updates the options of the light source with new values.
+
+        It only updates existing options. No new options are added.
 
         :param kwargs: A dictionary with the options to update and their new values.
         :return: None
@@ -124,21 +139,18 @@ class LightSource:
             if opt in self.options:
                 self.options[opt] = kwargs[opt]
 
-        if "output_units" in kwargs:
-            self._update_get_spectrum()
-
         self.ready = False
         self.cache_spectrum = None
 
-    def _update_get_spectrum(self):
+    def _update_get_spectrum(self, output_units):
         """ Updates the function to get the spectrum, depending on the chosen output units.
 
         :return: None
         """
-        try:
-            self._get_spectrum = REGISTERED_CONVERTERS[self.options["output_units"]]
-        except ValueError:
-            raise ValueError(f"Valid units are: {list(REGISTERED_CONVERTERS.keys())}.")
+        msg = f"Valid units are: {list(REGISTERED_CONVERTERS.keys())}."
+        assert output_units in REGISTERED_CONVERTERS, msg
+
+        self._get_spectrum = REGISTERED_CONVERTERS[output_units]
 
     def _update_spectrum_function(self):
         """ Updates the spectrum function during the light source creation or just after updating one or more of the options. It also updates the "options" property with any default options available to the chosen light source, if any.
@@ -197,7 +209,7 @@ class LightSource:
 
             self.x_internal = wl
             self.power_density = (
-                np.trapz(y=spectrum, x=wl) * self.options["concentration"]
+                np.trapz(y=spectrum, x=wl) * self.concentration
             )
             output = interp1d(
                 x=wl, y=spectrum, bounds_error=False, fill_value=0, assume_sorted=True
@@ -231,7 +243,7 @@ class LightSource:
                 center + 5 * options["linewidth"],
                 options["linewidth"] / 20,
             )
-            self.power_density = power * self.options["concentration"]
+            self.power_density = power * self.concentration
             return output
 
         except KeyError:
@@ -279,7 +291,7 @@ class LightSource:
             self.x_internal = np.arange(0, wl_max * 10, wl_max / 100)
             sigma = 5.670_367e-8
             self.power_density = (
-                sigma * T ** 4 * entendue / np.pi * self.options["concentration"]
+                sigma * T ** 4 * entendue / np.pi * self.concentration
             )
 
             return BB
@@ -309,7 +321,7 @@ class LightSource:
 
         self.x_internal = wl
         self.power_density = (
-            np.trapz(y=irradiance, x=wl) * self.options["concentration"]
+            np.trapz(y=irradiance, x=wl) * self.concentration
         )
         output = interp1d(
             x=wl, y=irradiance, bounds_error=False, fill_value=0, assume_sorted=True
@@ -348,7 +360,7 @@ class LightSource:
 
             self.x_internal = out[0]
             self.power_density = (
-                np.trapz(y=out[output], x=out[0]) * self.options["concentration"]
+                np.trapz(y=out[output], x=out[0]) * self.concentration
             )
             output = interp1d(
                 x=out[0],
@@ -390,6 +402,12 @@ class LightSource:
             elif units == "photon_flux_per_nm":
                 wl = x_data
                 spectrum = y_data * (c * h * 1e9 / wl)
+            elif units == "power_density_per_m":
+                wl = x_data * 1e-9
+                spectrum = y_data * 1e-9
+            elif units == "photon_flux_per_m":
+                wl = x_data * 1e-9
+                spectrum = y_data * (c * h / wl)
             elif units == "power_density_per_eV":
                 wl, spectrum = spectral_conversion_nm_ev(x_data, y_data)
             elif units == "photon_flux_per_eV":
@@ -414,7 +432,7 @@ class LightSource:
 
             self.x_internal = wl
             self.power_density = (
-                np.trapz(y=spectrum, x=wl) * self.options["concentration"]
+                np.trapz(y=spectrum, x=wl) * self.concentration
             )
             output = interp1d(
                 x=wl, y=spectrum, bounds_error=False, fill_value=0, assume_sorted=True

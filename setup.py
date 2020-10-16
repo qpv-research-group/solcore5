@@ -65,6 +65,7 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
 
 
 install_requires = [
+    "numpy",
     "matplotlib",
     "scipy",
     "tmm",
@@ -75,7 +76,9 @@ install_requires = [
     "yabox",
 ]
 tests_require = ["pytest", "pytest-cov", "pytest-mock", "nbconvert", "nbformat"]
-extras_require = {"dev": tests_require + ["Sphinx", "pre-commit"]}
+docs_require = ["Sphinx", "recommonmark"]
+extras_require = {"dev": tests_require + docs_require + ["pre-commit"], 
+                  "docs": docs_require, "test": tests_require}
 
 
 setup(
@@ -83,8 +86,8 @@ setup(
     version=config.get("Configuration", "version"),
     description="Python-based solar cell simulator",
     long_description=long_description,
-    url="https://github.com/dalonsoa/solcore5",
-    download_url="https://github.com/dalonsoa/solcore5/archive/v{}.tar.gz".format(
+    url="https://github.com/qpv-research-group/solcore5",
+    download_url="https://github.com/qpv-research-group/solcore5/archive/v{}.tar.gz".format(
         config.get("Configuration", "version")
     ),
     project_urls={

@@ -379,6 +379,7 @@ def position_resolved(layer, dist, coh_tmm_data):
     Starting with output of coh_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """
+
     vw = coh_tmm_data['vw_list'][layer]
     kz = coh_tmm_data['kz_list'][layer]
     th = coh_tmm_data['th_list'][layer]
@@ -391,6 +392,7 @@ def position_resolved(layer, dist, coh_tmm_data):
 
     Ef = (vw.T[0] * np.exp(1j * kz.T * dist)).T
     Eb = (vw.T[1] * np.exp(-1j * kz.T * dist)).T
+
 
     # Poynting vector
     if (pol == 's'):
@@ -406,6 +408,8 @@ def position_resolved(layer, dist, coh_tmm_data):
         absor = (n * np.conj(np.cos(th)) *
                  (kz * abs(Ef - Eb) ** 2 - np.conj(kz) * abs(Ef + Eb) ** 2)
                  ).imag / (n_0 * np.conj(np.cos(th_0))).real
+
+
     return ({'poyn': poyn.T, 'absor': absor.T})
 
 
@@ -547,9 +551,12 @@ class absorp_analytic_fn:
 
             part1[self.A1 < 1e-100, :] = 0
             return (part1 + part2 + part3 + part4)
+
         else:
             return (self.A1 * np.exp(self.a1 * z) + self.A2 * np.exp(-self.a1 * z)
                     + self.A3 * np.exp(1j * self.a3 * z) + np.conj(self.A3) * np.exp(-1j * self.a3 * z))
+
+
 
     def flip(self):
         """
@@ -615,6 +622,10 @@ def absorp_in_each_layer(coh_tmm_data):
     final_answer = np.zeros((num_layers, num_lam_vec))
     final_answer[0:-1] = -np.diff(power_entering_each_layer, axis=0)
     final_answer[-1] = power_entering_each_layer[-1]
+
+
+    final_answer[final_answer < 0] = 0
+
     return final_answer
 
 
@@ -1005,6 +1016,10 @@ def inc_absorp_in_each_layer(inc_data):
             absorp_list.extend(stack_absorp)
     # final semi-infinite layer
     absorp_list.append(inc_data['T'])
+
+    absorp_list = np.array(absorp_list)
+    absorp_list[absorp_list < 0] = 0
+
     return absorp_list
 
 
@@ -1034,7 +1049,7 @@ def inc_find_absorp_analytic_fn(layer, inc_data):
     return forwardfunc.add(backfunc)
 
 
-def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas):
+def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zero_threshold=1e-6):
     """
     This function is vectorized. Analogous to position_resolved, but
     for layers (incoherent or coherent) in (partly) incoherent stacks.
@@ -1051,11 +1066,13 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas):
         if coherency_list[l] == 'c':
 
             fn = inc_find_absorp_analytic_fn(l, inc_tmm_data)
-            A_local[:, layer == l] = fn.run(dist[layer == l])
+            A_layer = fn.run(dist[layer == l])
 
         else:
+            A_layer = beer_lambert(alphas[l] * 1e9, fraction_reaching[i], dist[layer == l] * 1e-9)
 
-            A_local[:, layer == l] = beer_lambert(alphas[l]*1e9, fraction_reaching[i], dist[layer == l]*1e-9)
+        A_layer[fraction_reaching[i] < zero_threshold, :] = 0
+        A_local[:, layer == l] = A_layer
 
     return A_local
 

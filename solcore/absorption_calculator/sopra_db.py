@@ -325,6 +325,7 @@ class sopra_database:
                 n_at_C.append(n[i])
 
             # Interpolate the point corresponding to T and build the new data array...
+            #print('SOPRA INTERP DATA: ',frac, x_list, n_at_C)
             n_interp_data.append(np.interp(frac, x_list, n_at_C))
             k_interp_data.append(np.interp(frac, x_list, k_at_C))
 

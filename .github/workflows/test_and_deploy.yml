@@ -3,9 +3,11 @@ name: testing_and_deploy
 on:
   push:
 
+  pull_request:
+    
   # everyday at 3 am UTC
   schedule:
-    - cron:  '* 3 * * *'
+    - cron:  '0 3 * * *'
 
 jobs:
   testing:
@@ -75,14 +77,14 @@ jobs:
       if: success() && startsWith(github.event.ref, 'refs/tags')
       run: |
         python setup.py update_manifest
-        python setup.py sdist bdist_wheel
+        python setup.py sdist
 
     - name: Publish package
       if: success() && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
-        password: ${{ secrets.PYPI_PASSWORD }}
+        password: ${{ secrets.PYPI_TOKEN }}
 
     - name: Codecov
       if: matrix.os == 'ubuntu-latest'

@@ -9,8 +9,8 @@ from solcore.spice import solve_quasi_3D
 # First we load the masks defining the illumination pattern and the contacts. Both must be greyscale images
 # The solver expect images with values between 0 and 255 and imread of a PNG image is between 0 and 1, even when
 # it is in grey, so we scale it multiplying by 255. If the image were JPG, the result would be already in (0,255).
-illuminationMask = (plt.imread('masks_illumination.png') * 255).astype(np.int)
-contactsMask = (plt.imread('masks_sq.png') * 255).astype(np.int)
+illuminationMask = (plt.imread('data/masks_illumination.png') * 255).astype(np.int)
+contactsMask = (plt.imread('data/masks_sq.png') * 255).astype(np.int)
 
 nx, ny = illuminationMask.shape
 
@@ -53,7 +53,7 @@ wl = np.linspace(350, 2000, 301) * 1e-9
 light_source = LightSource(source_type='standard', version='AM1.5g', x=wl, output_units='photon_flux_per_m',
                            concentration=100)
 
-options = {'light_iv': True, 'wavelength': wl, 'light_source': light_source}
+options = {'light_iv': True, 'wavelength': wl, 'light_source': light_source, 'optics_method': 'BL'}
 
 V, I, Vall, Vmet = solve_quasi_3D(my_solar_cell, illuminationMask, contactsMask, options=options, Lx=Lx, Ly=Ly, h=h,
                                   R_back=1e-16, R_contact=Rcontact, R_line=Rline, bias_start=vini, bias_end=vfin,
