@@ -83,7 +83,7 @@ class LightSource:
 
         self.source_type = source_type
         self.x = x
-        self.x_internal = x
+        self.x_internal = None
         self.power_density = 0
 
         self.options = {}
@@ -115,7 +115,9 @@ class LightSource:
         source.
         :return: Array with the spectrum in the requested units
         """
-        self.x = x if x is not None else self.x_internal
+        
+        if x is None:
+            x = self.x if self.x is not None else self.x_internal
 
         output_units = output_units if output_units is not None else self.output_units
         con = concentration if concentration is not None else self.concentration
@@ -124,7 +126,7 @@ class LightSource:
         if kwargs:
             self._update(**kwargs)
             self._update_spectrum_function()
-        return self.x, self._get_spectrum(self._spectrum, self.x) * con
+        return self.x, self._get_spectrum(self._spectrum, x) * con
 
     def _update(self, **kwargs):
         """ Updates the options of the light source with new values.
