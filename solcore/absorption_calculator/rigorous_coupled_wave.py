@@ -132,17 +132,19 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
     return output
 
 
-def rcwa_rat(S, n_layers):
+def rcwa_rat(S, n_layers, theta, n_inc):
+    # TODO: check normalization of pfbo values. Also, theta correction should happen inside here rather than externally
     below = 'layer_' + str(n_layers)  # identify which layer is the transmission medium
 
-    R = 1 - sum(S.GetPowerFlux('layer_2'))  # GetPowerFlux gives forward & backward Poynting vector, so sum to get power flux
-    R_pfbo = -np.array(S.GetPowerFluxByOrder('layer_1'))[:,1] # real part of backwards power flow
-    Nrm = np.real(np.sum(R_pfbo))
-    R_pfbo = np.real((R/Nrm)*R_pfbo)
+    R = -n_inc*np.real(S.GetPowerFlux('layer_1')[1])/np.cos(theta*np.pi/180)  # GetPowerFlux gives forward & backward Poynting vector, so sum to get power flux
 
-    T = sum(S.GetPowerFlux(below))
 
-    T_pfbo = np.real(np.sum(np.array(S.GetPowerFluxByOrder(below)), 1))
+    R_pfbo = -np.array(S.GetPowerFluxByOrder('layer_1'))[:,1] # real part of backwards power flow. Not normalised correctly.
+
+    T = n_inc*sum(S.GetPowerFlux(below))/np.cos(theta*np.pi/180)
+
+    T_pfbo = n_inc*np.real(np.sum(np.array(S.GetPowerFluxByOrder(below)), 1))/np.cos(theta*np.pi/180)
+
     return {'R': np.real(R), 'T': np.real(T), 'R_pfbo': R_pfbo, 'T_pfbo': T_pfbo}
 
 
@@ -218,7 +220,7 @@ def necessary_materials(geom_list):
     for i1, geom in enumerate(geom_list):
         if bool(geom):
             shape_mats.append([x['mat'] for x in geom])
-            geom_list_str[i1] = [{}] * len(geom)
+            geom_list_str[i1] =[{} for _ in range(len(geom))]
             for i2, g in enumerate(geom):
                 for item in g.keys():
                     if item != 'mat':
@@ -250,7 +252,7 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
     :param size: a tuple of 2-D vectors in the format ((ux, uy), (vx, vy)) giving the x and y components of the lattice unit vectors in nm.
     :param orders: number of orders to retain in the RCWA calculations.
     :param wavelength: Wavelengths (in nm) in which calculate the data.
-    :param rat_output: A_pol' (polarization-dependent layer absorption) output from calculate_rat_rcwa
+    :param rat_output: 'A_pol' (polarization-dependent layer absorption) output from calculate_rat_rcwa
     :param z_limit: Maximum value in the z direction at which to calculate depth-dependent absorption (nm)
     :param steps_size: if the dist is not specified, the step size in nm to use in the depth-dependent calculation
     :param dist: the positions (in nm) at which to calculate depth-dependent absorption
@@ -338,22 +340,23 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
     return output
 
 
-def rcwa_position_resolved(S, layer, depth, A):
+def rcwa_position_resolved(S, layer, depth, A, theta, n_inc):
     if A > 0:
         delta = 1e-9
         power_difference = np.real(
             sum(S.GetPowerFlux(layer, depth - delta)) - sum(S.GetPowerFlux(layer, depth + delta)))
-        return power_difference / (2 * delta)  # absorbed energy density normalised to total absorption
+        return n_inc * power_difference / (2 * delta * np.cos(theta*np.pi/180))  # absorbed energy density normalised to total absorption
     else:
         return 0
 
-def rcwa_absorption_per_layer(S, n_layers):
+def rcwa_absorption_per_layer(S, n_layers, theta, n_inc):
     # layer 1 is incidence medium, layer n is the transmission medium
     A = np.empty(n_layers-2)
     for i1, layer in enumerate(np.arange(n_layers-2)+2):
-        A[i1] = np.real(sum(S.GetPowerFlux('layer_' + str(layer))) - sum(S.GetPowerFlux('layer_' + str(layer+1))))
+        A[i1] = np.real(sum(S.GetPowerFlux('layer_' + str(layer))) -
+                        sum(S.GetPowerFlux('layer_' + str(layer+1))))
 
-    A = np.array([x if x > 0 else 0 for x in A])
+    A = n_inc*np.array([x if x > 0 else 0 for x in A])/np.cos(theta*np.pi/180)
 
     return A
 
@@ -382,10 +385,10 @@ def RCWA_wl(wl, geom_list, l_oc, s_oc, s_names, pol, theta, phi, widths, size, o
     def vs_pol(s, p):
         S.SetExcitationPlanewave((theta, phi), s, p, 0)
         S.SetFrequency(1 / wl)
-        out = rcwa_rat(S, len(widths))
+        out = rcwa_rat(S, len(widths), theta, n_inc)
         R = out['R']
         T = out['T']
-        A_layer = rcwa_absorption_per_layer(S, len(widths))
+        A_layer = rcwa_absorption_per_layer(S, len(widths), theta, n_inc)
         return R, T, A_layer
 
     S = initialise_S(size, orders, geom_list, l_oc, s_oc, s_names, widths, rcwa_options)
@@ -407,8 +410,6 @@ def RCWA_wl(wl, geom_list, l_oc, s_oc, s_names, pol, theta, phi, widths, size, o
             T = (T_s + T_p) / 2
             A_layer = np.stack([A_layer_s, A_layer_p])
 
-    T = n_inc * T / np.cos(theta * np.pi / 180)
-    A_layer = n_inc * A_layer / np.cos(theta * np.pi / 180)
     return R, T, A_layer
 
 
@@ -440,7 +441,7 @@ def RCWA_wl_prof(wl, A, dist, geom_list, layers_oc, shapes_oc, s_names, pol, the
         for j, d in enumerate(dist):
             layer, d_in_layer = tmm.find_in_structure_with_inf(widths, d)
             layer_name = 'layer_' + str(layer + 1)  # layer_1 is air above so need to add 1
-            data = rcwa_position_resolved(S, layer_name, d_in_layer, A_total)
+            data = rcwa_position_resolved(S, layer_name, d_in_layer, A_total, theta, n_inc)
             profile[j] = data
 
         return profile
@@ -460,5 +461,5 @@ def RCWA_wl_prof(wl, A, dist, geom_list, layers_oc, shapes_oc, s_names, pol, the
             profile_p = vs_pol_prof(0, 1, A[1])
             profile_data = 0.5*(profile_s + profile_p)
 
-    profile_data = n_inc * profile_data / np.cos(theta * np.pi / 180)
+    profile_data = profile_data
     return profile_data
