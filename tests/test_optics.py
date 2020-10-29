@@ -1,7 +1,7 @@
 import sys
 from pytest import mark, approx
 
-# @mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform != "linux", reason="Only works under linux")
 def test_calculate_rat_rcwa():
     import numpy as np
 
@@ -31,7 +31,7 @@ def test_calculate_rat_rcwa():
         assert v.shape[0] == len(wl)
 
 
-# @mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform != "linux", reason="Only works under linux")
 def test_calculate_absorption_profile_rcwa():
     import numpy as np
 
@@ -74,7 +74,7 @@ def test_calculate_absorption_profile_rcwa():
     assert approx(result["absorption"] == parallel_result["absorption"])
 
 
-# @mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform != "linux", reason="Only works under linux")
 def test_pol_rcwa():
     import numpy as np
 
@@ -130,7 +130,7 @@ def test_pol_rcwa():
     assert approx(result_u["absorption"] == 0.5*(result_s["absorption"] + result_p["absorption"]))
 
 
-# @mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform != "linux", reason="Only works under linux")
 def test_arbitrary_pol_rcwa():
     import numpy as np
 
@@ -178,7 +178,7 @@ def test_arbitrary_pol_rcwa():
     assert approx(result["absorption"] == result_s["absorption"])
 
 
-# @mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform != "linux", reason="Only works under linux")
 def test_rcwa_polygon():
     import numpy as np
 
@@ -240,6 +240,7 @@ def test_rcwa_polygon():
     assert approx(result_polygon["absorption"] == result_square["absorption"])
 
 
+@mark.skipif(sys.platform != "linux", reason="Only works under linux")
 def test_tmm_rcwa_structure_comparison():
     import numpy as np
     from solcore import si, material
@@ -295,7 +296,7 @@ def test_tmm_rcwa_structure_comparison():
             # plt.show()
 
 
-# @mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform != "linux", reason="Only works under linux")
 def test_tmm_rcwa_structure_profile_comparison():
     import numpy as np
     from solcore import si, material
