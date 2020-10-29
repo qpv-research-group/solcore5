@@ -317,9 +317,6 @@ def test_tmm_rcwa_structure_profile_comparison():
 
     size = ((100, 0), (0, 100))
 
-    # anti-reflection coating
-    ARC = [Layer(si('80.1nm'), Al2O3)]
-
     solar_cell = SolarCell([Layer(material=InGaP, width=si('400.5nm')),
                                   Layer(material=GaAs, width=si('500nm')),
                                   Layer(material=Ge, width=si('1000nm'))], substrate=Ag)
