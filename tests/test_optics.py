@@ -261,7 +261,6 @@ def test_tmm_rcwa_structure_comparison():
 
     size = ((100, 0), (0, 100))
 
-    # anti-reflection coating
     ARC = [Layer(si('80nm'), Al2O3)]
 
     solar_cell = SolarCell(ARC + [Layer(material=InGaP, width=si('400nm')),
@@ -311,8 +310,6 @@ def test_tmm_rcwa_structure_profile_comparison():
     Ag = material('Ag')()
     Air = material('Air')()
 
-    Al2O3 = material('Al2O3')()
-
     wavelengths = np.linspace(250, 1900, 8)
 
     size = ((100, 0), (0, 100))
@@ -340,7 +337,7 @@ def test_tmm_rcwa_structure_profile_comparison():
 
             assert tmm_profile['position'] == approx(rcwa_profile['position'], abs=2e-6)
             assert tmm_profile['absorption'] == approx(rcwa_profile['absorption'], abs=2e-6)
-            #
+
             # import matplotlib.pyplot as plt
             # plt.figure()
             # plt.plot(tmm_profile['position'], tmm_profile['absorption'].T)
@@ -348,5 +345,5 @@ def test_tmm_rcwa_structure_profile_comparison():
             # plt.title(pol + str(angle))
             # plt.ylim(0, 0.01)
             # plt.show()
-            #
+
 
