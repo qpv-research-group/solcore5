@@ -115,7 +115,7 @@ class LightSource:
         source.
         :return: Array with the spectrum in the requested units
         """
-        
+
         if x is None:
             x = self.x if self.x is not None else self.x_internal
 
