@@ -62,9 +62,13 @@ class Material:
             T (float): Temperature, in K.
             Na (float): Density of acceptors, in m^-3
             Nd (float): Density of acceptors, in m^-3
-            nk (xr.DataArray, str): Either a DataArray with the complex
+            nk (xr.DataArray, str, dict): Either a DataArray with the complex
                 refractive index as function of wavelength, in m; or the name of the
-                database from where to retrieve the data.
+                database from where to retrieve the data; or a dictionary with the
+                database name and extra arguments needed to retrieve the data from the
+                database - see detailed input information for the requested database.
+                Material name and composition are always passed, so should not be
+                included here.
             parametric (bool): If true (default) material parameters from the parameters
                 DB will be retrieved. If this flag is set to True and the material
                 is not in the parameters DB, the creation of the material will fail.
@@ -79,7 +83,9 @@ class Material:
 
         nk_data: Optional[xr.DataArray] = None
         if isinstance(nk, str):
-            nk_data = NK.get_data(nk, name, composition)
+            nk_data = NK.get_data(database=nk, name=name, composition=composition)
+        elif isinstance(nk, dict):
+            nk_data = NK.get_data(name=name, composition=composition, **nk)
         elif isinstance(nk, xr.DataArray):
             if "wavelength" not in nk.dims or "wavelength" not in nk.coords:
                 msg = "'wavelength' is not a DataArray dimension and coordinate."
@@ -232,7 +238,7 @@ class Material:
         return result
 
     def to_dict(self) -> dict:
-        """ Provide all the Material information as a plain dictionary.
+        """Provide all the Material information as a plain dictionary.
 
         Returns:
             A dictionary with all the material information.

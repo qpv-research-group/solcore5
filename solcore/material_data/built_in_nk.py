@@ -9,7 +9,7 @@ from .nk_database import NK, MaterialNKDatabaseError
 
 
 @NK.register_database(name="built-in")
-def get_built_in_nk_data(name: str, composition: Optional[dict] = None):
+def get_built_in_nk_data(name: str, composition: Optional[dict] = None, **kwargs):
     from solcore import config
 
     if name not in config.materials():

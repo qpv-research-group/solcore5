@@ -27,7 +27,7 @@ compounds_info.read(compounds_path)
 
 
 @NK.register_database(name="sopra")
-def get_sopra_nk_data(name: str, composition: Optional[dict] = None):
+def get_sopra_nk_data(name: str, composition: Optional[dict] = None, **kwargs):
 
     data = sopra_database(Material=name)
 
