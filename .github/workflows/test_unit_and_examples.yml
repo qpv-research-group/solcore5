@@ -36,10 +36,6 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: brew install ngspice
 
-    - name: Install system dependencies in Windows
-      if: matrix.os == 'windows-latest'
-      run: choco install ngspice
-
     - name: Install python dependencies
       run: |
         python -m pip install --upgrade setuptools wheel pip twine numpy
@@ -73,7 +69,7 @@ jobs:
       env:
         SOLCORE_SPICE: ngspice
       run: |
-        pytest -r a -v --cov=solcore/ --ignore tests/test_examples.py
+        pytest -r a -v --cov=solcore/ --ignore tests/test_examples.py -n "auto"
 
     - name: Codecov
       if: matrix.os == 'ubuntu-latest'
@@ -106,15 +102,11 @@ jobs:
 
     - name: Install system dependencies in Linux
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install -y gfortran ngspice
+      run: sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
     - name: Install system dependencies in MacOS
       if: matrix.os == 'macos-latest'
       run: brew install ngspice
-
-    - name: Install system dependencies in Windows
-      if: matrix.os == 'windows-latest'
-      run: choco install ngspice
 
     - name: Install python dependencies
       run: |
@@ -135,8 +127,14 @@ jobs:
         pip install --no-deps --force-reinstall --install-option="--with_pdd" -e .
       shell: powershell
 
-    - name: Test examples
+    - name: Test examples Linux and MacOS
+      if: matrix.os != 'windows-latest'
       env:
         SOLCORE_SPICE: ngspice
       run: |
-        pytest -r a -v tests/test_examples.py
+        pytest -r a -v tests/test_examples.py -n "auto"
+
+    - name: Test examples Linux and MacOS
+      if: matrix.os == 'windows-latest'
+      run: |
+        pytest -r a -v tests/test_examples.py -n "auto"
