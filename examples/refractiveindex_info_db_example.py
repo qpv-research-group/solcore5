@@ -1,4 +1,4 @@
-from solcore.absorption_calculator.nk_db import download_db, search_db
+from solcore.material_data.refractiveindex_info import download_db, search_db
 from solcore import material
 from solcore import si
 from solcore.solar_cell import SolarCell

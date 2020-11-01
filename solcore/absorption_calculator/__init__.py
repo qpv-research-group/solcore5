@@ -2,7 +2,6 @@ from .adachi_alpha import create_adachi_alpha
 from .absorption_QW import calc_alpha, calc_emission
 from .transfer_matrix import calculate_absorption_profile, calculate_rat, calculate_ellipsometry, OptiStack
 from .dielectric_constant_models import DielectricConstantModel
-from .nk_db import download_db, search_db, create_nk_txt
 from .cppm import Custom_CPPB
 from .tmm_core_vec import inc_tmm, position_resolved, inc_tmm, unpolarized_RT, ellips, find_in_structure
 

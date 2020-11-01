@@ -15,7 +15,7 @@ Page = namedtuple('Page', ['page', 'name', 'path'])
 Entry = namedtuple('Entry',['id','shelf','book','page'])
 
 # Check latest available database in https://refractiveindex.info/download.php
-_riiurl = "https://refractiveindex.info/download/database/rii-database-2018-07-01.zip"
+_riiurl = "https://refractiveindex.info/download/database/rii-database-2020-01-19.zip"
 
 class Database:
 

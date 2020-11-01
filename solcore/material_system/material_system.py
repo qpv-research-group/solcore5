@@ -13,7 +13,7 @@ from solcore.parameter_system import ParameterSystem
 from solcore.constants import h, c, q, kb, pi, electron_mass as m0, vacuum_permittivity
 from solcore.singleton import Singleton
 from solcore.material_data.sopra_db import sopra_database, compounds_info
-from solcore.absorption_calculator.nk_db import nkdb_load_n, nkdb_load_k
+from solcore.material_data.refractiveindex_info import nkdb_load_n, nkdb_load_k
 from solcore.material_data import calculate_mobility
 
 

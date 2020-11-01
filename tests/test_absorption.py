@@ -1,6 +1,6 @@
 """ Absorption calculator related tests
 """
-from pytest import approx, mark
+from pytest import approx
 
 from solcore import material, si
 from solcore.structure import Structure, Layer
@@ -20,9 +20,6 @@ from solcore.absorption_calculator.dielectric_constant_models import (
 from solcore.solar_cell_solver import solar_cell_solver
 from solcore.solar_cell import SolarCell
 from solcore.material_system import create_new_material
-from solcore.absorption_calculator import download_db, search_db
-from solcore.absorption_calculator.nk_db import nkdb_load_n
-from solcore.config_tools import add_source
 from solcore.optics import solve_tmm
 
 import os
@@ -132,23 +129,6 @@ def test_TMM_dielectric_model():
     )
 
     assert all([d == approx(o) for d, o in zip(data, n)])
-
-
-def test_sopra_absorption():
-    from solcore.material_data.sopra_db import sopra_database
-
-    # Import material constant data for Gallium Arsenide :: Do this by placing the
-    # material name as the sole argument...
-    SOPRA_Material = sopra_database("GaAs")
-
-    # Can also load alpha data...
-    GaAs_alpha = SOPRA_Material.load_alpha()
-
-    out = GaAs_alpha[1][10]
-
-    data = 163666134.03339368
-
-    assert data == approx(out)
 
 
 def test_substrate_presence_A():
@@ -316,7 +296,7 @@ def test_inc_coh_tmm():
             [0.5742503, 0.67956899, 0.73481184, 0.725372, 0.76792856],
             [0.5742503, 0.67956899, 0.73481184, 0.725372, 0.76792856],
             [0.5742503, 0.67956899, 0.73474943, 0.70493469, 0.70361194],
-            [0.5742503, 0.67956899, 0.70927724, 0.71509221, 0.71592772]
+            [0.5742503, 0.67956899, 0.70927724, 0.71509221, 0.71592772],
         ]
     )
     assert A_calc == approx(A_data)
@@ -324,6 +304,7 @@ def test_inc_coh_tmm():
 
 def test_define_material():
     from solcore import ParameterSystem, MaterialSystem
+
     this_dir = os.path.split(__file__)[0]
     create_new_material(
         "SiGeSn",
@@ -337,13 +318,3 @@ def test_define_material():
     SiGeSn = material("SiGeSn")()
     assert SiGeSn.n(400e-9) == approx(4.175308391752484)
     assert SiGeSn.k(400e-9) == approx(2.3037424963866306)
-
-
-def test_database_materials():
-    download_db(confirm=True)
-    wl, n = nkdb_load_n(2683)  # Should be carbon, from Phillip
-
-    data_path = Path(__file__).parent / "data" / "database_materials.txt"
-    n_data = np.loadtxt(data_path)
-
-    assert all([d == approx(o) for d, o in zip(n, n_data)])

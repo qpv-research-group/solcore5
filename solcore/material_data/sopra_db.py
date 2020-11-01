@@ -27,7 +27,16 @@ compounds_info.read(compounds_path)
 
 
 @NK.register_database(name="sopra")
-def get_sopra_nk_data(name: str, composition: Optional[dict] = None, **kwargs):
+def get_sopra_nk_data(name: str, composition: Optional[dict] = None):
+    """Gets the nk data from the SOPRA database.
+
+    Args:
+        name (str): Name of the material.
+        composition (dict): Composition of the material, eg. {"In": 0.17}.
+
+    Returns:
+        DataArray with the complex refractive index as function of wavelength, in m.
+    """
 
     data = sopra_database(Material=name)
 
