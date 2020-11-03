@@ -241,7 +241,9 @@ def test_rcwa_polygon():
 
 
 @mark.skipif(sys.platform != "linux", reason="Only works under linux")
-def test_tmm_rcwa_structure_comparison():
+@mark.parametrize("pol", ['s', 'p', 'u'])
+@mark.parametrize("angle", [0, 60])
+def test_tmm_rcwa_structure_comparison(pol, angle):
     import numpy as np
     from solcore import si, material
     from solcore.structure import Layer
@@ -270,33 +272,22 @@ def test_tmm_rcwa_structure_comparison():
     solar_cell_OS = OptiStack(solar_cell, no_back_reflection=False, substrate=solar_cell.substrate)
 
 
-    for pol in ['s', 'p', 'u']:
-        for angle in [0, 60]:
-            rcwa_result = calculate_rat_rcwa(solar_cell, size, 2, wavelengths, Air, Ag, theta=angle, phi=angle,
-                                             pol=pol, parallel=True)
-            tmm_result = calculate_rat(solar_cell_OS, wavelengths, angle, pol, no_back_reflection=False)
+    rcwa_result = calculate_rat_rcwa(solar_cell, size, 2, wavelengths, Air, Ag, theta=angle, phi=angle,
+                                     pol=pol, parallel=True)
+    tmm_result = calculate_rat(solar_cell_OS, wavelengths, angle, pol, no_back_reflection=False)
 
-            assert tmm_result['A_per_layer'][1:-1] == approx(rcwa_result['A_per_layer'].T)
-            assert tmm_result['R'] == approx(rcwa_result['R'])
-            assert tmm_result['T'] == approx(rcwa_result['T'])
+    assert tmm_result['A_per_layer'][1:-1] == approx(rcwa_result['A_per_layer'].T)
+    assert tmm_result['R'] == approx(rcwa_result['R'])
+    assert tmm_result['T'] == approx(rcwa_result['T'])
 
-            assert np.sum(tmm_result['A_per_layer'][1:-1].T, 1) + tmm_result['R'] + tmm_result['T'] == approx(1)
-            assert np.sum(rcwa_result['A_per_layer'], 1) + rcwa_result['R'] + rcwa_result['T'] == approx(1)
-
-            # import matplotlib.pyplot as plt
-            # plt.figure()
-            # plt.plot(wavelengths, tmm_result['A_per_layer'][1:-1].T)
-            # plt.plot(wavelengths, tmm_result['R'])
-            # plt.plot(wavelengths, tmm_result['T'])
-            # plt.plot(wavelengths, rcwa_result['A_per_layer'], '--')
-            # plt.plot(wavelengths, rcwa_result['R'], '--')
-            # plt.plot(wavelengths, rcwa_result['T'], '--')
-            # plt.title(pol + str(angle))
-            # plt.show()
+    assert np.sum(tmm_result['A_per_layer'][1:-1].T, 1) + tmm_result['R'] + tmm_result['T'] == approx(1)
+    assert np.sum(rcwa_result['A_per_layer'], 1) + rcwa_result['R'] + rcwa_result['T'] == approx(1)
 
 
 @mark.skipif(sys.platform != "linux", reason="Only works under linux")
-def test_tmm_rcwa_structure_profile_comparison():
+@mark.parametrize("pol", ['s', 'p', 'u'])
+@mark.parametrize("angle", [0, 60])
+def test_tmm_rcwa_structure_profile_comparison(pol, angle):
     import numpy as np
     from solcore import si, material
     from solcore.structure import Layer
@@ -320,30 +311,17 @@ def test_tmm_rcwa_structure_profile_comparison():
 
     solar_cell_OS = OptiStack(solar_cell, no_back_reflection=False, substrate=solar_cell.substrate)
 
+    rcwa_result = calculate_rat_rcwa(solar_cell, size, 2, wavelengths, Air, Ag, theta=angle, phi=angle,
+                                     pol=pol, parallel=True)
+    tmm_result = calculate_rat(solar_cell_OS, wavelengths, angle, pol, no_back_reflection=False)
 
-    for pol in ['s', 'p', 'u']:
-        for angle in [0, 60]:
-            rcwa_result = calculate_rat_rcwa(solar_cell, size, 2, wavelengths, Air, Ag, theta=angle, phi=angle,
-                                             pol=pol, parallel=True)
-            tmm_result = calculate_rat(solar_cell_OS, wavelengths, angle, pol, no_back_reflection=False)
+    tmm_profile = calculate_absorption_profile(solar_cell_OS, wavelengths, no_back_reflection=False,
+                                               angle=angle, pol=pol, RAT_out=tmm_result, steps_size=2)
 
-            tmm_profile = calculate_absorption_profile(solar_cell_OS, wavelengths, no_back_reflection=False,
-                                                       angle=angle, pol=pol, RAT_out=tmm_result, steps_size=2)
-
-            rcwa_profile = calculate_absorption_profile_rcwa(solar_cell, size, 2, wavelengths, rcwa_result['A_pol'],
-                                                             theta=angle, phi=angle, pol=pol, incidence=Air,
-                                                             substrate=solar_cell.substrate, parallel=True, steps_size=2)
+    rcwa_profile = calculate_absorption_profile_rcwa(solar_cell, size, 2, wavelengths, rcwa_result['A_pol'],
+                                                     theta=angle, phi=angle, pol=pol, incidence=Air,
+                                                     substrate=solar_cell.substrate, parallel=True, steps_size=2)
 
 
-            assert tmm_profile['position'] == approx(rcwa_profile['position'], abs=2e-6)
-            assert tmm_profile['absorption'] == approx(rcwa_profile['absorption'], abs=2e-6)
-
-            # import matplotlib.pyplot as plt
-            # plt.figure()
-            # plt.plot(tmm_profile['position'], tmm_profile['absorption'].T)
-            # plt.plot(rcwa_profile['position'], rcwa_profile['absorption'].T, '--')
-            # plt.title(pol + str(angle))
-            # plt.ylim(0, 0.01)
-            # plt.show()
-
-
+    assert tmm_profile['position'] == approx(rcwa_profile['position'], abs=2e-6)
+    assert tmm_profile['absorption'] == approx(rcwa_profile['absorption'], abs=2e-6)

@@ -133,6 +133,15 @@ def calculate_rat_rcwa(structure, size, orders, wavelength, incidence, substrate
 
 
 def rcwa_rat(S, n_layers, theta, n_inc):
+    """
+    Calculates total reflection and transmission and reflection and transmission by diffraction order, at a single wavelength
+
+    :param S: S4 simulation object
+    :param n_layers: the number of layers in the structure, including the incidence and transmission medium
+    :param theta: incident polar angle in degrees
+    :param n_inc: (real part of) the refractive index of the incidence medium
+    :return: dictionary with total R, total T, and lists of R and T per order
+    """
     # TODO: check normalization of pfbo values. Also, theta correction should happen inside here rather than externally
     below = 'layer_' + str(n_layers)  # identify which layer is the transmission medium
 
@@ -215,6 +224,15 @@ def initialise_S(size, orders, geom_list, mats_oc, shapes_oc, shape_mats, widths
 
 
 def necessary_materials(geom_list):
+    """Checks which materials are needed to define the shapes in the layers (so not the main layer materials), and
+    returns a version of the geom_list object which doesn't contain Solcore materials (to avoid pickling issues).
+
+    :param geom_list: list of the geometry attributes of every layer in the structure. This is a list of lists;
+            each lists can contain any number of dictionaries (including 0) describing a shape in that layer
+    :return: a list of the necessary Solcore materials for the calculation, and an object which is exactly like
+            geom_list except the Solcore material objects have been replaced with strings. This is to avoid pickling
+            issues when running calculations in parallel.
+    """
     shape_mats = []
     geom_list_str = [None] * len(geom_list)
     for i1, geom in enumerate(geom_list):
@@ -232,6 +250,15 @@ def necessary_materials(geom_list):
 
 
 def update_epsilon(S, stack_OS, shape_mats_OS, wl):
+    """Updates the dielectric constants in the S4 simulation object to the relevant values at the desired wavelength.
+
+    :param S: S4 simulation object
+    :param stack_OS: OptiStack for the main layers in the structures
+    :param shape_mats_OS: OptiStack containing layers made up of the materials used in the shapes within the main layers
+            (the structure is not physically meaningful but is used to store the optical constant information)
+    :param wl: wavelength in nm
+    :return: the S4 simulation object with updated parameters
+    """
     for i1 in range(len(stack_OS.get_widths())):
         S.SetMaterial('layer_' + str(i1 + 1), stack_OS.get_indices(wl)[i1] ** 2)
     for i1 in range(len(shape_mats_OS.widths)):  # initialise the materials needed for all the shapes in S4
@@ -341,6 +368,16 @@ def calculate_absorption_profile_rcwa(structure, size, orders, wavelength, rat_o
 
 
 def rcwa_position_resolved(S, layer, depth, A, theta, n_inc):
+    """Calculate the derivative of the absorbed power with respect to depth in a layer.
+
+    :param S: S4 simulation object
+    :param layer: layer index (layer 1 is the incidence medium)
+    :param depth: depth in the layer in nm
+    :param A: the total power absorbed in the layer
+    :param theta: polar angle of the light in the incidence medium
+    :param n_inc: (real part of) the refractive index of the incidence medium
+    :return: the derivative of the absorbed power with depth in the structure
+    """
     if A > 0:
         delta = 1e-9
         power_difference = np.real(
@@ -350,7 +387,14 @@ def rcwa_position_resolved(S, layer, depth, A, theta, n_inc):
         return 0
 
 def rcwa_absorption_per_layer(S, n_layers, theta, n_inc):
-    # layer 1 is incidence medium, layer n is the transmission medium
+    """Calculates the fraction of the incident power absorbed in each layer of the structure.
+
+    :param S: S4 simulation object
+    :param n_layers: number of layers in the structure, including the incidence and transmission medium
+    :param theta: polar angle of the light in the incidence medium
+    :param n_inc: (real part of) the refractive index of the incidence medium
+    :return:
+    """
     A = np.empty(n_layers-2)
     for i1, layer in enumerate(np.arange(n_layers-2)+2):
         A[i1] = np.real(sum(S.GetPowerFlux('layer_' + str(layer))) -
