@@ -238,3 +238,90 @@ def test_rcwa_polygon():
     assert approx(A_output_sq == A_output_pol)
 
     assert approx(result_polygon["absorption"] == result_square["absorption"])
+
+
+@mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.parametrize("pol", ['s', 'p', 'u'])
+@mark.parametrize("angle", [0, 60])
+def test_tmm_rcwa_structure_comparison(pol, angle):
+    import numpy as np
+    from solcore import si, material
+    from solcore.structure import Layer
+    from solcore.solar_cell import SolarCell
+    from solcore.optics.tmm import calculate_rat, OptiStack
+    from solcore.optics.rcwa import calculate_rat_rcwa
+
+    InGaP = material('GaInP')(In=0.5)
+    GaAs = material('GaAs')()
+    Ge = material('Ge')()
+    Ag = material('Ag')()
+    Air = material('Air')()
+
+    Al2O3 = material('Al2O3')()
+
+    wavelengths = np.linspace(250, 1900, 500)
+
+    size = ((100, 0), (0, 100))
+
+    ARC = [Layer(si('80nm'), Al2O3)]
+
+    solar_cell = SolarCell(ARC + [Layer(material=InGaP, width=si('400nm')),
+                                  Layer(material=GaAs, width=si('4000nm')),
+                                  Layer(material=Ge, width=si('3000nm'))], substrate=Ag)
+
+    solar_cell_OS = OptiStack(solar_cell, no_back_reflection=False, substrate=solar_cell.substrate)
+
+
+    rcwa_result = calculate_rat_rcwa(solar_cell, size, 2, wavelengths, Air, Ag, theta=angle, phi=angle,
+                                     pol=pol, parallel=True)
+    tmm_result = calculate_rat(solar_cell_OS, wavelengths, angle, pol, no_back_reflection=False)
+
+    assert tmm_result['A_per_layer'][1:-1] == approx(rcwa_result['A_per_layer'].T)
+    assert tmm_result['R'] == approx(rcwa_result['R'])
+    assert tmm_result['T'] == approx(rcwa_result['T'])
+
+    assert np.sum(tmm_result['A_per_layer'][1:-1].T, 1) + tmm_result['R'] + tmm_result['T'] == approx(1)
+    assert np.sum(rcwa_result['A_per_layer'], 1) + rcwa_result['R'] + rcwa_result['T'] == approx(1)
+
+
+@mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.parametrize("pol", ['s', 'p', 'u'])
+@mark.parametrize("angle", [0, 60])
+def test_tmm_rcwa_structure_profile_comparison(pol, angle):
+    import numpy as np
+    from solcore import si, material
+    from solcore.structure import Layer
+    from solcore.solar_cell import SolarCell
+    from solcore.optics.tmm import calculate_rat, calculate_absorption_profile, OptiStack
+    from solcore.optics.rcwa import calculate_rat_rcwa, calculate_absorption_profile_rcwa
+
+    InGaP = material('GaInP')(In=0.5)
+    GaAs = material('GaAs')()
+    Ge = material('Ge')()
+    Ag = material('Ag')()
+    Air = material('Air')()
+
+    wavelengths = np.linspace(250, 1900, 8)
+
+    size = ((100, 0), (0, 100))
+
+    solar_cell = SolarCell([Layer(material=InGaP, width=si('400.5nm')),
+                                  Layer(material=GaAs, width=si('500nm')),
+                                  Layer(material=Ge, width=si('1000nm'))], substrate=Ag)
+
+    solar_cell_OS = OptiStack(solar_cell, no_back_reflection=False, substrate=solar_cell.substrate)
+
+    rcwa_result = calculate_rat_rcwa(solar_cell, size, 2, wavelengths, Air, Ag, theta=angle, phi=angle,
+                                     pol=pol, parallel=True)
+    tmm_result = calculate_rat(solar_cell_OS, wavelengths, angle, pol, no_back_reflection=False)
+
+    tmm_profile = calculate_absorption_profile(solar_cell_OS, wavelengths, no_back_reflection=False,
+                                               angle=angle, pol=pol, RAT_out=tmm_result, steps_size=2)
+
+    rcwa_profile = calculate_absorption_profile_rcwa(solar_cell, size, 2, wavelengths, rcwa_result['A_pol'],
+                                                     theta=angle, phi=angle, pol=pol, incidence=Air,
+                                                     substrate=solar_cell.substrate, parallel=True, steps_size=2)
+
+
+    assert tmm_profile['position'] == approx(rcwa_profile['position'], abs=2e-6)
+    assert tmm_profile['absorption'] == approx(rcwa_profile['absorption'], abs=2e-6)
