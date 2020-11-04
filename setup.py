@@ -7,8 +7,8 @@ from configparser import ConfigParser
 
 
 def gen_data_files(*dirs):
-    """ Creates the list of files (not necessarily python files) that need to be
-    installed together with the rest of stuff """
+    """Creates the list of files (not necessarily python files) that need to be
+    installed together with the rest of stuff"""
     results = []
     exclude = [".DS_Store", "__pycache__", "egg", ".git"]
     for src_dir in dirs:
@@ -74,12 +74,24 @@ install_requires = [
     "cycler",
     "pyyaml",
     "yabox",
-    "joblib"
+    "joblib",
+    "xarray"
 ]
-tests_require = ["pytest", "pytest-cov", "pytest-mock", "nbconvert", "nbformat"]
+tests_require = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "nbconvert",
+    "nbformat",
+    "pytest-rerunfailures",
+    "pytest-xdist",
+]
 docs_require = ["Sphinx", "recommonmark"]
-extras_require = {"dev": tests_require + docs_require + ["pre-commit"], 
-                  "docs": docs_require, "test": tests_require}
+extras_require = {
+    "dev": tests_require + docs_require + ["pre-commit"],
+    "docs": docs_require,
+    "test": tests_require,
+}
 
 
 setup(

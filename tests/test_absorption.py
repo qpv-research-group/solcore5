@@ -330,6 +330,7 @@ def test_define_material():
         os.path.join(this_dir, "data", "SiGeSn_n.txt"),
         os.path.join(this_dir, "data", "SiGeSn_k.txt"),
         os.path.join(this_dir, "data", "SiGeSn_params.txt"),
+        overwrite=True,
     )
     assert "SiGeSn" in ParameterSystem().database.sections()
     assert "SiGeSn".lower() in MaterialSystem().sources

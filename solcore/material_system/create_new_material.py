@@ -12,7 +12,9 @@ from configparser import ConfigParser
 from solcore.material_system import MaterialSystem
 
 
-def create_new_material(mat_name, n_source, k_source, parameter_source = None):
+def create_new_material(
+    mat_name, n_source, k_source, parameter_source=None, overwrite=False
+):
     """
     This function adds a new material to Solcore's material_data folder, so that it can be called like a
     built-in material. It needs a name for the new material, and source files for the n and k data and other
@@ -27,26 +29,31 @@ def create_new_material(mat_name, n_source, k_source, parameter_source = None):
     PARAMETER_PATH = os.path.join(config.user_folder, "custom_parameters.txt")
     if "custom" not in config.parameters():
         if not os.path.isfile(PARAMETER_PATH):
-            open(PARAMETER_PATH, 'a').close()
+            open(PARAMETER_PATH, "a").close()
         config["Parameters", "custom"] = PARAMETER_PATH
 
     CUSTOM_PATH = os.path.join(config.user_folder, "custom_materials")
 
     # check if there is already a material with this name
-    if mat_name in sorted(ParameterSystem().database.sections()) or mat_name in config.materials():
-        answer = input(f"A material named {mat_name} already exists in the database."
-                       f"Do you want to overwrite it [y/n]?")
+    if (
+        mat_name in sorted(ParameterSystem().database.sections())
+        or mat_name in config.materials()
+    ) and not overwrite:
+        answer = input(
+            f"A material named {mat_name} already exists in the database."
+            f"Do you want to overwrite it [y/n]?"
+        )
         if answer.lower() != "y":
             return
 
     # create a folder in the custom materials folders
-    folder = os.path.join(CUSTOM_PATH, mat_name + '-Material')
+    folder = os.path.join(CUSTOM_PATH, mat_name + "-Material")
     if not os.path.exists(folder) and folder != "":
         os.makedirs(folder)
 
     # copy n and k data files to the material's folder
-    copyfile(n_source, os.path.join(folder, 'n.txt'))
-    copyfile(k_source, os.path.join(folder, 'k.txt'))
+    copyfile(n_source, os.path.join(folder, "n.txt"))
+    copyfile(k_source, os.path.join(folder, "k.txt"))
 
     config["Materials", mat_name] = folder
 
@@ -62,6 +69,6 @@ def create_new_material(mat_name, n_source, k_source, parameter_source = None):
         params[mat_name] = {}
         with open(PARAMETER_PATH, "w") as fp:
             params.write(fp)
-        print('Material created with optical constants n and k only.')
+        print("Material created with optical constants n and k only.")
 
     ParameterSystem().read()

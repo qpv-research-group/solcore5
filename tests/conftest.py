@@ -4,9 +4,10 @@ from unittest.mock import patch
 import os
 import tempfile
 
-temp_folder = tempfile.TemporaryDirectory()
-SOLCORE_USER_DATA = temp_folder.name
-os.environ["SOLCORE_USER_DATA"] = SOLCORE_USER_DATA
+
+@fixture(autouse=True)
+def solcore_user(tmp_path):
+    os.environ["SOLCORE_USER_DATA"] = str(tmp_path)
 
 
 def patch_plots(function):
@@ -17,6 +18,7 @@ def patch_plots(function):
 
         with patch("matplotlib.pyplot.show", lambda *x, **y: None):
             import matplotlib
+
             matplotlib.use("Agg")
             return function(*args, **kwargs)
 
