@@ -77,6 +77,7 @@ install_requires = [
     "joblib",
     "xarray",
     "pint",
+    "frozendict"
 ]
 tests_require = [
     "pytest",

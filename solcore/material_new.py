@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 
 import xarray as xr
 import pandas as pd
+from frozendict import frozendict
 
 from . import get_all_parameters, NK
 
@@ -13,31 +14,14 @@ class MaterialParameterError(Exception):
     pass
 
 
-class ReadOnlyDict(dict):
-    def __readonly__(self, *args, **kwargs):
-        raise RuntimeError("Cannot modify ReadOnlyDict")
-
-    __setitem__ = __readonly__
-    __delitem__ = __readonly__
-    pop = __readonly__  # type: ignore
-    popitem = __readonly__
-    clear = __readonly__
-    update = __readonly__  # type: ignore
-    setdefault = __readonly__
-    del __readonly__
-
-    def __getattr__(self, item):
-        return self[item]
-
-
 @dataclass(frozen=True)
 class Material:
     name: str = "No name"
-    composition: ReadOnlyDict = field(default_factory=ReadOnlyDict)
+    composition: frozendict = field(default_factory=frozendict)
     T: float = 273.0
     Na: float = 0.0
     Nd: float = 0.0
-    params: ReadOnlyDict = field(default_factory=ReadOnlyDict)
+    params: frozendict = field(default_factory=frozendict)
     nk: Optional[xr.DataArray] = None
 
     @classmethod
@@ -94,11 +78,11 @@ class Material:
 
         return cls(
             name=name,
-            composition=ReadOnlyDict(**composition),
+            composition=frozendict(**composition),
             T=T,
             Na=Na,
             Nd=Nd,
-            params=ReadOnlyDict(**params),
+            params=frozendict(**params),
             nk=nk_data,
         )
 
@@ -124,7 +108,7 @@ class Material:
         d = data.copy()
         result = {k: d.pop(k) for k in ("name", "T", "Na", "Nd") if k in data}
         composition = d.pop("composition") if "composition" in d else {}
-        result["composition"] = ReadOnlyDict(**composition)
+        result["composition"] = frozendict(**composition)
         result["nk"] = d.pop("nk") if "nk" in d else None
 
         if result["nk"] is not None and (
@@ -137,7 +121,7 @@ class Material:
             )
             raise ValueError(msg)
 
-        result["params"] = ReadOnlyDict(**d)
+        result["params"] = frozendict(**d)
         return cls(**result)
 
     @classmethod
@@ -169,7 +153,7 @@ class Material:
         """
         result = {k: data.loc[index, k] for k in ("name", "T", "Na", "Nd") if k in data}
         composition = data.loc[index, "composition"] if "composition" in data else {}
-        result["composition"] = ReadOnlyDict(**composition)
+        result["composition"] = frozendict(**composition)
 
         _nk_cols: Tuple[str, str]
         if nk_cols == True:
@@ -206,7 +190,7 @@ class Material:
             and not k.startswith("wavelength")
             and not k.startswith("nk")
         ]
-        result["params"] = ReadOnlyDict(**data.loc[index, param_cols].to_dict())
+        result["params"] = frozendict(**data.loc[index, param_cols].to_dict())
         return cls(**result)
 
     def __getattr__(self, item: str) -> Any:
