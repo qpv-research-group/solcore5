@@ -3,6 +3,7 @@ from __future__ import annotations
 from numbers import Number
 from typing import Optional, Union, Tuple, TypeVar, Dict
 from abc import ABC, abstractmethod
+from functools import lru_cache
 
 import pint
 
@@ -117,6 +118,8 @@ class ParameterSystem:
             ValueError(f"ParameterSource name '{name}' already exists.")
 
         self._known_sources[name] = source_class
+        self._normalise_source.cache_clear()
+        self._validate_source.cache_clear()
 
     @property
     def known_sources(self) -> Tuple[str, ...]:
@@ -213,6 +216,7 @@ class ParameterSystem:
             if p not in exclude
         }
 
+    @lru_cache
     def _validate_source(self, source: str) -> None:
         """Checks if a source is a known source
 
@@ -246,6 +250,7 @@ class ParameterSystem:
             self.sources[source] = self._known_sources[source].load_source()
         return self.sources[source]
 
+    @lru_cache
     def _normalise_source(
         self, source: Union[str, Tuple[str], None]
     ) -> Tuple[str, ...]:
