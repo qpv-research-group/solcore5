@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from numbers import Number
-from typing import Optional, Union, Tuple, TypeVar, Dict
 from abc import ABC, abstractmethod
 from functools import lru_cache
+from typing import Dict, List, Optional, Tuple, TypeVar, Union
 
 import pint
 
@@ -19,10 +18,10 @@ class ParameterSourceError(Exception):
 class Parameter(pint.Quantity):
     def __new__(
         cls,
-        value: Union[str, Number],
+        value: Union[str, float, int],
         units: Optional[str] = None,
         description: Optional[str] = None,
-        reference: Optional[str] = None,
+        reference: Optional[str, Tuple[str]] = None,
     ):
         """Wrapper of the pint.Quantity class adding 'description' and 'reference'.
 
@@ -42,7 +41,11 @@ class Parameter(pint.Quantity):
             u = parsed.units
         out = pint.Quantity.__new__(cls, v, u)
         out._description = str(description) if description is not None else ""
-        out._reference = str(reference) if reference is not None else ""
+        out._reference = ()
+        if isinstance(reference, str):
+            out._reference = (reference,)
+        elif isinstance(reference, tuple):
+            out._reference = reference
         return out
 
     @property
@@ -56,28 +59,30 @@ class Parameter(pint.Quantity):
         return self._description
 
     @property
-    def reference(self) -> str:
+    def reference(self) -> Tuple[str, ...]:
         """Parameter's reference. Long form for `r`"""
         return self._reference
 
     @property
-    def r(self) -> str:
+    def r(self) -> Tuple[str, ...]:
         """Parameter's reference. Short form for `reference`"""
         return self._reference
 
     def __str__(self) -> str:
         out = super(Parameter, self).__str__()
+        out = out.replace("Quantity", "Parameter")
         if self.d != "" and self.r != "":
-            return f"{self.d}: {out} ({self.r})"
+            return f"{self.d}: {out} {self.r}"
         elif self.d != "":
             return f"{self.d}: {out}"
         elif self.r != "":
-            return f"{out} ({self.r})"
+            return f"{out} {self.r}"
         else:
             return out
 
     def __repr__(self) -> str:
         out = super(Parameter, self).__repr__()
+        out = out.replace("Quantity", "Parameter")
         return out.replace(")>", f", '{self.d}', '{self.r}')>")
 
 
@@ -93,13 +98,16 @@ class ParameterSystem:
             ParameterSystem.__instance = inst
         return ParameterSystem.__instance
 
-    @staticmethod
-    def initialize() -> None:
+    def initialize(self) -> None:
         """Imports the materials data module to register the sources defined there
 
         Returns:
             None
         """
+        from . import parameter_system  # noqa: F401
+
+        for source in self.known_sources:
+            self.sources[source] = self._known_sources[source].load_source(source)
 
     def add_source(self, name: str, source_class: ParameterSource) -> None:
         """Adds a parameters source class to the registry.
@@ -159,11 +167,11 @@ class ParameterSystem:
                 return self._load_source(s).get_parameter(material, parameter, **kwargs)
             except ParameterError:
                 pass
-            finally:
-                raise ParameterError(
-                    f"Parameter '{parameter}' nor found for material "
-                    f"'{material}' in any of the following sources: {nsource}."
-                )
+        else:
+            raise ParameterError(
+                f"Parameter '{parameter}' not found for material "
+                f"'{material}' in any of the following sources: {nsource}."
+            )
 
     def get_multiple_parameters(
         self,
@@ -245,16 +253,17 @@ class ParameterSystem:
         Returns:
             The instance of the loaded source.
         """
+        if len(self.sources) == 0:
+            self.initialize()
+
         self._validate_source(source)
-        if source not in self.sources:
-            self.sources[source] = self._known_sources[source].load_source()
         return self.sources[source]
 
     @lru_cache
     def _normalise_source(
         self, source: Union[str, Tuple[str], None]
     ) -> Tuple[str, ...]:
-        """Normalise the source to a standard sequence of sources.
+        """Normalise the sources to a standard sequence and prioritize them.
 
         Args:
             source (Union[str, Tuple[str], None]): The source as a string, a
@@ -266,40 +275,69 @@ class ParameterSystem:
         Returns:
             A tuple with the sources to check, even if it is just one.
         """
+        if len(self.sources) == 0:
+            self.initialize()
+
         if source is None:
-            return self.known_sources
+            out = self.known_sources
         elif isinstance(source, str):
             self._validate_source(source)
-            return (source,)
+            out = (source,)
         elif isinstance(source, Tuple):
             out = ()
             for s in source:
                 out = out + self._normalise_source(s)
-            return out
         else:
             raise ParameterSourceError(
                 f"Invalid type for source: {type(source)}. It "
                 "must be a string, a tuple of strings or None."
             )
 
+        return tuple(sorted(out, reverse=True, key=lambda s: self.sources[s].priority))
+
 
 class ParameterSourceBase(ABC):
 
-    name: str = ""
+    name: Union[str, List[str]] = ""
+    _priority: Union[int, Dict[str, int]] = 0
 
     def __init_subclass__(cls: ParameterSource, **kwargs):
-        if cls.name == "":
+        if len(cls.name) == 0:
             raise ValueError(
-                "A ParameterSource subclass cannot have an empty string as the class "
-                "attribute 'name'."
+                "A ParameterSource subclass cannot have an empty attribute 'name'."
             )
+        elif isinstance(cls.name, str):
+            ParameterSystem().add_source(cls.name, cls)
+        elif isinstance(cls.name, List):
+            for n in cls.name:
+                ParameterSystem().add_source(n, cls)
 
-        ParameterSystem().add_source(cls.name, cls)
+    @classmethod
+    @abstractmethod
+    def load_source(cls, source_name: str = "") -> ParameterSource:
+        """Factory method to initialise the source.
+
+        Args:
+            source_name: The name of the source, needed when a general base source
+                might have several concrete sources.
+
+        Returns:
+            An instance of the source class
+        """
 
     @property
     def parsys(self) -> ParameterSystem:
         """Convenience method to access the ParameterSystem from within a source."""
         return ParameterSystem()
+
+    @property
+    def priority(self) -> int:
+        """Priority of the source. The higher the number, the higher the priority.
+
+        Returns:
+            The priority as a integer number
+        """
+        return self._priority
 
     @property
     @abstractmethod
@@ -308,15 +346,6 @@ class ParameterSourceBase(ABC):
 
         Returns:
             A tuple with the list of materials.
-        """
-
-    @classmethod
-    @abstractmethod
-    def load_source(cls) -> ParameterSource:
-        """Factory method to initialise the source.
-
-        Returns:
-            An instance of the source class
         """
 
     @abstractmethod
@@ -349,6 +378,30 @@ class ParameterSourceBase(ABC):
         Returns:
             A Parameter object with the requested parameter.
         """
+
+
+def alloy_parameter(
+    p0: Union[Parameter, float],
+    p1: Union[Parameter, float],
+    x: float,
+    b: Union[Parameter, float] = 0.0,
+):
+    """Calculate the parameter of an alloy including bowing, if present.
+
+    If there is no bowing (b = 0), this formula becomes the standard Vegard's Law.
+
+        result = p0 * (1 - x) + p1 * x - b * (1 - x) * x
+
+    Args:
+        p0: Value of the parameter for the first parent.
+        p1: Value of the parameter for the second parent.
+        x: Fractional composition of the second parent.
+        b: Bowing parameter (default = 0)
+
+    Returns:
+        The parameter calculated for the alloy.
+    """
+    return p0 * (1.0 - x) + p1 * x - b * (1 - x) * x
 
 
 ParameterSource = TypeVar("ParameterSource", bound=ParameterSourceBase)
