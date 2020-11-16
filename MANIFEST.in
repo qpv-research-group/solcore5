@@ -15,9 +15,9 @@ include solcore/source_managed_class.py
 include solcore/state.py
 include solcore/data_analysis_tools/__init__.py
 include solcore/data_analysis_tools/ellipsometry_analysis.py
-include solcore/parameter_system/__init__.py
-include solcore/parameter_system/calculable_parameters.txt
-include solcore/parameter_system/parameter_system.py
+include solcore/parameter_manager/__init__.py
+include solcore/parameter_manager/calculable_parameters.txt
+include solcore/parameter_manager/parameter_manager.py
 include solcore/analytic_solar_cells/detailed_balance.py
 include solcore/analytic_solar_cells/diode_equation.py
 include solcore/analytic_solar_cells/IV.py

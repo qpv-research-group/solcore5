@@ -7,7 +7,7 @@ verbose_loading: 1
 default: SOLCORE_ROOT/units_system/Default_units.txt
 
 [Parameters]
-calculables: SOLCORE_ROOT/parameter_system/calculable_parameters.txt
+calculables: SOLCORE_ROOT/parameter_manager/calculable_parameters.txt
 adachi_binaries: SOLCORE_ROOT/material_data/Adachi/binaries.txt
 adachi_compounds: SOLCORE_ROOT/material_data/Adachi/ternaries.txt
 vurgaftman_binaries: SOLCORE_ROOT/material_data/Vurgaftman/binaries.txt

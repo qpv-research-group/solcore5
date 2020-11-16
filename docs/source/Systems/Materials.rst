@@ -68,7 +68,7 @@ The material class
 Accessing parameters
 ---------------------
 
-.. automodule:: solcore.parameter_system.parameter_system
+.. automodule:: solcore.parameter_manager.parameter_manager
     :members:
     :undoc-members:
 

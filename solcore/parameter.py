@@ -335,7 +335,7 @@ class ParameterSourceBase(ABC):
         """
 
     @property
-    def parsys(self) -> ParameterManager:
+    def parman(self) -> ParameterManager:
         """Convenience method to access the ParameterManager from within a source."""
         return ParameterManager()
 

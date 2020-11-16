@@ -1,5 +1,9 @@
+from typing import Tuple
+
 from pytest import mark, raises
 from unittest.mock import MagicMock
+
+from solcore.parameter import Parameter, ParameterSource
 
 
 class TestParameter:
@@ -35,25 +39,25 @@ class TestParameter:
 
 class TestParameterManager:
     @mark.xfail(reason="The modules with sources are imported too soon.")
-    def test_gather_sources(self, parameter_system):
-        assert len(parameter_system._known_sources) == 0
-        parameter_system.gather_sources()
-        assert len(parameter_system._known_sources) > 0
+    def test_gather_sources(self, parameter_manager):
+        assert len(parameter_manager._known_sources) == 0
+        parameter_manager.gather_sources()
+        assert len(parameter_manager._known_sources) > 0
 
-    def test_initialize(self, parameter_system):
+    def test_initialize(self, parameter_manager):
         class DummySource:
             load_source = MagicMock(return_value="A source")
 
-        parameter_system._known_sources["my source"] = DummySource
-        assert len(parameter_system.sources) == 0
-        parameter_system.initialize()
-        assert parameter_system.sources["my source"] == "A source"
+        parameter_manager._known_sources["my source"] = DummySource
+        assert len(parameter_manager.sources) == 0
+        parameter_manager.initialize()
+        assert parameter_manager.sources["my source"] == "A source"
 
-    def test_add_source(self, parameter_system):
+    def test_add_source(self, parameter_manager):
         class Dummy:
             cache_clear = MagicMock()
 
-        ps = parameter_system
+        ps = parameter_manager
         ps._normalise_source = Dummy()
         ps._validate_source = Dummy()
 
@@ -65,18 +69,18 @@ class TestParameterManager:
         with raises(ValueError):
             ps.add_source("my source", None)
 
-    def test_known_sources(self, parameter_system):
+    def test_known_sources(self, parameter_manager):
 
         sources = ("source 1", "source 2")
-        ps = parameter_system
+        ps = parameter_manager
         for s in sources:
             ps._known_sources[s] = None
         assert ps.known_sources == sources
 
-    def test_get_parameter(self, parameter_system):
+    def test_get_parameter(self, parameter_manager):
         from solcore.parameter import ParameterError
 
-        ps = parameter_system
+        ps = parameter_manager
         sources = ("source 1", "source 2")
         ps._normalise_source = MagicMock(return_value=sources)
 
@@ -104,8 +108,8 @@ class TestParameterManager:
         with raises(ParameterError):
             ps.get_parameter("dark matter", "stupid question")
 
-    def test_get_multiple_parameters(self, parameter_system):
-        ps = parameter_system
+    def test_get_multiple_parameters(self, parameter_manager):
+        ps = parameter_manager
         sources = ("source 1", "source 2")
         ps._normalise_source = MagicMock(return_value=sources)
 
@@ -141,11 +145,11 @@ class TestParameterManager:
         actual = ps.get_multiple_parameters("dark matter", exclude=excluded)
         assert actual == expected
 
-    def test__validate_source(self, parameter_system):
+    def test__validate_source(self, parameter_manager):
         from solcore.parameter import ParameterSourceError
 
         sources = ("source 1", "source 2")
-        ps = parameter_system
+        ps = parameter_manager
         for s in sources:
             ps._known_sources[s] = None
 
@@ -153,8 +157,8 @@ class TestParameterManager:
         with raises(ParameterSourceError):
             ps._validate_source("source 3")
 
-    def test__load_source(self, parameter_system):
-        ps = parameter_system
+    def test__load_source(self, parameter_manager):
+        ps = parameter_manager
         ps.initialize = MagicMock()
         ps._validate_source = MagicMock()
 
@@ -170,8 +174,8 @@ class TestParameterManager:
         ps.initialize.assert_not_called()
         ps._validate_source.assert_called_once()
 
-    def test__normalise_source(self, parameter_system):
-        ps = parameter_system
+    def test__normalise_source(self, parameter_manager):
+        ps = parameter_manager
         ps.initialize = MagicMock()
         ps._validate_source = MagicMock()
 
@@ -189,7 +193,7 @@ class TestParameterManager:
         assert ps._normalise_source(None) == expected
 
         # A single source provided, returned as a tuple
-        expected = ("source 3", )
+        expected = ("source 3",)
         assert ps._normalise_source("source 3") == expected
 
         # A couple of sources provided, returned iun the order requested by the user
@@ -198,23 +202,48 @@ class TestParameterManager:
 
 
 class TestParameterSourceBase:
-    def test_load_source(self):
-        assert False
+    def test__init_subclass__(self, parameter_manager):
+        from solcore.parameter import ParameterSourceBase
 
-    def test_parsys(self):
-        assert False
+        parameter_manager.add_source = MagicMock()
 
-    def test_priority(self):
-        assert False
+        class NewSource(ParameterSourceBase):
+            name = "my source"
 
-    def test_materials(self):
-        assert False
+        parameter_manager.add_source.assert_called_once_with("my source", NewSource)
+        parameter_manager.add_source.reset_mock()
 
-    def test_parameters(self):
-        assert False
+        class NewSource2(ParameterSourceBase):
+            name = ["my source 1", "my source 2"]
 
-    def test_get_parameter(self):
-        assert False
+        assert parameter_manager.add_source.call_count == 2
+
+    def test_properties(self, parameter_manager):
+        from solcore.parameter import ParameterSourceBase
+
+        parameter_manager.add_source = MagicMock()
+
+        class NewSource(ParameterSourceBase):
+            name = "my class"
+            _priority = 10
+
+            @classmethod
+            def load_source(cls, source_name: str = "") -> ParameterSource:
+                pass
+
+            @property
+            def materials(self) -> Tuple[str, ...]:
+                pass
+
+            def parameters(self, material: str) -> Tuple[str, ...]:
+                pass
+
+            def get_parameter(self, material: str, parameter: str,
+                              **kwargs) -> Parameter:
+                pass
+
+        assert NewSource().parman == parameter_manager
+        assert NewSource().priority == 10
 
 
 @mark.parametrize("bow", [-1, 1])

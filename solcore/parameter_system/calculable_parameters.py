@@ -167,7 +167,7 @@ class CalculableParameters(ParameterSourceBase):
             else:
                 # If not, is it in another source?
                 try:
-                    params[p] = self.parsys.get_parameter(material, p, **kwargs)
+                    params[p] = self.parman.get_parameter(material, p, **kwargs)
 
                 except ParameterError as err:
                     # If not... is there a default value??

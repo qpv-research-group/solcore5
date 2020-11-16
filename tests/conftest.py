@@ -231,10 +231,9 @@ def light_source(wavelength):
 
 
 @fixture
-def parameter_system():
+def parameter_manager():
     from solcore.parameter import ParameterManager
-    ParameterManager()._instance.sources.clear()
-    ParameterManager()._instance._known_sources.clear()
-    yield ParameterManager()
-    ParameterManager._instance = None
+    if ParameterManager._instance is not None:
+        ParameterManager._instance = None
+    return ParameterManager()
 
