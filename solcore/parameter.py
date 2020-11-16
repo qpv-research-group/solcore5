@@ -20,8 +20,8 @@ class Parameter(pint.Quantity):
         cls,
         value: Union[str, float, int],
         units: Optional[str] = None,
-        description: Optional[str] = None,
-        reference: Optional[str, Tuple[str]] = None,
+        description: str = "",
+        reference: Union[str, Tuple[str, ...]] = (),
     ):
         """Wrapper of the pint.Quantity class adding 'description' and 'reference'.
 
@@ -40,8 +40,7 @@ class Parameter(pint.Quantity):
             v = parsed.magnitude
             u = parsed.units
         out = pint.Quantity.__new__(cls, v, u)
-        out._description = str(description) if description is not None else ""
-        out._reference = ()
+        out._description = str(description)
         if isinstance(reference, str):
             out._reference = (reference,)
         elif isinstance(reference, tuple):
@@ -86,26 +85,34 @@ class Parameter(pint.Quantity):
         return out.replace(")>", f", '{self.d}', '{self.r}')>")
 
 
-class ParameterSystem:
+class ParameterManager:
 
-    __instance: Optional[ParameterSystem] = None
+    _instance = None
 
     def __new__(cls):
-        if cls.__instance is None:
+        if cls._instance is None:
             inst = object.__new__(cls)
             inst._known_sources = {}
             inst.sources = {}
-            ParameterSystem.__instance = inst
-        return ParameterSystem.__instance
+            cls._instance = inst
+        return cls._instance
 
-    def initialize(self) -> None:
-        """Imports the materials data module to register the sources defined there
+    @staticmethod
+    def gather_sources() -> None:
+        """Scan several standard locations to register known sources.
 
         Returns:
             None
         """
         from . import parameter_system  # noqa: F401
 
+    def initialize(self) -> None:
+        """Imports all known sources
+
+        Returns:
+            None
+        """
+        self.gather_sources()
         for source in self.known_sources:
             self.sources[source] = self._known_sources[source].load_source(source)
 
@@ -123,7 +130,7 @@ class ParameterSystem:
             None
         """
         if name in self.known_sources:
-            ValueError(f"ParameterSource name '{name}' already exists.")
+            raise ValueError(f"ParameterSource name '{name}' already exists.")
 
         self._known_sources[name] = source_class
         self._normalise_source.cache_clear()
@@ -280,20 +287,22 @@ class ParameterSystem:
 
         if source is None:
             out = self.known_sources
+            return tuple(
+                sorted(out, reverse=True, key=lambda s: self.sources[s].priority)
+            )
         elif isinstance(source, str):
             self._validate_source(source)
-            out = (source,)
+            return (source,)
         elif isinstance(source, Tuple):
             out = ()
             for s in source:
                 out = out + self._normalise_source(s)
+            return out
         else:
             raise ParameterSourceError(
                 f"Invalid type for source: {type(source)}. It "
                 "must be a string, a tuple of strings or None."
             )
-
-        return tuple(sorted(out, reverse=True, key=lambda s: self.sources[s].priority))
 
 
 class ParameterSourceBase(ABC):
@@ -307,10 +316,10 @@ class ParameterSourceBase(ABC):
                 "A ParameterSource subclass cannot have an empty attribute 'name'."
             )
         elif isinstance(cls.name, str):
-            ParameterSystem().add_source(cls.name, cls)
+            ParameterManager().add_source(cls.name, cls)
         elif isinstance(cls.name, List):
             for n in cls.name:
-                ParameterSystem().add_source(n, cls)
+                ParameterManager().add_source(n, cls)
 
     @classmethod
     @abstractmethod
@@ -326,9 +335,9 @@ class ParameterSourceBase(ABC):
         """
 
     @property
-    def parsys(self) -> ParameterSystem:
-        """Convenience method to access the ParameterSystem from within a source."""
-        return ParameterSystem()
+    def parsys(self) -> ParameterManager:
+        """Convenience method to access the ParameterManager from within a source."""
+        return ParameterManager()
 
     @property
     def priority(self) -> int:
@@ -431,6 +440,6 @@ if __name__ == "__main__":
 
         name = "NotFancy"
 
-    print(ParameterSystem()._known_sources)
-    ParameterSystem()._load_source("Fancy")
-    print(ParameterSystem().sources)
+    print(ParameterManager()._known_sources)
+    ParameterManager()._load_source("Fancy")
+    print(ParameterManager().sources)

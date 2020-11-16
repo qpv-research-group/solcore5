@@ -253,7 +253,7 @@ class SimpleSource(ParameterSourceBase):
 
 
 if __name__ == "__main__":
-    from solcore.parameter import ParameterSystem
+    from solcore.parameter import ParameterManager
 
     v = ParameterSystem()._load_source("vurgaftmanJAP2001")
     print(v.get_parameter("GaAs", "gamma1"))

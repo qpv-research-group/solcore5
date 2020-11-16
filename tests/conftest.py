@@ -2,7 +2,6 @@ from pytest import fixture
 import numpy as np
 from unittest.mock import patch
 import os
-import tempfile
 
 
 @fixture(autouse=True)
@@ -229,3 +228,13 @@ def light_source(wavelength):
         output_units="photon_flux_per_m",
         concentration=1,
     )
+
+
+@fixture
+def parameter_system():
+    from solcore.parameter import ParameterManager
+    ParameterManager()._instance.sources.clear()
+    ParameterManager()._instance._known_sources.clear()
+    yield ParameterManager()
+    ParameterManager._instance = None
+
