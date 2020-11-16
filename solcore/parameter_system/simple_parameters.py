@@ -11,7 +11,7 @@ from solcore.parameter import (
     ParameterError,
     ParameterSource,
     ParameterSourceBase,
-    alloy_parameter
+    alloy_parameter,
 )
 
 SAFE_BUILTINS = {k: v for k, v in math.__dict__.items() if not k.startswith("__")}
@@ -112,17 +112,25 @@ class SimpleSource(ParameterSourceBase):
                 f"Impossible to load the source. 'path' for '{source_name}' is 'None'."
             )
 
+        priority = cls._priority.get(source_name, None)
+        if priority is None:
+            raise ValueError(
+                f"Impossible to load the source. 'priority' for '{source_name}' "
+                f"is 'None'."
+            )
+
         with path.open("r") as f:
             data = json.load(f)
 
         reference = data.pop("reference", "")
         descriptions = data.pop("descriptions", {})
 
-        return cls(source_name, data, reference, descriptions)
+        return cls(source_name, priority, data, reference, descriptions)
 
     def __init__(
         self,
         name: str,
+        priority: int,
         data: Dict[str, Dict],
         reference: str = "",
         descriptions: Optional[Dict[str, str]] = None,
@@ -131,14 +139,14 @@ class SimpleSource(ParameterSourceBase):
 
         Args:
             name: The concrete source name
+            priority: Integer indicating the priority of the source.
             data: Dictionary of materials and their properties.
             reference: Reference indicating the origin of the data.
             descriptions: Dictionary linking each property
                 (a short name) with a description indicating what they are.
         """
         self.name = name
-        self.path = self.__class__._path[name]
-        self._priority = self.__class__._priority[name]
+        self._priority = priority
         self.reference = reference
         self._data = data
         self._descriptions = descriptions if descriptions is not None else {}
@@ -255,7 +263,7 @@ class SimpleSource(ParameterSourceBase):
 if __name__ == "__main__":
     from solcore.parameter import ParameterManager
 
-    v = ParameterSystem()._load_source("vurgaftmanJAP2001")
+    v = ParameterManager()._load_source("vurgaftmanJAP2001")
     print(v.get_parameter("GaAs", "gamma1"))
     print(v.get_parameter("GaAs", "alpha_gamma"))
     print(v.get_parameter("GaAs", "lattice_constant", T=300))

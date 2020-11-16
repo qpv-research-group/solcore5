@@ -1,7 +1,37 @@
-from pytest import fixture
-import numpy as np
-from unittest.mock import patch
 import os
+import sys
+from pathlib import Path
+from unittest.mock import patch
+
+import matplotlib
+import numpy as np
+from pytest import fixture
+
+matplotlib.use("Agg")
+
+
+@fixture(autouse=True)
+def set_userdir(monkeypatch, tmp_path):
+    """Sets the user path to a temp directory."""
+    monkeypatch.setattr(Path, "home", lambda: tmp_path)
+
+
+@fixture
+def app_local_path():
+    if sys.platform == "win32":
+        path = Path("AppData") / "Local" / "solcore"
+    elif sys.platform == "darwin":
+        path = Path("Library") / "ApplicationSupport" / "solcore"
+    else:
+        path = Path(".solcore")
+    return path
+
+
+@fixture
+def app_temp_path(app_local_path):
+    path = Path.home() / app_local_path
+    os.makedirs(path)
+    return path
 
 
 @fixture(autouse=True)
@@ -35,7 +65,7 @@ def gauss_spectrum(wavelength):
 
     centre = wavelength.mean()
     width = (wavelength.max() - wavelength.min()) / 6
-    sp = np.exp(-(wavelength - centre) ** 2 / width)
+    sp = np.exp(-((wavelength - centre) ** 2) / width)
     return sp, interp1d(wavelength, sp, bounds_error=False, fill_value=0)
 
 
@@ -233,7 +263,31 @@ def light_source(wavelength):
 @fixture
 def parameter_manager():
     from solcore.parameter import ParameterManager
+
     if ParameterManager._instance is not None:
         ParameterManager._instance = None
     return ParameterManager()
 
+
+@fixture
+def simple_data():
+    return {
+        "reference": "A paper",
+        "descriptions": {
+            "param1": "The first parameter",
+            "param2": "The second parameter",
+            "param3": "The third parameter",
+        },
+        "Dark matter": {"param1": 42, "param2": "23 eV", "param3": "2*T K"},
+        "Light matter": {"param1": 84, "param2": "42 eV"},
+    }
+
+
+@fixture
+def simple_data_file(tmp_path, simple_data):
+    import json
+
+    path = tmp_path / "data.json"
+    with path.open("a") as f:
+        json.dump(simple_data, f)
+    return path
