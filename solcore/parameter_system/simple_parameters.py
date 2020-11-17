@@ -153,21 +153,21 @@ class SimpleSource(ParameterSourceBase):
 
     @property
     def materials(self) -> Tuple[str, ...]:
-        """
+        """Materials this source provides parameters for.
 
         Returns:
-
+            A tuple with the list of materials.
         """
         return tuple(self._data.keys())
 
     def parameters(self, material: str) -> Tuple[str, ...]:
-        """
+        """Parameters available in this source for the requested material.
 
         Args:
-            material:
+            material (str): The material whose parameters are of interests.
 
         Returns:
-
+            A tuple with the parameters for this material that this source provides.
         """
         if material not in self.materials:
             raise ParameterError(f"Material '{material}' not in '{self.name}' source.")
@@ -175,15 +175,22 @@ class SimpleSource(ParameterSourceBase):
         return tuple(self._data[material].keys())
 
     def get_parameter(self, material: str, parameter: str, **kwargs) -> Parameter:
-        """
+        """Retrieve the parameter for the material.
+
+        Any arguments that obtaining this parameter requires must be included as
+        keyword arguments in the call.
 
         Args:
-            material:
-            parameter:
-            **kwargs:
+            material (str): Material the enquiry is about.
+            parameter (str): The parameter of interest.
+            **kwargs: Any other argument needed to calculate the requested parameter.
+
+        Raises
+            ParameterError if the material does not exist in this source or if the
+                parameter does not exist for this material.
 
         Returns:
-
+            A Parameter object with the requested parameter.
         """
         if material not in self.materials:
             raise ParameterError(f"Material '{material}' not in '{self.name}' source.")
@@ -204,60 +211,84 @@ class SimpleSource(ParameterSourceBase):
     def _get_parameter_alloy(
         self, material: str, parameter: str, **kwargs
     ) -> Parameter:
-        """
+        """Retrieve the parameter for the material in the case of a ternary alloy.
+
+        Any arguments that obtaining this parameter requires must be included as
+        keyword arguments in the call.
 
         Args:
-            material:
-            parameter:
-            **kwargs:
+            material (str): Material the enquiry is about.
+            parameter (str): The parameter of interest.
+            **kwargs: Any other argument needed to calculate the requested parameter.
+
+        Raises
+            ParameterError if the information about any of the parents is missing.
+            KeyError if the composition information is missing from the input arguments.
 
         Returns:
-
+            A Parameter object with the requested parameter.
         """
-        p0 = self.get_parameter(self._data[material]["parent0"], parameter, **kwargs)
-        p1 = self.get_parameter(self._data[material]["parent1"], parameter, **kwargs)
-        b = self.to_param(self._data[material].get(parameter, 0), parameter, **kwargs)
+        dmat = self._data[material]
+
+        b = self.to_param(dmat.get(parameter, 0), parameter, **kwargs)
+        try:
+            p0 = self.get_parameter(dmat["parent0"], parameter, **kwargs)
+            p1 = self.get_parameter(dmat["parent1"], parameter, **kwargs)
+        except KeyError:
+            raise ParameterError(
+                "Ternary alloys must have 'parent0' and 'parent1' parameters defined "
+                "as parent materials."
+            )
 
         try:
-            x = kwargs[self._data[material]["x"]]
+            x = kwargs.get("comp", {})[dmat["x"]]
         except KeyError:
             raise KeyError(
-                f"Composition for element {self._data[material]['x']} is "
-                f"required to get parameter '{parameter}' for material "
-                f"'{material}'."
+                f"Composition for element {dmat['x']} is required to get parameter "
+                f"'{parameter}' for material '{material}'."
             )
 
         raw = alloy_parameter(p0, p1, x, b)
         return self.to_param(raw, parameter, **kwargs)
 
     def to_param(
-        self, raw: Union[float, Parameter], parameter: str, **kwargs
+        self, raw: Union[float, str, Parameter], parameter: str, **kwargs
     ) -> Parameter:
-        """
+        """Transform a raw input read from file into a Parameter object.
+
+        If it cannot be transofrmed drectly because the parameter value is written as
+        some sort of small mathematical expression (eg. 2*cos(4*T) ) then 'eval' is used
+        to evaluate the expression. To be safe, the '__builtins__' passed to 'eval' are
+        limited to the contents of the 'math' builtin library.
 
         Args:
-            raw:
-            parameter:
-            kwargs:
+            raw: The raw value of the parameter.
+            parameter: The name of the parameter.
+            **kwargs: Any other argument needed to calculate the requested parameter.
+
+        Raises:
+            NameError if 'eval' does not have all the information required to evaluate
+                the expression.
 
         Returns:
-
+            A Parameter object with the requested parameter.
         """
-        try:
-            return Parameter(
-                raw,
-                description=self._descriptions.get(parameter, None),
-                reference=self.name,
-            )
-        except Exception:
+        if isinstance(raw, str):
             value, units = raw.split(" ", 1)
-            value = eval(value, {"__builtins__": SAFE_BUILTINS}, kwargs)
-            return Parameter(
-                value,
-                units=units,
-                description=self._descriptions.get(parameter, None),
-                reference=self.name,
-            )
+            try:
+                value = float(value)
+            except ValueError:
+                value = eval(value, {"__builtins__": SAFE_BUILTINS}, kwargs)
+        else:
+            value = raw
+            units = None
+
+        return Parameter(
+            value,
+            units=units,
+            description=self._descriptions.get(parameter, None),
+            reference=self.name,
+        )
 
 
 if __name__ == "__main__":

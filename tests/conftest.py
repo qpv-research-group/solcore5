@@ -291,3 +291,12 @@ def simple_data_file(tmp_path, simple_data):
     with path.open("a") as f:
         json.dump(simple_data, f)
     return path
+
+
+@fixture
+def simple_param_source(simple_data_file):
+    from solcore.parameter_system import SimpleSource
+
+    SimpleSource._path = {"source 1": simple_data_file}
+    SimpleSource._priority = {"source 1": 1}
+    return SimpleSource.load_source("source 1")
