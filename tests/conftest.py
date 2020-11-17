@@ -295,7 +295,7 @@ def simple_data_file(tmp_path, simple_data):
 
 @fixture
 def simple_param_source(simple_data_file):
-    from solcore.parameter_system import SimpleSource
+    from solcore.parameter_sources import SimpleSource
 
     SimpleSource._path = {"source 1": simple_data_file}
     SimpleSource._priority = {"source 1": 1}

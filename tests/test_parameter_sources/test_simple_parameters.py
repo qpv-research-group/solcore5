@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 
 def test_app_dir(app_local_path):
-    from solcore.parameter_system.simple_parameters import app_dir
+    from solcore.parameter_sources.simple_parameters import app_dir
     from pathlib import Path
     import os
 
@@ -17,15 +17,15 @@ def test_app_dir(app_local_path):
 
 
 def test_locate_source_files_builtin():
-    from solcore.parameter_system.simple_parameters import locate_source_files_builtin
+    from solcore.parameter_sources.simple_parameters import locate_source_files_builtin
 
     assert len(list(locate_source_files_builtin())) > 0
 
 
 def test_locate_source_files_in_solcore_app_dir(app_temp_path):
-    package = "solcore.parameter_system.simple_parameters"
+    package = "solcore.parameter_sources.simple_parameters"
     with patch(f"{package}.app_dir", lambda: app_temp_path):
-        from solcore.parameter_system.simple_parameters import (
+        from solcore.parameter_sources.simple_parameters import (
             locate_source_files_builtin,
             locate_source_files_in_solcore_app_dir,
         )
@@ -41,7 +41,7 @@ def test_locate_source_files_in_solcore_app_dir(app_temp_path):
 
 
 def test_locate_source_files_in_pwd(tmp_path):
-    from solcore.parameter_system.simple_parameters import (
+    from solcore.parameter_sources.simple_parameters import (
         locate_source_files_builtin,
         locate_source_files_in_pwd,
     )
@@ -67,11 +67,11 @@ def test_locate_source_files():
     app_dir = MagicMock()
     pwd = MagicMock()
 
-    package = "solcore.parameter_system.simple_parameters"
+    package = "solcore.parameter_sources.simple_parameters"
     with patch(f"{package}.locate_source_files_builtin", builtin), patch(
         f"{package}.locate_source_files_in_solcore_app_dir", app_dir
     ), patch(f"{package}.locate_source_files_in_pwd", pwd):
-        from solcore.parameter_system.simple_parameters import locate_source_files
+        from solcore.parameter_sources.simple_parameters import locate_source_files
 
         files = locate_source_files()
 
@@ -82,7 +82,7 @@ def test_locate_source_files():
 
 
 def test_populate_sources():
-    from solcore.parameter_system.simple_parameters import populate_sources
+    from solcore.parameter_sources.simple_parameters import populate_sources
     from itertools import chain
     from pathlib import Path
 
@@ -103,7 +103,7 @@ def test_populate_sources():
 
 class TestSimpleSource:
     def test_load_source(self, simple_data, simple_data_file):
-        from solcore.parameter_system import SimpleSource
+        from solcore.parameter_sources import SimpleSource
 
         SimpleSource._path = {}
         with raises(ValueError, match="'path' for 'source 1' is 'None'"):

@@ -104,7 +104,7 @@ class ParameterManager:
         Returns:
             None
         """
-        from . import parameter_system  # noqa: F401
+        from . import parameter_sources  # noqa: F401
 
     def initialize(self) -> None:
         """Imports all known sources

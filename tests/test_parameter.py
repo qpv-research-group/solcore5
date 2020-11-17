@@ -38,7 +38,6 @@ class TestParameter:
 
 
 class TestParameterManager:
-    @mark.xfail(reason="The modules with sources are imported too soon.")
     def test_gather_sources(self, parameter_manager):
         assert len(parameter_manager._known_sources) == 0
         parameter_manager.gather_sources()
