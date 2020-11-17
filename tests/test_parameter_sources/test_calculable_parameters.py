@@ -1,65 +1,153 @@
-from pytest import raises
-from unittest.mock import MagicMock
+from pytest import raises, mark, approx
+from unittest.mock import patch, MagicMock
 
 
 def test_eg():
-    assert False
+    from pint import Quantity
+    from solcore.parameter_sources.calculable_parameters import eg
+
+    T = Quantity(298, "K")
+    eg0 = Quantity(1.6, "eV")
+    alpha = Quantity(0.1, "meV/K")
+    beta = Quantity(600, "K")
+
+    out = eg(T, eg0, alpha, beta)
+    assert out.check("electron_volt")
+    assert out < eg0
 
 
-def test_eg_gamma():
-    assert False
+@mark.parametrize("fun", ["eg_gamma", "eg_x", "eg_l"])
+def test_eg_at_point(fun):
+    from pint import Quantity
+
+    T = Quantity(298, "K")
+    eg0 = Quantity(1.6, "eV")
+    alpha = Quantity(0.1, "meV/K")
+    beta = Quantity(600, "K")
+    mock_eg = MagicMock()
+    package = "solcore.parameter_sources.calculable_parameters"
+
+    with patch(f"{package}.eg", mock_eg):
+        from solcore.parameter_sources.calculable_parameters import eg_gamma, eg_x, eg_l
+
+        f = {"eg_gamma": eg_gamma, "eg_x": eg_x, "eg_l": eg_l}[fun]
+        f(T, eg0, alpha, beta)
+        mock_eg.assert_called_once_with(T, eg0, alpha, beta)
+        mock_eg.reset_mock()
 
 
-def test_eg_x():
-    assert False
+def test_band_gap_and_lowest_band():
+    from pint import Quantity
+    from solcore.parameter_sources.calculable_parameters import band_gap, lowest_band
 
+    eg_gamma = Quantity(1.4, "eV")
+    eg_x = Quantity(1.6, "eV")
+    eg_l = Quantity(1, "eV")
 
-def test_eg_l():
-    assert False
+    with raises(ValueError):
+        band_gap()
 
-
-def test_band_gap():
-    assert False
-
-
-def test_lowest_band():
-    assert False
+    gap = band_gap(eg_gamma, eg_x, eg_l)
+    assert eg_l == gap
+    assert Quantity("L", "dimensionless") == lowest_band(gap, eg_gamma, eg_x, eg_l)
 
 
 def test_eff_mass_split_off():
-    assert False
+    from pint import Quantity
+    from solcore.parameter_sources.calculable_parameters import eff_mass_split_off
+
+    g1 = Quantity(5.18)
+    Ep = Quantity("18.7 eV")
+    Delta_so = Quantity("0.676 eV")
+    Eg = Quantity("1.42 eV")
+
+    out = eff_mass_split_off(g1, Ep, Delta_so, Eg)
+    assert out.u == "kilogram"
 
 
-def test_eff_mass_hh_z():
-    assert False
+def test_eff_mass_z():
+    from pint import Quantity
+    from solcore.parameter_sources.calculable_parameters import (
+        eff_mass_hh_z,
+        eff_mass_lh_z,
+    )
+    from solcore.constants import electron_mass
+
+    g1 = Quantity(5.18)
+    g2 = Quantity(1.19)
+
+    hh = eff_mass_hh_z(g1, g2)
+    lh = eff_mass_lh_z(g1, g2)
+    assert hh.u == "kilogram"
+    assert lh.u == "kilogram"
+    assert lh + hh == 2 * g1 * electron_mass
+    assert lh - hh == 4 * g2 * electron_mass
 
 
-def test_eff_mass_hh_110():
-    assert False
+def test_eff_mass_110():
+    from pint import Quantity
+    from solcore.parameter_sources.calculable_parameters import (
+        eff_mass_hh_110,
+        eff_mass_lh_110,
+    )
+    from solcore.constants import electron_mass
+
+    g1 = Quantity(5.18)
+    g2 = Quantity(1.19)
+    g3 = Quantity(1.97)
+
+    hh = eff_mass_hh_110(g1, g2, g3)
+    lh = eff_mass_lh_110(g1, g2, g3)
+    assert hh.u == "kilogram"
+    assert lh.u == "kilogram"
+    assert lh + hh == 2 * g1 * electron_mass
+    assert round((lh - hh) / electron_mass, 6) == round(g2 + 3 * g3, 6)
 
 
-def test_eff_mass_hh_111():
-    assert False
+def test_eff_mass_111():
+    from pint import Quantity
+    from solcore.parameter_sources.calculable_parameters import (
+        eff_mass_hh_111,
+        eff_mass_lh_111,
+    )
+    from solcore.constants import electron_mass
 
+    g1 = Quantity(5.18)
+    g3 = Quantity(1.97)
 
-def test_eff_mass_lh_z():
-    assert False
-
-
-def test_eff_mass_lh_110():
-    assert False
-
-
-def test_eff_mass_lh_111():
-    assert False
+    hh = eff_mass_hh_111(g1, g3)
+    lh = eff_mass_lh_111(g1, g3)
+    assert hh.u == "kilogram"
+    assert lh.u == "kilogram"
+    assert lh + hh == 2 * g1 * electron_mass
+    assert round(lh - hh, 6) == round(4 * g3 * electron_mass, 6)
 
 
 def test_eff_mass_electron():
-    assert False
+    from pint import Quantity
+    from solcore.parameter_sources.calculable_parameters import eff_mass_electron
+    from solcore.constants import electron_mass
+
+    F = Quantity(-0.56)
+    Ep = Quantity("18.7 eV")
+    Delta_so = Quantity("0.676 eV")
+    Eg = Quantity("1.42 eV")
+
+    out = eff_mass_electron(F, Ep, Delta_so, Eg)
+    assert out.u == "kilogram"
+
+    out = eff_mass_electron(F, Ep * 0, Delta_so, Eg)
+    assert out == (1 + 2 * F) * electron_mass
 
 
 def test_permittivity():
-    assert False
+    from pint import Quantity
+    from solcore.parameter_sources.calculable_parameters import permittivity
+    from solcore.constants import vacuum_permittivity
+
+    er = Quantity(12.5)
+    out = permittivity(er)
+    assert out == vacuum_permittivity * 12.5
 
 
 class TestCalculableParameters:

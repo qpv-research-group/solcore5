@@ -308,7 +308,7 @@ def band_gap(
 )
 def lowest_band(
     band_gap: Quantity, eg_gamma: Quantity, eg_x: Quantity, eg_l: Quantity
-) -> str:
+) -> Quantity:
     """Label indicating what is the lowest band out of [Gamma, X, L].
 
     Args:
@@ -320,7 +320,9 @@ def lowest_band(
     Returns:
         The band gap (in eV)
     """
-    return ["Gamma", "X", "L"][[eg_gamma, eg_x, eg_l].index(band_gap)]
+    return Quantity(
+        ["Gamma", "X", "L"][[eg_gamma, eg_x, eg_l].index(band_gap)], "dimensionless"
+    )
 
 
 @CalculableParameters.register_calculable(description="Split-off hole effective mass")
@@ -408,7 +410,7 @@ def eff_mass_hh_111(
 
     Provided by Eq. 2.16 of Vurgaftman et al. JAP, 2001:
 
-        m0/m_hh_110 = g1 - 2*g3
+        m0/m_hh_111 = g1 - 2*g3
 
     Args:
         gamma1: Luttinger parameter gamma1 (dimensionless)
@@ -454,7 +456,7 @@ def eff_mass_lh_110(
 
     Provided by Eq. 2.17 of Vurgaftman et al. JAP, 2001:
 
-        m0/m_hh_111 = 1/2 * (2*g1 + g2 + 3*g3)
+        m0/m_hh_110 = 1/2 * (2*g1 + g2 + 3*g3)
 
     Args:
         gamma1: Luttinger parameter gamma1 (dimensionless)
@@ -477,7 +479,7 @@ def eff_mass_lh_111(
 
     Provided by Eq. 2.17 of Vurgaftman et al. JAP, 2001:
 
-        m0/m_hh_110 = g1 + 2*g3
+        m0/m_hh_111 = g1 + 2*g3
 
     Args:
         gamma1: Luttinger parameter gamma1 (dimensionless)
