@@ -14,7 +14,8 @@ from solcore.parameter import (
     Parameter,
     ParameterError,
     ParameterSource,
-    ParameterSourceBase
+    ParameterSourceBase,
+    ParameterSourceError,
 )
 
 
@@ -22,15 +23,15 @@ class CalculableParameters(ParameterSourceBase):
 
     name: Union[str, List[str]] = "Calculable"
     _priority: Union[int, Dict[str, int]] = -10
-    __instance = None
+    _instance = None
 
     def __new__(cls, *args, **kwargs):
-        if cls.__instance is None:
-            cls.__instance = ParameterSourceBase.__new__(cls)
-            cls.__instance._params = {}
-            cls.__instance._descriptions = {}
-            cls.__instance._warned = False
-        return cls.__instance
+        if cls._instance is None:
+            cls._instance = ParameterSourceBase.__new__(cls)
+            cls._instance._params = {}
+            cls._instance._descriptions = {}
+            cls._instance._warned = False
+        return cls._instance
 
     def __getitem__(self, parameter: str) -> Callable:
         """Dictionary-like access to the calculable source.
@@ -44,7 +45,7 @@ class CalculableParameters(ParameterSourceBase):
         Returns:
             The callable for this parameter
         """
-        if parameter not in self._params:
+        if parameter not in self.parameters():
             raise ParameterError(
                 f"Parameter '{parameter}' not in '{self.name}' parameters source"
             )
@@ -66,7 +67,7 @@ class CalculableParameters(ParameterSourceBase):
 
     @classmethod
     def load_source(cls, source_name: str = "") -> ParameterSource:
-        return cls.__instance
+        return cls._instance
 
     @classmethod
     def register_calculable(
@@ -84,8 +85,12 @@ class CalculableParameters(ParameterSourceBase):
         if function is None:
             return partial(cls.register_calculable, description=description)
 
-        cls()._params[function.__name__] = function
-        cls()._descriptions[function.__name__] = description
+        name = function.__name__
+        if name in cls()._params:
+            raise ParameterSourceError(f"Calculable parameter '{name}' already exists!")
+
+        cls()._params[name] = function
+        cls()._descriptions[name] = description
         return function
 
     @property
@@ -187,6 +192,7 @@ class CalculableParameters(ParameterSourceBase):
         )
 
 
+@CalculableParameters.register_calculable(description="Band gap as a function of T")
 def eg(T: Quantity, eg0: Quantity, alpha: Quantity, beta: Quantity) -> Quantity:
     """Energy gap as a function of temperature
 
