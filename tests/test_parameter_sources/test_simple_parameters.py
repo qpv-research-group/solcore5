@@ -130,7 +130,7 @@ class TestSimpleSource:
 
     def test_materials(self, simple_param_source):
         ss = simple_param_source
-        assert ss.materials == tuple((m for m in ss._data.keys()))
+        assert ss.materials == tuple((m for m in ss._data))
 
     def test_parameters(self, simple_param_source):
         from solcore.parameter import ParameterError

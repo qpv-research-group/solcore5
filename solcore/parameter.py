@@ -18,7 +18,7 @@ class ParameterSourceError(Exception):
 class Parameter(pint.Quantity):
     def __new__(
         cls,
-        value: Union[str, float, int],
+        value: Union[str, float, int, pint.Quantity],
         units: Optional[str] = None,
         description: str = "",
         reference: Union[str, Tuple[str, ...]] = (),
@@ -39,6 +39,9 @@ class Parameter(pint.Quantity):
             parsed = pint.Quantity(value, units)
             v = parsed.magnitude
             u = parsed.units
+        elif isinstance(value, pint.Quantity):
+            v = value.magnitude
+            u = value.units
         out = pint.Quantity.__new__(cls, v, u)
         out._description = str(description)
         if isinstance(reference, str):
@@ -410,7 +413,7 @@ def alloy_parameter(
     Returns:
         The parameter calculated for the alloy.
     """
-    return p0 * (1.0 - x) + p1 * x - b * (1 - x) * x
+    return p0 * (1 - x) + p1 * x - b * (1 - x) * x
 
 
 ParameterSource = TypeVar("ParameterSource", bound=ParameterSourceBase)

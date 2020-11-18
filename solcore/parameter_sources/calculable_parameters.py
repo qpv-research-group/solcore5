@@ -67,7 +67,16 @@ class CalculableParameters(ParameterSourceBase):
 
     @classmethod
     def load_source(cls, source_name: str = "") -> ParameterSource:
-        return cls._instance
+        """Factory method to initialise the source.
+
+        Args:
+            source_name: The name of the source, needed when a general base source
+                might have several concrete sources.
+
+        Returns:
+            An instance of the source class
+        """
+        return cls()
 
     @classmethod
     def register_calculable(

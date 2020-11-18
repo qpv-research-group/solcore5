@@ -1,0 +1,319 @@
+{
+    "reference": "'Empirical low-field mobility model for III-V compounds applicable in device simulation codes', M. Sotoodeh, A. H. Khalid, and A. A. Rezazadeh, Journal of Applied Physics 87, 2890 (2000); https://doi.org/10.1063/1.372274",
+    "descriptions": {
+        "electron_mobility": "Mobility for electrons",
+        "hole_mobility": "Mobility for holes"
+    },
+    "Si": {
+        "composition": "pure",
+        "electron": {
+            "mu_max": "1360 cm**2 / s / V",
+            "mu_min": "92 cm**2 / s / V",
+            "Nref": "1.3e+17 1/cm**3",
+            "l": 0.91,
+            "t1": 0,
+            "t2": 0
+        },
+        "hole": {
+            "mu_max": "450 cm**2 / s / V",
+            "mu_min": "48 cm**2 / s / V",
+            "Nref": "6.3e+16 1/cm**3",
+            "l": 0.76,
+            "t1": 0,
+            "t2": 0
+        }
+    },
+    "AlAs": {
+        "composition": "pure",
+        "electron": {
+            "mu_max": "400 cm**2 / s / V",
+            "mu_min": "10 cm**2 / s / V",
+            "Nref": "5.46e+17 1/cm**3",
+            "l": 1,
+            "t1": 2.1,
+            "t2": 3
+        },
+        "hole": {
+            "mu_max": "200 cm**2 / s / V",
+            "mu_min": "10 cm**2 / s / V",
+            "Nref": "3.846e+17 1/cm**3",
+            "l": 0.488,
+            "t1": 2.24,
+            "t2": 3
+        },
+        "params": {
+            "es": 10.06,
+            "einf": 8.16,
+            "EgG": "2.799 eV",
+            "EgX": "2.163 eV",
+            "EgL": "2.469 eV",
+            "mnG": 0.15,
+            "mnX": 0.71,
+            "mnL": 0.66
+        }
+    },
+    "GaAs": {
+        "composition": "pure",
+        "electron": {
+            "mu_max": "9400 cm**2 / s / V",
+            "mu_min": "500 cm**2 / s / V",
+            "Nref": "6e+16 1/cm**3",
+            "l": 0.394,
+            "t1": 2.1,
+            "t2": 3
+        },
+        "hole": {
+            "mu_max": "491.5 cm**2 / s / V",
+            "mu_min": "20 cm**2 / s / V",
+            "Nref": "1.48e+17 1/cm**3",
+            "l": 0.38,
+            "t1": 2.2,
+            "t2": 3
+        },
+        "params": {
+            "es": 12.9,
+            "einf": 10.92,
+            "EgG": "1.422 eV",
+            "EgX": "1.899 eV",
+            "EgL": "1.707 eV",
+            "mnG": 0.065,
+            "mnX": 0.85,
+            "mnL": 0.56
+        }
+    },
+    "InAs": {
+        "composition": "pure",
+        "electron": {
+            "mu_max": "34000 cm**2 / s / V",
+            "mu_min": "1000 cm**2 / s / V",
+            "Nref": "1.1e+18 1/cm**3",
+            "l": 0.32,
+            "t1": 1.57,
+            "t2": 3
+        },
+        "hole": {
+            "mu_max": "530 cm**2 / s / V",
+            "mu_min": "20 cm**2 / s / V",
+            "Nref": "1.1e+17 1/cm**3",
+            "l": 0.46,
+            "t1": 2.3,
+            "t2": 3
+        },
+        "params": {
+            "es": 15.15,
+            "einf": 12.25,
+            "EgG": "0.35 eV",
+            "EgX": "2.14 eV",
+            "EgL": "1.45 eV",
+            "mnG": 0.023,
+            "mnX": 0.64,
+            "mnL": 0.29
+        }
+    },
+    "InP": {
+        "composition": "pure",
+        "electron": {
+            "mu_max": "5200 cm**2 / s / V",
+            "mu_min": "400 cm**2 / s / V",
+            "Nref": "3e+17 1/cm**3",
+            "l": 0.47,
+            "t1": 2,
+            "t2": 3.25
+        },
+        "hole": {
+            "mu_max": "170 cm**2 / s / V",
+            "mu_min": "10 cm**2 / s / V",
+            "Nref": "4.87e+17 1/cm**3",
+            "l": 0.62,
+            "t1": 2.0,
+            "t2": 3
+        },
+        "params": {
+            "es": 12.61,
+            "einf": 9.61,
+            "EgG": "1.351 eV",
+            "EgX": "2.2 eV",
+            "EgL": "2.0 eV",
+            "mnG": 0.079,
+            "mnX": 0.676,
+            "mnL": 0.655
+        }
+    },
+    "GaP": {
+        "composition": "pure",
+        "electron": {
+            "mu_max": "152 cm**2 / s / V",
+            "mu_min": "10 cm**2 / s / V",
+            "Nref": "4.4e+18 1/cm**3",
+            "l": 0.8,
+            "t1": 1.6,
+            "t2": 0.71
+        },
+        "hole": {
+            "mu_max": "147 cm**2 / s / V",
+            "mu_min": "10 cm**2 / s / V",
+            "Nref": "1e+18 1/cm**3",
+            "l": 0.85,
+            "t1": 1.98,
+            "t2": 0
+        },
+        "params": {
+            "es": 11.1,
+            "einf": 9.08,
+            "EgG": "2.76 eV",
+            "EgX": "2.261 eV",
+            "EgL": "2.63 eV",
+            "mnG": 0.126,
+            "mnX": 0.82,
+            "mnL": 0.756
+        }
+    },
+    "InAlAs": {
+        "composition": "ternary",
+        "electron": {
+            "mu_max": "4800 cm**2 / s / V",
+            "mu_min": "800 cm**2 / s / V",
+            "Nref": "3e+16 1/cm**3",
+            "l": 1.1,
+            "t1": 1.57,
+            "t2": 3
+        },
+        "hole": {
+            "mu_max": "530 cm**2 / s / V",
+            "mu_min": "20 cm**2 / s / V",
+            "Nref": "1.1e+17 1/cm**3",
+            "l": 0.46,
+            "t1": 2.3,
+            "t2": 3
+        },
+        "params": {
+            "bG": "0.304 eV",
+            "bX": "0.713 eV",
+            "bL": "0.617 eV",
+            "x": 0.52
+        },
+        "parent_1": "InAs",
+        "parent_2": "AlAs",
+        "x": "In"
+    },
+    "AlGaAs": {
+        "composition": "ternary",
+        "electron": {
+            "mu_max": "400 cm**2 / s / V",
+            "mu_min": "10 cm**2 / s / V",
+            "Nref": "5.46e+17 1/cm**3",
+            "l": 1,
+            "t1": 2.1,
+            "t2": 3
+        },
+        "hole": {
+            "mu_max": "240 cm**2 / s / V",
+            "mu_min": "5 cm**2 / s / V",
+            "Nref": "1e+17 1/cm**3",
+            "l": 0.324,
+            "t1": 2.1,
+            "t2": 3
+        },
+        "params": {
+            "bG": "0.0 eV",
+            "bX": "0.143 eV",
+            "bL": "0.15 eV",
+            "x": 0.3
+        },
+        "parent_1": "AlAs",
+        "parent_2": "GaAs",
+        "x": "Al"
+    },
+    "InGaAs": {
+        "composition": "ternary",
+        "electron": {
+            "mu_max": "14000 cm**2 / s / V",
+            "mu_min": "300 cm**2 / s / V",
+            "Nref": "1.3e+17 1/cm**3",
+            "l": 0.48,
+            "t1": 1.59,
+            "t2": 3.68
+        },
+        "hole": {
+            "mu_max": "320 cm**2 / s / V",
+            "mu_min": "10 cm**2 / s / V",
+            "Nref": "4.9e+17 1/cm**3",
+            "l": 0.403,
+            "t1": 1.59,
+            "t2": 3
+        },
+        "params": {
+            "bG": "0.42 eV",
+            "bX": "0.509 eV",
+            "bL": "1.087 eV",
+            "x": 0.53
+        },
+        "parent_1": "InAs",
+        "parent_2": "GaAs",
+        "x": "In"
+    },
+    "GaInP": {
+        "composition": "ternary",
+        "electron": {
+            "mu_max": "4300 cm**2 / s / V",
+            "mu_min": "400 cm**2 / s / V",
+            "Nref": "2e+16 1/cm**3",
+            "l": 0.7,
+            "t1": 1.66,
+            "t2": 1.95
+        },
+        "hole": {
+            "mu_max": "150 cm**2 / s / V",
+            "mu_min": "15 cm**2 / s / V",
+            "Nref": "1.5e+17 1/cm**3",
+            "l": 0.8,
+            "t1": 2,
+            "t2": 1.47
+        },
+        "params": {
+            "bG": "0.67 eV",
+            "bX": "0.17 eV",
+            "bL": "0.41 eV",
+            "x": 0.49
+        },
+        "parent_1": "InP",
+        "parent_2": "GaP",
+        "x": "In"
+    },
+    "GaAsP": {
+        "composition": "ternary",
+        "electron": {},
+        "hole": {},
+        "params": {
+            "bG": "0.21 eV",
+            "bX": "0.21 eV",
+            "bL": "0.42 eV"
+        },
+        "parent_1": "GaP",
+        "parent_2": "GaAs",
+        "x": "P"
+    },
+    "InAsP": {
+        "composition": "ternary",
+        "electron": {},
+        "hole": {},
+        "params": {
+            "bG": "0.286 eV",
+            "bX": "0.187 eV",
+            "bL": "0.115 eV"
+        },
+        "parent_1": "InP",
+        "parent_2": "InAs",
+        "x": "P"
+    },
+    "InGaAsP": {
+        "composition": "quaternary",
+        "electron": {},
+        "hole": {},
+        "params": {},
+        "parent_1": "InGaAs",
+        "parent_2": "InAsP",
+        "x": "In",
+        "y": "P"
+    }
+}
