@@ -26,8 +26,11 @@ config = ConfigParser()
 config.read([default_config])
 
 # We give the option of compiling - and installing - the extension modules
-if "--with_pdd" in sys.argv:
-    sources = os.path.join("solcore", "poisson_drift_diffusion", "DDmodel-current.f95")
+if (("--with_pdd" in sys.argv) or
+        (('SOLCORE_WITH_PDD' in os.environ) and
+         (os.environ['SOLCORE_WITH_PDD'] == "1"))):
+    sources = os.path.join("solcore", "poisson_drift_diffusion",
+                           "DDmodel-current.f95")
     ext = [
         Extension(
             name="solcore.poisson_drift_diffusion.ddModel",
@@ -35,7 +38,8 @@ if "--with_pdd" in sys.argv:
             f2py_options=["--quiet"],
         )
     ]
-    sys.argv.remove("--with_pdd")
+    if "--with_pdd" in sys.argv:
+        sys.argv.remove("--with_pdd")
 else:
     ext = []
 
