@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # config = ConfigParser()
 # config.read([default_config, ])
 # __version__ = config.get('Configuration', 'version')
-__version__ = '5.7.3'
+__version__ = '5.7.4'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
