@@ -339,6 +339,7 @@ def test_define_material():
     assert SiGeSn.k(400e-9) == approx(2.3037424963866306)
 
 
+@mark.skip(reason="Flaky test. Need review.")
 def test_database_materials():
     download_db(confirm=True)
     wl, n = nkdb_load_n(2683)  # Should be carbon, from Phillip
