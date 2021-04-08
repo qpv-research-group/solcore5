@@ -301,12 +301,12 @@ class BaseMaterial:
     def __getattr__(self, attrname):  # only used for unknown attributes.
         if attrname == "n":
             try:
-                return self.__getattribute__(self,attrname)
+                return self.__getattribute__(attrname)
             except AttributeError:
                 return self.n_interpolated
         if attrname == "k":
             try:
-                return self.__getattribute__(self,attrname)
+                return self.__getattribute__(attrname)
             except AttributeError:
                 return self.k_interpolated
         if attrname == "electron_affinity":
