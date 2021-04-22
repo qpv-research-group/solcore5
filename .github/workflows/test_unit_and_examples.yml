@@ -35,7 +35,7 @@ jobs:
     - name: Install system dependencies in MacOS
       if: matrix.os == 'macos-latest'
       run: |
-        brew install gcc
+        brew install gfortran
         brew install ngspice
 
     - name: Install python dependencies
