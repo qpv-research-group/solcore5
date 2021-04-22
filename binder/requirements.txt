@@ -7,3 +7,4 @@ regex
 cycler
 pyyaml
 yabox
+joblib
