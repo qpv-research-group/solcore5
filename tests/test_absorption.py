@@ -339,12 +339,3 @@ def test_define_material():
     assert SiGeSn.n(400e-9) == approx(4.175308391752484)
     assert SiGeSn.k(400e-9) == approx(2.3037424963866306)
 
-
-def test_database_materials():
-    download_db(confirm=True)
-    wl, n = nkdb_load_n(2683)  # Should be carbon, from Phillip
-
-    data_path = Path(__file__).parent / "data" / "database_materials.txt"
-    n_data = np.loadtxt(data_path)
-
-    assert all([d == approx(o) for d, o in zip(n, n_data)])
