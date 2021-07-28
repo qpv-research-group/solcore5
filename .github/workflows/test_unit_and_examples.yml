@@ -104,7 +104,9 @@ jobs:
 
     - name: Install system dependencies in Linux
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
+      run:
+        sudo apt-get update
+        sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
     - name: Install system dependencies in MacOS
       if: matrix.os == 'macos-latest'
