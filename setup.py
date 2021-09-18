@@ -36,6 +36,7 @@ if (("--with_pdd" in sys.argv) or
             name="solcore.poisson_drift_diffusion.ddModel",
             sources=[sources],
             f2py_options=["--quiet"],
+            extra_link_args=["-static", "-static-libgfortran", "-static-libgcc"] if sys.platform == "win32" else None
         )
     ]
     if "--with_pdd" in sys.argv:
