@@ -124,3 +124,16 @@ def test_photon_flux_per_hz(wavelength, gauss_spectrum):
 
     actual = photon_flux_per_hz(sp_fun, hz)
     assert actual * h * hz == approx(expected)
+
+def test_wavelength_array_consistency():
+    #GH 147
+    from solcore.light_source import LightSource
+    import numpy as np
+
+    wl_arr = np.linspace(300, 1200, 10)*1e-9
+    wl_arr2 = np.linspace(300, 1200, 20)*1e-9
+
+    ls = LightSource(source_type='standard', version='AM1.5g', x=wl_arr,
+                             output_units='photon_flux_per_m')
+    assert ls.spectrum()[1].shape == wl_arr.shape
+    assert ls.spectrum(x=wl_arr2)[1].shape == wl_arr2.shape

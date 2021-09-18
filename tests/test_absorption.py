@@ -1,6 +1,6 @@
 """ Absorption calculator related tests
 """
-from pytest import approx, mark
+from pytest import approx
 
 from solcore import material, si
 from solcore.structure import Structure, Layer
@@ -20,9 +20,6 @@ from solcore.absorption_calculator.dielectric_constant_models import (
 from solcore.solar_cell_solver import solar_cell_solver
 from solcore.solar_cell import SolarCell
 from solcore.material_system import create_new_material
-from solcore.absorption_calculator import download_db, search_db
-from solcore.absorption_calculator.nk_db import nkdb_load_n
-from solcore.config_tools import add_source
 from solcore.optics import solve_tmm
 
 import os
@@ -330,6 +327,7 @@ def test_define_material():
         os.path.join(this_dir, "data", "SiGeSn_n.txt"),
         os.path.join(this_dir, "data", "SiGeSn_k.txt"),
         os.path.join(this_dir, "data", "SiGeSn_params.txt"),
+        overwrite=True,
     )
     assert "SiGeSn" in ParameterSystem().database.sections()
     assert "SiGeSn".lower() in MaterialSystem().sources
@@ -337,14 +335,3 @@ def test_define_material():
     SiGeSn = material("SiGeSn")()
     assert SiGeSn.n(400e-9) == approx(4.175308391752484)
     assert SiGeSn.k(400e-9) == approx(2.3037424963866306)
-
-
-@mark.skip(reason="Flaky test. Need review.")
-def test_database_materials():
-    download_db(confirm=True)
-    wl, n = nkdb_load_n(2683)  # Should be carbon, from Phillip
-
-    data_path = Path(__file__).parent / "data" / "database_materials.txt"
-    n_data = np.loadtxt(data_path)
-
-    assert all([d == approx(o) for d, o in zip(n, n_data)])

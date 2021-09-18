@@ -7,8 +7,8 @@ from configparser import ConfigParser
 
 
 def gen_data_files(*dirs):
-    """ Creates the list of files (not necessarily python files) that need to be
-    installed together with the rest of stuff """
+    """Creates the list of files (not necessarily python files) that need to be
+    installed together with the rest of stuff"""
     results = []
     exclude = [".DS_Store", "__pycache__", "egg", ".git"]
     for src_dir in dirs:
@@ -26,16 +26,21 @@ config = ConfigParser()
 config.read([default_config])
 
 # We give the option of compiling - and installing - the extension modules
-if "--with_pdd" in sys.argv:
-    sources = os.path.join("solcore", "poisson_drift_diffusion", "DDmodel-current.f95")
+if (("--with_pdd" in sys.argv) or
+        (('SOLCORE_WITH_PDD' in os.environ) and
+         (os.environ['SOLCORE_WITH_PDD'] == "1"))):
+    sources = os.path.join("solcore", "poisson_drift_diffusion",
+                           "DDmodel-current.f95")
     ext = [
         Extension(
             name="solcore.poisson_drift_diffusion.ddModel",
             sources=[sources],
             f2py_options=["--quiet"],
+            extra_link_args=["-static", "-static-libgfortran", "-static-libgcc"] if sys.platform == "win32" else None
         )
     ]
-    sys.argv.remove("--with_pdd")
+    if "--with_pdd" in sys.argv:
+        sys.argv.remove("--with_pdd")
 else:
     ext = []
 
@@ -74,12 +79,23 @@ install_requires = [
     "cycler",
     "pyyaml",
     "yabox",
-    "joblib"
+    "joblib",
 ]
-tests_require = ["pytest", "pytest-cov", "pytest-mock", "nbconvert", "nbformat"]
+tests_require = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "nbconvert",
+    "nbformat",
+    "pytest-rerunfailures",
+    "pytest-xdist",
+]
 docs_require = ["Sphinx", "recommonmark"]
-extras_require = {"dev": tests_require + docs_require + ["pre-commit"], 
-                  "docs": docs_require, "test": tests_require}
+extras_require = {
+    "dev": tests_require + docs_require + ["pre-commit"],
+    "docs": docs_require,
+    "test": tests_require,
+}
 
 
 setup(
