@@ -1,0 +1,24 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "jcohen02",
+      "name": "Jeremy Cohen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8027703?v=4",
+      "profile": "https://github.com/jcohen02",
+      "contributions": [
+        "infra"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "solcore5",
+  "projectOwner": "qpv-research-group",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
