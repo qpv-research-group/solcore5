@@ -1,0 +1,31 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "phoebe-p",
+      "name": "Phoebe Pearce",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25822065?v=4",
+      "profile": "https://www.qpvgroup.org/phoebe-pearce",
+      "contributions": [
+        "code",
+        "bug",
+        "doc",
+        "example",
+        "ideas",
+        "maintenance",
+        "review",
+        "test"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "solcore5",
+  "projectOwner": "qpv-research-group",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
