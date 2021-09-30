@@ -1,0 +1,29 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "MarkusFF",
+      "name": "MarkusFF",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1842361?v=4",
+      "profile": "https://github.com/MarkusFF",
+      "contributions": [
+        "code",
+        "bug",
+        "doc",
+        "example",
+        "ideas",
+        "design"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "solcore5",
+  "projectOwner": "qpv-research-group",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
