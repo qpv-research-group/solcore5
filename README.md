@@ -1,4 +1,7 @@
 [![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/develop?urlpath=lab)
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
 [![Documentation Status](http://readthedocs.org/projects/solcore5/badge/?version=latest)](http://solcore5.readthedocs.io/en/latest/?badge=latest)
@@ -29,3 +32,23 @@ Solcore is the result of many years of developement by many people, trying to pu
 -   Tomos Thomas
 -   Alvin Chan
 -   Ned Ekins-Daukes
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://www.qpvgroup.org/phoebe-pearce"><img src="https://avatars.githubusercontent.com/u/25822065?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Phoebe Pearce</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=phoebe-p" title="Code">💻</a> <a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3Aphoebe-p" title="Bug reports">🐛</a> <a href="https://github.com/qpv-research-group/solcore5/commits?author=phoebe-p" title="Documentation">📖</a> <a href="#example-phoebe-p" title="Examples">💡</a> <a href="#ideas-phoebe-p" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-phoebe-p" title="Maintenance">🚧</a> <a href="https://github.com/qpv-research-group/solcore5/pulls?q=is%3Apr+reviewed-by%3Aphoebe-p" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/qpv-research-group/solcore5/commits?author=phoebe-p" title="Tests">⚠️</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
