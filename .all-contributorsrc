@@ -1,0 +1,30 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "twmwilson",
+      "name": "Tom Wilson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11062839?v=4",
+      "profile": "https://github.com/twmwilson",
+      "contributions": [
+        "code",
+        "bug",
+        "doc",
+        "example",
+        "ideas",
+        "review",
+        "test"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "solcore5",
+  "projectOwner": "qpv-research-group",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
