@@ -1,0 +1,29 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "iclned",
+      "name": "Ned Ekins-Daukes",
+      "avatar_url": "https://avatars.githubusercontent.com/u/128552?v=4",
+      "profile": "http://www.qpvgroup.org",
+      "contributions": [
+        "doc",
+        "example",
+        "ideas",
+        "financial",
+        "review",
+        "test"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "solcore5",
+  "projectOwner": "qpv-research-group",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
