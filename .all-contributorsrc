@@ -39,56 +39,66 @@
       ]
     },
     {
-       "login": "twmwilson",
-       "name": "Tom Wilson",
-       "avatar_url": "https://avatars.githubusercontent.com/u/11062839?v=4",
-       "profile": "https://github.com/twmwilson",
-       "contributions": [
-         "code",
-         "bug",
-         "doc",
-         "example",
-         "ideas",
-         "review",
-         "test"
-       ]
+      "login": "twmwilson",
+      "name": "Tom Wilson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11062839?v=4",
+      "profile": "https://github.com/twmwilson",
+      "contributions": [
+        "code",
+        "bug",
+        "doc",
+        "example",
+        "ideas",
+        "review",
+        "test"
+      ]
     },
     {
-       "login": "iclned",
-       "name": "Ned Ekins-Daukes",
-       "avatar_url": "https://avatars.githubusercontent.com/u/128552?v=4",
-       "profile": "http://www.qpvgroup.org",
-       "contributions": [
-         "doc",
-         "example",
-         "ideas",
-         "financial",
-         "review",
-         "test"
-       ]
+      "login": "iclned",
+      "name": "Ned Ekins-Daukes",
+      "avatar_url": "https://avatars.githubusercontent.com/u/128552?v=4",
+      "profile": "http://www.qpvgroup.org",
+      "contributions": [
+        "doc",
+        "example",
+        "ideas",
+        "financial",
+        "review",
+        "test"
+      ]
     },
     {
-       "login": "MarkusFF",
-       "name": "MarkusFF",
-       "avatar_url": "https://avatars.githubusercontent.com/u/1842361?v=4",
-       "profile": "https://github.com/MarkusFF",
-       "contributions": [
-         "code",
-         "bug",
-         "doc",
-         "example",
-         "ideas",
-         "design"
-       ]
+      "login": "MarkusFF",
+      "name": "MarkusFF",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1842361?v=4",
+      "profile": "https://github.com/MarkusFF",
+      "contributions": [
+        "code",
+        "bug",
+        "doc",
+        "example",
+        "ideas",
+        "design"
+      ]
     },
     {
-       "login": "jcohen02",
-       "name": "Jeremy Cohen",
-       "avatar_url": "https://avatars.githubusercontent.com/u/8027703?v=4",
-       "profile": "https://github.com/jcohen02",
-       "contributions": [
-         "infra"
-       ]
+      "login": "jcohen02",
+      "name": "Jeremy Cohen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8027703?v=4",
+      "profile": "https://github.com/jcohen02",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "PieceMaker",
+      "name": "Jonathan Adams",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4616735?v=4",
+      "profile": "https://github.com/PieceMaker",
+      "contributions": [
+        "test",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7,
