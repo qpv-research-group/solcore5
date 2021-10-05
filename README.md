@@ -1,6 +1,6 @@
 [![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/develop?urlpath=lab)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
@@ -35,6 +35,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/MarkusFF"><img src="https://avatars.githubusercontent.com/u/1842361?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MarkusFF</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=MarkusFF" title="Code">💻</a> <a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3AMarkusFF" title="Bug reports">🐛</a> <a href="https://github.com/qpv-research-group/solcore5/commits?author=MarkusFF" title="Documentation">📖</a> <a href="#example-MarkusFF" title="Examples">💡</a> <a href="#ideas-MarkusFF" title="Ideas, Planning, & Feedback">🤔</a> <a href="#design-MarkusFF" title="Design">🎨</a></td>
     <td align="center"><a href="https://github.com/jcohen02"><img src="https://avatars.githubusercontent.com/u/8027703?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jeremy Cohen</b></sub></a><br /><a href="#infra-jcohen02" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     <td align="center"><a href="https://github.com/PieceMaker"><img src="https://avatars.githubusercontent.com/u/4616735?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jonathan Adams</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=PieceMaker" title="Tests">⚠️</a> <a href="https://github.com/qpv-research-group/solcore5/pulls?q=is%3Apr+reviewed-by%3APieceMaker" title="Reviewed Pull Requests">👀</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/mhrownaghi"><img src="https://avatars.githubusercontent.com/u/56091044?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mohammad Hosein Ronaghi</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=mhrownaghi" title="Tests">⚠️</a> <a href="https://github.com/qpv-research-group/solcore5/commits?author=mhrownaghi" title="Code">💻</a></td>
   </tr>
 </table>
 
