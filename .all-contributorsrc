@@ -259,6 +259,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "etervo",
+      "name": "Eric Tervo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51174646?v=4",
+      "profile": "https://github.com/etervo",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
