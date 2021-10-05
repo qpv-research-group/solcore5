@@ -177,6 +177,15 @@
         "code",
         "infra"
       ]
+    },
+    {
+      "login": "MichaelNOz",
+      "name": "michael_oz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/39320219?v=4",
+      "profile": "https://github.com/MichaelNOz",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
