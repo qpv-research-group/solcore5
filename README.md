@@ -1,6 +1,6 @@
 [![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/develop?urlpath=lab)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-21-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
@@ -52,6 +52,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/jscooksey"><img src="https://avatars.githubusercontent.com/u/18700514?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Justin Cooksey</b></sub></a><br /><a href="#example-jscooksey" title="Examples">💡</a></td>
     <td align="center"><a href="https://github.com/yuriy-os"><img src="https://avatars.githubusercontent.com/u/12021598?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yura Osychenko</b></sub></a><br /><a href="#design-yuriy-os" title="Design">🎨</a></td>
     <td align="center"><a href="https://github.com/canns99"><img src="https://avatars.githubusercontent.com/u/70144228?v=4?s=100" width="100px;" alt=""/><br /><sub><b>canns99</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3Acanns99" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/AndiPOz"><img src="https://avatars.githubusercontent.com/u/66819562?v=4?s=100" width="100px;" alt=""/><br /><sub><b>AndiPOz</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3AAndiPOz" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
