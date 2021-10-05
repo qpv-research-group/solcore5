@@ -1,6 +1,6 @@
 [![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/develop?urlpath=lab)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-23-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-24-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
@@ -57,6 +57,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="http://jaib.home.blog"><img src="https://avatars.githubusercontent.com/u/31744868?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jai Agarwal</b></sub></a><br /><a href="#example-jaibhageria" title="Examples">💡</a></td>
     <td align="center"><a href="https://github.com/jkrich"><img src="https://avatars.githubusercontent.com/u/29390895?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jkrich</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=jkrich" title="Code">💻</a> <a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3Ajkrich" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/Rushil17D070020"><img src="https://avatars.githubusercontent.com/u/89643859?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rushil17D070020</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3ARushil17D070020" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
