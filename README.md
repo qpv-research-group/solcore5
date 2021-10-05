@@ -1,6 +1,6 @@
 [![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/develop?urlpath=lab)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-11-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
@@ -41,6 +41,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/federikovi"><img src="https://avatars.githubusercontent.com/u/17218213?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Federica Trevisan</b></sub></a><br /><a href="#example-federikovi" title="Examples">💡</a></td>
     <td align="center"><a href="https://github.com/Artyko"><img src="https://avatars.githubusercontent.com/u/30906495?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Artyko</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=Artyko" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/emmanuel-carreira"><img src="https://avatars.githubusercontent.com/u/30865344?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Emmanuel Carreira</b></sub></a><br /><a href="#example-emmanuel-carreira" title="Examples">💡</a></td>
+    <td align="center"><a href="https://nimishverma.medium.com/"><img src="https://avatars.githubusercontent.com/u/17747722?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nimish Verma</b></sub></a><br /><a href="#example-NimishVerma" title="Examples">💡</a></td>
   </tr>
 </table>
 
