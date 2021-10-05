@@ -233,23 +233,32 @@
       ]
     },
     {
-       "login": "jaibhageria",
-       "name": "Jai Agarwal",
-       "avatar_url": "https://avatars.githubusercontent.com/u/31744868?v=4",
-       "profile": "http://jaib.home.blog",
-       "contributions": [
-         "example"
-       ]
+      "login": "jaibhageria",
+      "name": "Jai Agarwal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31744868?v=4",
+      "profile": "http://jaib.home.blog",
+      "contributions": [
+        "example"
+      ]
     },
     {
-       "login": "jkrich",
-       "name": "jkrich",
-       "avatar_url": "https://avatars.githubusercontent.com/u/29390895?v=4",
-       "profile": "https://github.com/jkrich",
-       "contributions": [
-         "code",
-         "bug"
-       ]
+      "login": "jkrich",
+      "name": "jkrich",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29390895?v=4",
+      "profile": "https://github.com/jkrich",
+      "contributions": [
+        "code",
+        "bug"
+      ]
+    },
+    {
+      "login": "Rushil17D070020",
+      "name": "Rushil17D070020",
+      "avatar_url": "https://avatars.githubusercontent.com/u/89643859?v=4",
+      "profile": "https://github.com/Rushil17D070020",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
