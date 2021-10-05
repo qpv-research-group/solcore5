@@ -213,6 +213,15 @@
       "contributions": [
         "design"
       ]
+    },
+    {
+      "login": "canns99",
+      "name": "canns99",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70144228?v=4",
+      "profile": "https://github.com/canns99",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
