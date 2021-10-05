@@ -195,6 +195,15 @@
       "contributions": [
         "example"
       ]
+    },
+    {
+      "login": "jscooksey",
+      "name": "Justin Cooksey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18700514?v=4",
+      "profile": "https://github.com/jscooksey",
+      "contributions": [
+        "example"
+      ]
     }
   ],
   "contributorsPerLine": 7,
