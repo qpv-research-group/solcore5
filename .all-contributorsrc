@@ -156,6 +156,17 @@
         "bug",
         "test"
       ]
+    },
+    {
+      "login": "jmllorens",
+      "name": "jmllorens",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1357438?v=4",
+      "profile": "https://github.com/jmllorens",
+      "contributions": [
+        "code",
+        "bug",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
