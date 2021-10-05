@@ -1,6 +1,6 @@
 [![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/develop?urlpath=lab)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-14-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
@@ -44,6 +44,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://nimishverma.medium.com/"><img src="https://avatars.githubusercontent.com/u/17747722?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nimish Verma</b></sub></a><br /><a href="#example-NimishVerma" title="Examples">💡</a></td>
     <td align="center"><a href="https://github.com/P-Tillmann"><img src="https://avatars.githubusercontent.com/u/23280737?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peter Tillmann</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=P-Tillmann" title="Code">💻</a> <a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3AP-Tillmann" title="Bug reports">🐛</a> <a href="https://github.com/qpv-research-group/solcore5/commits?author=P-Tillmann" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/jmllorens"><img src="https://avatars.githubusercontent.com/u/1357438?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jmllorens</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=jmllorens" title="Code">💻</a> <a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3Ajmllorens" title="Bug reports">🐛</a> <a href="https://github.com/qpv-research-group/solcore5/commits?author=jmllorens" title="Tests">⚠️</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/Abelarm"><img src="https://avatars.githubusercontent.com/u/6976921?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Luigi Giugliano</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=Abelarm" title="Code">💻</a> <a href="#infra-Abelarm" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
   </tr>
 </table>
 
