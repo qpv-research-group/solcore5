@@ -118,6 +118,15 @@
       "contributions": [
         "example"
       ]
+    },
+    {
+      "login": "Artyko",
+      "name": "Artyko",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30906495?v=4",
+      "profile": "https://github.com/Artyko",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
