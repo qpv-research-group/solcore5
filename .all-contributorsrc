@@ -231,6 +231,25 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+       "login": "jaibhageria",
+       "name": "Jai Agarwal",
+       "avatar_url": "https://avatars.githubusercontent.com/u/31744868?v=4",
+       "profile": "http://jaib.home.blog",
+       "contributions": [
+         "example"
+       ]
+    },
+    {
+       "login": "jkrich",
+       "name": "jkrich",
+       "avatar_url": "https://avatars.githubusercontent.com/u/29390895?v=4",
+       "profile": "https://github.com/jkrich",
+       "contributions": [
+         "code",
+         "bug"
+       ]
     }
   ],
   "contributorsPerLine": 7,
