@@ -127,6 +127,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "emmanuel-carreira",
+      "name": "Emmanuel Carreira",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30865344?v=4",
+      "profile": "https://github.com/emmanuel-carreira",
+      "contributions": [
+        "example"
+      ]
     }
   ],
   "contributorsPerLine": 7,
