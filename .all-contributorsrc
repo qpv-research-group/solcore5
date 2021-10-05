@@ -186,6 +186,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "hrishikeshSuresh",
+      "name": "Hrishikesh Suresh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30840337?v=4",
+      "profile": "https://www.linkedin.com/in/hrishikesh-suresh-881020136",
+      "contributions": [
+        "example"
+      ]
     }
   ],
   "contributorsPerLine": 7,
