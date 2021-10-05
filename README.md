@@ -1,6 +1,6 @@
 [![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/develop?urlpath=lab)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-18-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
@@ -49,6 +49,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/Abelarm"><img src="https://avatars.githubusercontent.com/u/6976921?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Luigi Giugliano</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=Abelarm" title="Code">💻</a> <a href="#infra-Abelarm" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     <td align="center"><a href="https://github.com/MichaelNOz"><img src="https://avatars.githubusercontent.com/u/39320219?v=4?s=100" width="100px;" alt=""/><br /><sub><b>michael_oz</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=MichaelNOz" title="Code">💻</a></td>
     <td align="center"><a href="https://www.linkedin.com/in/hrishikesh-suresh-881020136"><img src="https://avatars.githubusercontent.com/u/30840337?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Hrishikesh Suresh</b></sub></a><br /><a href="#example-hrishikeshSuresh" title="Examples">💡</a></td>
+    <td align="center"><a href="https://github.com/jscooksey"><img src="https://avatars.githubusercontent.com/u/18700514?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Justin Cooksey</b></sub></a><br /><a href="#example-jscooksey" title="Examples">💡</a></td>
   </tr>
 </table>
 
