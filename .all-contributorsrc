@@ -177,6 +177,16 @@
         "code",
         "infra"
       ]
+    },
+    {
+      "login": "jkrich",
+      "name": "jkrich",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29390895?v=4",
+      "profile": "https://github.com/jkrich",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
