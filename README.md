@@ -42,7 +42,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/MarkusFF"><img src="https://avatars.githubusercontent.com/u/1842361?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MarkusFF</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=MarkusFF" title="Code">💻</a> <a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3AMarkusFF" title="Bug reports">🐛</a> <a href="https://github.com/qpv-research-group/solcore5/commits?author=MarkusFF" title="Documentation">📖</a> <a href="#example-MarkusFF" title="Examples">💡</a> <a href="#ideas-MarkusFF" title="Ideas, Planning, & Feedback">🤔</a> <a href="#design-MarkusFF" title="Design">🎨</a></td>
+    <td align="center"><a href="https://github.com/MarkusFF"><img src="https://avatars.githubusercontent.com/u/1842361?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MarkusFF</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/commits?author=MarkusFF" title="Code">💻</a> <a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3AMarkusFF" title="Bug reports">🐛</a> <a href="https://github.com/qpv-research-group/solcore5/commits?author=MarkusFF" title="Documentation">📖</a> <a href="#example-MarkusFF" title="Examples">💡</a> <a href="#ideas-MarkusFF" title="Ideas, Planning, & Feedback">🤔</a> <a href="#design-MarkusFF" title="Design">🎨</a> <a href="#data-MarkusFF" title="Data">🔣</a></td>
   </tr>
 </table>
 
