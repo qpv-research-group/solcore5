@@ -145,6 +145,17 @@
       "contributions": [
         "example"
       ]
+    },
+    {
+      "login": "P-Tillmann",
+      "name": "Peter Tillmann",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23280737?v=4",
+      "profile": "https://github.com/P-Tillmann",
+      "contributions": [
+        "code",
+        "bug",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
