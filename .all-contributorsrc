@@ -19,7 +19,8 @@
         "infra",
         "maintenance",
         "review",
-        "test"
+        "test",
+        "data"
       ]
     }
   ],
