@@ -1,4 +1,16 @@
-from setuptools import find_packages
+from setuptools import dist, find_packages
+
+
+def pre_install_numpy():
+    try:
+        import numpy
+    except ImportError:
+        print('Installing numpy')
+        numpy_version = dist.Distribution().fetch_build_eggs(['numpy'])[0].version
+        print(f'Pre-installed numpy {numpy_version}')
+
+
+pre_install_numpy()
 from numpy.distutils.core import Extension, setup
 
 import os
@@ -68,7 +80,6 @@ if "update_manifest" in sys.argv:
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-
 install_requires = [
     "numpy",
     "matplotlib",
@@ -96,7 +107,6 @@ extras_require = {
     "docs": docs_require,
     "test": tests_require,
 }
-
 
 setup(
     name="solcore",
