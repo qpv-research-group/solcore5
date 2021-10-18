@@ -3,7 +3,7 @@ from setuptools import dist, find_packages
 
 def pre_install_numpy():
     try:
-        import numpy
+        import numpy # noqa
     except ImportError:
         print('Installing numpy')
         numpy_version = dist.Distribution().fetch_build_eggs(['numpy'])[0].version
