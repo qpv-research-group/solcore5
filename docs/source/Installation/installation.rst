@@ -21,12 +21,11 @@ Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solve
 - Python >3.7
 - pip
 - setuptools
-- numpy
 - :doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`
 
-*Pip* is normally part of the standard Python installation, but you might need to install *setuptools* and *numpy* manually with::
+*Pip* is normally part of the standard Python installation, but you might need to install *setuptools* manually with::
 
-    pip install setuptools numpy
+    pip install setuptools
 
 Now, installing Solcore should be as easy as writing in the terminal::
 

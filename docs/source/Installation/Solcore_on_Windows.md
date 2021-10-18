@@ -25,11 +25,6 @@ sudo apt install python3-pip
 sudo apt-get install libblas-dev liblapack-dev
 ```
 
--  Install NumPy:
-    
-```bash
-pip3 install numpy
-```
 -  Install matplotlib (and tk, otherwise get an error later):
     
 ```bash
