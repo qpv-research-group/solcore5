@@ -93,7 +93,7 @@ class Layer:
 
 
 class Junction(list):
-    """ Class that groups together the layers that make a junction. Esentially, it is just a list with attributes you can update.
+    """ Class that groups together the layers that make a junction. Essentially, it is just a list with attributes you can update.
     """
 
     def __init__(self, *args, **kwargs):
