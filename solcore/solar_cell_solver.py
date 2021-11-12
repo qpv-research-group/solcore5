@@ -50,7 +50,7 @@ default_options.radiative_coupling = False
 default_options.optics_method = 'BL'
 default_options.recalculate_absorption = False
 
-default_options = merge_dicts(default_options, ASC.db_options, PDD.pdd_options, rcwa_options)
+default_options = merge_dicts(default_options, ASC.db_options, ASC.da_options, PDD.pdd_options, rcwa_options)
 
 
 def solar_cell_solver(solar_cell, task, user_options=None):

@@ -7,6 +7,8 @@ from solcore.science_tracker import science_reference
 from solcore.state import State
 from solcore.light_source import LightSource
 
+da_options = State()
+da_options.da_mode = 'bvp'
 
 def identify_layers(junction):
     # First we have to figure out if we are talking about a PN, NP, PIN or NIP junction
