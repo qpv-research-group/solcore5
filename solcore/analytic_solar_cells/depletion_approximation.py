@@ -221,7 +221,8 @@ def iv_depletion(junction, options):
         if options.da_mode == 'bvp':
             deriv = get_J_sc_diffusion(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
         else:
-            deriv = get_J_sc_diffusion_green(xa, xb, g, d_top, l_top, min_top, s_top, ph, side='top')
+            xbb = xb - (xb - xa)/1001.
+            deriv = get_J_sc_diffusion_green(xa, xbb, g, d_top, l_top, min_top, s_top, ph, side='top')
             deriv = np.trapz(deriv, wl)
         J_sc_top = q * d_top * abs(deriv)
 
@@ -231,7 +232,8 @@ def iv_depletion(junction, options):
         if options.da_mode == 'bvp':
             deriv = get_J_sc_diffusion(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
         else:
-            deriv = get_J_sc_diffusion_green(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
+            xbb = xb - (xb - xa)/1001.
+            deriv = get_J_sc_diffusion_green(xa, xbb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
             deriv = np.trapz(deriv, wl)
         J_sc_bot = q * d_bottom * abs(deriv)
 
@@ -486,7 +488,8 @@ def qe_depletion(junction, options):
     if options.da_mode == 'bvp':
         deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
     else:
-        deriv = get_J_sc_diffusion_green(xa, xb, g, d_top, l_top, min_top, s_top, ph, side='top')
+        xbb = xb - (xb - xa)/1001.
+        deriv = get_J_sc_diffusion_green(xa, xbb, g, d_top, l_top, min_top, s_top, ph, side='top')
     j_sc_top = d_top * abs(deriv)
 
 
@@ -497,7 +500,8 @@ def qe_depletion(junction, options):
     if options.da_mode == 'bvp':
         deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
     else:
-        deriv = get_J_sc_diffusion_green(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
+        xbb = xb - (xb - xa)/1001.
+        deriv = get_J_sc_diffusion_green(xa, xbb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
     j_sc_bot = d_bottom * abs(deriv)
 
     # The contribution from the SCR (includes the intrinsic region, if present).
