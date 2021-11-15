@@ -398,7 +398,6 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
 
 def get_J_sc_diffusion_green(xx, gg, D, L, y0, S, side='top'):
-    xx_int = xx - xx[0]
     dxi = xx[1] - xx[0]
     Gx = gg / D + y0 / L / L
     xx_cnv = (xx[-1] - xx) / L
