@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.integrate import solve_bvp
+from scipy.integrate import solve_bvp, quad_vec
 
 from solcore.constants import kb, q
 from solcore.science_tracker import science_reference
@@ -221,10 +221,8 @@ def iv_depletion(junction, options):
         if options.da_mode == 'bvp':
             deriv = get_J_sc_diffusion(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
         else:
-            xx = np.linspace(xa, xb, 1025, endpoint=False)
-            gg = np.trapz(g(xx) * ph, wl, axis=1)
-            gg[np.isnan(gg)] = 0.
-            deriv = get_J_sc_diffusion_green(xx, gg, d_top, l_top, min_top, s_top, side='top')
+            deriv = get_J_sc_diffusion_green(xa, xb, g, d_top, l_top, min_top, s_top, ph, side='top')
+            deriv = np.trapz(deriv, wl)
         J_sc_top = q * d_top * abs(deriv)
 
         # The contribution from the Base (bottom side).
@@ -233,10 +231,8 @@ def iv_depletion(junction, options):
         if options.da_mode == 'bvp':
             deriv = get_J_sc_diffusion(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
         else:
-            xx = np.linspace(xa, xb, 1025, endpoint=False)
-            gg = np.trapz(g(xx) * ph, wl, axis=1)
-            gg[np.isnan(gg)] = 0.
-            deriv = get_J_sc_diffusion_green(xx, gg, d_bottom, l_bottom, min_bot, s_bottom, side='bottom')
+            deriv = get_J_sc_diffusion_green(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
+            deriv = np.trapz(deriv, wl)
         J_sc_bot = q * d_bottom * abs(deriv)
 
         # The contribution from the SCR (includes the intrinsic region, if present).
@@ -397,28 +393,33 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
     return out
 
 
-def get_J_sc_diffusion_green(xx, gg, D, L, y0, S, side='top'):
-    dxi = xx[1] - xx[0]
-    Gx = gg / D + y0 / L / L
-    xx_cnv = (xx[-1] - xx) / L
+def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side='top'):
+    xbL = (xb - xa) / L
     crvel = S / D * L
-    xbL = xx_cnv[0]
-    nwl = 0 if gg.ndim == 1 else gg.shape[1]
     if xbL > 1.e2:
-        return 0. if nwl == 0 else np.zeros(nwl)
-    elif side == 'top':
-        cp = -np.cosh(xbL) - crvel * np.sinh(xbL)
-        Gx = np.flipud(Gx)
-        Pkern = np.cosh(xx_cnv) + crvel * np.sinh(xx_cnv)
-        cadd = S / D * y0
+        return g(xa)*0.
+
+    def fun(x):
+        xc = (xb - x) / L
+        if side == 'top':
+            xv = np.array([xa + xb - x, ])
+            Pkern = np.cosh(xc) + crvel * np.sinh(xc)
+        else:
+            xv = np.array([x, ])
+            Pkern = np.cosh(xc) - crvel * np.sinh(xc)
+        Gx = g(xv) * ph / D + y0 / L / L
+        return Pkern*Gx
+
+    out, err = quad_vec(fun, xa, xb, epsrel=1.e-5)
+
+    if side == 'top':
+        out += S / D * y0
+        out /= -np.cosh(xbL) - crvel * np.sinh(xbL)
     else:
-        cp = np.cosh(xbL) - crvel * np.sinh(xbL)
-        Pkern = np.cosh(xx_cnv) - crvel * np.sinh(xx_cnv)
-        cadd = - S / D * y0
-    if nwl > 0:
-        Pkern = np.expand_dims(Pkern, axis=1)
-    out = np.trapz(Pkern * Gx, dx=dxi, axis=0) + cadd
-    return out / cp
+        out -= S / D * y0
+        out /= np.cosh(xbL) - crvel * np.sinh(xbL)
+
+    return out.squeeze()
 
 
 def get_J_sc_SCR(xa, xb, g, wl, ph):
@@ -485,9 +486,7 @@ def qe_depletion(junction, options):
     if options.da_mode == 'bvp':
         deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
     else:
-        xx = np.linspace(xa, xb, 1025, endpoint=False)
-        gg = g(xx) * ph
-        deriv = get_J_sc_diffusion_green(xx, gg, d_top, l_top, min_top, s_top, side='top')
+        deriv = get_J_sc_diffusion_green(xa, xb, g, d_top, l_top, min_top, s_top, ph, side='top')
     j_sc_top = d_top * abs(deriv)
 
 
@@ -498,9 +497,7 @@ def qe_depletion(junction, options):
     if options.da_mode == 'bvp':
         deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
     else:
-        xx = np.linspace(xa, xb, 1025, endpoint=False)
-        gg = g(xx) * ph
-        deriv = get_J_sc_diffusion_green(xx, gg, d_bottom, l_bottom, min_bot, s_bottom, side='bottom')
+        deriv = get_J_sc_diffusion_green(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
     j_sc_bot = d_bottom * abs(deriv)
 
     # The contribution from the SCR (includes the intrinsic region, if present).
