@@ -398,30 +398,47 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side='top'):
     xbL = (xb - xa) / L
     crvel = S / D * L
-    if xbL > 1.e2:
-        return g(xa)*0.
 
-    def fun(x):
-        xc = (xb - x) / L
+    # if L too low in comparison to junction width, avoid nan's
+    if xbL > 1.e2:
         if side == 'top':
-            xv = np.array([xa + xb - x, ])
-            Pkern = np.cosh(xc) + crvel * np.sinh(xc)
+            cadd = -2. * S / D * y0 / (1. + crvel) * np.exp(-xbL)
         else:
-            xv = np.array([x, ])
-            Pkern = np.cosh(xc) - crvel * np.sinh(xc)
-        Gx = g(xv) * ph / D + y0 / L / L
-        return Pkern*Gx
+            cadd = -2. * S / D * y0 / (1. - crvel) * np.exp(-xbL)
+        cp = 1.
+
+        def fun(x):
+            xc = (xa - x) / L
+            if side == 'top':
+                xv = np.array([xa + xb - x, ])
+                Pkern = -np.exp(xc)
+            else:
+                xv = np.array([x, ])
+                Pkern = np.exp(xc)
+            Gx = g(xv) * ph / D + y0 / L / L
+            return Pkern*Gx
+    else:
+        if side == 'top':
+            cp = -np.cosh(xbL) - crvel * np.sinh(xbL)
+            cadd = S / D * y0
+        else:
+            cp = np.cosh(xbL) - crvel * np.sinh(xbL)
+            cadd = - S / D * y0
+
+        def fun(x):
+            xc = (xb - x) / L
+            if side == 'top':
+                xv = np.array([xa + xb - x, ])
+                Pkern = np.cosh(xc) + crvel * np.sinh(xc)
+            else:
+                xv = np.array([x, ])
+                Pkern = np.cosh(xc) - crvel * np.sinh(xc)
+            Gx = g(xv) * ph / D + y0 / L / L
+            return Pkern*Gx
 
     out, err = quad_vec(fun, xa, xb, epsrel=1.e-5)
 
-    if side == 'top':
-        out += S / D * y0
-        out /= -np.cosh(xbL) - crvel * np.sinh(xbL)
-    else:
-        out -= S / D * y0
-        out /= np.cosh(xbL) - crvel * np.sinh(xbL)
-
-    return out.squeeze()
+    return (out.squeeze() + cadd) / cp
 
 
 def get_J_sc_SCR(xa, xb, g, wl, ph):
