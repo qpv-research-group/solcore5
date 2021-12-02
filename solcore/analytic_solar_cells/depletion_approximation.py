@@ -396,6 +396,20 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
 
 def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side='top'):
+    """Computes the derivative of the minority carrier concentration at the edge of the junction by approximating the convolution integral resulting from applying the Green's function method to the drift-diffusion equation.
+
+    :param xa: Coordinate at the start the junction.
+    :param xb: Coordinate at the end the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param D: Diffusion constant.
+    :param L: Diffusion length.
+    :param y0: Carrier equilibrium density.
+    :param S: Surface recombination velocity.
+    :param ph: Light spectrum.
+    :param side: String to indicate the edge of interest. Either 'top' or 'bottom'.
+
+    :return: The derivative of the minority carrier concentration at the edge of the junction.
+    """
     xbL = (xb - xa) / L
     crvel = S / D * L
 
