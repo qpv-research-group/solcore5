@@ -410,6 +410,10 @@ def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side='top'):
 
     :return: The derivative of the minority carrier concentration at the edge of the junction.
     """
+
+    science_reference('DA Green\'s function method.',
+                      'T. Vasileiou, J. M. Llorens, J. Buencuerpo, J. M. Ripalda, D. Izzo and L. Summerer, “Light absorption enhancement and radiation hardening for triple junction solar cell through bioinspired nanostructures,” Bioinspir. Biomim., vol. 16, no. 5, pp. 056010, 2021.')
+
     xbL = (xb - xa) / L
     crvel = S / D * L
 
