@@ -1,4 +1,4 @@
-Example of a 2J solar cell calculated with the PDD solver
+Example of a 3J solar cell calculated with the DA solver
 =========================================================
 
 .. image:: DA_iv.png

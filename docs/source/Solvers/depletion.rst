@@ -67,10 +67,10 @@ the equations provided by Nelson is given by the BL law
 which has an explicit dependence on :math:`z` and results in analytic
 expressions for the current densities. In Solcore, we integrate the
 expressions for the drift-diffusion equations under the depletion
-approximation numerically to allow for an arbitrary generation profile
-calculated with any of the :doc:`optical solvers <../Optics/optics.rst>`.
-It should be noted that although the equations are integrated
-numerically this will not be a self-consistent solution of the
+approximation numerically or by using the Green's function method to allow
+for an arbitrary generation profile calculated with any of the :doc:`optical
+solvers <../Optics/optics.rst>`. It should be noted that although the equations
+are integrated numerically this will not be a self-consistent solution of the
 Poisson-drift-diffusion equations, as is achieved by the PDD solver.
 
 Detailed balance functions
