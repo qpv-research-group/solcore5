@@ -397,6 +397,15 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
 
 def _conv_exp_top(x, xa, xb, g, L, phoD):
+    """Convolution of the carrier generation rate with the approximate Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the top edge. This kernel approximates the original one when the diffusion length is 2 orders of magnitude higher than the junction width by assuming that sinh(x) = cosh(x) = .5 * exp(x).
+
+    :param x: Coordinate in the junction (variable to be integrated).
+    :param xa: Coordinate at the start the junction.
+    :param xb: Coordinate at the end the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param L: Diffusion length.
+    :param phoD: Light spectrum divided by the diffusion constant D.
+    """
     xc = (xa - x) / L
     xv = np.array([xa + xb - x, ])
     Pkern = -np.exp(xc)
@@ -405,6 +414,14 @@ def _conv_exp_top(x, xa, xb, g, L, phoD):
 
 
 def _conv_exp_bottom(x, xa, g, L, phoD):
+    """Convolution of the carrier generation rate with the approximate Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the bottom edge. This kernel approximates the original one when the diffusion length is 2 orders of magnitude higher than the junction width by assuming that sinh(x) = cosh(x) = .5 * exp(x).
+
+    :param x: Coordinate in the junction (variable to be integrated).
+    :param xa: Coordinate at the start the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param L: Diffusion length.
+    :param phoD: Light spectrum divided by the diffusion constant D.
+    """
     xc = (xa - x) / L
     xv = np.array([x, ])
     Pkern = np.exp(xc)
@@ -413,6 +430,16 @@ def _conv_exp_bottom(x, xa, g, L, phoD):
 
 
 def _conv_green_top(x, xa, xb, g, L, phoD, crvel):
+    """Convolution of the carrier generation rate with the Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the top edge.
+
+    :param x: Coordinate in the junction (variable to be integrated).
+    :param xa: Coordinate at the start the junction.
+    :param xb: Coordinate at the end the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param L: Diffusion length.
+    :param phoD: Light spectrum divided by the diffusion constant D.
+    :param crvel: Coefficient computed as S / D * L, with S the surface recombination velocity.
+    """
     xc = (xb - x) / L
     xv = np.array([xa + xb - x, ])
     Pkern = np.cosh(xc) + crvel * np.sinh(xc)
@@ -421,6 +448,15 @@ def _conv_green_top(x, xa, xb, g, L, phoD, crvel):
 
 
 def _conv_green_bottom(x, xb, g, L, phoD, crvel):
+    """Convolution of the carrier generation rate with the Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the bottom edge.
+
+    :param x: Coordinate in the junction (variable to be integrated).
+    :param xb: Coordinate at the end the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param L: Diffusion length.
+    :param phoD: Light spectrum divided by the diffusion constant D.
+    :param crvel: Coefficient computed as S / D * L, with S the surface recombination velocity.
+    """
     xc = (xb - x) / L
     xv = np.array([x, ])
     Pkern = np.cosh(xc) - crvel * np.sinh(xc)
