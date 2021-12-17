@@ -57,6 +57,7 @@ def da_options():
     options.light_source = da_light_source()
     options.position = None
     options.internal_voltages = np.linspace(-6, 4, 20)
+    options.da_mode = 'bvp'
 
     return options
 
