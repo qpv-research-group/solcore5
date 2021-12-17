@@ -396,35 +396,35 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
     return out
 
 
-def _conv_exp_top(x, xa, xb, g, D, L, y0, ph):
+def _conv_exp_top(x, xa, xb, g, L, phoD):
     xc = (xa - x) / L
     xv = np.array([xa + xb - x, ])
     Pkern = -np.exp(xc)
-    Gx = g(xv) * ph / D + y0 / L / L
+    Gx = g(xv) * phoD
     return Pkern*Gx
 
 
-def _conv_exp_bottom(x, xa, g, D, L, y0, ph):
+def _conv_exp_bottom(x, xa, g, L, phoD):
     xc = (xa - x) / L
     xv = np.array([x, ])
     Pkern = np.exp(xc)
-    Gx = g(xv) * ph / D + y0 / L / L
+    Gx = g(xv) * phoD
     return Pkern*Gx
 
 
-def _conv_green_top(x, xa, xb, g, D, L, y0, ph, crvel):
+def _conv_green_top(x, xa, xb, g, L, phoD, crvel):
     xc = (xb - x) / L
     xv = np.array([xa + xb - x, ])
     Pkern = np.cosh(xc) + crvel * np.sinh(xc)
-    Gx = g(xv) * ph / D + y0 / L / L
+    Gx = g(xv) * phoD
     return Pkern*Gx
 
 
-def _conv_green_bottom(x, xb, g, D, L, y0, ph, crvel):
+def _conv_green_bottom(x, xb, g, L, phoD, crvel):
     xc = (xb - x) / L
     xv = np.array([x, ])
     Pkern = np.cosh(xc) - crvel * np.sinh(xc)
-    Gx = g(xv) * ph / D + y0 / L / L
+    Gx = g(xv) * phoD
     return Pkern*Gx
 
 
@@ -449,29 +449,30 @@ def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side='top'):
 
     xbL = (xb - xa) / L
     crvel = S / D * L
+    ph_over_D = ph / D
 
     # if L too low in comparison to junction width, avoid nan's
     if xbL > 1.e2:
         if side == 'top':
-            cadd = -2. * S / D * y0 / (1. + crvel) * np.exp(-xbL)
+            cadd = -y0 / L
             fun = partial(_conv_exp_top, xa=xa, xb=xb, g=g,
-                          D=D, L=L, y0=y0, ph=ph)
+                          L=L, phoD=ph_over_D)
         else:
-            cadd = -2. * S / D * y0 / (1. - crvel) * np.exp(-xbL)
+            cadd = y0 / L
             fun = partial(_conv_exp_bottom, xa=xa, g=g,
-                          D=D, L=L, y0=y0, ph=ph)
+                          L=L, phoD=ph_over_D)
         cp = 1.
     else:
         if side == 'top':
             cp = -np.cosh(xbL) - crvel * np.sinh(xbL)
-            cadd = S / D * y0
+            cadd = (np.sinh(xbL) + crvel * np.cosh(xbL)) * y0 / L
             fun = partial(_conv_green_top, xa=xa, xb=xb, g=g,
-                          D=D, L=L, y0=y0, ph=ph, crvel=crvel)
+                          L=L, phoD=ph_over_D, crvel=crvel)
         else:
             cp = np.cosh(xbL) - crvel * np.sinh(xbL)
-            cadd = - S / D * y0
+            cadd = (np.sinh(xbL) - crvel * np.cosh(xbL)) * y0 / L
             fun = partial(_conv_green_bottom, xb=xb, g=g,
-                          D=D, L=L, y0=y0, ph=ph, crvel=crvel)
+                          L=L, phoD=ph_over_D, crvel=crvel)
 
     out, err = quad_vec(fun, xa, xb, epsrel=1.e-5)
     return (out.squeeze() + cadd) / cp
