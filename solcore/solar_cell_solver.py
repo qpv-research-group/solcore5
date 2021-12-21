@@ -50,11 +50,11 @@ default_options.radiative_coupling = False
 default_options.optics_method = 'BL'
 default_options.recalculate_absorption = False
 
-default_options = merge_dicts(default_options, ASC.db_options, PDD.pdd_options, rcwa_options)
+default_options = merge_dicts(default_options, ASC.db_options, ASC.da_options, PDD.pdd_options, rcwa_options)
 
 
 def solar_cell_solver(solar_cell, task, user_options=None):
-    """ Solves the properties of a solar cell object, either calculating its optical properties (R, A and T), its quantum efficiency or its current voltage characteristics in the dark or under illumination. The general options for the solvers are passed as dicionaries.
+    """ Solves the properties of a solar cell object, either calculating its optical properties (R, A and T), its quantum efficiency or its current voltage characteristics in the dark or under illumination. The general options for the solvers are passed as dictionaries.
 
     :param solar_cell: A solar_cell object
     :param task: Task to perform. It has to be "optics", "iv", "qe", "equilibrium" or "short_circuit". The last two only work for PDD junctions

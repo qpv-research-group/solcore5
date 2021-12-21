@@ -14,7 +14,7 @@ def hexID(obj: str) -> str:
 def science_reference(short_purpose: str, reference: str) -> None:
     """Marker acting as a reference for the origin of specific information
 
-    Acts as a marker in code where particular alogrithms/data/... originates. General execution of code silently passes
+    Acts as a marker in code where particular algorithms/data/... originates. General execution of code silently passes
     these markers, but remembers how and where they were called. Which markers were passed in a particular program run
     can be recalled with print_references().
 
@@ -50,7 +50,7 @@ def science_reference(short_purpose: str, reference: str) -> None:
 
 
 def print_references() -> None:
-    """ recall the science_reference markers passed, print out the referenes."""
+    """recall the science_reference markers passed, print out the references."""
     global bibliography, bibliography_id, science_tracking, track_each_reference_call
 
     "List of references encountered while executing"

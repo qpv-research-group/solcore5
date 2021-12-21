@@ -1,12 +1,15 @@
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.integrate import solve_bvp
+from scipy.integrate import solve_bvp, quad_vec
+from functools import partial
 
 from solcore.constants import kb, q
 from solcore.science_tracker import science_reference
 from solcore.state import State
 from solcore.light_source import LightSource
 
+da_options = State()
+da_options.da_mode = 'bvp'
 
 def identify_layers(junction):
     # First we have to figure out if we are talking about a PN, NP, PIN or NIP junction
@@ -216,13 +219,23 @@ def iv_depletion(junction, options):
         xa = cum_widths[id_top]
         xb = cum_widths[id_top + 1] - w_top[id_v0]
 
-        deriv = get_J_sc_diffusion(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
+        if options.da_mode == 'bvp':
+            deriv = get_J_sc_diffusion(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
+        else:
+            xbb = xb - (xb - xa)/1001.
+            deriv = get_J_sc_diffusion_green(xa, xbb, g, d_top, l_top, min_top, s_top, ph, side='top')
+            deriv = np.trapz(deriv, wl)
         J_sc_top = q * d_top * abs(deriv)
 
         # The contribution from the Base (bottom side).
         xa = cum_widths[id_bottom] + w_bottom[id_v0]
         xb = cum_widths[id_bottom + 1]
-        deriv = get_J_sc_diffusion(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
+        if options.da_mode == 'bvp':
+            deriv = get_J_sc_diffusion(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
+        else:
+            xbb = xb - (xb - xa)/1001.
+            deriv = get_J_sc_diffusion_green(xa, xbb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
+            deriv = np.trapz(deriv, wl)
         J_sc_bot = q * d_bottom * abs(deriv)
 
         # The contribution from the SCR (includes the intrinsic region, if present).
@@ -383,6 +396,124 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
     return out
 
 
+def _conv_exp_top(x, xa, xb, g, L, phoD):
+    """Convolution of the carrier generation rate with the approximate Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the top edge. This kernel approximates the original one when the diffusion length is 2 orders of magnitude higher than the junction width by assuming that sinh(x) = cosh(x) = .5 * exp(x).
+
+    :param x: Coordinate in the junction (variable to be integrated).
+    :param xa: Coordinate at the start the junction.
+    :param xb: Coordinate at the end the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param L: Diffusion length.
+    :param phoD: Light spectrum divided by the diffusion constant D.
+    """
+    xc = (xa - x) / L
+    xv = np.array([xa + xb - x, ])
+    Pkern = -np.exp(xc)
+    Gx = g(xv) * phoD
+    return Pkern*Gx
+
+
+def _conv_exp_bottom(x, xa, g, L, phoD):
+    """Convolution of the carrier generation rate with the approximate Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the bottom edge. This kernel approximates the original one when the diffusion length is 2 orders of magnitude higher than the junction width by assuming that sinh(x) = cosh(x) = .5 * exp(x).
+
+    :param x: Coordinate in the junction (variable to be integrated).
+    :param xa: Coordinate at the start the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param L: Diffusion length.
+    :param phoD: Light spectrum divided by the diffusion constant D.
+    """
+    xc = (xa - x) / L
+    xv = np.array([x, ])
+    Pkern = np.exp(xc)
+    Gx = g(xv) * phoD
+    return Pkern*Gx
+
+
+def _conv_green_top(x, xa, xb, g, L, phoD, crvel):
+    """Convolution of the carrier generation rate with the Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the top edge.
+
+    :param x: Coordinate in the junction (variable to be integrated).
+    :param xa: Coordinate at the start the junction.
+    :param xb: Coordinate at the end the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param L: Diffusion length.
+    :param phoD: Light spectrum divided by the diffusion constant D.
+    :param crvel: Coefficient computed as S / D * L, with S the surface recombination velocity.
+    """
+    xc = (xb - x) / L
+    xv = np.array([xa + xb - x, ])
+    Pkern = np.cosh(xc) + crvel * np.sinh(xc)
+    Gx = g(xv) * phoD
+    return Pkern*Gx
+
+
+def _conv_green_bottom(x, xb, g, L, phoD, crvel):
+    """Convolution of the carrier generation rate with the Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the bottom edge.
+
+    :param x: Coordinate in the junction (variable to be integrated).
+    :param xb: Coordinate at the end the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param L: Diffusion length.
+    :param phoD: Light spectrum divided by the diffusion constant D.
+    :param crvel: Coefficient computed as S / D * L, with S the surface recombination velocity.
+    """
+    xc = (xb - x) / L
+    xv = np.array([x, ])
+    Pkern = np.cosh(xc) - crvel * np.sinh(xc)
+    Gx = g(xv) * phoD
+    return Pkern*Gx
+
+
+def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side='top'):
+    """Computes the derivative of the minority carrier concentration at the edge of the junction by approximating the convolution integral resulting from applying the Green's function method to the drift-diffusion equation.
+
+    :param xa: Coordinate at the start the junction.
+    :param xb: Coordinate at the end the junction.
+    :param g: Carrier generation rate at point x (expected as function).
+    :param D: Diffusion constant.
+    :param L: Diffusion length.
+    :param y0: Carrier equilibrium density.
+    :param S: Surface recombination velocity.
+    :param ph: Light spectrum.
+    :param side: String to indicate the edge of interest. Either 'top' or 'bottom'.
+
+    :return: The derivative of the minority carrier concentration at the edge of the junction.
+    """
+
+    science_reference('DA Green\'s function method.',
+                      'T. Vasileiou, J. M. Llorens, J. Buencuerpo, J. M. Ripalda, D. Izzo and L. Summerer, “Light absorption enhancement and radiation hardening for triple junction solar cell through bioinspired nanostructures,” Bioinspir. Biomim., vol. 16, no. 5, pp. 056010, 2021.')
+
+    xbL = (xb - xa) / L
+    crvel = S / D * L
+    ph_over_D = ph / D
+
+    # if L too low in comparison to junction width, avoid nan's
+    if xbL > 1.e2:
+        if side == 'top':
+            cadd = -y0 / L
+            fun = partial(_conv_exp_top, xa=xa, xb=xb, g=g,
+                          L=L, phoD=ph_over_D)
+        else:
+            cadd = y0 / L
+            fun = partial(_conv_exp_bottom, xa=xa, g=g,
+                          L=L, phoD=ph_over_D)
+        cp = 1.
+    else:
+        if side == 'top':
+            cp = -np.cosh(xbL) - crvel * np.sinh(xbL)
+            cadd = (np.sinh(xbL) + crvel * np.cosh(xbL)) * y0 / L
+            fun = partial(_conv_green_top, xa=xa, xb=xb, g=g,
+                          L=L, phoD=ph_over_D, crvel=crvel)
+        else:
+            cp = np.cosh(xbL) - crvel * np.sinh(xbL)
+            cadd = (np.sinh(xbL) - crvel * np.cosh(xbL)) * y0 / L
+            fun = partial(_conv_green_bottom, xb=xb, g=g,
+                          L=L, phoD=ph_over_D, crvel=crvel)
+
+    out, err = quad_vec(fun, xa, xb, epsrel=1.e-5)
+    return (out.squeeze() + cadd) / cp
+
+
 def get_J_sc_SCR(xa, xb, g, wl, ph):
     zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
@@ -444,7 +575,11 @@ def qe_depletion(junction, options):
     xa = cum_widths[id_top]
     xb = cum_widths[id_top + 1] - w_top
 
-    deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
+    if options.da_mode == 'bvp':
+        deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
+    else:
+        xbb = xb - (xb - xa)/1001.
+        deriv = get_J_sc_diffusion_green(xa, xbb, g, d_top, l_top, min_top, s_top, ph, side='top')
     j_sc_top = d_top * abs(deriv)
 
 
@@ -452,7 +587,11 @@ def qe_depletion(junction, options):
     xa = cum_widths[id_bottom] + w_bottom
     xb = cum_widths[id_bottom + 1]
 
-    deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
+    if options.da_mode == 'bvp':
+        deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
+    else:
+        xbb = xb - (xb - xa)/1001.
+        deriv = get_J_sc_diffusion_green(xa, xbb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
     j_sc_bot = d_bottom * abs(deriv)
 
     # The contribution from the SCR (includes the intrinsic region, if present).

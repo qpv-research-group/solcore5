@@ -469,6 +469,129 @@ def test_get_J_sc_diffusion_vs_WL_bottom():
     assert result == approx(expected)
 
 
+def test_get_J_sc_diffusion_green_top():
+    from solcore.analytic_solar_cells.depletion_approximation import get_J_sc_diffusion_green
+    from solcore.light_source import LightSource
+
+    D = np.power(10, np.random.uniform(-5, 0)) # Diffusion coefficient
+    L = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
+    minority = np.power(10, np.random.uniform(-7, -4))# minority carrier density
+    s = np.power(10, np.random.uniform(0, 3)) # surface recombination velocity
+
+    light_source = LightSource(source_type="standard", version="AM1.5g")
+    wl = np.linspace(300, 1800, 50) * 1e-9
+    wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+
+    xa_nm = np.random.uniform(1, 1000)
+    xa = xa_nm * 1e-9
+    xb = np.random.uniform(xa_nm+1, 1100) * 1e-9
+    beta1 = (xb - xa) / L
+    if beta1 > 1.e2:
+        xb = xa + 99. * L
+        beta1 = (xb - xa) / L
+
+    ## make a simple Beer-Lambert profile
+    alphas = np.linspace(1e8, 10, len(wl))
+
+    # theoreical value from Fonash, Solar cell device physics eq 4.10
+    # (the absorption profile has to be offset for xa != 0.)
+    beta2 = (xb - xa) * alphas
+    beta3 = L * s / D
+    c1 = beta2*beta2/(beta2*beta2 - beta1*beta1)
+    c2 = (beta3*beta1/beta2 + 1.) / (beta3 * np.sinh(beta1) + np.cosh(beta1))
+    expected = (beta3*np.cosh(beta1) + np.sinh(beta1)) / (beta3*np.sinh(beta1) + np.cosh(beta1))
+    expected *= beta1/beta2
+    expected += 1.
+    expected *= np.exp(-beta2)
+    expected = (expected - c2) * c1  * phg / D * np.exp(-alphas * xa)
+    expected -= minority / L * (beta3*np.cosh(beta1) + np.sinh(beta1)) / (beta3*np.sinh(beta1) + np.cosh(beta1))
+
+    result = get_J_sc_diffusion_green(xa, xb, lambda x: alphas * np.exp(-alphas * x),
+                                      D, L, minority, s, phg, side='top')
+
+    assert beta1 < 1.e2
+    assert result == approx(expected, rel=1.e-5)
+
+    #  test version for extreme L values
+    Lmax = np.log10((xb - xa) * 1.e-2)
+    L = np.power(10, np.random.uniform(Lmax - 2., Lmax))
+
+    # theoretical value for Beer-Lambert profile
+    alphas_miL = alphas - 1. / L
+    idx_c = np.abs(alphas_miL) < 1.e-3
+    idx_i = np.logical_not(idx_c)
+    expected = np.zeros_like(alphas)
+    expected = np.exp(-alphas_miL * xa - xb / L) - np.exp(-alphas * xb)
+    expected[idx_i] /= alphas_miL[idx_i]
+    expected[idx_c] = np.exp(-alphas[idx_c] * xb)
+    expected *= -phg * alphas / D
+    expected -= minority / L
+
+    result = get_J_sc_diffusion_green(xa, xb, lambda x: alphas * np.exp(-alphas * x),
+                                      D, L, minority, s, phg, side='top')
+
+    assert (xb - xa) / L > 1.e2
+    assert result == approx(expected, rel=1.e-5)
+
+
+def test_get_J_sc_diffusion_green_bottom():
+    from solcore.analytic_solar_cells.depletion_approximation import get_J_sc_diffusion_green
+    from solcore.light_source import LightSource
+
+    D = np.power(10, np.random.uniform(-5, 0)) # Diffusion coefficient
+    L = np.power(10, np.random.uniform(-9, -6)) # Diffusion length
+    minority = np.power(10, np.random.uniform(-7, -4))# minority carrier density
+    s = np.power(10, np.random.uniform(0, 3)) # surface recombination velocityx
+
+    light_source = LightSource(source_type="standard", version="AM1.5g")
+    wl = np.linspace(300, 1800, 50)*1e-9
+    wl_ls, phg = light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+
+    xa_nm = np.random.uniform(1, 1000)
+    xa = xa_nm*1e-9
+    xb = np.random.uniform(xa_nm+1, 1100)*1e-9
+    beta1 = (xb - xa) / L
+    if beta1 > 1.e2:
+        xb = xa + 99. * L
+        beta1 = (xb - xa) / L
+
+    ## make a simple Beer-Lambert profile
+    alphas = np.linspace(1e8, 10, len(wl))
+
+    # theoreical value from Fonash, Solar cell device physics eq 4.15
+    beta2 = (xb - xa) * alphas
+    beta3 = -L * s / D
+    c1 = beta2*beta2/(beta2*beta2 - beta1*beta1) * np.exp(-alphas * xa)
+    c2 = (beta3*beta1/beta2 - 1.) / (beta3 * np.sinh(beta1) + np.cosh(beta1))
+    expected = (beta3*np.cosh(beta1) + np.sinh(beta1)) / (beta3*np.sinh(beta1) + np.cosh(beta1))
+    expected *= -beta1/beta2
+    expected += 1.
+    expected = (expected + c2 * np.exp(-beta2)) * c1  * phg / D
+    expected += minority / L * (beta3*np.cosh(beta1) + np.sinh(beta1)) / (beta3*np.sinh(beta1) + np.cosh(beta1))
+
+    result = get_J_sc_diffusion_green(xa, xb, lambda x: alphas * np.exp(-alphas * x),
+                                      D, L, minority, s, phg, side='bottom')
+
+    assert beta1 < 1.e2
+    assert result == approx(expected, rel=1.e-5)
+
+    #  test version for extreme L values
+    Lmax = np.log10((xb - xa) * 1.e-2)
+    L = np.power(10, np.random.uniform(Lmax - 2., Lmax))
+
+    # theoretical value for Beer-Lambert profile
+    beta1 = (xb - xa) / L
+    expected = np.exp(-beta1 - alphas * xb) - np.exp(-alphas * xa)
+    expected *= -phg * alphas / D / (alphas + 1. / L)
+    expected += minority / L
+
+    result = get_J_sc_diffusion_green(xa, xb, lambda x: alphas * np.exp(-alphas * x),
+                                      D, L, minority, s, phg, side='bottom')
+
+    assert beta1 > 1.e2
+    assert result == approx(expected, rel=1.e-5)
+
+
 def test_identify_layers_exceptions():
     from solcore.analytic_solar_cells.depletion_approximation import identify_layers
     from solcore import material
@@ -902,6 +1025,18 @@ def test_qe_depletion_np(np_junction):
                   test_junc[0].eqe_scr(wl) == approx(test_junc[0].eqe(wl)))
     assert np.all(test_junc[0].iqe(wl) >= test_junc[0].eqe(wl))
 
+    options['da_mode'] = 'green'
+    qe_depletion(test_junc[0], options)
+
+    assert np.all(test_junc[0].eqe(wl) < 1)
+    assert np.all(test_junc[0].eqe_emitter(wl) < 1)
+    assert np.all(test_junc[0].eqe_base(wl) < 1)
+    assert np.all(test_junc[0].eqe_scr(wl) < 1)
+    assert np.all(test_junc[0].eqe(wl)[test_junc[0].eqe(wl) > 1e-3]
+                  <= test_junc.absorbed[test_junc[0].eqe(wl) > 1e-3])
+    assert np.all(test_junc[0].eqe_emitter(wl) + test_junc[0].eqe_base(wl) +
+                  test_junc[0].eqe_scr(wl) == approx(test_junc[0].eqe(wl)))
+    assert np.all(test_junc[0].iqe(wl) >= test_junc[0].eqe(wl))
 
 
 def test_qe_depletion_pn(pn_junction):
@@ -923,6 +1058,18 @@ def test_qe_depletion_pn(pn_junction):
                   test_junc[0].eqe_scr(wl) == approx(test_junc[0].eqe(wl)))
     assert np.all(test_junc[0].iqe(wl) >= test_junc[0].eqe(wl))
 
+    options['da_mode'] = 'green'
+    qe_depletion(test_junc[0], options)
+
+    assert np.all(test_junc[0].eqe(wl) < 1)
+    assert np.all(test_junc[0].eqe_emitter(wl) < 1)
+    assert np.all(test_junc[0].eqe_base(wl) < 1)
+    assert np.all(test_junc[0].eqe_scr(wl) < 1)
+    assert np.all(test_junc[0].eqe(wl)[test_junc[0].eqe(wl) > 1e-3]
+                  <= test_junc.absorbed[test_junc[0].eqe(wl) > 1e-3])
+    assert np.all(test_junc[0].eqe_emitter(wl) + test_junc[0].eqe_base(wl) +
+                  test_junc[0].eqe_scr(wl) == approx(test_junc[0].eqe(wl)))
+    assert np.all(test_junc[0].iqe(wl) >= test_junc[0].eqe(wl))
 
 def test_iv_depletion_np(np_junction):
 
@@ -944,11 +1091,22 @@ def test_iv_depletion_np(np_junction):
 
     power = abs(test_junc[0].iv(V[quadrant])*V[quadrant])[:-1]
 
-
     assert abs(test_junc[0].iv(0)) <= Jph
     assert approx_Voc < test_junc[0][1].material.band_gap/q
     assert np.all(power < options.light_source.power_density)
 
+    options['da_mode'] = 'green'
+    iv_depletion(test_junc[0], options)
+
+    approx_Voc = V[np.argmin(abs(test_junc[0].iv(V)))]
+
+    quadrant = (V > 0) * (V < approx_Voc)
+
+    power = abs(test_junc[0].iv(V[quadrant])*V[quadrant])[:-1]
+
+    assert abs(test_junc[0].iv(0)) <= Jph
+    assert approx_Voc < test_junc[0][1].material.band_gap/q
+    assert np.all(power < options.light_source.power_density)
 
 def test_iv_depletion_pn(pn_junction):
     from solcore.analytic_solar_cells import iv_depletion
@@ -962,6 +1120,19 @@ def test_iv_depletion_pn(pn_junction):
 
     wl_sp, ph = options.light_source.spectrum(output_units='photon_flux_per_m', x=wl)
     Jph = q*np.trapz(test_junc.absorbed*ph, wl)
+
+    approx_Voc = V[np.argmin(abs(test_junc[0].iv(V)))]
+
+    quadrant = (V > 0) * (V < approx_Voc)
+
+    power = abs(test_junc[0].iv(V[quadrant])*V[quadrant])[:-1]
+
+    assert abs(test_junc[0].iv(0)) <= Jph
+    assert approx_Voc < test_junc[0][1].material.band_gap/q
+    assert np.all(power < options.light_source.power_density)
+
+    options['da_mode'] = 'green'
+    iv_depletion(test_junc[0], options)
 
     approx_Voc = V[np.argmin(abs(test_junc[0].iv(V)))]
 
