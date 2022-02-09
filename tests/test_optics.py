@@ -71,7 +71,7 @@ def test_calculate_absorption_profile_rcwa():
     assert len(result["position"]) == len(dist)
     assert len(parallel_result["position"]) == len(dist)
 
-    assert result["absorption"] == approx(parallel_result["absorption"])
+    assert result["absorption"] == approx(parallel_result["absorption"], abs=1e-5)
 
 
 @mark.skipif(sys.platform != "linux", reason="Only works under linux")
