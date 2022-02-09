@@ -100,6 +100,10 @@ position_plot = np.linspace(0, 200, 100)*1e-9
 absorption_profile_TMM = solar_cell[0].diff_absorption(position_plot)
 absorption_profile_constructed = solar_cell_external[0].diff_absorption(position_plot)
 
+plt.figure()
+plt.plot(position_plot, solar_cell[1].absorbed(position_plot))
+plt.show()
+
 plt.figure(figsize=(10, 4))
 plt.subplot(121)
 plt.imshow(absorption_profile_TMM, aspect='auto', extent=[0, 400, 1200, 300])
