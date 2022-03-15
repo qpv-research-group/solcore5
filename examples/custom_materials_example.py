@@ -24,6 +24,10 @@ the parameters in SiGeSn_params.txt have been copied directly from Ge.
 
 create_new_material('SiGeSn', 'data/SiGeSn_n.txt', 'data/SiGeSn_k.txt', 'data/SiGeSn_params.txt')
 
+# Note that the final argument, the parameter file, is optional - if you do not
+# provide it, a material will be added with optical constants only, so it can be
+# used for optical calculations.
+
 # can now create an instance of it like any Solcore material
 SiGeSn = material('SiGeSn')()
 
