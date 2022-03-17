@@ -16,12 +16,16 @@ Once you are ready to install it in your own machine, go to the next section.
 Installing Solcore
 ^^^^^^^^^^^^^^^^^^
 
-Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient. The following instructions are expected to work in most systems, but check the sections below for OS specific instructions and caveats. In order to install Solcore in your computer, you will need the following:
+Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient,
+and the RCWA (rigorous coupled-wave analysis) solver uses the package S4 which is written in C++.
+The following instructions are expected to work in most systems, but check the sections below for OS specific instructions and caveats.
+In order to install Solcore in your computer, you will need the following:
 
 - Python >3.7
 - pip
 - setuptools
 - :doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`
+- :doc:`the S4 package <s4_installation>` (only needed for RCWA functionality)
 
 *Pip* is normally part of the standard Python installation, but you might need to install *setuptools* manually with::
 
@@ -126,7 +130,7 @@ Problems with the installation
 
 There are several things that can go wrong in the above description, specially in Windows.
 
-1. **The tests associated with the Poisson-Drift-Diffusion solver fail**: This is usually the result of not having a Fortran compiler installed in your system, not being correctly configured or having a temperamental F2PY version, the tool - included in numpy - that makes Fotran code accesible from Python. Please, make sure you follow all the steps indicated in the :doc:`Fortran compiler section <compilation>` and above to have the PDD solver up and running.
+1. **The tests associated with the Poisson-Drift-Diffusion solver fail**: This is usually the result of not having a Fortran compiler installed in your system, not being correctly configured or having a temperamental F2PY version, the tool - included in numpy - that makes Fortran code accesible from Python. Please, make sure you follow all the steps indicated in the :doc:`Fortran compiler section <compilation>` and above to have the PDD solver up and running.
 
 2. **Some of the dependencies fail to install**: That is rarely the case, as all dependencies are in the main Python repositories. However, there might be issues with Numpy, Matplotlib and Scipy. Depending on your Python distribution, some of these packages might need to be compiled and it is often easy to get them as a scientific bundle. You can check `Anaconda <https://www.continuum.io/downloads>`_ which provides all these packages together already configured for the correct OS.
 

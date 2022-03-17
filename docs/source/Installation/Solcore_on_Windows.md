@@ -1,12 +1,27 @@
 Solcore on Windows 10
 =====================
-The Python part of Solcore, which is the majority, should work under Windows with no problems. However, we have found a lot trouble trying to make the parts and complements that require compilation to work properly (the PDD solver, S4, SMARTS and SPICE). For those who need to use those tools, please follow the instructions below. 
+The Python part of Solcore, which is the majority, should work under Windows with no problems. However, we have had some
+trouble trying to make the parts and complements that require compilation to work properly (the PDD solver, S4, SMARTS 
+and SPICE). For those who need to use those tools and encounter issues on Windows, please follow the instructions below. 
+
+Note that in principle, out of the packages listed above (the PDD solver, S4, SMARTS and SPICE), all can be
+installed on Windows **except S4**, which to date we have not been able to produce Windows installation instructions for. 
+To compile the PDD, you need to do [a few extra steps](compilation.md) to get a suitable compiler working.
+S4 is only required to use the rigorous coupled-wave analysis (RCWA) functionality in Solcore, used to calculate diffration
+from periodic structures (e.g. diffraction gratings, photonic crystals). Thus, if you do not need this functionality, you 
+can stick with Windows.
 
 Installing Solcore
 ------------------
-(thanks Phoebe!)
 
-After a lot of effort, we have Solcore fully up and running in Windows 10... more or less, using the Ubuntu shell that comes with Windows 10. To install Solcore there, follow this steps:
+It is possible to run all the parts of Solcore from a Windows 10 environment without using a virtual machine or dual-booting a UNIX operating
+system (e.g. Ubuntu). This can be done by using the Ubuntu shell that comes with Windows 10. **It should be noted that the Windows
+Subsystem on Linux (WSL) does not support graphical applications, so it is purely a command line environment.** This can be 
+inconvenient for actually writing code and viewing results, so please bear this in mind before continuing with the instructions below.
+If you are having problems on Windows (or want to use the RCWA functionality/S4) and do not want to be limited to a command-line only
+environment, we recommend installing Ubuntu either as a virtual machine, or as a dual boot alongside Windows 10.
+
+If you do want to install Solcore on WSL, follow these steps:
 
 All steps on fresh install of Ubuntu (using the Ubuntu terminal on
 Windows 10 distributed by Canonical Group, Ubuntu 16.04.3 LTS, Codename:
@@ -14,68 +29,70 @@ xenial)
 
 -  Install git if not done already
 -  Install python 3.x if not already done
--  Install pip3 (for installing Python3 packages; you may need to update the package list first: sudo apt-get update)::
+-  Install pip3 (for installing Python3 packages; you may need to update the package list first: `sudo apt-get update`):
 
-```bash
-sudo apt install python3-pip
-```
-- You need LAPACK and BLAS libraries linked to the -llapack and -lblas library flags – these are used for scipy and S4. The developers of S4 recommend OpenBLAS (you can find installation instructions by Googling), but this also works and is simpler:
-
-```bash
-sudo apt-get install libblas-dev liblapack-dev
-```
+    ```bash
+    sudo apt install python3-pip
+    ```
 
 -  Install matplotlib (and tk, otherwise get an error later):
     
-```bash
-pip3 install matplotlib
-sudo apt-get install python3-tk 
-```
+    ```bash
+    pip3 install matplotlib
+    sudo apt-get install python3-tk 
+    ```
 
--  Other dependencies install automatically & successfully when
-      installing Solcore5... hopefully.
+-  Other dependencies install automatically & successfully when installing Solcore5... hopefully.
 
 -  Now, we actually Install Solcore::
 
-```bash
-git clone https://github.com/dalonsoa/solcore5.git
-cd solcore5
-sudo python3 setup.py install
-```
+    ```bash
+    git clone https://github.com/dalonsoa/solcore5.git
+    cd solcore5
+    sudo python3 setup.py install
+    ```
 
 Installing S4
 -------------
 
--  The “make” command must be available:
+- The “make” command must be available:
 
-```bash
-sudo apt install make
-```
+    ```bash
+    sudo apt install make
+    ```
+   
+- You need LAPACK, BOOST and BLAS libraries to compile S4. The developers of S4 recommend OpenBLAS (you can find installation 
+   instructions by Googling), but this also works and is simpler:
+    
+    ```bash
+    sudo apt install libopenblas-dev libfftw3-dev libsuitesparse-dev libboost-all-dev
+    ```
 
--  You must use the fork of S4 at https://github.com/phoebe-p/S4; the
+  (if you have any issues, more detailed installation instructions can be found [here](https://github.com/phoebe-p/S4).
+- You must use the fork of S4 at [https://github.com/phoebe-p/S4](https://github.com/phoebe-p/S4); the
       main branch is not compatible with Python 3.x:
 
-```bash
-git clone https://github.com/phoebe-p/S4.git
-cd S4
-make S4_pyext
-```
+    ```bash
+    git clone https://github.com/phoebe-p/S4.git
+    cd S4
+    make S4_pyext
+    ```
 
 Checking if everything works 
 --------------------------
 
 - To see if the PDD is working:
 
-```bash
-python3
->>> import solcore.solar_cell_solver
-```
+    ```bash
+    python3
+    >>> import solcore.solar_cell_solver
+    ```
 
 -  Run tests:
 
-```bash
-sudo python3 setup.py test
-```
+    ```bash
+    sudo python3 setup.py test
+    ```
 
 This might result in an error saying that quantum mechanics failed because 5\ :sup:`th` decimal place of result doesn’t match. Simply, ignore it.
 
