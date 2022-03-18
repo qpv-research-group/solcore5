@@ -74,11 +74,11 @@ Install in development mode
 
 If you are planning to develop Solcore further, you would want to have all the files in an accessible place but still being able to use the package from other places and examples, behaving as if it were truly installed. For this, install Solcore in development mode. `Download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_ as above and then::
 
-    pip install -e .[dev]
+    pip install -e .'[dev]'
 
 or::
 
-    pip install -e .[dev] --install-option="--with_pdd"
+    pip install -e .'[dev]' --install-option="--with_pdd"
     
 Solcore uses *pre-commit* to do a few things before commiting the changes (for example, clearing the output of Jupyter Notebooks). The *pre-commit* package is installed automatically with the above commands, but each user needs to be initialise it before it can work. This can be done with::
 
@@ -101,7 +101,7 @@ After installing Solcore (or even without installing it), there are a few things
 	from solcore import config
 	print(config)
 	
-You can find all the functionality of the :code:`config` object in `The config_tools`_
+You can find all the functionality of the :code:`config` object in `The config_tools`_.
 
 2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper in the `Journal of Computational Electronics (2018) <https://doi.org/10.1007/s10825-018-1171-3>`_ and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time. You can try directly the examples using `MyBinder.org <https://mybinder.org/v2/gh/qpv-research-group/solcore5/deployment>`_.
 
@@ -115,7 +115,7 @@ You can find all the functionality of the :code:`config` object in `The config_t
 	config.smarts('/path/to/the/SMARTS/folder')
 
 
-4. **Installing S4:** The rigorous-coupled wave analysis (RCWA) solver S4, created by the Stanford University, needs to be installed separately using `the fork by Phoebe Pearce <http://github.com/phoebe-p/S4>`_. The original version **do not work** with Python 3.x, only with Python 2. You can find more information about the solver in the `project webpage <http://web.stanford.edu/group/fan/S4/>`_. An example of its use with Solcore is included in the examples folder, *Figure9.py*.
+4. **Installing S4:** The rigorous-coupled wave analysis (RCWA) solver S4, created by the Stanford University, needs to be installed separately using `the fork by Phoebe Pearce <http://github.com/phoebe-p/S4>`_. The original version **does not work** with Python 3.x, only with Python 2. You can find more information about the solver in the `project webpage <http://web.stanford.edu/group/fan/S4/>`_. An example of its use with Solcore is included in the examples folder :doc:`here </Examples/example_optics_comparison>`.
 
 5. **Getting specific information about Solcore:** Even though the documentation "should" be more complete, you can get information about any object in python (including any Solcore function, module and package) using the :code:`help` built-in function, for example::
 
