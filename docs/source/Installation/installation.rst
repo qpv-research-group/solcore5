@@ -74,11 +74,11 @@ Install in development mode
 
 If you are planning to develop Solcore further, you would want to have all the files in an accessible place but still being able to use the package from other places and examples, behaving as if it were truly installed. For this, install Solcore in development mode. `Download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_ as above and then::
 
-    pip install -e .'[dev]'
+    pip install -e ".[dev]"
 
 or::
 
-    pip install -e .'[dev]' --install-option="--with_pdd"
+    pip install -e ".[dev]" --install-option="--with_pdd"
     
 Solcore uses *pre-commit* to do a few things before commiting the changes (for example, clearing the output of Jupyter Notebooks). The *pre-commit* package is installed automatically with the above commands, but each user needs to be initialise it before it can work. This can be done with::
 
