@@ -14,6 +14,10 @@ For Mac OS X we have used the *gfortran* compiler installed together with GCC us
 
 Other package managers like [MacPorts](https://www.macports.org) or [Fink](http://www.finkproject.org) might also work, but we have not tried. 
 
+There is currently a known issue involving the compilation of the PDD solver on new Macs with M1/ARM/Apple silicon chips. 
+The homebrew version of gfortran (installed above alongside gcc as indicated above) does not work. For a workaround please
+see [here](https://github.com/qpv-research-group/solcore5/issues/209).
+
 ## Windows
 
 To get a Fortran compiler properly working under Windows with F2Py, we have followed the [detailed instructions written by Michael Hirsch](https://www.scivision.co/f2py-running-fortran-code-in-python-on-windows/). Read Michael Hirsch's instructions in full for a complete picture, but the important bits are:

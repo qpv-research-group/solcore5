@@ -134,6 +134,11 @@ There are several things that can go wrong in the above description, specially i
 
 2. **Some of the dependencies fail to install**: That is rarely the case, as all dependencies are in the main Python repositories. However, there might be issues with Numpy, Matplotlib and Scipy. Depending on your Python distribution, some of these packages might need to be compiled and it is often easy to get them as a scientific bundle. You can check `Anaconda <https://www.continuum.io/downloads>`_ which provides all these packages together already configured for the correct OS.
 
+3. **The PDD solver throws an error, even though I installed it and the installation appeared to be successful**:
+   This can happen if you are trying to call PDD functions when the solcore5 directory (downloaded from GitHub) is
+   the current working directory. Try calling the functions from a different working directory (by e.g. copying the file you
+   are trying to run to a different directory) and seeing if the error persists.
+
 The config_tools
 ^^^^^^^^^^^^^^^^
 

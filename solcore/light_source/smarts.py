@@ -62,6 +62,7 @@ def calculate_spectrum_smarts(smarts_file_contents=None, filename='smarts295', t
 
     if target_directory is not None:
         target_directory = target_directory.rstrip('\/')
+        print(target_directory)
         assert os.access(target_directory, os.W_OK), 'ERROR: Target folder for smarts output does not exists ' \
                                                      'or is not writable.'
 
