@@ -27,7 +27,8 @@ Example of a 3J solar cell calculated with the DA solver
 
 
     def this_dir_file(f):
-        return "data/" + f
+        from pathlib import Path
+        return str(Path(__file__).parent / "data" /  f)
 
 
     # We need to build the solar cell layer by layer.
