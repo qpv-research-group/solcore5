@@ -4,7 +4,7 @@ In order to use the Poisson-Drift-diffusion solver, it will be necessary to have
 
 ## Linux
 
-Most linux systems have a Fortran compiler already installed, typically part of GCC, the GNU compiler collection. If not, you will need to check how to install it for your particular linux distribution. 
+Most Linux systems have a Fortran compiler already installed, typically part of GCC, the GNU compiler collection. If not, you will need to check how to install it for your particular linux distribution. 
 
 ## Mac OS X
 

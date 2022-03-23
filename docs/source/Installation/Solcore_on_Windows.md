@@ -6,7 +6,8 @@ and SPICE). For those who need to use those tools and encounter issues on Window
 
 Note that in principle, out of the packages listed above (the PDD solver, S4, SMARTS and SPICE), all can be
 installed on Windows **except S4**, which to date we have not been able to produce Windows installation instructions for. 
-To compile the PDD, you need to do [a few extra steps](compilation.md) to get a suitable compiler working.
+To compile the PDD, you need to do [a few extra steps](compilation.md) to get a suitable compiler working. Steps
+for (optionally) installing SMARTS are given below.
 S4 is only required to use the rigorous coupled-wave analysis (RCWA) functionality in Solcore, used to calculate diffraction
 from periodic structures (e.g. diffraction gratings, photonic crystals). Thus, if you do not need this functionality, you 
 can stick with Windows.
@@ -15,42 +16,35 @@ Installing Solcore
 ------------------
 
 It is possible to run all the parts of Solcore from a Windows 10 environment without using a virtual machine or dual-booting a UNIX operating
-system (e.g. Ubuntu). This can be done by using the Ubuntu shell that comes with Windows 10. **It should be noted that this Windows
-Subsystem on Linux (WSL) does not support graphical applications, so it is purely a command line environment.** This can be 
-inconvenient for actually writing code and viewing results, so please bear this in mind before continuing with the instructions below.
-If you are having problems on Windows (or want to use the RCWA functionality/S4) and do not want to be limited to a command-line only
-environment, we recommend installing Ubuntu either as a virtual machine, or as a dual boot alongside Windows 10. If you do want to 
-install Solcore on WSL, follow these steps:
+system (e.g. Ubuntu). This can be done by using the Windows Subsystem for Linux (WSL) which can be installed on Windows 10. 
+By itself,
+the WSL does not support graphical applications, but it is possible to use Python installed in the WSL from a development
+environment running in Windows (such as VSCode), including plotting capabilities. Step-by-step instructions for
+setting up the WSL and accessing it from VSCode are given [here](https://code.visualstudio.com/docs/remote/wsl-tutorial).
+Note that to be able to see plots generated during code execution you can right-click on the Python file you want to execute
+in VSCode and select 'Run Current File in Python Interactive window'. This has been tested on the Ubuntu20.04 version of the
+WSL (using [WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install#upgrade-version-from-wsl-1-to-wsl-2)); both S4
+and the PDD install and run without issues.
 
-All steps on fresh install of Ubuntu (using the Ubuntu terminal on
-Windows 10 distributed by Canonical Group, Ubuntu 16.04.3 LTS, Codename:
-xenial)
+If you would like to use a different development environment, you will have to check if it supports accessing Python from
+the WSL from a Windows application; it
+is possible in [PyCharm](https://www.jetbrains.com/help/pycharm/using-wsl-as-a-remote-interpreter.html).
 
-- Install git if not done already
-- Install python 3.x if not already done
-- Install pip3 (for installing Python3 packages; you may need to update the package list first: `sudo apt-get update`):
-
-    ```bash
-    sudo apt install python3-pip
-    ```
-
-- Install matplotlib (and tk, otherwise get an error later):
-    
-    ```bash
-    pip3 install matplotlib
-    sudo apt-get install python3-tk 
-    ```
-
-- Install Solcore5, which can be done according to the [standard instructions](installation.rst).
-
+However, depending on your preferences you may still want to use a virtual machine or dual boot your computer to run a 
+complete Linux operating system. Whichever option you choose, you should be able to install Solcore in your preferred way
+using the normal installation
+instructions; instructions for installing S4 on Ubuntu, if you want to use it, are given below.
 
 Installing S4
 -------------
 
-- The “make” command must be available:
+These are the steps for installing S4 in an Ubuntu WSL environment (through the WSL command line environment). These steps
+should be the same for any Ubuntu environment.
+
+- The “make” and “git“ commands must be available:
 
     ```bash
-    sudo apt install make
+    sudo apt install make git
     ```
    
 - You need LAPACK, BOOST, FFT and BLAS libraries to compile S4. The developers of S4 recommend OpenBLAS (you can find installation 
@@ -60,7 +54,7 @@ Installing S4
     sudo apt install libopenblas-dev libfftw3-dev libsuitesparse-dev libboost-all-dev
     ```
 
-  (if you have any issues, more detailed installation instructions can be found [here](https://github.com/phoebe-p/S4).
+  (if you have any issues, more detailed installation instructions can be found [here](https://github.com/phoebe-p/S4).)
 - You must use the fork of S4 at [https://github.com/phoebe-p/S4](https://github.com/phoebe-p/S4), as the
       main branch is not compatible with Python 3:
 
@@ -87,19 +81,9 @@ Checking if everything works
     ```
 
 This might result in an error saying that quantum mechanics failed because 5\ :sup:`th` decimal place of result doesn’t match. 
-You can simply ignore this error.
-
-- Other information:
-    - gcc/g++/gfortran versions used here: gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.6)
-
-    -  If everything is working correctly, should be able to import
-      solcore.solar_cell_solver without getting warnings about the RCWA
-      solver or PDD.
-
-    -  Sometimes, an issue arises with the SOPRA database (and occasionally
-   importing solar_cell_solver?) where the permissions are set such that
-   you cannot access the database – running sudo python3, or sudo
-   [whatever python editor you’re using] fixes this.
+You can simply ignore this error. If everything is working correctly, should be able to `import solcore.solar_cell_solver` 
+without getting warnings about the RCWA solver or PDD.
+  
 
 Installing SMARTS Windows10/Ubuntu Shell 
 ----------------------------------------

@@ -27,9 +27,10 @@ In order to install Solcore in your computer, you will need the following:
 - :doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`
 - :doc:`the S4 package <s4_installation>` (only needed for RCWA functionality)
 
-*Pip* is normally part of the standard Python installation, but you might need to install *setuptools* manually with::
+*Pip* is normally part of the standard Python installation, but you might need to install it. You also need to make sure
+the *setuptools* and *wheel* packages are available. To make sure these packages are installed and up to date, run::
 
-    pip install setuptools
+    pip install -U pip setuptools wheel
 
 Now, installing Solcore should be as easy as writing in the terminal::
 
