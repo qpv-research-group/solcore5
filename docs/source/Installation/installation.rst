@@ -43,7 +43,7 @@ This will download Solcore form the Pypi repository and install the package with
 
 **NOTE**: Pip passes the --install-option to all the dependencies of the package and therefore the installation will fail since those dependencies do not have the option "--with_pdd". That is the reason why, for now, Solcore needs to be installed twice: the first one to install Solcore normally with all the dependencies and the second one re-installs Solcore with PDD support. 
 
-And that's all!! Solcore should be available to be used as with any Python package::
+And that's all! Solcore should be available to be used as with any Python package::
 
     >>> import solcore
 
@@ -81,7 +81,7 @@ or::
 
     pip install -e ".[dev]" --install-option="--with_pdd"
     
-Solcore uses *pre-commit* to do a few things before commiting the changes (for example, clearing the output of Jupyter Notebooks). The *pre-commit* package is installed automatically with the above commands, but each user needs to be initialise it before it can work. This can be done with::
+Solcore uses *pre-commit* to do a few things before committing the changes (for example, clearing the output of Jupyter Notebooks). The *pre-commit* package is installed automatically with the above commands, but each user needs to be initialise it before it can work. This can be done with::
 
     pre-commit install
    
@@ -90,7 +90,7 @@ Check the `pre-commit webpage <https://pre-commit.com/#3-install-the-git-hook-sc
 Getting started
 ^^^^^^^^^^^^^^^
 
-After installing Solcore (or even without installing it), there are a few things you might want to do in order to personalise it and start using it. These are general instructions that, hopefully, should work in most *NIX systems. Check specific instructions for:
+After installing Solcore (or even without installing it), there are a few things you might want to do in order to personalise it and start using it. These are general instructions that, hopefully, should work in most \*NIX systems. Check specific instructions for:
 
 - :doc:`Windows 10 <Solcore_on_Windows>`
 - :doc:`Mac OS X <Solcore_on_MacOSX>`
@@ -104,9 +104,9 @@ After installing Solcore (or even without installing it), there are a few things
 	
 You can find all the functionality of the :code:`config` object in `The config_tools`_.
 
-2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper in the `Journal of Computational Electronics (2018) <https://doi.org/10.1007/s10825-018-1171-3>`_ and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time. You can try directly the examples using `MyBinder.org <https://mybinder.org/v2/gh/qpv-research-group/solcore5/deployment>`_.
+2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper in the `Journal of Computational Electronics (2018) <https://doi.org/10.1007/s10825-018-1171-3>`_ and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time. You can try the examples directly using `MyBinder.org <https://mybinder.org/v2/gh/qpv-research-group/solcore5/deployment>`_.
 
-3. **Set the location of a SPICE executable and the SMARTS folder:** You will need to do this eventually in order to use those tools::
+3. **Set the location of a SPICE executable and the SMARTS folder:** You will need to do this if you want to use those tools::
 
 .. code:: python
 
