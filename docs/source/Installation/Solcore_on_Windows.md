@@ -22,7 +22,8 @@ the WSL does not support graphical applications, but it is possible to use Pytho
 environment running in Windows (such as VSCode), including plotting capabilities. Step-by-step instructions for
 setting up the WSL and accessing it from VSCode are given [here](https://code.visualstudio.com/docs/remote/wsl-tutorial).
 Note that to be able to see plots generated during code execution you can right-click on the Python file you want to execute
-in VSCode and select 'Run Current File in Python Interactive window'. This has been tested on the Ubuntu20.04 version of the
+in VSCode and select 'Run Current File in Python Interactive window'. This has been tested on 64-bit Windows 10 using
+the Ubuntu20.04 version of the
 WSL (using [WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install#upgrade-version-from-wsl-1-to-wsl-2)); both S4
 and the PDD install and run without issues.
 
@@ -80,7 +81,7 @@ Checking if everything works
     sudo python3 setup.py test
     ```
 
-This might result in an error saying that quantum mechanics failed because 5\ :sup:`th` decimal place of result doesn’t match. 
+This might result in an error saying that quantum mechanics failed because the 5th decimal place of result doesn’t match. 
 You can simply ignore this error. If everything is working correctly, should be able to `import solcore.solar_cell_solver` 
 without getting warnings about the RCWA solver or PDD.
   
