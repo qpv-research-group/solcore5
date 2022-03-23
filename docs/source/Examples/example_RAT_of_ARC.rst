@@ -1,4 +1,4 @@
-Using the TMM solver to calculate the reflextion of a multilayered ARC
+Using the TMM solver to calculate the reflection of a multilayered ARC
 ======================================================================
 
 .. image:: RAT_of_ARC.png

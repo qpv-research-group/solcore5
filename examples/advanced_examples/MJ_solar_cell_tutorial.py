@@ -153,7 +153,7 @@ pmpp = []
 
 fig3, axIV = plt.subplots(1, 1, figsize=(6, 4))
 for c in con:
-    light_source.options["concentration"] = c
+    light_source.concentration = c
 
     solar_cell_solver(
         my_solar_cell,
