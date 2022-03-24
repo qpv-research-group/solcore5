@@ -113,9 +113,6 @@ def solve_beer_lambert(solar_cell, options):
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
 
         # total absorption at each wavelength, per layer
-        layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
-                options.position < solar_cell[j].offset + solar_cell[j].width)]
-        layer_positions = layer_positions - np.min(layer_positions)
         solar_cell[j].layer_absorption = fraction*(1-np.exp(-alphas[j]*solar_cell[j].width))
 
     solar_cell.transmitted = transmitted
