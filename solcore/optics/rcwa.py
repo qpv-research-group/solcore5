@@ -77,7 +77,7 @@ def solve_rcwa(solar_cell, options):
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
 
-        solar_cell[j].layer_absorption = initial*np.sum(A_per_layer[layer:(layer+n_layers_junction[j])], axis = 0)
+        solar_cell[j].layer_absorption = initial*np.sum(A_per_layer[layer:(layer+n_layers_junction[j])], axis=0)
         layer = layer + n_layers_junction[j]
 
     solar_cell.reflected = RAT['R'] * initial
