@@ -23,8 +23,6 @@ def solve_beer_lambert(solar_cell, options):
     if hasattr(solar_cell, 'shading'):
         fraction *= (1 - solar_cell.shading)
 
-    initial = fraction[:]
-
     # And the reflexion losses
     if hasattr(solar_cell, 'reflectivity') and solar_cell.reflectivity is not None:
         solar_cell.reflected = solar_cell.reflectivity(wl_m)
@@ -65,7 +63,7 @@ def solve_beer_lambert(solar_cell, options):
                     w = layer_object.width
 
                     def alf(x):
-                        return 0.0*x
+                        return 0.0 * x
 
                     solar_cell[j].alpha = alf
                     solar_cell[j].reflected = interp1d(wl_m, solar_cell.reflected, bounds_error=False,
@@ -113,37 +111,23 @@ def solve_beer_lambert(solar_cell, options):
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
 
-    I0 = fraction
-    layers_above_offset = np.cumsum([0] + n_layers_junction)
+    I0 = 1*fraction # need the *1 because we DO NOT want to modify fraction! Will mess up profile calculation
 
-    print(layers_above_offset)
-    print(widths)
+    layers_above_offset = np.cumsum([0] + n_layers_junction)
 
     for j in range(len(solar_cell)):
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
 
-        layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
-                options.position < solar_cell[j].offset + solar_cell[j].width)]
-        layer_positions = layer_positions - np.min(layer_positions)
-        solar_cell[j].layer_absorption = np.trapz(solar_cell[j].absorbed(layer_positions), layer_positions, axis=0)
-
         # total absorption at each wavelength, per layer
         A_junc = np.zeros_like(wl_m)
+
         for k in range(n_layers_junction[j]):
-
-            print(j, k, layers_above_offset[j])
-
-            A_layer = I0*(1 - np.exp(-alphas[layers_above_offset[j]+k] * widths[layers_above_offset[j]+k]))
-
-            print(alphas[layers_above_offset[j]+k][0], widths[layers_above_offset[j]+k])
-
+            A_layer = I0 * (1 - np.exp(-alphas[layers_above_offset[j] + k] * widths[layers_above_offset[j] + k]))
             A_junc += A_layer
-
             I0 -= A_layer
 
-        solar_cell[j].layer_absorption_2 = A_junc
-
+        solar_cell[j].layer_absorption = A_junc
 
     solar_cell.transmitted = transmitted
     solar_cell.absorbed = all_absorbed
