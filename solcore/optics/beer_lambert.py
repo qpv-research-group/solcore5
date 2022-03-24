@@ -107,6 +107,7 @@ def solve_beer_lambert(solar_cell, options):
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
     I_0 = fraction
+
     for j in range(len(solar_cell)):
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
@@ -115,7 +116,7 @@ def solve_beer_lambert(solar_cell, options):
         layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
                 options.position < solar_cell[j].offset + solar_cell[j].width)]
         layer_positions = layer_positions - np.min(layer_positions)
-        solar_cell[j].layer_absorption = np.trapz(solar_cell[j].absorbed(layer_positions), layer_positions, axis=0)
+        solar_cell[j].layer_absorption = fraction*(1-np.exp(-alphas[j]*solar_cell[j].width))
 
     solar_cell.transmitted = transmitted
     solar_cell.absorbed = all_absorbed
