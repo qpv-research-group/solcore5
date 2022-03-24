@@ -143,7 +143,7 @@ jobs:
       run: |
         pytest -r a -v tests/test_examples.py -n "auto"
 
-    - name: Test examples Linux and MacOS
+    - name: Test examples Windows
       if: matrix.os == 'windows-latest'
       run: |
         pytest -r a -v tests/test_examples.py -n "auto"
