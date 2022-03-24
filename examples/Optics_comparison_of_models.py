@@ -81,7 +81,7 @@ BL_EQE_NP = solar_cell[2].eqe(opts.wavelength)
 
 try:
     opts.optics_method = 'RCWA'
-    opts.orders = 19  # number of diffraction orders to keep in the RCWA solver
+    opts.orders = 9  # number of diffraction orders to keep in the RCWA solver
     solar_cell_solver(solar_cell, 'qe', opts)
     RCWA_EQE_NP = solar_cell[2].eqe(opts.wavelength)
     RCWA_legend = 'RCWA (GaAs SC + NP array + DBR)'

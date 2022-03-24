@@ -26,7 +26,7 @@ def test_PDE():
 
     problem = Ackley()
 
-    algorithm = PDE(problem, problem.bounds)
+    algorithm = PDE(problem, problem.bounds, processes=0)
 
     result = algorithm.solve()
 
