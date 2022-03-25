@@ -70,11 +70,19 @@ jobs:
         python -m pip install --no-deps --force-reinstall --install-option="--with_pdd" -e .
       shell: powershell
 
-    - name: Unit and functional tests
+    - name: Unit and functional tests (Linux and MacOS)
+      if: matrix.os != 'windows-latest'
       env:
         SOLCORE_SPICE: ngspice
       run: |
         pytest -r a -v --cov=solcore/ --ignore tests/test_examples.py -n "auto"
+
+    - name: Unit and functional tests (Windows)
+      if: matrix.os != 'windows-latest'
+      env:
+        SOLCORE_SPICE: ngspice
+      run: |
+        pytest -r a -v --cov=solcore/ --ignore tests/test_examples.py --ignore tests/test__pdd.py -n "auto"
 
     - name: Codecov
       if: matrix.os == 'ubuntu-latest'
