@@ -123,7 +123,8 @@ def solve_beer_lambert(solar_cell, options):
         A_junc = np.zeros_like(wl_m)
 
         for k in range(n_layers_junction[j]):
-            A_layer = I0 * (1 - np.exp(-alphas[layers_above_offset[j] + k] * widths[layers_above_offset[j] + k]))
+            ilayer = layers_above_offset[j] + k
+            A_layer = I0 * (1 - np.exp(-alphas[ilayer] * widths[ilayer]))
             A_junc += A_layer
             I0 -= A_layer
 
