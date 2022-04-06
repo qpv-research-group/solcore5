@@ -38,7 +38,7 @@ due to diffraction effects.
     from solcore.solar_cell_solver import solar_cell_solver, default_options
     from solcore.light_source import LightSource
     from solcore.constants import vacuum_permittivity
-    from solcore.optics import RCWASolverError
+    from solcore.absorption_calculator import RCWASolverError
 
     # user options
     T = 298

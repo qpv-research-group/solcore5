@@ -4,7 +4,7 @@ In order to use the Poisson-Drift-diffusion solver, it will be necessary to have
 
 ## Linux
 
-Most linux systems have a Fortran compiler already installed, typically part of GCC, the GNU compiler collection. If not, you will need to check how to install it for your particular linux distribution. 
+Most Linux systems have a Fortran compiler already installed, typically part of GCC, the GNU compiler collection. If not, you will need to check how to install it for your particular linux distribution. 
 
 ## Mac OS X
 
@@ -13,6 +13,10 @@ For Mac OS X we have used the *gfortran* compiler installed together with GCC us
 ```brew install gcc```
 
 Other package managers like [MacPorts](https://www.macports.org) or [Fink](http://www.finkproject.org) might also work, but we have not tried. 
+
+There is currently a known issue involving the compilation of the PDD solver on new Macs with M1/ARM/Apple silicon chips. 
+The homebrew version of gfortran (installed above alongside gcc as indicated above) does not work. For a workaround please
+see [here](https://github.com/qpv-research-group/solcore5/issues/209).
 
 ## Windows
 

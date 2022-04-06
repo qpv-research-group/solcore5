@@ -1,7 +1,7 @@
 Solcore on Mac OS X
 =====================
 
-Solcore has been heavely tested under Mac OS X, so there should be no problems. However, using NGSPICE requires some details, as shown below.
+Solcore has been heavily tested under Mac OS X, so there should be no problems. However, using NGSPICE requires some details, as shown below.
 
 Installing NGSpice on MacOSX
 ----------------------------

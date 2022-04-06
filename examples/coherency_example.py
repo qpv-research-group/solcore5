@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from solcore import material, si
 
 from solcore.solar_cell import SolarCell, Layer, Junction
-from solcore.solar_cell_solver import solar_cell_solver, prepare_solar_cell
+from solcore.solar_cell_solver import solar_cell_solver
 from solcore.state import State
 
 GaInP = material("GaInP")(In=0.5)

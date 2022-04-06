@@ -169,14 +169,6 @@ of the window and BSF layers, and (2) the missing layers are added
 outside the Junction object when creating the full solar cell in order
 to consider their optical properties (see below).
 
-**TRICK:** The TMM solver work best with "thin" layers therefore, if the
-results of optical calculations look strange, try dividing thick layers
-(> 2-3 µm) into thinner ones (~500 nm). The reason is that the waves
-propagating forwards and backwards, leading to interference are
-ultimately complex exponentials that increase (or decrease) quite fast
-away from the interfaces, resulting in a loss of numerical accuracy when
-they trying to interact far from the interfaces.
-
 The only tunnel junction of this solar cell will be defined according to
 the parametric model and we will assume it is made of GaInP layers, 40
 nm-thick in total, that will block part of the light reaching the bottom
@@ -246,6 +238,7 @@ code that defines the spectrum to use and lunch the calculation will be:
     solar_cell_solver(my_solar_cell, 'qe',
                       user_options={'light_source': light_source, 'wavelength': wl, 'optics_method': 'TMM'})
 
+
 The calculation will proceed in several stages: (1) The structure is
 processed and discretized, (2) the problem is solved under equilibrium,
 (2) the problem is solved under short circuit conditions increasing in
@@ -255,17 +248,6 @@ two junctions. The following code plots the electrons and holes
 densities at equilibrium (dashed line) and at short circuit (continuous
 line), as well as the EQE of the two junctions and the total absorption
 in the layers.
-
-.. code:: python
-
-    from solcore.solar_cell_solver import solar_cell_solver
-    from solcore.light_source import LightSource
-
-    light_source = LightSource(source_type='standard', version='AM1.5g', x=wl,
-                               output_units='photon_flux_per_m', concentration=1)
-
-    solar_cell_solver(my_solar_cell, 'qe',
-                      user_options={'light_source': light_source, 'wavelength': wl, 'optics_method': 'TMM'})
 
 .. figure:: qe.jpg
    :alt: Quantum efficiency

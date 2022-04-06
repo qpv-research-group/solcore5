@@ -71,7 +71,7 @@ def test_calculate_absorption_profile_rcwa():
     assert len(result["position"]) == len(dist)
     assert len(parallel_result["position"]) == len(dist)
 
-    assert approx(result["absorption"] == parallel_result["absorption"])
+    assert result["absorption"] == approx(parallel_result["absorption"], abs=1e-5)
 
 
 @mark.skipif(sys.platform != "linux", reason="Only works under linux")
@@ -125,9 +125,9 @@ def test_pol_rcwa():
                                                  rat_output_A=A_output_p, parallel=True, steps_size=step_size,
                                                  pol='p')
 
-    assert approx(A_output_u == 0.5*(A_output_p + A_output_s))
+    assert np.mean(A_output_u, 1) == approx(0.5*(A_output_p + A_output_s))
 
-    assert approx(result_u["absorption"] == 0.5*(result_s["absorption"] + result_p["absorption"]))
+    assert result_u["absorption"] == approx(0.5*(result_s["absorption"] + result_p["absorption"]))
 
 
 @mark.skipif(sys.platform != "linux", reason="Only works under linux")
@@ -173,9 +173,9 @@ def test_arbitrary_pol_rcwa():
                                                  rat_output_A=A_output_s, parallel=True, steps_size=step_size,
                                                  pol='s')
 
-    assert approx(A_output == A_output_s)
+    assert A_output == approx(A_output_s)
 
-    assert approx(result["absorption"] == result_s["absorption"])
+    assert result["absorption"] == approx(result_s["absorption"])
 
 
 @mark.skipif(sys.platform != "linux", reason="Only works under linux")
@@ -235,9 +235,9 @@ def test_rcwa_polygon():
 
 
 
-    assert approx(A_output_sq == A_output_pol)
+    assert A_output_sq == approx(A_output_pol)
 
-    assert approx(result_polygon["absorption"] == result_square["absorption"])
+    assert result_polygon["absorption"] == approx(result_square["absorption"], abs=0.001)
 
 
 @mark.skipif(sys.platform != "linux", reason="Only works under linux")

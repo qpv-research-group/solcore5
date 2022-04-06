@@ -58,7 +58,8 @@ def snell(n_1, n_2, th_1):
     # give different results e.g. for arcsin(2).)
     # Use real_if_close because e.g. arcsin(2 + 1e-17j) is very different from
     # arcsin(2) due to branch cut
-    return sp.arcsin(np.real_if_close(n_1 * np.sin(th_1) / n_2))
+    # Note: scipy.arcsin is deprecated, hence scimath replacement
+    return np.lib.scimath.arcsin(np.real_if_close(n_1 * np.sin(th_1) / n_2))
 
 
 def list_snell(n_list, th_0):
@@ -71,7 +72,8 @@ def list_snell(n_list, th_0):
     # give different results e.g. for arcsin(2).)
     # Use real_if_close because e.g. arcsin(2 + 1e-17j) is very different from
     # arcsin(2) due to branch cut
-    return sp.arcsin(np.real_if_close(n_list[0] * np.sin(th_0) / n_list))
+    # Note: scipy.arcsin is deprecated, hence scimath replacement
+    return np.lib.scimath.arcsin(np.real_if_close(n_list[0] * np.sin(th_0) / n_list))
 
 
 def interface_r(polarization, n_i, n_f, th_i, th_f):
@@ -253,9 +255,9 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
 
     # delta is the total phase accrued by traveling through a given layer.
     # ignore warning about inf multiplication
-    olderr = sp.seterr(invalid='ignore')
+    olderr = np.seterr(invalid='ignore')
     delta = kz_list * d_list
-    sp.seterr(**olderr)
+    np.seterr(**olderr)
 
     # For a very opaque layer, reset delta to avoid divide-by-0 and similar
     # errors. The criterion imag(delta) > 35 corresponds to single-pass
@@ -1072,7 +1074,7 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zer
             A_layer = beer_lambert(alphas[l] * 1e9, fraction_reaching[i], dist[layer == l] * 1e-9)
 
         A_layer[fraction_reaching[i] < zero_threshold, :] = 0
-        A_local[:, layer == l] = A_layer
+        A_local[:, layer == l] = np.real(A_layer)
 
     return A_local
 

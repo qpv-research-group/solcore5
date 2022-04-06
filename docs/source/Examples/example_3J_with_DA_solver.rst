@@ -1,4 +1,4 @@
-Example of a 2J solar cell calculated with the PDD solver
+Example of a 3J solar cell calculated with the DA solver
 =========================================================
 
 .. image:: DA_iv.png
@@ -14,7 +14,6 @@ Example of a 2J solar cell calculated with the PDD solver
 
 .. code-block:: Python
 
-    import os
     import numpy as np
     import matplotlib.pyplot as plt
 
@@ -28,7 +27,8 @@ Example of a 2J solar cell calculated with the PDD solver
 
 
     def this_dir_file(f):
-        return os.path.join(os.path.split(__file__)[0], f)
+        from pathlib import Path
+        return str(Path(__file__).parent / "data" /  f)
 
 
     # We need to build the solar cell layer by layer.
