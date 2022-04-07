@@ -113,6 +113,7 @@ setup(
     version=config.get("Configuration", "version"),
     description="Python-based solar cell simulator",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/qpv-research-group/solcore5",
     download_url="https://github.com/qpv-research-group/solcore5/archive/v{}.tar.gz".format(
         config.get("Configuration", "version")
