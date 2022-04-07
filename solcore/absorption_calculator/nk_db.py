@@ -11,7 +11,7 @@ from solcore.material_data.refractiveindex_info_DB import dboperations as DB
 from solcore import config, SOLCORE_ROOT
 
 
-def download_db(url = None, interpolation_points = 200, confirm = False):
+def download_db(url=None, interpolation_points=200, confirm=False):
     """
     This function downloads the refractiveindex.info database and creates on SQLite database at
     the path specified in the user config file.
@@ -35,8 +35,8 @@ def download_db(url = None, interpolation_points = 200, confirm = False):
 
         if response not in 'Yy':
             return
-    else:
-        confirm = True
+        else:
+            confirm = True
 
     if confirm:
         db = DB.Database(NK_PATH)
