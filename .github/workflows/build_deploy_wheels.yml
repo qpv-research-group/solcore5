@@ -3,6 +3,9 @@ name: Upload Python Package
 on:
   release:
     types: [published]
+  push:
+    branches:
+      - 'fix_deploy/*'
 
 jobs:
   deploy_wheels:
