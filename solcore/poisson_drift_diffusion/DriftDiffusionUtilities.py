@@ -141,7 +141,6 @@ def short_circuit_pdd(junction, options):
 
     z = junction.equilibrium_data['Bandstructure']['x']
     absorption = junction.absorbed if hasattr(junction, 'absorbed') else lambda x: 0
-    print(hasattr(junction, 'absorbed'))
     abs_profile = CalculateAbsorptionProfile(z, wl, absorption)
 
     dd.set_generation(abs_profile)
