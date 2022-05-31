@@ -16,6 +16,7 @@ from solcore.structure import Junction, Layer
 from solcore.solar_cell_solver import solar_cell_solver
 from solcore.constants import q, kb
 from solcore.material_system import create_new_material
+from solcore.absorption_calculator import search_db
 
 # The "if __name__ == "__main__" construction is used to avoid issues with parallel processing on Windows.
 # The issue arises because the multiprocessing module uses a different process on Windows than on UNIX
@@ -38,6 +39,9 @@ from solcore.material_system import create_new_material
 # add SiGeSn optical constants to the database
 create_new_material('SiGeSn', 'SiGeSn_n.txt', 'SiGeSn_k.txt', 'SiGeSn_params.txt') # Note: comment out this line after the material
 # has been added to avoid being asked if you want to overwrite it.
+
+# Search the refractiveindex.info for the Ta2O5 data we want to use and save the pageid to use later
+Ta2O5_pageid = str(search_db("Ta2O5/Rodriguez-de Marcos")[0][0])
 
 # define class for the optimization:
 class calc_min_Jsc():
@@ -70,8 +74,8 @@ class calc_min_Jsc():
         self.InGaP = [self.wl, InGaP.n(self.wl*1e-9), InGaP.k(self.wl*1e-9)]
         self.GaAs = [self.wl, GaAs.n(self.wl*1e-9), GaAs.k(self.wl*1e-9)]
         self.MgF2 = [self.wl, material('MgF2')().n(self.wl*1e-9), material('MgF2')().k(self.wl*1e-9)]
-        self.Ta2O5 = [self.wl, material('410',
-                                        nk_db=True)().n(self.wl*1e-9), material('410',
+        self.Ta2O5 = [self.wl, material(Ta2O5_pageid,
+                                        nk_db=True)().n(self.wl*1e-9), material(Ta2O5_pageid,
                                                                                 nk_db=True)().k(self.wl*1e-9)]
 
         # assuming an AM1.5G spectrum
@@ -176,7 +180,7 @@ class calc_min_Jsc_DA():
         InGaP = material('GaInP')
         Ge = material('Ge')
         MgF2 = material('MgF2')()
-        Ta2O5 = material('410', nk_db=True)()
+        Ta2O5 = material(Ta2O5_pageid, nk_db=True)()
         AlInP = material("AlInP")
 
         window_material = AlInP(Al=0.52)
