@@ -272,8 +272,6 @@ def SolveQWproperties(device, calculate_absorption=True, WLsteps=(300e-9, 1100e-
 
 def CalculateAbsorptionProfile(z, wl, absorption):
     out = np.array(wl)
-    print(z)
-    print(absorption(z))
     out = np.vstack((out, absorption(z)))
 
     return out

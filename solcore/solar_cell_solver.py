@@ -135,7 +135,7 @@ def solve_iv(solar_cell, options):
     solve_optics(solar_cell, options)
 
     print('Solving IV of the junctions...')
-    print(solar_cell.junction_indices)
+
     for j in solar_cell.junction_indices:
 
         if solar_cell[j].kind == 'PDD':
