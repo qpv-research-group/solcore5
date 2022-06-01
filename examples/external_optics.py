@@ -13,9 +13,9 @@ Si = material("Si")
 SiO2 = material("SiO2")()
 
 n_material = Si(T=T, Nd=si(1e21, "cm-3"), hole_diffusion_length=si("50um"),
-                electron_mobility=50e-4, relative_permittivity = 11.68)
+                electron_mobility=50e-4)
 p_material = Si(T=T, Na=si(1e16, "cm-3"), electron_diffusion_length=si("150um"),
-                hole_mobility=400e-4, relative_permittivity = 11.68)
+                hole_mobility=400e-4)
 
 ARC_width = si("100nm")
 n_material_width = si("500nm")
