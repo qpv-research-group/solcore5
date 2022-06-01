@@ -84,7 +84,7 @@ Searching the refractiveindex.info database and comparing materials
 
     GaAs = material('GaAs')()
 
-    colors = sns.color_palette('husl', n_colors=len(names))
+    colors = ['k', 'r', 'g', 'y', 'b', 'm']
 
     plt.figure()
     for c, Ag_mat in enumerate([Ag_Joh, Ag_Jia, Ag_McP, Ag_Hag, Ag_Rak, Ag_Sol]):
