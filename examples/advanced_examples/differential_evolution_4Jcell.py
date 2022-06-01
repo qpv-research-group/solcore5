@@ -16,6 +16,7 @@ from solcore.structure import Junction, Layer
 from solcore.solar_cell_solver import solar_cell_solver
 from solcore.constants import q, kb
 from solcore.material_system import create_new_material
+from solcore.absorption_calculator import search_db
 
 # The "if __name__ == "__main__" construction is used to avoid issues with parallel processing on Windows.
 # The issue arises because the multiprocessing module uses a different process on Windows than on UNIX
@@ -36,8 +37,11 @@ from solcore.material_system import create_new_material
 # will actually calculate the value we are trying to minimize for a set of parameters.
 
 # add SiGeSn optical constants to the database
-create_new_material('SiGeSn', 'SiGeSn_n.txt', 'SiGeSn_k.txt', 'SiGeSn_params.txt') # Note: comment out this line after the material
+# create_new_material('SiGeSn', 'SiGeSn_n.txt', 'SiGeSn_k.txt', 'SiGeSn_params.txt') # Note: comment out this line after the material
 # has been added to avoid being asked if you want to overwrite it.
+
+# Search the refractiveindex.info for the Ta2O5 data we want to use and save the pageid to use later
+Ta2O5_pageid = str(search_db("Ta2O5/Rodriguez-de Marcos")[0][0])
 
 # define class for the optimization:
 class calc_min_Jsc():
@@ -70,8 +74,8 @@ class calc_min_Jsc():
         self.InGaP = [self.wl, InGaP.n(self.wl*1e-9), InGaP.k(self.wl*1e-9)]
         self.GaAs = [self.wl, GaAs.n(self.wl*1e-9), GaAs.k(self.wl*1e-9)]
         self.MgF2 = [self.wl, material('MgF2')().n(self.wl*1e-9), material('MgF2')().k(self.wl*1e-9)]
-        self.Ta2O5 = [self.wl, material('410',
-                                        nk_db=True)().n(self.wl*1e-9), material('410',
+        self.Ta2O5 = [self.wl, material(Ta2O5_pageid,
+                                        nk_db=True)().n(self.wl*1e-9), material(Ta2O5_pageid,
                                                                                 nk_db=True)().k(self.wl*1e-9)]
 
         # assuming an AM1.5G spectrum
@@ -176,7 +180,7 @@ class calc_min_Jsc_DA():
         InGaP = material('GaInP')
         Ge = material('Ge')
         MgF2 = material('MgF2')()
-        Ta2O5 = material('410', nk_db=True)()
+        Ta2O5 = material(Ta2O5_pageid, nk_db=True)()
         AlInP = material("AlInP")
 
         window_material = AlInP(Al=0.52)
@@ -190,10 +194,8 @@ class calc_min_Jsc_DA():
         GaInP_D_e = GaInP_mobility_e * kb * 300 / e_charge
         GaInP_L_e = np.sqrt(GaInP_D_e * GaInP_lifetime_e)
 
-        top_cell_n_material = InGaP(In=0.5, Nd=si("2e18cm-3"), hole_diffusion_length=GaInP_L_h,
-                                    relative_permittivity=11.75, hole_mobility=GaInP_mobility_h)
-        top_cell_p_material = InGaP(In=0.5, Na=si("2e17cm-3"), electron_diffusion_length=GaInP_L_e,
-                                    relative_permittivity=11.75, electron_mobility=GaInP_mobility_e)
+        top_cell_n_material = InGaP(In=0.5, Nd=si("2e18cm-3"), hole_diffusion_length=GaInP_L_h, hole_mobility=GaInP_mobility_h)
+        top_cell_p_material = InGaP(In=0.5, Na=si("2e17cm-3"), electron_diffusion_length=GaInP_L_e, electron_mobility=GaInP_mobility_e)
 
         # MID CELL  - GaAs
 
@@ -206,10 +208,8 @@ class calc_min_Jsc_DA():
         GaAs_D_e = GaAs_mobility_e * kb * 300 / e_charge
         GaAs_L_e = np.sqrt(GaAs_D_e * GaAs_lifetime_e)
 
-        mid_cell_n_material = GaAs(Nd=si("1e18cm-3"), hole_diffusion_length=GaAs_L_h,
-                                   relative_permittivity=13.1, hole_mobility=GaAs_mobility_h)
-        mid_cell_p_material = GaAs(Na=si("1e17cm-3"), electron_diffusion_length=GaAs_L_e,
-                                   relative_permittivity=13.1, electron_mobility=GaAs_mobility_e)
+        mid_cell_n_material = GaAs(Nd=si("1e18cm-3"), hole_diffusion_length=GaAs_L_h, hole_mobility=GaAs_mobility_h)
+        mid_cell_p_material = GaAs(Na=si("1e17cm-3"), electron_diffusion_length=GaAs_L_e, electron_mobility=GaAs_mobility_e)
 
 
         SiGeSn.band_gap = si('0.77eV') # from PL measurement
@@ -237,10 +237,8 @@ class calc_min_Jsc_DA():
         Ge_L_e = np.sqrt(Ge_D_e * Ge_lifetime_e)
 
 
-        bot_cell_n_material = Ge(Nd=si("2e18cm-3"), hole_diffusion_length=Ge_L_h,
-                                 relative_permittivity=16, hole_mobility=Ge_mobility_h)
-        bot_cell_p_material = Ge(Na=si("1e17cm-3"), electron_diffusion_length=Ge_L_e,
-                                 relative_permittivity=16, electron_mobility=Ge_mobility_e)
+        bot_cell_n_material = Ge(Nd=si("2e18cm-3"), hole_diffusion_length=Ge_L_h, hole_mobility=Ge_mobility_h)
+        bot_cell_p_material = Ge(Na=si("1e17cm-3"), electron_diffusion_length=Ge_L_e, electron_mobility=Ge_mobility_e)
 
 
         # And, finally, we put everything together, adding also the surface recombination velocities. We also add some shading

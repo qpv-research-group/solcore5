@@ -16,7 +16,7 @@ def download_db(url=None, interpolation_points=200, confirm=False):
     This function downloads the refractiveindex.info database and creates on SQLite database at
     the path specified in the user config file.
 
-    :param url: URL from which the zip archive of the database will be downloaded. Default is "https://refractiveindex.info/download/database/rii-database-2017-09-05.zip"
+    :param url: URL from which the zip archive of the database will be downloaded. Default is "https://refractiveindex.info/download/database/rii-database-2021-07-18.zip"
     :param interpolation_points: how many interpolation points to save the data at. Default is 200.
     :param confirm: if True, will not ask if you want to download database again even if it has been downloaded previously
     :return:
