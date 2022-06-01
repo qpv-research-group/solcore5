@@ -39,7 +39,6 @@ for mat in [top_cell_n_material, top_cell_p_material]:
     mat.band_gap = material('GaInP')(In=0.51).band_gap
     mat.eff_mass_hh_z = material('GaInP')(In=0.51).eff_mass_hh_z
     mat.eff_mass_electron = material('GaInP')(In=0.51).eff_mass_electron
-    mat.relative_permittivity = 11.75
 
 all_materials.append(ARC1)
 all_materials.append(ARC2)
@@ -59,7 +58,6 @@ for mat in [mid_cell_n_material, mid_cell_p_material]:
     mat.band_gap = material('GaAs')(In=0.01).band_gap
     mat.eff_mass_hh_z = material('GaAs')(In=0.01).eff_mass_hh_z
     mat.eff_mass_electron = material('GaAs')(In=0.01).eff_mass_electron
-    mat.relative_permittivity = 13.1
 
 all_materials.append(mid_window_material)
 all_materials.append(mid_cell_n_material)
@@ -84,7 +82,6 @@ for mat in [bot_cell_n_material, bot_cell_p_material]:
     mat.band_gap = material('Ge')().band_gap
     mat.eff_mass_hh_z = material('Ge')().eff_mass_hh_z
     mat.eff_mass_electron = material('Ge')().eff_mass_electron
-    mat.relative_permittivity = 16
 
 all_materials.append(bot_buffer_material)
 all_materials.append(bot_nucleation_material)
