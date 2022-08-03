@@ -53,6 +53,7 @@ class ParameterSystem(SourceManagedClass):
             "([A-Z][a-z]*)")
 
     def get_parameter(self, material, parameter, verbose=False, **others):
+        # print('1', material)
         """Calculate/look up parameters for materials, returns in SI units
         
         Usage: .get_parameter(material_name, parameter_name, **kwargs)
@@ -68,7 +69,8 @@ class ParameterSystem(SourceManagedClass):
         The function is cached, so that multiple calls with the same parameters do not incur additional overhead.
         
         """
-        material, relevant_parameters = self.__parse_material_string(material, others)
+
+        relevant_parameters = others
 
         def tryget(p, alternative):
             try:
@@ -129,36 +131,38 @@ class ParameterSystem(SourceManagedClass):
         raise ValueError(
             "Parameter '{}' not in material '{}', nor in calculable parameters.".format(parameter, material))
 
-    def __parse_material_string(self, material_string, other_parameters):
-        """parses the material identifier strings of these types:
-        
-            - In0.2GaAsP0.01
-            - InGaAsP {"In":0.2, "P":0.01}
-            
-            into:
-                tuple("InGaAsP", {"In":0.2, "P":0.01})
-            
-            other parameters are passed into the fractions dictionary. Chemical element Symbols are permitted as 
-            sub-material strings, as well as longer words as long as they begin with a capital letter. 
-        """
-        if "{" in material_string:  # fractions given as a dictionary: InGaAsP {'In':0.2, 'P':0.01}
-            identifier, arguments = material_string.split(" ")
-            arguments = ast.literal_eval(arguments)
-            assert type(arguments) == dict, "{} is not a dict".format(arguments)
-            arguments.update(other_parameters)
-            return identifier, arguments
-
-        # else: fractions given in parameter or in string: In0.2GaAsP0.01
-        elements_and_fractions = self.element_RE.split(material_string)[1:]
-        arguments = {}
-        for element, fraction in grouper(elements_and_fractions, 2):
-            try:
-                arguments[element] = float(fraction)
-            except:
-                pass
-        arguments.update(other_parameters)
-        # print ("".join(elements_and_fractions[::2]),arguments )
-        return "".join(elements_and_fractions[::2]), arguments
+    # def __parse_material_string(self, material_string, other_parameters):
+    #     """parses the material identifier strings of these types:
+    #
+    #         - In0.2GaAsP0.01
+    #         - InGaAsP {"In":0.2, "P":0.01}
+    #
+    #         into:
+    #             tuple("InGaAsP", {"In":0.2, "P":0.01})
+    #
+    #         other parameters are passed into the fractions dictionary. Chemical element Symbols are permitted as
+    #         sub-material strings, as well as longer words as long as they begin with a capital letter.
+    #     """
+    #     # print('parse f', material_string)
+    #     if "{" in material_string:  # fractions given as a dictionary: InGaAsP {'In':0.2, 'P':0.01}
+    #         identifier, arguments = material_string.split(" ")
+    #         arguments = ast.literal_eval(arguments)
+    #         assert type(arguments) == dict, "{} is not a dict".format(arguments)
+    #         arguments.update(other_parameters)
+    #         return identifier, arguments
+    #
+    #
+    #     elements_and_fractions = self.element_RE.split(material_string)[1:]
+    #
+    #     arguments = {}
+    #     for element, fraction in grouper(elements_and_fractions, 2):
+    #         try:
+    #             arguments[element] = float(fraction)
+    #         except:
+    #             pass
+    #     arguments.update(other_parameters)
+    #
+    #     return "".join(elements_and_fractions[::2]), arguments
 
     def __eval_string_expression(self, string_expression, **others):
         if " " in string_expression:  # treat second part as unit!

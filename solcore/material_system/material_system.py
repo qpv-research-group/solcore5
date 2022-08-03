@@ -347,6 +347,7 @@ class BaseMaterial:
 
         kwargs = {element: getattr(self, element) for element in self.composition}
         kwargs["T"] = self.T
+
         return ParameterSystem().get_parameter(self.material_string, attrname, **kwargs)
 
     @lru_cache(maxsize=1)
