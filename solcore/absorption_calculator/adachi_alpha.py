@@ -4,12 +4,14 @@ from solcore.constants import hbar, pi, c
 from solcore.science_tracker import science_reference
 
 
+
+
 def create_adachi_alpha(material, Esteps=(1.42, 6, 3000), T=300, wl=None):
     """ Calculates the n, k and absorption coefficient of a material using Adachi's formalism of critical points.
 
     :param material: A solcore material
     :param Esteps: (1.42, 6, 3000) A tuple with the start, end and step energies in which calculating the optical data
-    :param T: (300) Temeprature in kelvin
+    :param T: (300) Temperature in kelvin
     :param wl: (None) Optional array indicating the wavelengths in which calculating the data
     :return: A tuple containing 4 arrays: (Energy, n, k, alpha)
     """
@@ -18,27 +20,40 @@ def create_adachi_alpha(material, Esteps=(1.42, 6, 3000), T=300, wl=None):
                       'S.Adachi, “Optical dispersion relations for GaP, GaAs, GaSb, InP, InAs, InSb, AlxGa1−xAs, '
                       'and In1−xGaxAsyP1−y” J.Appl.Phys., vol.66, no.12, pp.6030–12, 1989.')
 
-    if type(material) != str:
-        material = material.plain_string()
+    # determine if material is stored in Solcore as an alloy by checking main_fraction
+    # if not, can simply look up by name. Otherwise, need to pass relevant alloy compositions also
 
-    e0 = get_parameter(material, "E0", T=T) + 0j
-    Delta0 = get_parameter(material, "E0plusD0", T=T) + 0j - e0
-    e1 = get_parameter(material, "E1", T=T) + 0j
-    Delta1 = get_parameter(material, "E1plusD1", T=T) + 0j - e1
-    e2 = get_parameter(material, "E2", T=T) + 0j
-    egid = get_parameter(material, "Eg1d", T=T) + 0j
-    a = get_parameter(material, "A", T=T) + 0j
-    b1 = get_parameter(material, "B1", T=T) + 0j
-    b11 = get_parameter(material, "B11", T=T) + 0j
-    Gamma = get_parameter(material, "Gamma", T=T) + 0j  # , "eV",T=T)
-    cc = get_parameter(material, "C", T=T) + 0j
-    gamma = get_parameter(material, "gamma", T=T) + 0j
-    d = get_parameter(material, "D", T=T) + 0j
+    if type(material) != str:
+        if material.main_fraction == 0:
+            material = material.material_string
+            alloy_args = {}
+
+        else:
+            alloy_args = {material.composition[0]: material.main_fraction}
+            material = material.material_string
+
+    # else:
+    #     alloy_args = re.split(r'([\d\.]+)', material)
+
+
+    e0 = get_parameter(material, "E0", T=T, **alloy_args) + 0j
+    Delta0 = get_parameter(material, "E0plusD0", T=T,**alloy_args) + 0j - e0
+    e1 = get_parameter(material, "E1", T=T, **alloy_args) + 0j
+    Delta1 = get_parameter(material, "E1plusD1", T=T, **alloy_args) + 0j - e1
+    e2 = get_parameter(material, "E2", T=T, **alloy_args) + 0j
+    egid = get_parameter(material, "Eg1d", T=T, **alloy_args) + 0j
+    a = get_parameter(material, "A", T=T, **alloy_args) + 0j
+    b1 = get_parameter(material, "B1", T=T, **alloy_args) + 0j
+    b11 = get_parameter(material, "B11", T=T, **alloy_args) + 0j
+    Gamma = get_parameter(material, "Gamma", T=T, **alloy_args) + 0j  # , "eV",T=T)
+    cc = get_parameter(material, "C", T=T, **alloy_args) + 0j
+    gamma = get_parameter(material, "gamma", T=T, **alloy_args) + 0j
+    d = get_parameter(material, "D", T=T, **alloy_args) + 0j
     omegaphonon = 0
     b2 = b1
     b21 = b11
 
-    a0 = get_parameter(material, "lattice_constant", T=T)
+    a0 = get_parameter(material, "lattice_constant", T=T, **alloy_args)
 
     b2 = 44 * (e1 + 2 * Delta1 / 3.) / (a0 * (e1 + Delta1) ** 2)
     b1 = 44 * (e1 + Delta1 / 3) / (a0 * e1 ** 2)
