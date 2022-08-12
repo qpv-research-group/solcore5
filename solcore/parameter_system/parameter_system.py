@@ -53,7 +53,7 @@ class ParameterSystem(SourceManagedClass):
             "([A-Z][a-z]*)")
 
     def get_parameter(self, material, parameter, verbose=False, **others):
-        # print('1', material)
+
         """Calculate/look up parameters for materials, returns in SI units
         
         Usage: .get_parameter(material_name, parameter_name, **kwargs)
