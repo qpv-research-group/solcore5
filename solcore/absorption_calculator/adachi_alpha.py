@@ -4,8 +4,6 @@ from solcore.constants import hbar, pi, c
 from solcore.science_tracker import science_reference
 
 
-
-
 def create_adachi_alpha(material, Esteps=(1.42, 6, 3000), T=300, wl=None):
     """ Calculates the n, k and absorption coefficient of a material using Adachi's formalism of critical points.
 
@@ -31,10 +29,6 @@ def create_adachi_alpha(material, Esteps=(1.42, 6, 3000), T=300, wl=None):
         else:
             alloy_args = {material.composition[0]: material.main_fraction}
             material = material.material_string
-
-    # else:
-    #     alloy_args = re.split(r'([\d\.]+)', material)
-
 
     e0 = get_parameter(material, "E0", T=T, **alloy_args) + 0j
     Delta0 = get_parameter(material, "E0plusD0", T=T,**alloy_args) + 0j - e0
