@@ -5,6 +5,7 @@ import re  # parsing material string
 from functools import lru_cache  # cache function calls to stop things taking forever / recalculating smae things
 import numpy
 from typing import Optional, Callable
+from warnings import warn
 
 import solcore
 from solcore import siUnits
@@ -53,14 +54,15 @@ class ParameterSystem(SourceManagedClass):
             "([A-Z][a-z]*)")
 
     def get_parameter(self, material, parameter, verbose=False, **others):
-
         """Calculate/look up parameters for materials, returns in SI units
         
         Usage: .get_parameter(material_name, parameter_name, **kwargs)
-        - material_name is a string of element symbols/fractions, e.g.: In0.2GaAsP0.1
-        - parameter_name is a string of 
+        - material_name is a string, the name of the material in Solcore's database. Note that alloy fractions need to be
+            specified in **others
+        - parameter_name is a string, name of the parameter to get
         - **kwargs captures parameters that may be necessary for some calculations, eg. Temperature
-            material fractions may also be specified here, e.g.: .get_parameter("InGaAs", "band_gap", In=0.2)
+            material fractions may also be specified here, e.g.: .get_parameter("InGaAs", "band_gap", In=0.2) for the
+            bandgap of In0.2Ga0.8As.
         
         If a compound material is bowed between two parent materials, the parent materials' parameters are calculated
         recursively with this function. The final parameter is calculated as:
@@ -69,6 +71,9 @@ class ParameterSystem(SourceManagedClass):
         The function is cached, so that multiple calls with the same parameters do not incur additional overhead.
         
         """
+
+        warn('Passing alloy fractions to get_parameter in the material name (e.g. In0.2GaAs) is now deprecated; \
+        pass the alloy fraction as an argument instead.', DeprecationWarning)
 
         relevant_parameters = others
 
@@ -131,38 +136,6 @@ class ParameterSystem(SourceManagedClass):
         raise ValueError(
             "Parameter '{}' not in material '{}', nor in calculable parameters.".format(parameter, material))
 
-    # def __parse_material_string(self, material_string, other_parameters):
-    #     """parses the material identifier strings of these types:
-    #
-    #         - In0.2GaAsP0.01
-    #         - InGaAsP {"In":0.2, "P":0.01}
-    #
-    #         into:
-    #             tuple("InGaAsP", {"In":0.2, "P":0.01})
-    #
-    #         other parameters are passed into the fractions dictionary. Chemical element Symbols are permitted as
-    #         sub-material strings, as well as longer words as long as they begin with a capital letter.
-    #     """
-    #     # print('parse f', material_string)
-    #     if "{" in material_string:  # fractions given as a dictionary: InGaAsP {'In':0.2, 'P':0.01}
-    #         identifier, arguments = material_string.split(" ")
-    #         arguments = ast.literal_eval(arguments)
-    #         assert type(arguments) == dict, "{} is not a dict".format(arguments)
-    #         arguments.update(other_parameters)
-    #         return identifier, arguments
-    #
-    #
-    #     elements_and_fractions = self.element_RE.split(material_string)[1:]
-    #
-    #     arguments = {}
-    #     for element, fraction in grouper(elements_and_fractions, 2):
-    #         try:
-    #             arguments[element] = float(fraction)
-    #         except:
-    #             pass
-    #     arguments.update(other_parameters)
-    #
-    #     return "".join(elements_and_fractions[::2]), arguments
 
     def __eval_string_expression(self, string_expression, **others):
         if " " in string_expression:  # treat second part as unit!
