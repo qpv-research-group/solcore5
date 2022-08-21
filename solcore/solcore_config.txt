@@ -1,5 +1,5 @@
 [Configuration]
-version: 5.7.7
+version: 5.8.0
 welcome_message: 1
 verbose_loading: 1
 
