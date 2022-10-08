@@ -43,7 +43,7 @@ def test_iv_parameters():
     current = s - voltage
 
     expected = dict(
-        Isc=s, Voc=s, Pmmp=(s / 2) ** 2, Impp=(s / 2), Vmpp=(s / 2), FF=1 / 4
+        Jsc=s, Voc=s, Pmmp=(s / 2) ** 2, Jmpp=(s / 2), Vmpp=(s / 2), FF=1 / 4
     )
     actual1 = iv_parameters(voltage, current)
     actual2 = JunctionBase.iv_parameters(voltage, current)
