@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import NamedTuple, Optional, Dict, Sequence, Callable, Union
+from typing import NamedTuple, Optional, Dict, Sequence, Callable, Union, Tuple
 from dataclasses import dataclass
 from warnings import warn
 
@@ -8,9 +8,9 @@ import xarray as xr
 import numpy as np
 
 from ..junction_base import JunctionBase
-from ..structure import Structure
-from ..constants import kb, q, vacuum_permittivity as e0
-from ..analytic_solar_cells.depletion_approximation import get_Jsrh
+from ...structure import Structure
+from ...constants import kb, q, vacuum_permittivity as e0
+from ...analytic_solar_cells.depletion_approximation import get_Jsrh
 
 
 NK_DATA_SIGNATURE = Callable[[np.ndarray], xr.DataArray]
@@ -209,7 +209,7 @@ class AbruptHomojunction(JunctionBase):
         )
 
     @staticmethod
-    def _find_polarity(structure: Structure) -> (Sequence, str):
+    def _find_polarity(structure: Structure) -> Tuple[Sequence, str]:
         """Finds the polarity of a Structure of layers with materials.
 
         Args:

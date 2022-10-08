@@ -2,7 +2,7 @@ from pytest import approx
 
 
 def test_registry():
-    from solcore.junction_base import JUNCTIONS_REGISTRY, JunctionBase
+    from solcore.future.junction_base import JUNCTIONS_REGISTRY, JunctionBase
 
     class MyJunction(JunctionBase):
         pass
@@ -11,7 +11,7 @@ def test_registry():
 
 
 def test_not_overwritten_behavior():
-    from solcore.junction_base import JunctionBase
+    from solcore.future.junction_base import JunctionBase
 
     class MyJunction(JunctionBase):
         def solve_equilibrium(self):
@@ -35,7 +35,7 @@ def test_not_overwritten_behavior():
 
 
 def test_iv_parameters():
-    from solcore.junction_base import iv_parameters, JunctionBase
+    from solcore.future.junction_base import iv_parameters, JunctionBase
     import numpy as np
 
     s = 1.5
