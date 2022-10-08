@@ -3,11 +3,11 @@ from setuptools import dist, find_packages
 
 def pre_install_numpy():
     try:
-        import numpy # noqa
+        import numpy  # noqa
     except ImportError:
-        print('Installing numpy')
-        numpy_version = dist.Distribution().fetch_build_eggs(['numpy'])[0].version
-        print(f'Pre-installed numpy {numpy_version}')
+        print("Installing numpy")
+        numpy_version = dist.Distribution().fetch_build_eggs(["numpy"])[0].version
+        print(f"Pre-installed numpy {numpy_version}")
 
 
 pre_install_numpy()
@@ -38,17 +38,18 @@ config = ConfigParser()
 config.read([default_config])
 
 # We give the option of compiling - and installing - the extension modules
-if (("--with_pdd" in sys.argv) or
-        (('SOLCORE_WITH_PDD' in os.environ) and
-         (os.environ['SOLCORE_WITH_PDD'] == "1"))):
-    sources = os.path.join("solcore", "poisson_drift_diffusion",
-                           "DDmodel-current.f95")
+if ("--with_pdd" in sys.argv) or (
+    ("SOLCORE_WITH_PDD" in os.environ) and (os.environ["SOLCORE_WITH_PDD"] == "1")
+):
+    sources = os.path.join("solcore", "poisson_drift_diffusion", "DDmodel-current.f95")
     ext = [
         Extension(
             name="solcore.poisson_drift_diffusion.ddModel",
             sources=[sources],
             f2py_options=["--quiet"],
-            extra_link_args=["-static", "-static-libgfortran", "-static-libgcc"] if sys.platform == "win32" else None
+            extra_link_args=["-static", "-static-libgfortran", "-static-libgcc"]
+            if sys.platform == "win32"
+            else None,
         )
     ]
     if "--with_pdd" in sys.argv:
@@ -92,7 +93,11 @@ install_requires = [
     "yabox",
     "xarray",
     "joblib",
-    "xarray"
+    "pint",
+    "frozendict",
+    "pint_xarray",
+    "Deprecated",
+    "requests",
 ]
 tests_require = [
     "pytest",
@@ -102,10 +107,13 @@ tests_require = [
     "nbformat",
     "pytest-rerunfailures",
     "pytest-xdist",
+    "pytest-flake8",
+    "pytest-mypy",
+    "hypothesis",
 ]
 docs_require = ["Sphinx", "recommonmark"]
 extras_require = {
-    "dev": tests_require + docs_require + ["pre-commit"],
+    "dev": tests_require + docs_require + ["pre-commit", "bump2version"],
     "docs": docs_require,
     "test": tests_require,
 }
