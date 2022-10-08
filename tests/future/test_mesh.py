@@ -4,7 +4,7 @@ from pytest import raises, approx
 def test_validate():
     import xarray as xr
     import numpy as np
-    from solcore.mesh import InvalidMesh, Mesh
+    from solcore.future.mesh import InvalidMesh, Mesh
 
     p = [1, 2, 3]
 
@@ -22,7 +22,7 @@ def test_validate():
 
     # No interval information
     z = xr.DataArray(
-        p, dims=["points"], coords={"group": ("points", np.ones_like(p).astype(int)),},
+        p, dims=["points"], coords={"group": ("points", np.ones_like(p).astype(int))}
     )
     with raises(InvalidMesh):
         Mesh._validate(z)
@@ -31,7 +31,9 @@ def test_validate():
     z = xr.DataArray(
         p,
         dims=["points"],
-        coords={"interval": ("points", np.ones_like(p).astype(int)),},
+        coords={
+            "interval": ("points", np.ones_like(p).astype(int)),
+        },
     )
     with raises(InvalidMesh):
         Mesh._validate(z)
@@ -49,7 +51,7 @@ def test_validate():
 
 
 def test_init_mesh():
-    from solcore.mesh import Mesh
+    from solcore.future.mesh import Mesh
     import xarray as xr
     import numpy as np
 
@@ -70,7 +72,7 @@ def test_init_mesh():
 
 
 def test_uniform():
-    from solcore.mesh import uniform
+    from solcore.future.mesh import uniform
 
     nodes = [4, 40, 400]
     mesh = uniform(42, nodes)
@@ -80,7 +82,7 @@ def test_uniform():
 
 
 def test_piecewise_uniform():
-    from solcore.mesh import piecewise_uniform
+    from solcore.future.mesh import piecewise_uniform
 
     nodes = [4, 40, 400]
 
@@ -98,7 +100,7 @@ def test_piecewise_uniform():
 
 
 def test_constrained():
-    from solcore.mesh import constrained
+    from solcore.future.mesh import constrained
     import numpy as np
 
     nodes = np.array([0, 4, 200, 40000]) * 1e-9
@@ -113,7 +115,7 @@ def test_constrained():
 
 
 def test_select_interval():
-    from solcore.mesh import piecewise_uniform
+    from solcore.future.mesh import piecewise_uniform
 
     nodes = [4, 40, 400]
     npoints = [42, 100]
@@ -133,7 +135,7 @@ def test_select_interval():
 
 
 def test_split_in_intervals():
-    from solcore.mesh import piecewise_uniform
+    from solcore.future.mesh import piecewise_uniform
 
     nodes = [4, 40, 400, 4000]
     npoints = [42, 100, 200]
@@ -148,7 +150,7 @@ def test_split_in_intervals():
 
 
 def test_concat2mesh():
-    from solcore.mesh import uniform, piecewise_uniform, concat2mesh
+    from solcore.future.mesh import uniform, piecewise_uniform, concat2mesh
     import numpy as np
 
     nodes1 = [4, 40, 400]
@@ -166,7 +168,7 @@ def test_concat2mesh():
 
 
 def test_concat_mesh():
-    from solcore.mesh import piecewise_uniform, concat_mesh
+    from solcore.future.mesh import piecewise_uniform, concat_mesh
     import numpy as np
     from functools import reduce
 
@@ -199,7 +201,7 @@ def test_concat_mesh():
 
 
 def test_select_group():
-    from solcore.mesh import uniform, piecewise_uniform, concat2mesh
+    from solcore.future.mesh import uniform, piecewise_uniform, concat2mesh
     import xarray as xr
 
     nodes1 = [5, 40, 400]
@@ -220,7 +222,7 @@ def test_select_group():
 
 
 def test_split_in_groups():
-    from solcore.mesh import uniform, piecewise_uniform, concat2mesh
+    from solcore.future.mesh import uniform, piecewise_uniform, concat2mesh
     import xarray as xr
 
     nodes1 = [4, 40, 400]
