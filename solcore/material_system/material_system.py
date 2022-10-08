@@ -301,13 +301,13 @@ class BaseMaterial:
     def __getattr__(self, attrname):  # only used for unknown attributes.
         if attrname == "n":
             try:
-                return self.n
-            except:
+                return self.__getattribute__(attrname)
+            except AttributeError:
                 return self.n_interpolated
         if attrname == "k":
             try:
-                return self.k
-            except:
+                return self.__getattribute__(attrname)
+            except AttributeError:
                 return self.k_interpolated
         if attrname == "electron_affinity":
             try:
@@ -347,6 +347,7 @@ class BaseMaterial:
 
         kwargs = {element: getattr(self, element) for element in self.composition}
         kwargs["T"] = self.T
+
         return ParameterSystem().get_parameter(self.material_string, attrname, **kwargs)
 
     @lru_cache(maxsize=1)

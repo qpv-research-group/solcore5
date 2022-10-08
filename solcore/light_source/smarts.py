@@ -82,7 +82,7 @@ def calculate_spectrum_smarts(smarts_file_contents=None, filename='smarts295', t
         # Start the process
         try:
             this_process = subprocess.Popen((executable,), stdout=subprocess.PIPE, stdin=subprocess.PIPE,
-                                            stderr=subprocess.PIPE, cwd=working_directory)
+                                            stderr=subprocess.PIPE, cwd=smarts)
             # We need to tell smarts where to find the input data
             output, error = this_process.communicate(
                 input=bytes('N\n"{0}"\n{1}\nY\n'.format(working_directory, filename), "ASCII"))

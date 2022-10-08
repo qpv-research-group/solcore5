@@ -67,7 +67,7 @@ def iv_2diode(junction, options):
                 jsc = junction.jsc
             elif hasattr(junction, 'eqe'):
                 eqe = junction.eqe
-                wl, ph = options.light_source.spectrum(x=wl, output_units='photon_flux_per_m')
+                _, ph = options.light_source.spectrum(x=wl, output_units='photon_flux_per_m')
                 jsc = q * np.trapz(eqe(wl) * ph, wl)
             else:
                 jsc = 0

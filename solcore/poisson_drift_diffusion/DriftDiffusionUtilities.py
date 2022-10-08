@@ -137,7 +137,7 @@ def short_circuit_pdd(junction, options):
     equilibrium_pdd(junction, options)
 
     wl = options.wavelength
-    wl, ph = options.light_source.spectrum(x=wl, output_units='photon_flux_per_m')
+    wl_sp, ph = options.light_source.spectrum(x=wl, output_units='photon_flux_per_m')
 
     z = junction.equilibrium_data['Bandstructure']['x']
     absorption = junction.absorbed if hasattr(junction, 'absorbed') else lambda x: 0

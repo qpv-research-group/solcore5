@@ -5,16 +5,18 @@ import numpy as np
 import types
 from solcore.state import State
 
+
 rcwa_options = State()
 rcwa_options.size = [500, 500]
 rcwa_options.orders = 4
 rcwa_options.theta = 0
 rcwa_options.phi = 0
 rcwa_options.pol = 'u'
-
+rcwa_options.parallel = False
+rcwa_options.n_jobs = -1
 
 def solve_rcwa(solar_cell, options):
-    """ Calculates the reflection, transmission and absorption of a solar cell object using the rigorous coupled-wave analysis solver.
+    """Calculates the reflection, transmission and absorption of a solar cell object using the rigorous coupled-wave analysis solver.
 
     :param solar_cell: A solar_cell object
     :param options: Options for the solver
@@ -22,20 +24,25 @@ def solve_rcwa(solar_cell, options):
     """
     wl = options.wavelength
     solar_cell.wavelength = options.wavelength
+    parallel = options.parallel
+    rcwa_options = options.get("rcwa_options", None)
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, 'shading') else 1
 
     # Now we calculate the absorbed and transmitted light. We first get all the relevant parameters from the objects
     all_layers = []
+    n_layers_junction = []
     for j, layer_object in enumerate(solar_cell):
 
         # Attenuation due to absorption in the AR coatings or any layer in the front that is not part of the junction
         if type(layer_object) is Layer:
             all_layers.append(layer_object)
+            n_layers_junction.append(1)
 
         # For each junction, and layer within the junction, we get the absorption coefficient and the layer width.
         elif type(layer_object) in [TunnelJunction, Junction]:
+            n_layers_junction.append(len(layer_object))
             for i, layer in enumerate(layer_object):
                 all_layers.append(layer)
 
@@ -43,23 +50,26 @@ def solve_rcwa(solar_cell, options):
     stack = all_layers
 
     position = options.position * 1e9
-    # angle_theta = options.angle_theta if 'angle_theta' in options.keys() else 0
-    # angle_phi = options.angle_phi if 'angle_phi' in options.keys() else 0
-    # pol = options.pol if 'pol' in options.keys() else 'u'
-    # size = options.size if 'size' in options.keys() else [500, 500]
-    # orders = options.orders if 'orders' in options.keys() else 4
+
     substrate = solar_cell.substrate
+    incidence = solar_cell.incidence
 
     print('Calculating RAT...')
-    RAT = calculate_rat_rcwa(stack, options.size, options.orders, wl * 1e9, theta=options.theta,
-                             phi=options.phi, pol=options.pol, substrate=substrate)
+    RAT = calculate_rat_rcwa(stack, options.size, options.orders, wl * 1e9, incidence, substrate, theta=options.theta,
+                             phi=options.phi, pol=options.pol, parallel=parallel, user_options=rcwa_options)
+
 
     print('Calculating absorption profile...')
-    out = calculate_absorption_profile_rcwa(stack, options.size, options.orders, wl * 1e9, RAT,
-                                            dist=position, theta=options.theta, phi=options.phi, pol=options.pol, substrate=substrate)
-
+    out = calculate_absorption_profile_rcwa(stack, options.size, options.orders, wl*1e9, RAT['A_pol'],
+                                      dist=position, theta=options.theta, phi=options.phi, pol=options.pol, incidence=incidence,
+                                      substrate=substrate,
+                                      parallel=options.parallel, n_jobs=options.n_jobs, user_options=rcwa_options)
     # With all this information, we are ready to calculate the differential absorption function
     diff_absorption, all_absorbed = calculate_absorption_rcwa(out, initial)
+
+
+    layer = 0
+    A_per_layer = np.array(RAT['A_per_layer'].T)
 
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
@@ -67,10 +77,8 @@ def solve_rcwa(solar_cell, options):
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
 
-        layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
-                options.position < solar_cell[j].offset + solar_cell[j].width)]
-        layer_positions = layer_positions - np.min(layer_positions)
-        solar_cell[j].layer_absorption = np.trapz(solar_cell[j].absorbed(layer_positions), layer_positions, axis=0)
+        solar_cell[j].layer_absorption = initial*np.sum(A_per_layer[layer:(layer+n_layers_junction[j])], axis=0)
+        layer = layer + n_layers_junction[j]
 
     solar_cell.reflected = RAT['R'] * initial
     solar_cell.absorbed = sum([solar_cell[x].layer_absorption for x in np.arange(len(solar_cell))])

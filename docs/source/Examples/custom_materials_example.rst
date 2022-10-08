@@ -18,21 +18,10 @@ Setting up the options for and defining custom materials
 	import numpy as np
 	import os
 
-	# first we need to tell Solcore some things about where to put custom materials. for this,
-	# we use the add_source function from config_tools, although we could also manually edit
-	# the solcore configuration file (which should be in your home directory).
-	# You need to add two things to the config file: where to put the n and k data for new
-	# materials added to the database, and where to put the other parameters (these can all
-	# go in the same file).
-
-	home_folder = os.path.expanduser('~')
-	custom_nk_path = os.path.join(home_folder, 'Solcore/custommats')
-	nk_db_path = os.path.join(home_folder, 'Solcore/NK.db')
-	param_path = os.path.join(home_folder, 'Solcore/custom_params.txt')
-
-	add_source('Others', 'custom_mats', custom_nk_path)
-	add_source('Others', 'nk', nk_db_path)
-	add_source('Parameters', 'custom', param_path)
+    # When adding custom materials - or getting the refractive index database - the
+    # information will be stored in the Solcore's users folder. These can be setup by setting
+    # the SOLCORE_USER_DATA environmental variable to your prefered location or, by default,
+    # it will be in your home directory, in a directory called .solcore.
 
 	# EXAMPLE 1
 
@@ -42,6 +31,10 @@ Setting up the options for and defining custom materials
 	# create a new material, silicon-germanium-tin, from input files. Here,
 	# the parameters in SiGeSn_params.txt have been copied directly from Ge.
 	create_new_material('SiGeSn', 'SiGeSn_n.txt', 'SiGeSn_k.txt', 'SiGeSn_params.txt')
+
+	# Note that the final argument, the parameter file, is optional - if you do not
+	# provide it, a material will be added with optical constants only, so it can be
+	# used for optical calculations.
 
 	# can now create an instance of it like any Solcore material
 	SiGeSn = material('SiGeSn')()

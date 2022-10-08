@@ -33,7 +33,7 @@ Looking at the effect of substrate and the no_back_reflection option in the TMM 
 
 	# Thin solar cell, no substrate - will get significant absorption enhancement from reflection at the GaAs/air interface at the back
 	# MUST specify no_back_reflection = False, so that Solcore does not automatically suppress reflections from the back
-	# (currently, the default setting in solcore is to suppress reflections from the back, so no_back_reflection = True
+	# (currently, the default setting in solcore is to suppress reflections from the back, so no_back_reflection = True)
 	solar_cell_solver(thin_GaAs, 'optics', user_options={'wavelength': wl, 'optics_method': 'TMM', 'no_back_reflection': False})
 	z_pos = np.linspace(0, thin_GaAs.width, 201)
 	profiles_thin = thin_GaAs[0].absorbed(z_pos)

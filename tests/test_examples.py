@@ -2,6 +2,7 @@ from glob import glob
 from pathlib import Path
 from pytest import fixture, mark, skip
 import os
+import subprocess
 from .conftest import patch_plots
 
 cwd = os.getcwd()
@@ -20,7 +21,6 @@ def examples_directory(tmp_path_factory):
 def example_scripts():
     exdir = Path(__file__).parent.parent / "examples"
     scripts = sorted([os.path.basename(f) for f in glob(str(exdir / "*.py"))])
-    # scripts.remove("differential_evolution_ARC.py")
     return scripts
 
 
@@ -32,96 +32,55 @@ def example_notebooks():
 
 @patch_plots
 @mark.parametrize("example", example_scripts())
-def test_example_scripts(example, examples_directory, monkeypatch):
-    from solcore.spice import SpiceSolverError
-    from solcore.light_source import SmartsSolverError
-    from solcore.optics import RCWASolverError
-    import sys
+def test_example_scripts(example, examples_directory):
 
-    os.chdir(examples_directory)
-    monkeypatch.setattr("builtins.input", lambda *x, **y: "y")
+    env = os.environ.copy()
+    env["PYTHONWARNINGS"] = "ignore"
+    with open(examples_directory / example) as fp:
+        script = "import matplotlib\nmatplotlib.use('Agg')\n" + fp.read()
+        process = subprocess.run(
+            ["python", "-c", script],
+            capture_output=True,
+            cwd=str(examples_directory),
+            env=env,
+        )
 
-    script = str(examples_directory / Path(example))
-    try:
-        with open(script) as fp:
-            code = compile(fp.read(), script, "exec")
-
-        # try to emulate __main__ namespace as much as possible
-        # What trace python module uses https://docs.python.org/3.7/library/trace.html
-        globs = {
-            "__file__": script,
-            "__name__": "__main__",
-            "__package__": None,
-            "__cached__": None,
-        }
-        exec(code, globs, globs)
-        os.chdir(cwd)
-
-    except OSError as err:
-        os.chdir(cwd)
-        sys.exit("Cannot run file %r because: %s" % (sys.argv[0], err))
-
-    except SystemExit:
-        os.chdir(cwd)
-        pass
-
-    except SpiceSolverError:
-        os.chdir(cwd)
+    if b"SpiceSolverError" in process.stderr:
         skip("No SPICE solver found.")
-
-    except SmartsSolverError:
-        os.chdir(cwd)
+    elif b"SmartsSolverError" in process.stderr:
         skip("No SMARTS solver found.")
-
-    except RCWASolverError:
-        os.chdir(cwd)
+    elif b"RCWASolverError" in process.stderr:
         skip("No RCWA solver found.")
+    elif process.stderr != b"":
+        raise Exception(process.stderr.decode())
 
 
 @patch_plots
 @mark.parametrize("example", example_notebooks())
-def test_example_notebooks(example, examples_directory, monkeypatch):
-    from solcore.spice import SpiceSolverError
-    from solcore.light_source import SmartsSolverError
+def test_example_notebooks(example, examples_directory):
     import nbconvert
     import nbformat
-    import sys
 
-    notebooks_folder = examples_directory / "notebooks"
-    os.chdir(notebooks_folder)
-    monkeypatch.setattr("builtins.input", lambda *x, **y: "y")
-
-    script = str(notebooks_folder / Path(example))
     exporter = nbconvert.PythonExporter()
-    try:
-        nbcode = nbformat.reads(open(script).read(), as_version=4)
+    notebooks_folder = examples_directory / "notebooks"
+    env = os.environ.copy()
+    env["PYTHONWARNINGS"] = "ignore"
+    with open(notebooks_folder / example) as fp:
+        nbcode = nbformat.reads(fp.read(), as_version=4)
         (code, _) = exporter.from_notebook_node(nbcode)
-        with open(script) as fp:
-            code = compile(code, script, "exec")
+        script = "import matplotlib\nmatplotlib.use('Agg')\n" + code
+        process = subprocess.run(
+            ["python", "-c", script],
+            capture_output=True,
+            cwd=str(notebooks_folder),
+            env=env,
+        )
 
-        # try to emulate __main__ namespace as much as possible
-        # What trace python module uses https://docs.python.org/3.7/library/trace.html
-        globs = {
-            "__file__": script,
-            "__name__": "__main__",
-            "__package__": None,
-            "__cached__": None,
-        }
-        exec(code, globs, globs)
-        os.chdir(cwd)
-
-    except OSError as err:
-        os.chdir(cwd)
-        sys.exit("Cannot run file %r because: %s" % (sys.argv[0], err))
-
-    except SystemExit:
-        os.chdir(cwd)
-        pass
-
-    except SpiceSolverError:
-        os.chdir(cwd)
+    if b"SpiceSolverError" in process.stderr:
         skip("No SPICE solver found.")
-
-    except SmartsSolverError:
-        os.chdir(cwd)
+    elif b"SmartsSolverError" in process.stderr:
         skip("No SMARTS solver found.")
+    elif b"RCWASolverError" in process.stderr:
+        skip("No RCWA solver found.")
+    elif process.stderr != b"":
+        raise Exception(process.stderr.decode())

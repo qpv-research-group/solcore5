@@ -68,7 +68,7 @@ def iv_detailed_balance(junction, options):
     # Now we calculate the generation current, made of thermal generation and photogeneration
     jthermal = emis(np.array([0]), Ta)[0]
     if light:
-        wl, ph = options.light_source.spectrum(x=wl, output_units='photon_flux_per_m')
+        _, ph = options.light_source.spectrum(x=wl, output_units='photon_flux_per_m')
         jsc = q * np.trapz(eqe(wl) * ph, wl) + jthermal
     else:
         jsc = jthermal

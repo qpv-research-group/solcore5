@@ -24,6 +24,10 @@ the parameters in SiGeSn_params.txt have been copied directly from Ge.
 
 create_new_material('SiGeSn', 'data/SiGeSn_n.txt', 'data/SiGeSn_k.txt', 'data/SiGeSn_params.txt')
 
+# Note that the final argument, the parameter file, is optional - if you do not
+# provide it, a material will be added with optical constants only, so it can be
+# used for optical calculations.
+
 # can now create an instance of it like any Solcore material
 SiGeSn = material('SiGeSn')()
 
@@ -39,25 +43,26 @@ plt.show()
 """
 EXAMPLE 2
 Can also create a Solcore material from a material in the refractiveindex.info database:
-
 if necessary, download database:
+(Uncomment lines below to run this part of the example!)
 """
-download_db()
-
-# search what options are available for diamond, then use the first result's pageid to
-# create data files for the n & k of diamond:
-
-results = search_db('Diamond')
-create_nk_txt(pageid=results[0][0], file='C_Diamond')
-create_new_material(mat_name = 'Diamond', n_source='C_Diamond_n.txt', k_source='C_Diamond_k.txt')
-
-Diamond = material('Diamond')()
-
-plt.figure()
-plt.plot(si(np.arange(100, 800, 5), 'nm')*1e9, Diamond.n(si(np.arange(100, 800, 5), 'nm')))
-plt.plot(si(np.arange(100, 800, 5), 'nm')*1e9, Diamond.k(si(np.arange(100, 800, 5), 'nm')))
-
-plt.xlabel('Wavelength (nm)')
-plt.ylabel('Diamond n / k')
-
-plt.show()
+#
+# download_db()
+#
+# # search what options are available for diamond, then use the first result's pageid to
+# # create data files for the n & k of diamond:
+#
+# results = search_db('Diamond')
+# create_nk_txt(pageid=results[0][0], file='C_Diamond')
+# create_new_material(mat_name = 'Diamond', n_source='C_Diamond_n.txt', k_source='C_Diamond_k.txt')
+#
+# Diamond = material('Diamond')()
+#
+# plt.figure()
+# plt.plot(si(np.arange(100, 800, 5), 'nm')*1e9, Diamond.n(si(np.arange(100, 800, 5), 'nm')))
+# plt.plot(si(np.arange(100, 800, 5), 'nm')*1e9, Diamond.k(si(np.arange(100, 800, 5), 'nm')))
+#
+# plt.xlabel('Wavelength (nm)')
+# plt.ylabel('Diamond n / k')
+#
+# plt.show()

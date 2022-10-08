@@ -33,22 +33,26 @@ def solve_beer_lambert(solar_cell, options):
     # Now we calculate the absorbed and transmitted light. We first get all the relevant parameters from the objects
     widths = []
     alphas = []
+    n_layers_junction = []
+
     for j, layer_object in enumerate(solar_cell):
 
         # Attenuation due to absorption in the AR coatings or any layer in the front that is not part of the junction
         if type(layer_object) is Layer:
             widths.append(layer_object.width)
             alphas.append(layer_object.material.alpha(wl_m))
+            n_layers_junction.append(1)
 
         # For each Tunnel junctions will have, at most, a resistance an some layers absorbing light.
         elif type(layer_object) is TunnelJunction:
+            n_layers_junction.append(len(layer_object))
             for i, layer in enumerate(layer_object):
                 widths.append(layer.width)
                 alphas.append(layer.material.alpha(wl_m))
 
         # For each junction, and layer within the junction, we get the absorption coeficient and the layer width.
         elif type(layer_object) is Junction:
-
+            n_layers_junction.append(len(layer_object))
             kind = solar_cell[j].kind if hasattr(solar_cell[j], 'kind') else None
 
             if kind == '2D':
@@ -59,7 +63,7 @@ def solve_beer_lambert(solar_cell, options):
                     w = layer_object.width
 
                     def alf(x):
-                        return 0.0*x
+                        return 0.0 * x
 
                     solar_cell[j].alpha = alf
                     solar_cell[j].reflected = interp1d(wl_m, solar_cell.reflected, bounds_error=False,
@@ -106,16 +110,25 @@ def solve_beer_lambert(solar_cell, options):
 
     # Each building block (layer or junction) needs to have access to the absorbed light in its region.
     # We update each object with that information.
-    I_0 = fraction
+
+    I0 = 1*fraction # need the *1 because we DO NOT want to modify fraction! Will mess up profile calculation
+
+    layers_above_offset = np.cumsum([0] + n_layers_junction)
+
     for j in range(len(solar_cell)):
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
 
         # total absorption at each wavelength, per layer
-        layer_positions = options.position[(options.position >= solar_cell[j].offset) & (
-                options.position < solar_cell[j].offset + solar_cell[j].width)]
-        layer_positions = layer_positions - np.min(layer_positions)
-        solar_cell[j].layer_absorption = np.trapz(solar_cell[j].absorbed(layer_positions), layer_positions, axis=0)
+        A_junc = np.zeros_like(wl_m)
+
+        for k in range(n_layers_junction[j]):
+            ilayer = layers_above_offset[j] + k
+            A_layer = I0 * (1 - np.exp(-alphas[ilayer] * widths[ilayer]))
+            A_junc += A_layer
+            I0 -= A_layer
+
+        solar_cell[j].layer_absorption = A_junc
 
     solar_cell.transmitted = transmitted
     solar_cell.absorbed = all_absorbed

@@ -252,9 +252,10 @@ class Cauchy:
         :param x: Spectral position in nm
         :return: The dielectric constant at this spectral position
         """
+        x_um = x / 1000
         x_eV = 1240 / x
 
-        N = self.An + self.Bn / (x / 1000.) ** 2 + self.Cn * (x / 1000.) ** 4
+        N = self.An + self.Bn / x_um** 2 + self.Cn /x_um ** 4
         K = self.Ak * np.exp(self.Bk * (x_eV - self.Ck))
 
         return (N + 1.j * K) ** 2

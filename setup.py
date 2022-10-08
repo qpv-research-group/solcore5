@@ -1,4 +1,16 @@
-from setuptools import find_packages
+from setuptools import dist, find_packages
+
+
+def pre_install_numpy():
+    try:
+        import numpy # noqa
+    except ImportError:
+        print('Installing numpy')
+        numpy_version = dist.Distribution().fetch_build_eggs(['numpy'])[0].version
+        print(f'Pre-installed numpy {numpy_version}')
+
+
+pre_install_numpy()
 from numpy.distutils.core import Extension, setup
 
 import os
@@ -7,8 +19,8 @@ from configparser import ConfigParser
 
 
 def gen_data_files(*dirs):
-    """ Creates the list of files (not necessarily python files) that need to be
-    installed together with the rest of stuff """
+    """Creates the list of files (not necessarily python files) that need to be
+    installed together with the rest of stuff"""
     results = []
     exclude = [".DS_Store", "__pycache__", "egg", ".git"]
     for src_dir in dirs:
@@ -26,16 +38,21 @@ config = ConfigParser()
 config.read([default_config])
 
 # We give the option of compiling - and installing - the extension modules
-if "--with_pdd" in sys.argv:
-    sources = os.path.join("solcore", "poisson_drift_diffusion", "DDmodel-current.f95")
+if (("--with_pdd" in sys.argv) or
+        (('SOLCORE_WITH_PDD' in os.environ) and
+         (os.environ['SOLCORE_WITH_PDD'] == "1"))):
+    sources = os.path.join("solcore", "poisson_drift_diffusion",
+                           "DDmodel-current.f95")
     ext = [
         Extension(
             name="solcore.poisson_drift_diffusion.ddModel",
             sources=[sources],
             f2py_options=["--quiet"],
+            extra_link_args=["-static", "-static-libgfortran", "-static-libgcc"] if sys.platform == "win32" else None
         )
     ]
-    sys.argv.remove("--with_pdd")
+    if "--with_pdd" in sys.argv:
+        sys.argv.remove("--with_pdd")
 else:
     ext = []
 
@@ -63,7 +80,6 @@ if "update_manifest" in sys.argv:
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-
 install_requires = [
     "numpy",
     "matplotlib",
@@ -75,18 +91,30 @@ install_requires = [
     "pyyaml",
     "yabox",
     "xarray",
+    "joblib",
 ]
-tests_require = ["pytest", "pytest-cov", "pytest-mock", "nbconvert", "nbformat"]
+tests_require = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "nbconvert",
+    "nbformat",
+    "pytest-rerunfailures",
+    "pytest-xdist",
+]
 docs_require = ["Sphinx", "recommonmark"]
-extras_require = {"dev": tests_require + docs_require + ["pre-commit"], 
-                  "docs": docs_require, "test": tests_require}
-
+extras_require = {
+    "dev": tests_require + docs_require + ["pre-commit"],
+    "docs": docs_require,
+    "test": tests_require,
+}
 
 setup(
     name="solcore",
     version=config.get("Configuration", "version"),
     description="Python-based solar cell simulator",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/qpv-research-group/solcore5",
     download_url="https://github.com/qpv-research-group/solcore5/archive/v{}.tar.gz".format(
         config.get("Configuration", "version")
