@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Dict, NamedTuple, Callable
+from typing import Optional, Dict, NamedTuple, Callable
 from copy import deepcopy
 import numpy as np
 import xarray as xr
 from scipy.optimize import root
 
 from ..junction_base import JunctionBase
-from ..constants import q, kb, hbar, c
+from ...constants import q, kb, hbar, c
 
 
 class TwoDiodeData(NamedTuple):
