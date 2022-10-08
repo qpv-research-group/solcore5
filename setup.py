@@ -92,6 +92,7 @@ install_requires = [
     "yabox",
     "xarray",
     "joblib",
+    "xarray"
 ]
 tests_require = [
     "pytest",
