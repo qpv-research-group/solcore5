@@ -256,7 +256,7 @@ class TestCalculableParameters:
             if param == "param_16":
                 return Parameter(16, reference="SomePaper")
             else:
-                raise ParameterMissing()
+                raise ParameterMissing("A source", "gold", "value")
 
         cp.parman.get_parameter = get_param
 
