@@ -6,7 +6,7 @@ import scipy.interpolate
 
 
 class DBMaterial:
-    """ Material class"""
+    """Material class"""
 
     def __init__(self, filename, interpolation_points=100, empty=False):
         """
@@ -161,9 +161,9 @@ class DBMaterial:
             header = "wl,n,k\n"
             output_f = open(output.replace(".csv", "(nk).csv"), "w")
             output_f.write(header)
-            for i in range(len(refr)):
+            for _refr, _ext in list(zip(refr, ext)):
                 output_f.write(
-                    ",".join(list(map(str, [refr[i][0], refr[i][1], ext[i][1]]))) + "\n"
+                    ",".join(list(map(str, [_refr[0], _refr[1], _ext[1]]))) + "\n"
                 )
             output_f.close()
             print("Wrote", output.replace(".csv", "(nk).csv"))
@@ -172,9 +172,9 @@ class DBMaterial:
                 output_f = open(output.replace(".csv", "(n).csv"), "w")
                 header = "wl,n\n"
                 output_f.write(header)
-                for i in range(len(refr)):
+                for _refr in refr:
                     output_f.write(
-                        ",".join(list(map(str, [refr[i][0], refr[i][1]]))) + "\n"
+                        ",".join(list(map(str, [_refr[0], _refr[1]]))) + "\n"
                     )
                 output_f.close()
                 print("Wrote", output.replace(".csv", "(n).csv"))
@@ -182,10 +182,8 @@ class DBMaterial:
                 output_f = open(output.replace(".csv", "(k).csv"), "w")
                 header = "wl,k\n"
                 output_f.write(header)
-                for i in range(len(ext)):
-                    output_f.write(
-                        ",".join(list(map(str, [ext[i][0], ext[i][1]]))) + "\n"
-                    )
+                for _ext in ext:
+                    output_f.write(",".join(list(map(str, [_ext[0], _ext[1]]))) + "\n")
                 output_f.close()
                 print("Wrote", output.replace(".csv", "(k).csv"))
 
@@ -315,25 +313,25 @@ class FormulaRefractiveIndexData:
             n = 0
             if formula_type == 1:  # Sellmeier
                 nsq = 1 + coefficients[0]
-                g = lambda c1, c2, w: c1 * (w ** 2) / (w ** 2 - c2 ** 2)  # noqa: E731
+                g = lambda c1, c2, w: c1 * (w**2) / (w**2 - c2**2)  # noqa: E731
                 for i in range(1, len(coefficients), 2):
                     nsq += g(coefficients[i], coefficients[i + 1], wavelength)
                 n = numpy.sqrt(nsq)
             elif formula_type == 2:  # Sellmeier-2
                 nsq = 1 + coefficients[0]
-                g = lambda c1, c2, w: c1 * (w ** 2) / (w ** 2 - c2)  # noqa: E731
+                g = lambda c1, c2, w: c1 * (w**2) / (w**2 - c2)  # noqa: E731
                 for i in range(1, len(coefficients), 2):
                     nsq += g(coefficients[i], coefficients[i + 1], wavelength)
                 n = numpy.sqrt(nsq)
             elif formula_type == 3:  # Polynomal
-                g = lambda c1, c2, w: c1 * w ** c2  # noqa: E731
+                g = lambda c1, c2, w: c1 * w**c2  # noqa: E731
                 nsq = coefficients[0]
                 for i in range(1, len(coefficients), 2):
                     nsq += g(coefficients[i], coefficients[i + 1], wavelength)
                 n = numpy.sqrt(nsq)
             elif formula_type == 4:  # RefractiveIndex.INFO
                 g = (
-                    lambda wl, ci, cj, ck, cl: ci * wl ** cj / (wl ** 2 - ck ** cl)
+                    lambda wl, ci, cj, ck, cl: ci * wl**cj / (wl**2 - ck**cl)
                 )  # noqa: E731
                 n = coefficients[0]
                 n += g(wavelength, *coefficients[1:5])
@@ -343,7 +341,7 @@ class FormulaRefractiveIndexData:
 
                 n = numpy.sqrt(n)
             elif formula_type == 5:  # Cauchy
-                g = lambda c1, c2, w: c1 * w ** c2  # noqa: E731
+                g = lambda c1, c2, w: c1 * w**c2  # noqa: E731
                 n = coefficients[0]
                 for i in range(1, len(coefficients), 2):
                     n += g(coefficients[i], coefficients[i + 1], wavelength)
@@ -354,22 +352,22 @@ class FormulaRefractiveIndexData:
                     n += g(coefficients[i], coefficients[i + 1], wavelength)
             elif formula_type == 7:  # Herzberger
                 n = coefficients[0]
-                n += coefficients[1] / (wavelength ** 2 - 0.028)
-                n += coefficients[2] * (1 / (wavelength ** 2 - 0.028)) ** 2
+                n += coefficients[1] / (wavelength**2 - 0.028)
+                n += coefficients[2] * (1 / (wavelength**2 - 0.028)) ** 2
                 for i, cc in enumerate(coefficients[3:]):
                     n += cc * wavelength ** (2 * (i + 1))
             elif formula_type == 8:  # Retro
                 n = coefficients[0]
                 n += (
                     coefficients[1]
-                    * wavelength ** 2
-                    / (wavelength ** 2 - coefficients[2])
+                    * wavelength**2
+                    / (wavelength**2 - coefficients[2])
                 )
-                n += coefficients[3] * wavelength ** 2
+                n += coefficients[3] * wavelength**2
                 n = numpy.sqrt(-(2 * n + 1) / (n - 1))
             elif formula_type == 9:  # Exotic
                 n = coefficients[0]
-                n += coefficients[1] / (wavelength ** 2 - coefficients[2])
+                n += coefficients[1] / (wavelength**2 - coefficients[2])
                 n += (
                     coefficients[3]
                     * (wavelength - coefficients[4])

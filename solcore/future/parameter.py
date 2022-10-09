@@ -12,7 +12,6 @@ from .constants import pi
 
 
 class MaterialMissing(Exception):
-
     """Raised if a material does not exist in a source."""
 
     def __init__(self, source, material):
@@ -24,7 +23,6 @@ class MaterialMissing(Exception):
 
 
 class ParameterMissing(Exception):
-
     """Raised if a parameter does not exist for a given material in that source."""
 
     def __init__(self, source, material, parameter):
@@ -40,7 +38,6 @@ class ParameterMissing(Exception):
 
 
 class InputArgumentMissing(Exception):
-
     """Raised if there is an error of missing input argument."""
 
     def __init__(self, argument):
@@ -51,10 +48,7 @@ class InputArgumentMissing(Exception):
 
 
 class ParameterSourceError(Exception):
-
     """Raised if there is an error setting upt the source."""
-
-    pass
 
 
 class Parameter(Q_):
@@ -219,11 +213,14 @@ class ParameterManager:
         for s in nsource:
             if parameter in self.sources[s].parameters(material):
                 return self.sources[s].get_parameter(material, parameter, **kwargs)
-        else:
-            raise ParameterMissing(nsource, material, parameter)
+
+        raise ParameterMissing(nsource, material, parameter)
 
     def get_nk(
-        self, material: str, source: Union[str, Tuple[str, ...]] = (), **kwargs,
+        self,
+        material: str,
+        source: Union[str, Tuple[str, ...]] = (),
+        **kwargs,
     ) -> xr.DataArray:
         """Retrieve the refractive index data for the material.
 
