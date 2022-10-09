@@ -6,7 +6,7 @@ class NKSourceTestSuite:
     def source(self):
         return self._source._instance
 
-    def test_load_source(self):
+    def test_load_source(self, *args, **kwargs):
         self._source._instance = None
         assert self.source is None
         source = self._source.load_source()

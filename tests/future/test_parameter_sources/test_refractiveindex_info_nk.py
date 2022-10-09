@@ -42,8 +42,6 @@ class TestRefractiveindexInfoNKSource(NKSourceTestSuite):
         self._source._instance = None
 
     def test_load_source(self, nk_database):
-        import os
-
         super().test_load_source()
         assert self.source._db is None
         self._source._instance = None
