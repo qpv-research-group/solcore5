@@ -25,7 +25,10 @@ SPECTRUM_SIGNATURE = Callable[[Union[np.ndarray, float]], Union[np.ndarray, floa
 
 class LightSourceBase(ABC):
     def __init__(
-        self, output_units="power_density_per_nm", concentration=1, **kwargs,
+        self,
+        output_units="power_density_per_nm",
+        concentration=1,
+        **kwargs,
     ):
         """Base class for all light sources
 
@@ -98,7 +101,6 @@ class LightSourceBase(ABC):
         parameter, the wavelengths in nm, and provide as output the spectrum in
         power_density_per_nm.
         """
-        pass
 
 
 LightSource = TypeVar("LightSource", bound=LightSourceBase)
