@@ -17,13 +17,13 @@ def test_not_overwritten_behavior():
         def solve_equilibrium(self):
             return None
 
-        def solve_short_circuit(self):
+        def solve_short_circuit(self, absorption, source):
             return None
 
-        def solve_iv(self):
+        def solve_iv(self, voltage, absorption, source):
             return None
 
-        def solve_qe(self):
+        def solve_qe(self, absorption, source):
             return None
 
     junc = MyJunction()
