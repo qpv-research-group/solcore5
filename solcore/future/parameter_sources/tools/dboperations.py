@@ -39,7 +39,6 @@ class Database:
         self.create_database_from_folder(
             outputfolder, interpolation_points=interpolation_points
         )
-        pass
 
     def search_custom(self, sqlquery):
         conn = sqlite3.connect(self.db_path)
@@ -283,9 +282,9 @@ class Database:
 
     def get_material_csv_all(self, outputfolder):
         allids = self._get_all_pageids()
-        for id in allids:
-            print("Processing", id)
-            self.get_material_csv(pageid=id, output="", folder=outputfolder)
+        for idd in allids:
+            print("Processing", idd)
+            self.get_material_csv(pageid=idd, output="", folder=outputfolder)
 
     def _get_pages_columns(self):
         conn = sqlite3.connect(self.db_path)
