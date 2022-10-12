@@ -76,11 +76,11 @@ def schrodinger(structure, plot_bands=False, kpoints=40, krange=1e9, num_eigenva
             "E": {key: np.array(bands[key]) for key in bands.keys() if key[0] in "E"},
         }
 
-    if "potentials" is graphtype:
+    if graphtype == "potentials":
         schrodinger_plt = graphics.split_schrodinger_graph_potentials(result_band_edge, **kwargs)
         # schrodinger_plt.draw()
 
-    if "potentialsLDOS" is graphtype:
+    if graphtype == "potentialsLDOS":
         Ee, LDOSe, Eh, LDOSh = graphics.split_schrodinger_graph_LDOS(result_band_edge, **kwargs)
         result_band_edge["LDOS"] = {"x": bands['x'], 'Ee': Ee, 'LDOSe': LDOSe, 'Eh': Eh, 'LDOSh': LDOSh}
 

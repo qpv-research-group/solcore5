@@ -145,7 +145,7 @@ def alpha_exciton_ehh_TE(exciton_index, E, z, E_e, E_hh, psi_e, psi_hh, well_wid
     Et = (E_e - E_hh)
     # import pdb; pdb.set_trace()
     # NOTE TO MARKUS: Added the possiblity of using a Gauss lineshape
-    if line_shape is "Gauss":
+    if line_shape == "Gauss":
         shape = Gauss(E, Et + En, hwhm)
     else:
         shape = L(E, Et + En, hwhm)
@@ -197,7 +197,7 @@ def alpha_exciton_elh_TE(exciton_index, E, z, E_e, E_lh, psi_e, psi_lh, well_wid
     En = -Ry_eff / ((exciton_index - dimensionality) ** 2)  # Exciton binding energy
     Et = (E_e - E_lh)
     # NOTE TO MARKUS: Added the possiblity of using a Gauss lineshape
-    if line_shape is "Gauss":
+    if line_shape == "Gauss":
         shape = Gauss(E, Et + En, hwhm)
     else:
         shape = L(E, Et + En, hwhm)

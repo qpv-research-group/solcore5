@@ -134,7 +134,7 @@ def calculate_junction_sr(junc, energies, bs, bs_initial, V, printParameters=Fal
     idx = 0
     pn_or_np = 'pn'
     for layer in junc:
-        if layer.role is not 'emitter':
+        if layer.role != 'emitter':
             idx += 1
         else:
             Na = 0
@@ -149,10 +149,10 @@ def calculate_junction_sr(junc, energies, bs, bs_initial, V, printParameters=Fal
             break
 
     # Now we check for an intrinsic region and, if there is, for the base.
-    if junc[idx + 1].role is 'intrinsic':
+    if junc[idx + 1].role == 'intrinsic':
         iRegion = junc[idx + 1]
 
-        if junc[idx + 2].role is 'base':
+        if junc[idx + 2].role == 'base':
             if pn_or_np == "pn":
                 nRegion = junc[idx + 2]
             else:
@@ -162,7 +162,7 @@ def calculate_junction_sr(junc, energies, bs, bs_initial, V, printParameters=Fal
                                '"base".')
 
     # If there is no intrinsic region, we check directly the base
-    elif junc[idx + 1].role is 'base':
+    elif junc[idx + 1].role == 'base':
         if pn_or_np == "pn":
             nRegion = junc[idx + 1]
         else:
