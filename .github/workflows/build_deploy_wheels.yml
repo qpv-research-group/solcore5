@@ -81,13 +81,13 @@ jobs:
         shell: powershell
 
       - name: Build Solcore Linux and MacOS
-          if: matrix.os != 'windows-latest'
-          env:
-            FC: gfortran
-            CC: gcc
+        if: matrix.os != 'windows-latest'
+        env:
+          FC: gfortran
+          CC: gcc
           SOLCORE_WITH_PDD: 1
-          run: |
-            export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
+        run: |
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
             python setup.py sdist bdist_wheel
 
       # - name: Publish wheels to PyPI
