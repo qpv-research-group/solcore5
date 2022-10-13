@@ -293,7 +293,7 @@ class QWunit(Structure):
                             3]  # 0 = Energy, 1 = n, 2 = k, 3 = Absorption
 
             # self[index].material.absorption[ edge_index: ] = 0
-            if self.labels[index] is "well":
+            if self.labels[index] == "well":
 
                 self[index].material.absorption = self[index].material.absorption - self[index].material.absorption[
                     edge_index]
@@ -302,7 +302,7 @@ class QWunit(Structure):
                 self[index].material.absorption = self[index].material.absorption + SR["alpha"][1] * self[
                     index].width / self.QW_width
 
-            elif self.labels[index] is "interlayer":
+            elif self.labels[index] == "interlayer":
                 self[index].material.absorption[edge_index:] = 0
 
             else:

@@ -364,7 +364,7 @@ class UnitsSystem(SourceManagedClass):
     def list_dimensions(self):
         for dim in self.dimensions.keys():
             print(
-                "%s: %s" % (dim, ", ".join([k for k in self.dimensions[dim].keys() if k is not None and k is not ""])))
+                "%s: %s" % (dim, ", ".join([k for k in self.dimensions[dim].keys() if k is not None and k != ""])))
 
 
 def compare_floats(a, b, absoulte_precision=1e-12, relative_precision=None):
