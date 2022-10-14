@@ -89,9 +89,9 @@ jobs:
   deploy_wheels_macos:
     name: Building for macOS
     runs-on: macOS-latest
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, windows-2019, macOS-11]
+#    strategy:
+#      matrix:
+#        os: [ubuntu-20.04, windows-2019, macOS-11]
 
     steps:
       - uses: actions/checkout@v3
