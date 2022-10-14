@@ -107,10 +107,9 @@ jobs:
         env:
           FC: gfortran
           CC: gcc
-          SOLCORE_WITH_PDD: 1
+          CIBW_BEFORE_ALL: 'brew reinstall gfortran'
+          CIBW_BEFORE_BUILD: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
         run: |
-          brew reinstall gfortran
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
           python -m cibuildwheel 
 
       - uses: actions/upload-artifact@v3
