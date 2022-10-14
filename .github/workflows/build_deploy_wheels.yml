@@ -107,6 +107,7 @@ jobs:
         env:
           FC: gfortran
           CC: gcc
+          CIBW_ARCHS_MACOS: x86_64 arm64
           CIBW_BUILD_VERBOSITY: 1
         run: |
           brew reinstall gfortran
