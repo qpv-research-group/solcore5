@@ -111,7 +111,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
         run: |
           brew reinstall gfortran
-          python -m pip install numpy
+          python -m pip install numpy==1.21.4
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1
           python -m cibuildwheel 
 
