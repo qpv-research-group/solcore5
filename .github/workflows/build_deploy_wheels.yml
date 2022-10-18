@@ -174,7 +174,7 @@ jobs:
 
       - name: Build wheels on macOS and Ubuntu
         #if: matrix.os != 'windows-latest'
-        if: matrix.oss == 'macOS-latest'
+        if: matrix.os == 'macOS-latest'
         env:
           FC: gfortran
           CC: gcc
