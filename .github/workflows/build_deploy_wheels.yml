@@ -180,6 +180,10 @@ jobs:
         run: |
           python -m cibuildwheel --output-dir dist
 
+      - name: Install gfortran on macOS
+        if: matrix.os == 'macOS-latest'
+        run: brew reinstall gfortran
+
       - name: Build wheels on Windows
         if: matrix.os == 'windows-latest'
         shell: powershell
