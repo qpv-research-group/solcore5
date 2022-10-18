@@ -175,6 +175,7 @@ jobs:
           CC: gcc
           CIBW_ARCHS_MACOS: x86_64 # arm64
           CIBW_BEFORE_BUILD: pip install numpy
+          CIBW_BUILD_VERBOSITY: 1
         run: |
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1
           python -m cibuildwheel --output-dir dist
@@ -187,6 +188,7 @@ jobs:
           CIBW_ARCHS_MACOS: x86_64 # arm64
           SOLCORE_WITH_PDD: 1
           CIBW_BEFORE_BUILD: pip install numpy && echo "[build]`ncompiler=mingw32" | Out-File -Encoding ASCII ~/pydistutils.cfg
+          CIBW_BUILD_VERBOSITY: 1
         run: |
           python -m cibuildwheel --output-dir dist
 
