@@ -184,18 +184,18 @@ jobs:
         run: |
           python -m cibuildwheel --output-dir dist
 
-#      - name: Build wheels on Windows
-#        if: matrix.os == 'windows-latest'
-#        shell: powershell
-#        env:
-#          FC: gfortran
-#          CC: gcc
-#          CIBW_ENVIRONMENT: SOLCORE_WITH_PDD=1
-#          CIBW_BEFORE_BUILD: pip install numpy
-#          #CIBW_BUILD_VERBOSITY: 1
-#        run: |
-#          echo "[build]`ncompiler=mingw32" | Out-File -Encoding ASCII ~/pydistutils.cfg
-#          python -m cibuildwheel --output-dir dist
+      - name: Build wheels on Windows
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        env:
+          FC: gfortran
+          CC: gcc
+          CIBW_ENVIRONMENT: SOLCORE_WITH_PDD=1
+          CIBW_BEFORE_BUILD: pip install numpy==1.21.4
+          #CIBW_BUILD_VERBOSITY: 1
+        run: |
+          echo "[build]`ncompiler=mingw32" | Out-File -Encoding ASCII ~/pydistutils.cfg
+          python -m cibuildwheel --output-dir dist
 
       - uses: actions/upload-artifact@v3
         with:
