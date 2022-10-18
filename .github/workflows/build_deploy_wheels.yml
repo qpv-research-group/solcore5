@@ -157,7 +157,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest, windows-latest, macOS-12]
 
     steps:
       - uses: actions/checkout@v3
@@ -172,7 +172,7 @@ jobs:
 #        if: matrix.os == 'macOS-latest'
 #        run: brew reinstall gfortran
 
-      - name: Build wheels on macOS and Ubuntu
+      - name: Build wheels on macOS and Linux
         if: matrix.os != 'windows-latest'
         env:
           FC: gfortran
