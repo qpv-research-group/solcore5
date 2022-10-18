@@ -179,9 +179,10 @@ jobs:
           CC: gcc
           CIBW_ARCHS_MACOS: arm64 # x86_64
           CIBW_BEFORE_BUILD: pip install numpy
-          CIBW_BEFORE_BUILD_MACOS: brew uninstall --ignore-dependencies gfortran && arch -arm64 brew install gfortran
+          #CIBW_BEFORE_BUILD_MACOS: arch -arm64 brew reinstall gfortran
+          CIBW_BEFORE_BUILD_MACOS: brew config
           CIBW_ENVIRONMENT: SOLCORE_WITH_PDD=1 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
-          #CIBW_BUILD_VERBOSITY: 1
+          CIBW_BUILD_VERBOSITY: 1
         run: |
           python -m cibuildwheel --output-dir dist
 
