@@ -173,7 +173,8 @@ jobs:
 #        run: brew reinstall gfortran
 
       - name: Build wheels on macOS and Ubuntu
-        if: matrix.os != 'windows-latest'
+        #if: matrix.os != 'windows-latest'
+        if: matrix.oss == 'macos-latest'
         env:
           FC: gfortran
           CC: gcc
