@@ -27,8 +27,9 @@ In order to install Solcore in your computer, you will need the following:
 - :doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`
 - :doc:`the S4 package (only needed for RCWA functionality) <s4_installation>`
 
-*Pip* is normally part of the standard Python installation, but you might need to install it. You also need to make sure
-the *setuptools* and *wheel* packages are available. To make sure these packages are installed and up to date, run::
+*Pip* is normally part of the standard Python installation, but you might need to
+install it. You also need to make sure the *setuptools* and *wheel* packages are
+available. To make sure these packages are installed and up to date, run::
 
     pip install -U pip setuptools wheel
 
@@ -36,7 +37,16 @@ Now, installing Solcore should be as easy as writing in the terminal::
 
     pip install solcore
 
-This will download Solcore form the Pypi repository and install the package within the Python packages tree, but it will *NOT* install the PDD solver, for which you need a suitable Fortran compiler :doc:`(read this to install your Fortran compiler) <compilation>`. Assuming you have a Fortran compiler correctly installed and configured, you can install Solcore with the PDD solver by doing::
+This will download Solcore form the PyPI repository and install the package within the
+Python packages tree. **From Solcore v5.8.1 this will also install the PDD solver if you
+are in Linux or Windows**.
+
+If you are in MacOS - or if there are no binary wheels for yous
+specific Python version and system architecture combination -, this command will *NOT*
+install the PDD solver, for which you need a suitable Fortran compiler :doc:`(read this
+to install your Fortran compiler) <compilation>`. Assuming you have a Fortran compiler
+correctly installed and configured, you can install Solcore with the PDD solver by
+doing::
 
     pip install solcore
     pip install --no-deps --force-reinstall --install-option="--with_pdd" solcore

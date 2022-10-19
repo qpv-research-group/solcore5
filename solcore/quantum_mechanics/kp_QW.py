@@ -136,7 +136,7 @@ def fill_hamiltonian_holes_4x4(A1, A2, B1, B2, C, D, delta, block):
     uu = np.zeros(2 * N)
     uuu = np.zeros(2 * N)
 
-    if block is "U":
+    if block == "U":
         # We write the equations for the UPPER 2x2 block of the Hamiltonian, for g1 and g2
 
         # We fill the first two equations separatelly

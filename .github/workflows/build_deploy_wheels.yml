@@ -1,5 +1,6 @@
 name: Upload Python Package
 
+
 on:
   # release:
   #   types: [published]
@@ -12,9 +13,9 @@ jobs:
   deploy_wheels_linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Deploy wheels - Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
@@ -37,13 +38,13 @@ jobs:
           system-packages: 'gcc-gfortran'
           pre-build-command: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
 
-#      - name: Publish wheels to PyPI
-#          if: startsWith(github.ref, 'refs/tags')
-#          env:
-#            TWINE_USERNAME: '__token__'
-#            TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-#          run: |
-#            twine upload dist/*-manylinux*.whl --skip-existing
+#       - name: Publish wheels to PyPI
+#         if: startsWith(github.ref, 'refs/tags')
+#         env:
+#           TWINE_USERNAME: '__token__'
+#           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+#         run: |
+#           twine upload dist/*-manylinux*.whl --skip-existing
 
       - uses: actions/upload-artifact@v3
         with:
@@ -86,6 +87,7 @@ jobs:
           python setup.py sdist bdist_wheel
         shell: powershell
 
+
       - name: Build Solcore MacOS
         if: matrix.os != 'windows-latest'
         env:
@@ -102,7 +104,7 @@ jobs:
 #            TWINE_USERNAME: '__token__'
 #            TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 #          run: |
-#            twine upload dist/*-win_amd64*.whl --skip-existing
+#            twine upload dist/*.whl --skip-existing
 
       - uses: actions/upload-artifact@v3
         with:
