@@ -9,11 +9,39 @@ on:
 
 jobs:
 
-  deploy_wheels:
+  deploy_wheels_linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy wheels - Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Deploy wheels - Install dependencies
+        run: |
+          python -m pip install --upgrade setuptools wheel pip twine numpy
+      - name: Deploy wheels - Build manylinux2014 binary wheels - py3.x - x86_64
+        uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2014_x86_64
+        with:
+          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
+          build-requirements: 'numpy'
+          system-packages: 'gcc-gfortran'
+          pre-build-command: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
+
+      - name: Deploy wheels - Build manylinux2014 binary wheels - py3.x - i686
+        uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2014_i686
+        with:
+          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
+          build-requirements: 'numpy==1.21.4'
+          system-packages: 'gcc-gfortran'
+          pre-build-command: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
+
+  deploy_wheels on macos - windows:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [macos-latest, windows-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10']
     name: Building for ${{ matrix.os }} - python ${{ matrix.python-version }}
 
@@ -24,12 +52,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-
-      - name: Install system dependencies in Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt install -y gfortran python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
       - name: Install system dependencies in MacOS
         if: matrix.os == 'macos-latest'
@@ -51,7 +73,7 @@ jobs:
           python setup.py sdist bdist_wheel
         shell: powershell
 
-      - name: Build Solcore Linux and MacOS
+      - name: Build Solcore MacOS
         if: matrix.os != 'windows-latest'
         env:
           FC: gfortran
