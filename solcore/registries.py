@@ -28,6 +28,7 @@ True
 
 """
 from typing import Callable, Dict
+from warnings import warn
 
 from .solar_cell import SolarCell
 from .state import State
@@ -54,15 +55,23 @@ OPTICS_METHOD_SIGNATURE = Callable[[SolarCell, State], None]
 OPTICS_METHOD_REGISTRY: Dict[str, OPTICS_METHOD_SIGNATURE] = {}
 
 
-def register_optics(name: str, overwrite: bool = False) -> Callable:
+def register_optics(
+    name: str, overwrite: bool = False, available: bool = True
+) -> Callable:
     if name in OPTICS_METHOD_REGISTRY and not overwrite:
         raise ValueError(
-            f"Optics method '{name}' already exist in the registry."
+            f"Optics method '{name}' already exist in the registry. "
             "Give it another name or set `overwrite = True`."
+        )
+    if not available:
+        warn(
+            f"Optics method '{name}' will not be available."
+            "Has it any dependency missing?"
         )
 
     def wrap(func: OPTICS_METHOD_SIGNATURE) -> OPTICS_METHOD_SIGNATURE:
-        OPTICS_METHOD_REGISTRY[name] = func
+        if available:
+            OPTICS_METHOD_REGISTRY[name] = func
         return func
 
     return wrap
