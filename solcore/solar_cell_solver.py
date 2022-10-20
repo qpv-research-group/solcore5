@@ -141,7 +141,7 @@ def solve_optics(solar_cell, options):
             solve_tmm(solar_cell, **options)
         elif options.optics_method == "RCWA":
             if solve_rcwa is not None:
-                solve_rcwa(solar_cell, options)
+                solve_rcwa(solar_cell, **options)
             else:
                 raise RCWASolverError("RCWA optical solver not available!!")
         else:
