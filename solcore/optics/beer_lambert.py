@@ -75,8 +75,8 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
                 # junction in the optical calculation
                 if hasattr(solar_cell[j], "jsc") or hasattr(solar_cell[j], "eqe"):
                     print(
-                        'Warning: A junction of kind "2D" found. Junction ignored in "
-                        "the optics calculation!'
+                        "Warning: A junction of kind '2D' found. Junction ignored in "
+                        "the optics calculation!"
                     )
 
                     w = layer_object.width
