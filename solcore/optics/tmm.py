@@ -122,6 +122,7 @@ def solve_tmm(
         coherency_list_[make_incoherent] = "i"
         coherency_list = coherency_list_.tolist()
 
+    position = position * 1e9
     profile_position = position[position < sum(full_stack.widths)]
 
     print("Calculating RAT...")

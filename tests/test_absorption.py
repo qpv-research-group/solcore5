@@ -1,6 +1,6 @@
 """ Absorption calculator related tests
 """
-from pytest import approx, mark
+from pytest import approx
 
 from solcore import material, si
 from solcore.structure import Structure, Layer
@@ -226,7 +226,6 @@ def test_BL_correction():
     )
 
 
-@mark.xfail(reason="Refactoring code")
 def test_substrate_presence_profile():
     wavelength = np.linspace(300, 800, 3) * 1e-9
 
