@@ -4,16 +4,19 @@ from typing import List, Optional
 import numpy as np
 from numpy.typing import NDArray
 
-from solcore.absorption_calculator import (
+from ..absorption_calculator import (
     OptiStack,
     calculate_absorption_profile,
     calculate_rat,
 )
-from solcore.structure import Junction, Layer, TunnelJunction
+from ..registries import register_optics
+from ..solar_cell import SolarCell
+from ..structure import Junction, Layer, TunnelJunction
 
 
+@register_optics(name="TMM")
 def solve_tmm(
-    solar_cell,
+    solar_cell: SolarCell,
     wavelength: NDArray,
     position: NDArray,
     BL_correction: bool = True,
