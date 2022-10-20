@@ -1,18 +1,18 @@
+from logging import getLogger
 from typing import Dict, Union
 
 import numpy as np
 
 from . import analytic_solar_cells as ASC
-from .absorption_calculator import RCWASolverError
 from .light_source import LightSource
-from .optics import (
+from .optics import (  # noqa
     rcwa_options,
     solve_beer_lambert,
     solve_external_optics,
     solve_rcwa,
     solve_tmm,
 )
-from .registries import ACTIONS_REGISTRY, register_action
+from .registries import ACTIONS_REGISTRY, register_action, OPTICS_METHOD_REGISTRY
 from .solar_cell import SolarCell
 from .state import State
 from .structure import Junction, Layer, TunnelJunction
@@ -101,58 +101,48 @@ def solar_cell_solver(
     if action is None:
         raise ValueError(
             "ERROR in 'solar_cell_solver' - Valid tasks are "
-            f"'{list(ACTIONS_REGISTRY.keys())}'."
+            f"{list(ACTIONS_REGISTRY.keys())}."
         )
 
     action(solar_cell, options)
 
 
 @register_action("optics")
-def solve_optics(solar_cell, options):
-    """Solves the optical properties of the structure, calculating the reflectance, absorptance and transmitance. The "optics_method" option controls which method is used to calculate the optical properties of the solar cell:
+def solve_optics(solar_cell: SolarCell, options: State):
+    """Solves the optical properties of the structure.
 
-    - None: The calculation is skipped. Only useful for solar cells involving just "2-diode" kind of junctions.
-    - BL: Uses the Beer-Lambert law to calculate the absorption in each layer. Front surface reflexion has to provided externally. It is the default method and the most flexible one.
-    - TMM: Uses a transfer matrix calculation to obtain the RAT. Not valid for DB or 2D junction
-    - RCWA: Uses the rigorous wave coupled analysisto obtain the RAT. This allows to include 2D photonic crystals in the structure, for example. Not valid for DB or 2D junctions
-    - external: The reflection and absorption profiles are provided externally by the user, and therefore no calculation is performed by Solcore.
+    It calls one of the registered optics methods, defined by the options.optics_method
+    to calculate the reflection, absorption and transmission of the cell as well as
+    ligth abosrbed per layer and junction. Note that not all optic methods are
+    compatible with all junctions. Check the information spefific for each of them.
 
-    :param solar_cell: A solar_cell object
-    :param options: Options for the optics solver
-    :return: None
+    Args:
+        solar_cell: A solar_cell object
+        options: Options for the optics solver
+
+    Return:
+        None
     """
-    print("Solving optics of the solar cell...")
+    getLogger().info("Solving optics of the solar cell...")
 
     calculated = hasattr(solar_cell[0], "absorbed")
-    recalc = (
-        options.recalculate_absorption
-        if "recalculate_absorption" in options.keys()
-        else False
-    )
+    recalc = options.get("recalculate_absorption", False)
     if not calculated or recalc:
+        method = OPTICS_METHOD_REGISTRY.get(options.optics_method, None)
 
-        if options.optics_method is None:
-            print("Warning: Not solving the optics of the solar cell.")
-        elif options.optics_method == "external":
-            solve_external_optics(solar_cell, **options)
-        elif options.optics_method == "BL":
-            solve_beer_lambert(solar_cell, **options)
-        elif options.optics_method == "TMM":
-            solve_tmm(solar_cell, **options)
-        elif options.optics_method == "RCWA":
-            if solve_rcwa is not None:
-                solve_rcwa(solar_cell, **options)
-            else:
-                raise RCWASolverError("RCWA optical solver not available!!")
-        else:
+        if method is None:
             raise ValueError(
-                'ERROR in "solar_cell_solver":\n\tOptics solver method must be None, "external", "BL", "TMM" or "RCWA".'
+                "ERROR in 'solar_cell_solver' - Valid optics methods are "
+                f"{list(OPTICS_METHOD_REGISTRY.keys())}."
             )
 
+        method(solar_cell, **options)
+
     else:
-        print(
-            "Already calculated reflection, transmission and absorption profile - not recalculating. "
-            "Set recalculate_absorption to True in the options if you want absorption to be calculated again."
+        getLogger().info(
+            "Already calculated reflection, transmission and absorption profile - "
+            "not recalculating. Set 'recalculate_absorption' to True in the options if "
+            "you want absorption to be calculated again."
         )
 
 
