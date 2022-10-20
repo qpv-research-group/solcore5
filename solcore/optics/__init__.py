@@ -5,7 +5,7 @@ from .rcwa import rcwa_options, solve_rcwa  # noqa
 from .tmm import solve_tmm  # noqa
 
 
-@register_optics(name="TMM")
+@register_optics(name=None)
 def no_optics(*args, **kwargs) -> None:
     """Dummy function that does not calculate any optics."""
     return
