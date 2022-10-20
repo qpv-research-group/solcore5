@@ -21,7 +21,6 @@ def solve_beer_lambert(solar_cell: SolarCell, wavelength: NDArray, **kwargs) -> 
         - solar_cell: A solar_cell object
         - wavelength: Array of wavelegth at which the optics are calculated.
 
-
     Return:
         None
     """
