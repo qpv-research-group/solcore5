@@ -37,26 +37,27 @@ def solve_tmm(
     A coherency_list option can be provided:
 
     Args:
-        - solar_cell: A solar_cell object
-        - wavelength: Array of wavelegth at which the optics are calculated.
-        - position: Array of positions in the z direction to calculate the absorption vs
+        solar_cell: A solar_cell object
+        wavelength: Array of wavelegth at which the optics are calculated.
+        position: Array of positions in the z direction to calculate the absorption vs
             depth.
-        - BL_correction: If is set to True, thick layers (thickness > 10*maximum
+        BL_correction: If is set to True, thick layers (thickness > 10*maximum
             wavelength) are treated incoherently using the Beer-Lambert law, to avoid
             the calculation of unphysical interference oscillations in the R/A/T
             spectra.
-        - theta: the incidence angle, in degrees
-        - pol: the polarization 'pol' ('s', 'p' or 'u')
-        - zero_threshold: when the fraction of incident light absorbed in a layer is
+        theta: the polar incidence angle, in degrees, with 0 degrees being normal
+            incidence.
+        pol: the polarization of the light ('s', 'p' or 'u')
+        zero_threshold: when the fraction of incident light absorbed in a layer is
             less than this value, the absorption profile is completely set to zero for
             both coherent and incoherent calculations. This is applied on a
             wavelength-by-wavelength basis and is intended to prevent errors where
             integrating a weak absorption profile in a layer over many points leads to
             calculated EQE > total absorption in that layer.
-        - no_back_reflection: Sets whether reflections from the back surface are
+        no_back_reflection: Sets whether reflections from the back surface are
             suppressed (if set to True, the default), or taken into account (if set to
             False).
-        - coherency_list: If present, this should have the same number of elements than
+        coherency_list: If present, this should have the same number of elements than
             number of layers (if a Junction contains multiple Layers, each should have
             its own entry in the coherency list). Each element is either 'c' for
             coherent treatment of that layer or 'i' for incoherent treatment.
