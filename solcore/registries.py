@@ -48,3 +48,21 @@ def register_action(name: str, overwrite: bool = False) -> Callable:
         return func
 
     return wrap
+
+
+OPTICS_METHOD_SIGNATURE = Callable[[SolarCell, State], None]
+OPTICS_METHOD_REGISTRY: Dict[str, OPTICS_METHOD_SIGNATURE] = {}
+
+
+def register_optics(name: str, overwrite: bool = False) -> Callable:
+    if name in OPTICS_METHOD_REGISTRY and not overwrite:
+        raise ValueError(
+            f"Optics method '{name}' already exist in the registry."
+            "Give it another name or set `overwrite = True`."
+        )
+
+    def wrap(func: OPTICS_METHOD_SIGNATURE) -> OPTICS_METHOD_SIGNATURE:
+        OPTICS_METHOD_REGISTRY[name] = func
+        return func
+
+    return wrap
