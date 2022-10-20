@@ -2,6 +2,9 @@ name: Upload Python Package
 
 on:
   push:
+    branches:
+      - main
+      - develop
 
 jobs:
 
@@ -47,7 +50,7 @@ jobs:
           path: dist/
 
   deploy_wheels_macos_windows:
-    runs-on: c{{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [macos-latest, windows-latest]
