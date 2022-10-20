@@ -46,7 +46,7 @@ def test_register_optics():
         registries.OPTICS_METHOD_REGISTRY["approximate"] == another_approximate_optics
     )
 
-    @registries.register_optics("final_approximate", available=False)
+    @registries.register_optics("final_approximate", reason_to_exclude="Doesn't work")
     def final_approximate_optics(*args, **kwargs):
         pass
 
