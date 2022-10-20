@@ -1,9 +1,10 @@
+import types
+
 import numpy as np
 
 from ..registries import register_optics
 from ..solar_cell import SolarCell
 from ..state import State
-from ..structure import Junction, Layer, TunnelJunction
 
 
 @register_optics(name="external")
