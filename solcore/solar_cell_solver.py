@@ -1,24 +1,24 @@
-import numpy as np
-
 from typing import Dict, Union
 
-import solcore.analytic_solar_cells as ASC
-from solcore.light_source import LightSource
-from solcore.state import State
-from solcore.optics import (
-    solve_beer_lambert,
-    solve_tmm,
-    solve_rcwa,
+import numpy as np
+
+from . import analytic_solar_cells as ASC
+from .absorption_calculator import RCWASolverError
+from .light_source import LightSource
+from .optics import (
     rcwa_options,
+    solve_beer_lambert,
     solve_external_optics,
+    solve_rcwa,
+    solve_tmm,
 )
-from solcore.absorption_calculator import RCWASolverError
-from solcore.structure import Layer, Junction, TunnelJunction
 from .registries import ACTIONS_REGISTRY, register_action
 from .solar_cell import SolarCell
+from .state import State
+from .structure import Junction, Layer, TunnelJunction
 
 try:
-    import solcore.poisson_drift_diffusion as PDD
+    from . import poisson_drift_diffusion as PDD
 
     a = PDD.pdd_options
 except AttributeError:
