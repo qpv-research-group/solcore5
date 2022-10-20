@@ -1,17 +1,17 @@
 import types
 
 import numpy as np
+from numpy.typing import NDArray
 from scipy.interpolate import interp1d
 
 from .. import analytic_solar_cells as ASC
 from ..registries import register_optics
 from ..solar_cell import SolarCell
-from ..state import State
 from ..structure import Junction, Layer, TunnelJunction
 
 
 @register_optics(name="BL")
-def solve_beer_lambert(solar_cell: SolarCell, options: State):
+def solve_beer_lambert(solar_cell: SolarCell, wavelength: NDArray, **kwargs) -> None:
     """Calculates RAT of a solar cell object using the Beer-Lambert law.
 
     Reflection is not really calculated and needs to be provided externally, otherwise
@@ -19,16 +19,15 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
 
     Args:
         - solar_cell: A solar_cell object
-        - user_options: A dictionary containing the options for the solver, which will
-          overwrite the default options.
+        - wavelength: Array of wavelegth at which the optics are calculated.
+
 
     Return:
         None
     """
-    wl_m = options.wavelength
-    solar_cell.wavelength = options.wavelength
+    solar_cell.wavelength = wavelength
 
-    fraction = np.ones(wl_m.shape)
+    fraction = np.ones(wavelength.shape)
 
     # We include the shadowing losses
     if hasattr(solar_cell, "shading"):
@@ -36,7 +35,7 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
 
     # And the reflexion losses
     if hasattr(solar_cell, "reflectivity") and solar_cell.reflectivity is not None:
-        solar_cell.reflected = solar_cell.reflectivity(wl_m)
+        solar_cell.reflected = solar_cell.reflectivity(wavelength)
         fraction *= 1 - solar_cell.reflected
     else:
         solar_cell.reflected = np.zeros(fraction.shape)
@@ -53,7 +52,7 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
         # that is not part of the junction
         if type(layer_object) is Layer:
             widths.append(layer_object.width)
-            alphas.append(layer_object.material.alpha(wl_m))
+            alphas.append(layer_object.material.alpha(wavelength))
             n_layers_junction.append(1)
 
         # For each Tunnel junctions will have, at most, a resistance an some layers
@@ -62,7 +61,7 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
             n_layers_junction.append(len(layer_object))
             for i, layer in enumerate(layer_object):
                 widths.append(layer.width)
-                alphas.append(layer.material.alpha(wl_m))
+                alphas.append(layer.material.alpha(wavelength))
 
         # For each junction, and layer within the junction, we get the absorption
         # coeficient and the layer width.
@@ -86,14 +85,14 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
 
                     solar_cell[j].alpha = alf
                     solar_cell[j].reflected = interp1d(
-                        wl_m,
+                        wavelength,
                         solar_cell.reflected,
                         bounds_error=False,
                         fill_value=(0, 0),
                     )
 
                     widths.append(w)
-                    alphas.append(alf(wl_m))
+                    alphas.append(alf(wavelength))
 
                 # Otherwise, we try to treat is as a DB junction from the optical point
                 # of view
@@ -110,14 +109,14 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
 
                     solar_cell[j].alpha = alf
                     solar_cell[j].reflected = interp1d(
-                        wl_m,
+                        wavelength,
                         solar_cell.reflected,
                         bounds_error=False,
                         fill_value=(0, 0),
                     )
 
                     widths.append(w)
-                    alphas.append(alf(wl_m))
+                    alphas.append(alf(wavelength))
 
             elif kind == "DB":
                 ASC.absorptance_detailed_balance(solar_cell[j])
@@ -132,16 +131,19 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
 
                 solar_cell[j].alpha = alf
                 solar_cell[j].reflected = interp1d(
-                    wl_m, solar_cell.reflected, bounds_error=False, fill_value=(0, 0)
+                    wavelength,
+                    solar_cell.reflected,
+                    bounds_error=False,
+                    fill_value=(0, 0),
                 )
 
                 widths.append(w)
-                alphas.append(alf(wl_m))
+                alphas.append(alf(wavelength))
 
             else:
                 for i, layer in enumerate(layer_object):
                     widths.append(layer.width)
-                    alphas.append(layer.material.alpha(wl_m))
+                    alphas.append(layer.material.alpha(wavelength))
 
     # With all this information, we are ready to calculate the absorbed light
     diff_absorption, transmitted, all_absorbed = calculate_absorption_beer_lambert(
@@ -152,10 +154,9 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
     # in its region.
     # We update each object with that information.
 
-    I0 = (
-        1 * fraction
-    )  # need the *1 because we DO NOT want to modify fraction! Will mess up profile
-    calculation
+    # need the *1 because we DO NOT want to modify fraction! Will mess up profile
+    # calculation
+    I0 = 1 * fraction
 
     layers_above_offset = np.cumsum([0] + n_layers_junction)
 
@@ -164,7 +165,7 @@ def solve_beer_lambert(solar_cell: SolarCell, options: State):
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
 
         # total absorption at each wavelength, per layer
-        A_junc = np.zeros_like(wl_m)
+        A_junc = np.zeros_like(wavelength)
 
         for k in range(n_layers_junction[j]):
             ilayer = layers_above_offset[j] + k

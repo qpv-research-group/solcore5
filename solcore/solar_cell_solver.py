@@ -134,9 +134,9 @@ def solve_optics(solar_cell, options):
         if options.optics_method is None:
             print("Warning: Not solving the optics of the solar cell.")
         elif options.optics_method == "external":
-            solve_external_optics(solar_cell, options)
+            solve_external_optics(solar_cell, **options)
         elif options.optics_method == "BL":
-            solve_beer_lambert(solar_cell, options)
+            solve_beer_lambert(solar_cell, **options)
         elif options.optics_method == "TMM":
             solve_tmm(solar_cell, options)
         elif options.optics_method == "RCWA":

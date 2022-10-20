@@ -1,14 +1,16 @@
 import types
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ..registries import register_optics
 from ..solar_cell import SolarCell
-from ..state import State
 
 
 @register_optics(name="external")
-def solve_external_optics(solar_cell: SolarCell, options: State):
+def solve_external_optics(
+    solar_cell: SolarCell, wavelength: NDArray, position: NDArray, **kwargs
+) -> None:
     """Calculates RAT of a solar cell from external data
 
     It also prepares the structure for further calculations. The external data that must
@@ -25,13 +27,14 @@ def solve_external_optics(solar_cell: SolarCell, options: State):
 
     Args:
         - solar_cell: A solar_cell object
-        - user_options: A dictionary containing the options for the solver, which will
-          overwrite the default options.
+        - wavelength: Array of wavelegth at which the optics are calculated.
+        - position: Array of positions in the z direction to calculate the absorption vs
+          depth.
 
     Return:
         None
     """
-    solar_cell.wavelength = options.wavelength
+    solar_cell.wavelength = wavelength
 
     # We include the shadowing losses
     initial = (1 - solar_cell.shading) if hasattr(solar_cell, "shading") else 1
@@ -45,8 +48,7 @@ def solve_external_optics(solar_cell: SolarCell, options: State):
 
     # We calculate the total amount of light absorbed in the solar cell, integrating
     # over its whole thickness with a step of 1 nm
-    all_z = options.position
-    all_absorbed = np.trapz(diff_absorption(all_z), all_z)
+    all_absorbed = np.trapz(diff_absorption(position), position)
 
     # Each building block (layer or junction) needs to have access to the absorbed light
     # in its region.

@@ -116,7 +116,7 @@ def junction(nd_top, na_top, nd_bottom, na_bottom):
     options = da_options()
     options.light_source = da_light_source()
     prepare_solar_cell(test_junc, options)
-    solve_beer_lambert(test_junc, options)
+    solve_beer_lambert(test_junc, **options)
 
     return test_junc, options
 
