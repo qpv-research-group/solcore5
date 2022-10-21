@@ -43,12 +43,16 @@ if (("--with_pdd" in sys.argv) or
          (os.environ['SOLCORE_WITH_PDD'] == "1"))):
     sources = os.path.join("solcore", "poisson_drift_diffusion",
                            "DDmodel-current.f95")
+
+    os_static_linking = ["darwin", "win32"]
+    link_args = ["-static", "-static-libgfortran", "-static-libgcc"] if sys.platform in os_static_linking else None
+
     ext = [
         Extension(
             name="solcore.poisson_drift_diffusion.ddModel",
             sources=[sources],
             f2py_options=["--quiet"],
-            extra_link_args=["-static", "-static-libgfortran", "-static-libgcc"] if sys.platform == "win32" else None
+            extra_link_args=link_args
         )
     ]
     if "--with_pdd" in sys.argv:
