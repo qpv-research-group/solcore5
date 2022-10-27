@@ -100,11 +100,8 @@ def solve_beer_lambert(solar_cell: SolarCell, wavelength: NDArray, **kwargs) -> 
                     w = layer_object.width
 
                     def alf(x):
-                        return (
-                            -1
-                            / w
-                            * np.log(np.maximum(1 - layer_object.absorptance(x), 1e-3))
-                        )
+                        val = np.maximum(1 - layer_object.absorptance(x), 1e-3)
+                        return -1 / w * np.log(val)
 
                     solar_cell[j].alpha = alf
                     solar_cell[j].reflected = interp1d(
@@ -122,11 +119,8 @@ def solve_beer_lambert(solar_cell: SolarCell, wavelength: NDArray, **kwargs) -> 
                 w = layer_object.width
 
                 def alf(x):
-                    return (
-                        -1
-                        / w
-                        * np.log(np.maximum(1 - layer_object.absorptance(x), 1e-3))
-                    )
+                    val = np.maximum(1 - layer_object.absorptance(x), 1e-3)
+                    return -1 / w * np.log(val)
 
                 solar_cell[j].alpha = alf
                 solar_cell[j].reflected = interp1d(
