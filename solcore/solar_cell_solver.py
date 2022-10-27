@@ -1,5 +1,6 @@
 from logging import getLogger
 from typing import Dict, Union
+from warnings import warn
 
 import numpy as np
 
@@ -12,7 +13,12 @@ from .optics import (  # noqa
     solve_rcwa,
     solve_tmm,
 )
-from .registries import ACTIONS_REGISTRY, register_action, OPTICS_METHOD_REGISTRY
+from .registries import (
+    ACTIONS_REGISTRY,
+    register_action,
+    OPTICS_METHOD_REGISTRY,
+    SHORT_CIRCUIT_SOLVER_REGISTRY,
+)
 from .solar_cell import SolarCell
 from .state import State
 from .structure import Junction, Layer, TunnelJunction
@@ -245,7 +251,7 @@ def solve_equilibrium(solar_cell, options):
     for j in solar_cell.junction_indices:
 
         if solar_cell[j].kind == "PDD":
-            PDD.equilibrium_pdd(solar_cell[j], options)
+            PDD.equilibrium_pdd(solar_cell[j], **options)
         else:
             print('WARNING: Only PDD junctions can be solved in "equilibrium".')
 
@@ -262,11 +268,15 @@ def solve_short_circuit(solar_cell, options):
     solve_optics(solar_cell, options)
 
     for j in solar_cell.junction_indices:
+        solver = SHORT_CIRCUIT_SOLVER_REGISTRY.get(solar_cell[j].kind, None)
 
-        if solar_cell[j].kind == "PDD":
-            PDD.short_circuit_pdd(solar_cell[j], options)
-        else:
-            print('WARNING: Only PDD junctions can be solved in "short_circuit".')
+        if solver is None:
+            warn(
+                "ERROR in 'solve_short_circuit' - Valid short circuit solvers are "
+                f"{list(SHORT_CIRCUIT_SOLVER_REGISTRY.keys())}."
+            )
+
+        solver(solar_cell[j], **options)
 
 
 def prepare_solar_cell(solar_cell, options):
