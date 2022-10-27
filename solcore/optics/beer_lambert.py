@@ -23,7 +23,7 @@ def solve_beer_lambert(solar_cell, options):
     if hasattr(solar_cell, 'shading'):
         fraction *= (1 - solar_cell.shading)
 
-    # And the reflexion losses
+    # And the reflection losses
     if hasattr(solar_cell, 'reflectivity') and solar_cell.reflectivity is not None:
         solar_cell.reflected = solar_cell.reflectivity(wl_m)
         fraction *= (1 - solar_cell.reflected)

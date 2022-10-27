@@ -447,7 +447,7 @@ if __name__ == '__main__':
 
     # out = calculate_rat([[300, model]], x)
 
-    # plt.semilogx(x, out['R'], 'b', label='Reflexion')
+    # plt.semilogx(x, out['R'], 'b', label='reflection')
     # plt.semilogx(x, out['A'], 'r', label='Absorption')
     # plt.semilogx(x, out['T'], 'g', label='Transmission')
 

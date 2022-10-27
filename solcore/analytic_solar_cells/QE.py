@@ -61,7 +61,7 @@ def spectral_response_all_junctions(solar_cell, incident_light=None, energy=None
     if hasattr(solar_cell, 'shading'):
         bs *= (1 - solar_cell.shading)
 
-    # And the reflexion losses
+    # And the reflection losses
     if hasattr(solar_cell, 'reflectivity') and solar_cell.reflectivity is not None:
         ref = solar_cell.reflectivity(energy)
         bs *= (1 - ref)

@@ -49,16 +49,16 @@ def np_cache(function):
 class OptiStack(object):
     """ Class that contains an optical structure: a sequence of layers with a thickness and a complex refractive index.
 
-    It serves as an intermediate step between solcore layers and materials and the stack of thicknesses and
+    It serves as an intermediate step between solcore layers and materials and the stack of thicknesses
     and n and k values necessary to run calculations involving TMM. When creating an OptiStack object, the thicknesses
     of all the layers forming the Solcore structure and the optical data of the materials of the layers are extracted
     and arranged in such a way they can be easily and fastly read by the TMM functions.
 
     In addition to a solcore structure with Layers, it can also take a list where each element represent a layer
-    written as a list and contains the layer thickness and the dielectrical model, the raw n and k data as a function
+    written as a list and contains the layer thickness and the dielectric model, the raw n and k data as a function
     of wavelengths, or a whole Device structure as the type used in the PDD model.
 
-    In summary, this class acepts:
+    In summary, this class accepts:
 
         - A solcore structure with layers
         - A list where each element is [thickness, DielectricModel]
@@ -72,8 +72,8 @@ class OptiStack(object):
     This allows for maximum flexibility when creating the optical model, allowing to construct the stack with
     experimental data, modelled data and known material properties from the database.
 
-    Yet anther way of defining the layers mixes experimental data with a DielectricModel within the same layer but in
-    spectrally distinct regions. The syntaxis for the layer is:
+    Yet another way of defining the layers mixes experimental data with a DielectricModel within the same layer but in
+    spectrally distinct regions. The syntax for the layer is:
 
     layer = [thickness, wavelength, n, k, DielectricModel, mixing]
 
@@ -89,11 +89,11 @@ class OptiStack(object):
 
     def __init__(self, structure=(), no_back_reflection=False, substrate=None, incidence=None, **kwargs):
         """ Class constructor. It takes a Solcore structure and extract the thickness and optical data from the
-        Layers and the materials. Option is given to indicate if the reflexion from the back of the structure must be
-        supressed, usefull for ellipsometry calculations. This is done by creating an artificial highly absorbing but
+        Layers and the materials. Option is given to indicate if the reflection from the back of the structure must be
+        suppressed, useful for ellipsometry calculations. This is done by creating an artificial highly absorbing but
         not reflecting layer just at the back.
 
-        Alternativelly, it can take simply a list of [thickness, DielectricModel] or [thickness, wavelength, n, k] for
+        Alternatively, it can take simply a list of [thickness, DielectricModel] or [thickness, wavelength, n, k] for
         each layer accounting for the refractive index of the layers. The three options can be mixed for maximum
         flexibility.
 
@@ -127,7 +127,7 @@ class OptiStack(object):
 
         :param wl: Wavelength of the light in nm.
         :return: A list with the complex refractive index of each layer, including the semi-infinite front and back
-        layers and, opionally, the back absorbing layer used to suppress back surface relfexion.
+        layers and, optionally, the back absorbing layer used to suppress back surface reflection.
         """
 
         out = []
@@ -353,9 +353,9 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
     :param angle: Angle (in degrees) of the incident light. Default: 0 (normal incidence).
     :param pol: Polarisation of the light: 's', 'p' or 'u'. Default: 'u' (unpolarised).
     :param coherent: If the light is coherent or not. If not, a coherency list must be added.
-    :param coherency_list: A list indicating in which layers light should be treated as coeherent ('c') and in which
+    :param coherency_list: A list indicating in which layers light should be treated as coherent ('c') and in which
     incoherent ('i'). It needs as many elements as layers in the structure.
-    :param no_back_reflection: If reflexion from the back must be supressed. Default=True.
+    :param no_back_reflection: If reflection from the back must be suppressed. Default=True.
     :return: A dictionary with the R, A and T at the specified wavelengths and angle.
     """
     num_wl = len(wavelength)
@@ -368,7 +368,17 @@ def calculate_rat(structure, wavelength, angle=0, pol='u',
         stack = structure
         stack.no_back_reflection = no_back_reflection
     else:
-        stack = OptiStack(structure, no_back_reflection=no_back_reflection)
+        if hasattr(structure, 'substrate'):
+            substrate = structure.substrate
+        else:
+            substrate = None
+
+        if hasattr(structure, 'incidence'):
+            incidence = structure.incidence
+        else:
+            incidence = None
+
+        stack = OptiStack(structure, no_back_reflection=no_back_reflection, substrate=substrate, incidence=incidence)
 
     if not coherent:
         if coherency_list is not None:

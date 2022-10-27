@@ -31,7 +31,7 @@ cbar.set_label('Absorption (1/nm)')
 
 # We can also check what is the overall light absorption in the AlGaAs and GaAs epilayers as that represents the total
 # light absorption in our solar cell and therefore the maximum EQE (light absorbed in the thick substrate lost).
-# The absorption is mostly limited by the reflexion in the front surface. Clearly, this solar cell needs an AR coating.
+# The absorption is mostly limited by the reflection in the front surface. Clearly, this solar cell needs an AR coating.
 A = np.zeros_like(wl)
 
 for i, absorption in enumerate(out['absorption'][:]):

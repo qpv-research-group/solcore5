@@ -31,7 +31,7 @@ Contrary to the :ref:`iv_calculator`, calculating the QE requires a substantial 
     # All the materials will be stored in this list, from top to bottom.
     all_materials = []
 
-    # We start from the AR coating. We only need this to define the reflexion of the cell.
+    # We start from the AR coating. We only need this to define the reflection of the cell.
     # In this case, we load it from an an external file
     def this_dir_file(f):
         return os.path.join(os.path.split(__file__)[0], f)

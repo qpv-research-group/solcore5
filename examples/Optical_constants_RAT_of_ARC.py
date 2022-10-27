@@ -7,7 +7,6 @@ from solcore.absorption_calculator import calculate_rat
 
 E_eV = np.linspace(0.65, 4, 1000)
 
-
 def nk_convert(fname, energy):
     """ Designed to handle nk data files"""
 
@@ -35,7 +34,7 @@ stack = Structure([
     [80, 1240 / E_eV, sic_nk[1], sic_nk[2]],
     [61, 1240 / E_eV, zns_nk[1], zns_nk[2]],
     [25, 1240 / E_eV, alinp_nk[1], alinp_nk[2]],
-    [350000, 1240 / E_eV, gainp_nk[1], gainp_nk[2]]
+    [1, 1240 / E_eV, gainp_nk[1], gainp_nk[2]]
 ])
 
 angles = np.linspace(0, 80, 10)
@@ -45,7 +44,7 @@ print("Calculate RAT ::")
 for theta in angles:
     print("Calculating at angle :: %4.1f deg" % theta)
     # Calculate RAT data...
-    rat_data = calculate_rat(stack, angle=theta, wavelength=1240 / E_eV)
+    rat_data = calculate_rat(stack, angle=theta, wavelength=1240 / E_eV, no_back_reflection=True)
 
     RAT_angles.append((theta, rat_data["R"], rat_data["A"]))
 
@@ -60,7 +59,7 @@ for i, RAT in enumerate(RAT_angles):
 ax2.set_ylim([0, 100])
 ax2.set_xlim([300, 1800])
 ax2.set_xlabel("Wavelength (nm)")
-ax2.set_ylabel("Reflection and Transmission (%)")
+ax2.set_ylabel("Reflection and transmission into cell (%)")
 ax2.legend(loc=5)
 ax2.text(0.05, 0.45, '(a)', transform=ax2.transAxes, fontsize=12)
 

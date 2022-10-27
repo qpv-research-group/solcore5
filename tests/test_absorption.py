@@ -54,7 +54,7 @@ def test_TMM_rat():
     idx = np.argmin(abs(wavelength - 800))
 
     out = calculate_rat(
-        my_structure, wavelength, coherent=True, no_back_reflexion=False
+        my_structure, wavelength, coherent=True, no_back_reflection=False
     )
     out = (out["R"][idx], out["A"][idx], out["T"][idx])
 
@@ -161,7 +161,7 @@ def test_substrate_presence_A():
         user_options={
             "wavelength": wavelength,
             "optics_method": "TMM",
-            "no_back_reflexion": False,
+            "no_back_reflection": False,
         },
     )
 
@@ -177,7 +177,7 @@ def test_substrate_presence_A():
         user_options={
             "wavelength": wavelength,
             "optics_method": "TMM",
-            "no_back_reflexion": False,
+            "no_back_reflection": False,
         },
     )
 
@@ -206,7 +206,7 @@ def test_BL_correction():
     position = np.arange(0, thick_cell.width, 1e-9)
     opts.position = position
     opts.recalculate_absorption = True
-    opts.no_back_reflexion = False
+    opts.no_back_reflection = False
 
     opts.BL_correction = False
     opts.wavelength = wl
