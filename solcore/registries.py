@@ -27,31 +27,101 @@ alternative to an existing approach:
 True
 
 """
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, Optional, Any
 from warnings import warn
 
 from .solar_cell import SolarCell
+from .structure import Junction
 from .state import State
 
-ACTIONS_SIGNATURE = Callable[[SolarCell, State], None]
-ACTIONS_REGISTRY: Dict[str, ACTIONS_SIGNATURE] = {}
 
+def generic_register(
+    name: str,
+    registrator_name: str,
+    registry: Dict[str, Callable],
+    signature: Any,
+    overwrite: bool = False,
+    reason_to_exclude: Optional[str] = None,
+) -> Callable:
+    """Generic register that can be used by the other specific ones.
 
-def register_action(name: str, overwrite: bool = False) -> Callable:
-    if name in ACTIONS_REGISTRY and not overwrite:
+    Args:
+        name (str): Name of the function to register
+        registrator_name (str): Name of the action of the specifric register, eg.
+        "Optics solver".
+        registry (Dict[str, Callable]): Registry in which to store the registered function.
+        signature (type): Signature of that function.
+        overwrite (bool, optional): If the method should overwrite an existing one with
+            the same name. Defaults to False.
+        reason_to_exclude (Optional[str], optional): If there is any reason to exclude
+            this method from the registry. If not None, the method will be excluded.
+            Defaults to None.
+
+    Raises:
+        ValueError: If the name of the method exist already in the registry and
+            overwrite is False.
+
+    Returns:
+        Callable: The inner decorator that will actually register the function.
+    """
+    if name in registry and not overwrite:
         raise ValueError(
-            f"Action '{name}' already exist in the registry."
+            f"{registrator_name.capitalize()} '{name}' already exist in the registry. "
             "Give it another name or set `overwrite = True`."
         )
+    if reason_to_exclude is not None:
+        warn(
+            f"{registrator_name.capitalize()} '{name}' will not be available. "
+            f"{reason_to_exclude}"
+        )
 
-    def wrap(func: ACTIONS_SIGNATURE) -> ACTIONS_SIGNATURE:
-        ACTIONS_REGISTRY[name] = func
+    def wrap(func: signature) -> signature:
+        if reason_to_exclude is None:
+            registry[name] = func
         return func
 
     return wrap
 
 
-OPTICS_METHOD_SIGNATURE = Callable[[SolarCell, State], None]
+ACTIONS_SIGNATURE = Callable[[SolarCell, State], None]
+ACTIONS_REGISTRY: Dict[str, ACTIONS_SIGNATURE] = {}
+
+
+def register_action(
+    name: str, overwrite: bool = False, reason_to_exclude: Optional[str] = None
+) -> Callable:
+    """Registers a global action to be executed over the whole cell.
+
+    Examples of these actions could include soling the optics of the cell, calculate the
+    IV curve or the quantum efficiency.
+
+    Args:
+        name (str): Name of the action.
+        overwrite (bool, optional): If the method should overwrite an existing one with
+            the same name. Defaults to False.
+        reason_to_exclude (Optional[str], optional): If there is any reason to exclude
+            this method from the registry. If not None, the method will be excluded.
+            Defaults to None.
+
+
+    Raises:
+        ValueError: If the name of the method exist already in the registry and
+            overwrite is False.
+
+    Returns:
+        Callable: The inner decorator that will actually register the function.
+    """
+    return generic_register(
+        name=name,
+        registrator_name="Action",
+        registry=ACTIONS_REGISTRY,
+        signature=ACTIONS_SIGNATURE,
+        overwrite=overwrite,
+        reason_to_exclude=reason_to_exclude,
+    )
+
+
+OPTICS_METHOD_SIGNATURE = Callable[[SolarCell, Any], None]
 OPTICS_METHOD_REGISTRY: Dict[str, OPTICS_METHOD_SIGNATURE] = {}
 
 
@@ -82,17 +152,11 @@ def register_optics(
     Returns:
         Callable: The inner decorator that will actually register the function.
     """
-    if name in OPTICS_METHOD_REGISTRY and not overwrite:
-        raise ValueError(
-            f"Optics method '{name}' already exist in the registry. "
-            "Give it another name or set `overwrite = True`."
-        )
-    if reason_to_exclude is not None:
-        warn(f"Optics method '{name}' will not be available. {reason_to_exclude}")
-
-    def wrap(func: OPTICS_METHOD_SIGNATURE) -> OPTICS_METHOD_SIGNATURE:
-        if reason_to_exclude is None:
-            OPTICS_METHOD_REGISTRY[name] = func
-        return func
-
-    return wrap
+    return generic_register(
+        name=name,
+        registrator_name="Optics solver",
+        registry=OPTICS_METHOD_REGISTRY,
+        signature=OPTICS_METHOD_SIGNATURE,
+        overwrite=overwrite,
+        reason_to_exclude=reason_to_exclude,
+    )
