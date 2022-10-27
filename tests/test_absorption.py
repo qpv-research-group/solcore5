@@ -161,11 +161,9 @@ def test_substrate_presence_A():
         user_options={
             "wavelength": wavelength,
             "optics_method": "TMM",
-            "no_back_reflexion": False,
+            "no_back_reflection": False,
         },
     )
-
-    z_pos = np.linspace(0, my_structure.width, 10)
 
     A_subs = my_structure[0].layer_absorption
 
@@ -177,7 +175,7 @@ def test_substrate_presence_A():
         user_options={
             "wavelength": wavelength,
             "optics_method": "TMM",
-            "no_back_reflexion": False,
+            "no_back_reflection": False,
         },
     )
 
@@ -206,17 +204,17 @@ def test_BL_correction():
     position = np.arange(0, thick_cell.width, 1e-9)
     opts.position = position
     opts.recalculate_absorption = True
-    opts.no_back_reflexion = False
+    opts.no_back_reflection = False
 
     opts.BL_correction = False
     opts.wavelength = wl
-    solve_tmm(thick_cell, opts)
+    solve_tmm(thick_cell, **opts)
 
     no_corr = thick_cell.absorbed
 
     opts.BL_correction = True
 
-    solve_tmm(thick_cell, opts)
+    solve_tmm(thick_cell, **opts)
 
     with_corr = thick_cell.absorbed
 
@@ -313,7 +311,7 @@ def test_inc_coh_tmm():
             [0.5742503, 0.67956899, 0.73481184, 0.725372, 0.76792856],
             [0.5742503, 0.67956899, 0.73481184, 0.725372, 0.76792856],
             [0.5742503, 0.67956899, 0.73474943, 0.70493469, 0.70361194],
-            [0.5742503, 0.67956899, 0.70927724, 0.71509221, 0.71592772]
+            [0.5742503, 0.67956899, 0.70927724, 0.71509221, 0.71592772],
         ]
     )
     assert A_calc == approx(A_data)
@@ -321,6 +319,7 @@ def test_inc_coh_tmm():
 
 def test_define_material():
     from solcore import ParameterSystem, MaterialSystem
+
     this_dir = os.path.split(__file__)[0]
     create_new_material(
         "SiGeSn",

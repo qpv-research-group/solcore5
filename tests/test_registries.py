@@ -21,3 +21,33 @@ def test_register_action():
         pass
 
     assert registries.ACTIONS_REGISTRY["pre-process"] == another_pre_process_cell
+
+
+def test_register_optics():
+    from solcore import registries
+
+    @registries.register_optics("approximate")
+    def approximate_optics(*args, **kwargs):
+        pass
+
+    assert "approximate" in registries.OPTICS_METHOD_REGISTRY
+
+    with pytest.raises(ValueError):
+
+        @registries.register_optics("approximate")
+        def custom_approximate_optics(*args, **kwargs):
+            pass
+
+    @registries.register_optics("approximate", overwrite=True)
+    def another_approximate_optics(*args, **kwargs):
+        pass
+
+    assert (
+        registries.OPTICS_METHOD_REGISTRY["approximate"] == another_approximate_optics
+    )
+
+    @registries.register_optics("final_approximate", reason_to_exclude="Doesn't work")
+    def final_approximate_optics(*args, **kwargs):
+        pass
+
+    assert "final_approximate" not in registries.OPTICS_METHOD_REGISTRY

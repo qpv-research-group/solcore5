@@ -85,7 +85,7 @@ try:
     solar_cell_solver(solar_cell, 'qe', opts)
     RCWA_EQE_NP = solar_cell[2].eqe(opts.wavelength)
     RCWA_legend = 'RCWA (GaAs SC + NP array + DBR)'
-except RCWASolverError:
+except ValueError:
     RCWA_EQE_NP = np.zeros_like(BL_EQE_NP)
     RCWA_legend = '(RCWA solver S4 not available)'
 
