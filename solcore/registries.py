@@ -162,7 +162,6 @@ def register_optics(
     )
 
 
-
 SHORT_CIRCUIT_SOLVER_SIGNATURE = Callable[[Junction, Any], None]
 SHORT_CIRCUIT_SOLVER_REGISTRY: Dict[str, SHORT_CIRCUIT_SOLVER_SIGNATURE] = {}
 
@@ -177,8 +176,8 @@ def register_short_circuit_solver(
     a generic **kwargs.
 
     After running the function, the input Junction object will be updated with the
-    bandstructure and the recombination properties, such as VB and CB band edges,
-    population of electrons and holes, etc.
+    bandstructure and recombination profile at short circuit will be available in a new
+    `short_circuit_data` attribute of the junction object as a State object.
 
     Args:
         name (str): Name of the solver.

@@ -257,12 +257,14 @@ def solve_equilibrium(solar_cell, options):
 
 
 @register_action("short_circuit")
-def solve_short_circuit(solar_cell, options):
-    """Uses the PDD solver to calculate the properties of all the all the junctions under short circuit
+def solve_short_circuit(solar_cell: SolarCell, options: State):
+    """Solves the electronic properfies of the cell at short circuit conditons.
 
-    :param solar_cell: A solar_cell object
-    :param options: Options for the solvers
-    :return: None
+    The junction objects are updated with the bandstructure and recombination profiles.
+
+    Args:
+        solar_cell: The solar cell to solve.
+        options: Options required by the solver.
     """
 
     solve_optics(solar_cell, options)

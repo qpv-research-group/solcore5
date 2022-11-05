@@ -5,6 +5,7 @@ from scipy.interpolate import interp1d
 from .. import asUnit, constants
 from ..registries import register_short_circuit_solver
 from ..state import State
+from ..structure import Junction
 from ..light_source import LightSource
 from .DeviceStructure import (
     CreateDeviceStructure,
@@ -145,20 +146,33 @@ def equilibrium_pdd(junction, **options):
 
 @register_short_circuit_solver("PDD", reason_to_exclude=reason_to_exclude)
 def short_circuit_pdd(
-    junction,
+    junction: Junction,
     wavelength: NDArray,
     light_source: LightSource,
     output_sc: int = 1,
     **options
 ):
-    """Solves the devices electronic properties at short circuit. Internally, it calls Equilibrium.
+    """Solves the electronic properties of the junction at short circuit.
 
-    :param junction: A junction object
-    :param options: Options to be passed to the solver
-    :return: None
+    Internally, it calls Equilibrium to get the initial bandstructure and then increases
+    progrssively the intensity of the light - done in the Fortran code - until the
+    desired spectrum.
+
+    The junction object is expected to have a `absorbed` method taking as input the
+    an array of mesh points in the junction and returning a 2D array showing the
+    fraction of light absorbed at each wavelenght and depth position. If that were not
+    the case, absorption is set to zero... which defeats the purpose of doing this
+    calculation to start with.
+
+    Args:
+        junction: A junction object with layers.
+        wavelength (NDArray): Array of the wavelenghts to solve the problem for.
+        light_source (LightSource): Light source object defining the illumination
+            specturm.
+        output_sc (int, optional): If the ouput of the shortcirctuit calculation process
+            should be shown. Defaults to 1.
     """
 
-    # We run equilibrium
     equilibrium_pdd(
         junction,
         wavelength=wavelength,
