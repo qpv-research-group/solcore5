@@ -3,7 +3,7 @@ from numpy.typing import NDArray
 from scipy.interpolate import interp1d
 
 from .. import asUnit, constants
-from ..registries import register_short_circuit_solver
+from ..registries import register_short_circuit_solver, register_equilibrium_solver
 from ..state import State
 from ..structure import Junction
 from ..light_source import LightSource
@@ -61,23 +61,18 @@ pdd_options.output_qe = 1
 
 
 # Functions for creating the streucture in the fortran variables and executing the DD solver
-def ProcessStructure(device, meshpoints, wavelengths=None):
+def ProcessStructure(device, meshpoints):
     """This function reads a dictionary containing all the device structure, extract the electrical and optical
     properties of the materials, and loads all that information into the Fortran variables. Finally, it initialises the
     device (in Fortran) calculating an initial mesh and all the properties as a function of the position.
 
     :param device: A dictionary containing the device structure. See PDD.DeviceStructure
-    :param wavelengths: (Optional) Wavelengths at which to calculate the optical properties.
     :return: Dictionary containing the device structure properties as a function of the position.
     """
     print("Processing structure...")
     # First, we clean any previous data from the Fortran code
     dd.reset()
     output = {}
-
-    if wavelengths is not None:
-        output["Optics"] = {}
-        output["Optics"]["wavelengths"] = wavelengths
 
     # We dump the structure information to the Fotran module and initialise the structure
     i = 0
@@ -115,17 +110,28 @@ def ProcessStructure(device, meshpoints, wavelengths=None):
     return output
 
 
-def equilibrium_pdd(junction, **options):
-    """Solves the PDD equations under equilibrium: in the dark with no external current and zero applied voltage.
+@register_equilibrium_solver("PDD", reason_to_exclude=reason_to_exclude)
+def equilibrium_pdd(
+    junction: Junction,
+    T: float = 298.0,
+    output_equilibrium: int = 1,
+    meshpoints: int = -400,
+    **options
+):
+    """Solves the PDD equations under equilibrium
 
-    :param junction: A junction object
-    :param options: Options to be passed to the solver
-    :return: None
+    That is, in the dark with no external current and zero applied voltage.
+
+    Args:
+        junction: A junction object with layers.
+        T (float, optional): Temperature of the cell. Defaults to 298.0.
+        output_equilibrium:  If the ouput of the equilibrium calculation process
+            should be shown. Defaults to 1.
+        meshpoints (int, optional): Number of mesh points. If negative, that sets the
+        initial number of points, but the calculation will dynamically adapt those.
+            Defaults to -400.
     """
     options = State(**options)
-    T = options.T
-    wl = options.wavelength
-    output_info = options.output_equilibrium
 
     SetConvergenceParameters(options)
     SetMeshParameters(options)
@@ -134,10 +140,10 @@ def equilibrium_pdd(junction, **options):
     device = CreateDeviceStructure("Junction", T=T, layers=junction)
 
     print("Solving equilibrium...")
-    output = ProcessStructure(device, options.meshpoints, wavelengths=wl)
+    output = ProcessStructure(device, meshpoints)
     dd.gen = 0
 
-    dd.equilibrium(output_info)
+    dd.equilibrium(output_equilibrium)
     print("...done!\n")
 
     output["Bandstructure"] = DumpBandStructure()
@@ -173,13 +179,7 @@ def short_circuit_pdd(
             should be shown. Defaults to 1.
     """
 
-    equilibrium_pdd(
-        junction,
-        wavelength=wavelength,
-        light_source=light_source,
-        output_sc=output_sc,
-        **options
-    )
+    equilibrium_pdd(junction, **options)
 
     _, ph = light_source.spectrum(x=wavelength, output_units="photon_flux_per_m")
 
@@ -195,7 +195,10 @@ def short_circuit_pdd(
     dd.lightsc(output_sc, 1)
     print("...done!\n")
 
-    output = {"Bandstructure": DumpBandStructure()}
+    output = {
+        "Bandstructure": DumpBandStructure(),
+        "Optics": {"wavelengths": wavelength},
+    }
     junction.short_circuit_data = State(**output)
 
 
