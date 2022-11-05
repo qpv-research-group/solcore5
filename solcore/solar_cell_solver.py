@@ -259,6 +259,7 @@ def solve_equilibrium(solar_cell: SolarCell, options: State):
                 "ERROR in 'solve_equilibrium' - Valid equilibrium solvers are "
                 f"{list(EQUILIBRIUM_SOLVER_REGISTRY.keys())}."
             )
+            continue
 
         solver(solar_cell[j], **options)
 
@@ -284,6 +285,7 @@ def solve_short_circuit(solar_cell: SolarCell, options: State):
                 "ERROR in 'solve_short_circuit' - Valid short circuit solvers are "
                 f"{list(SHORT_CIRCUIT_SOLVER_REGISTRY.keys())}."
             )
+            continue
 
         solver(solar_cell[j], **options)
 
