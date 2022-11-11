@@ -1,206 +1,109 @@
 name: Upload Python Package
 
-on: push
+on:
+  push:
+    branches:
+      - main
+      - develop
 
 jobs:
-#  deploy_wheels_linux:
-#    name: Building for Linux
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: Deploy wheels - Setup python
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: '3.x'
-#
-#      - name: Deploy wheels - Install dependencies
-#        run: |
-#          python -m pip install --upgrade setuptools wheel pip twine numpy
-#
-#      - name: Deploy wheels - Build manylinux2014 binary wheels - py3.x - x86_64
-#        uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2014_x86_64
-#        with:
-#          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
-#          build-requirements: 'numpy'
-#          system-packages: 'gcc-gfortran'
-#          pre-build-command: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
-#
-#      - name: Deploy wheels - Build manylinux2014 binary wheels - py3.x - i686
-#        uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2014_i686
-#        with:
-#          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
-#          build-requirements: 'numpy==1.21.4'
-#          system-packages: 'gcc-gfortran'
-#          pre-build-command: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
-#
-#      - name: Publish wheels to PyPI
-#        if: startsWith(github.ref, 'refs/tags')
-#        env:
-#          TWINE_USERNAME: '__token__'
-#          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-#        run: |
-#          twine upload dist/*-manylinux*.whl --skip-existing
-#
-#      - uses: actions/upload-artifact@v3
-#        with:
-#          name: linux_wheels
-#          path: dist/
-#
-#  deploy_wheels_windows:
-#    runs-on: windows-latest
-#    strategy:
-#      matrix:
-#        python-version: ['3.7', '3.8', '3.9', '3.10']
-#    name: Building for Windows, Python ${{ matrix.python-version }}
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: Set up Python
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: ${{ matrix.python-version }}
-#          architecture: x64
-#
-#      - name: Install python dependencies
-#        run: |
-#          python -m pip install --upgrade setuptools wheel pip twine numpy==1.21.4
-#
-#      - name: Build Solcore Windows
-#        env:
-#          FC: gfortran
-#          CC: gcc
-#          SOLCORE_WITH_PDD: 1
-#        run: |
-#          echo "[build]`ncompiler=mingw32" | Out-File -Encoding ASCII ~/pydistutils.cfg
-#          python setup.py sdist bdist_wheel
-#        shell: powershell
-#
-#      - name: Publish wheels to PyPI
-#        if: startsWith(github.ref, 'refs/tags')
-#        env:
-#          TWINE_USERNAME: '__token__'
-#          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-#        run: |
-#          twine upload dist/*-win_amd64*.whl --skip-existing
-#
-#      - uses: actions/upload-artifact@v3
-#        with:
-#          name: windows_wheels
-#          path: dist/
-#
-#  deploy_wheels_macos:
-#    name: Building for macOS
-#    runs-on: macOS-latest
-##    strategy:
-##      matrix:
-##        os: [ubuntu-20.04, windows-2019, macOS-11]
-#
-#    steps:
-#      - uses: actions/checkout@v3
-#
-#      # Used to host cibuildwheel
-#      - uses: actions/setup-python@v3
-#
-#      - name: Install cibuildwheel
-#        run: python -m pip install cibuildwheel==2.10.2
-#
-#      - name: Build wheels
-#        env:
-#          FC: gfortran
-#          CC: gcc
-#          CIBW_ARCHS_MACOS: x86_64 arm64
-#          CIBW_BEFORE_BUILD: pip install numpy
-#        run: |
-#          brew reinstall gfortran
-#          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1
-#          python -m cibuildwheel --output-dir dist
-#
-#      - uses: actions/upload-artifact@v3
-#        with:
-#          name: macos_wheels
-#          path: dist/
-#
-#
-#  deploy_wheels_all:
-#    name: Building for Linux, Windows, macOS
-#    runs-on: macOS-latest, windows-latest, ubuntu-latest
-#    #    strategy:
-#    #      matrix:
-#    #        os: [ubuntu-20.04, windows-2019, macOS-11]
-#
-#    steps:
-#      - uses: actions/checkout@v3
-#
-#      # Used to host cibuildwheel
-#      - uses: actions/setup-python@v3
-#
-#      - name: Install cibuildwheel
-#        run: python -m pip install cibuildwheel==2.10.2
-#
-#      - name: Build wheels on macOS
-#        env:
-#          FC: gfortran
-#          CC: gcc
-#          CIBW_ARCHS_MACOS: x86_64 arm64
-#          CIBW_BEFORE_BUILD: pip install numpy
-#        run: |
-#          brew reinstall gfortran
-#          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1
-#          python -m cibuildwheel --output-dir dist
-#
-#      - uses: actions/upload-artifact@v3
-#        with:
-#          name: macos_wheels
-#          path: dist/
 
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+  deploy_wheels_linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy wheels - Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Deploy wheels - Install dependencies
+        run: |
+          python -m pip install --upgrade setuptools wheel pip twine numpy
+      - name: Deploy wheels - Build manylinux2014 binary wheels - py3.x - x86_64
+        uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2014_x86_64
+        with:
+          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
+          build-requirements: 'numpy'
+          system-packages: 'gcc-gfortran'
+          pre-build-command: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
+
+      - name: Deploy wheels - Build manylinux2014 binary wheels - py3.x - i686
+        uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2014_i686
+        with:
+          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
+          build-requirements: 'numpy==1.21.4'
+          system-packages: 'gcc-gfortran'
+          pre-build-command: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
+
+      - name: Publish wheels to PyPI
+        if: startsWith(github.ref, 'refs/tags')
+        env:
+          TWINE_USERNAME: '__token__'
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          twine upload dist/*-manylinux*.whl --skip-existing
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: linux_wheels
+          path: dist/
+
+  deploy_wheels_macos_windows:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-12]
+        os: [macos-latest, windows-latest]
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+    name: Building for ${{ matrix.os }} - python ${{ matrix.python-version }}
 
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
 
-      # Used to host cibuildwheel
-      - uses: actions/setup-python@v3
+      - name: Install system dependencies in MacOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew reinstall gfortran
 
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.11.1
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade setuptools wheel pip twine numpy==1.21.4
 
-#      - name: Install gfortran on macOS
-#        if: matrix.os == 'macOS-latest'
-#        run: brew reinstall gfortran
+      - name: Build Solcore Windows
+        if: matrix.os == 'windows-latest'
+        env:
+          FC: gfortran
+          CC: gcc
+          SOLCORE_WITH_PDD: 1
+        run: |
+          echo "[build]`ncompiler=mingw32" | Out-File -Encoding ASCII ~/pydistutils.cfg
+          python setup.py sdist bdist_wheel
+        shell: powershell
 
-      - name: Build wheels on macOS and Linux
+      - name: Build Solcore MacOS
         if: matrix.os != 'windows-latest'
         env:
           FC: gfortran
           CC: gcc
-          CIBW_ARCHS_MACOS: arm64 # x86_64
-          CIBW_BEFORE_BUILD: pip install numpy
-          #CIBW_BEFORE_BUILD_MACOS: arch -arm64 brew reinstall gfortran
-          CIBW_BEFORE_BUILD_MACOS: brew config
-          CIBW_ENVIRONMENT: SOLCORE_WITH_PDD=1 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
-          CIBW_BUILD_VERBOSITY: 1
+          SOLCORE_WITH_PDD: 1
         run: |
-          python -m cibuildwheel --output-dir dist
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
+          python setup.py sdist bdist_wheel
 
-#      - name: Build wheels on Windows
-#        if: matrix.os == 'windows-latest'
-#        shell: powershell
-#        env:
-#          FC: gfortran
-#          CC: gcc
-#          CIBW_ENVIRONMENT: SOLCORE_WITH_PDD=1
-#          CIBW_BEFORE_BUILD: pip install numpy==1.21.4
-#          CIBW_ARCHS_WINDOWS: AMD64
-#          #CIBW_BUILD_VERBOSITY: 1
-#        run: |
-#          echo "[build]`ncompiler=mingw32" | Out-File -Encoding ASCII ~/pydistutils.cfg
-#          python -m cibuildwheel --output-dir dist
+      - name: Publish wheels to PyPI
+        if: startsWith(github.ref, 'refs/tags')
+        env:
+          TWINE_USERNAME: '__token__'
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          twine upload dist/*.whl --skip-existing
 
       - uses: actions/upload-artifact@v3
         with:
-          name: all_wheels
+          name: ${{ matrix.os }}_wheels
           path: dist/
