@@ -173,6 +173,16 @@ def interface_R(polarization, n_i, n_f, th_i, th_f):
     Fraction of light intensity reflected at an interface.
     """
     r = interface_r(polarization, n_i, n_f, th_i, th_f)
+
+    # If the outgoing angle is pi/2, that means the light is totally internally reflected
+    # and we can set r = R = 1. If not, can get unphysical results for r.
+
+    # Note that while T actually CAN be > 1 (when you have incidence from an absorbing
+    # medium), I don't think R can ever be > 1.
+
+    r[th_f.real > (np.pi / 2) - 1e-6] = 1
+    r[th_i.real > (np.pi / 2) - 1e-6] = 1
+
     return R_from_r(r)
 
 
@@ -181,6 +191,14 @@ def interface_T(polarization, n_i, n_f, th_i, th_f):
     Fraction of light intensity transmitted at an interface.
     """
     t = interface_t(polarization, n_i, n_f, th_i, th_f)
+
+    # If the incoming angle is pi/2, that means (most likely) that the light was previously
+    # totally internally reflected. That means the light will never reach this interface and
+    # we can safely set t = T = 0; otherwise we get numerical issues which give unphysically large
+    # values of T because in T_from_t we divide by cos(th_i) which is ~ 0.
+
+    t[th_i.real > (np.pi / 2) - 1e-6] = 0
+
     return T_from_t(polarization, t, n_i, n_f, th_i, th_f)
 
 
@@ -333,12 +351,6 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
             'vw_list': vw_list, 'kz_list': kz_list, 'th_list': th_list,
             'pol': pol, 'n_list': n_list, 'd_list': d_list, 'th_0': th_0,
             'lam_vac': lam_vac}
-
-    # return {'r': r, 't': t, 'R': R, 'T': T, 'power_entering': power_entering,
-    #         'kz_list': kz_list, 'th_list': th_list,
-    #         'pol': pol, 'n_list': n_list, 'd_list': d_list, 'th_0': th_0,
-    #         'lam_vac': lam_vac}
-
 
 def coh_tmm_reverse(pol, n_list, d_list, th_0, lam_vac):
     """
@@ -887,11 +899,6 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     # errors.
     T_list[T_list < 1e-30] = 1e-30
 
-    # For incoherent calculations at non-normal incidence, where total internal reflection should be occurring,
-    # can sometimes get values of R and T > 1. This is a hack to fix that.
-    R_list[R_list > 1] = 1
-    T_list[T_list > 1] = 1
-
     L_list = [np.nan]  # L_0 is not defined because 0'th layer has no beginning.
     Ltilde = (np.array([[np.ones_like(lam_vac), -R_list[1, 0]],
                      [R_list[0, 1],
@@ -901,7 +908,6 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     # Ltilde = Ltilde.transpose(2,0,1)
 
     for i in range(1, num_inc_layers - 1):
-
         L = np.matmul(
             np.array([[1 / P_list[i], np.zeros(len(lam_vac))], [np.zeros(len(lam_vac)), P_list[i]]]).transpose(2, 0, 1),
             np.array([[np.ones_like(lam_vac), -R_list[i + 1, i]],
@@ -926,7 +932,6 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     for i in range(num_inc_layers - 2, 0, -1):
         VW = np.matmul(L_list[i], VW_list[i+1].T[:, :, None])
         VW_list[i, :, :] = VW.transpose()
-
 
     # stackFB_list[n]=[F,B] means that F is light traveling forward towards n'th
     # stack and B is light traveling backwards towards n'th stack.
@@ -968,6 +973,12 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
         stackFB_list_ans = np.stack(stackFB_list).transpose(2, 0, 1)
     else:
         stackFB_list_ans = []
+
+    # despite checking in interface_T and interface_R, still sometimes end up with
+    # unphysical R or T values of incident from medium with n > 1
+    R[R > 1] = 1
+    T[T < 0] = 0
+
     #('VWlist', VW_list.transpose(2, 0, 1))
     ans = {'T': T, 'R': R, 'VW_list': VW_list.transpose(2, 0, 1),
            'coh_tmm_data_list': coh_tmm_data_list,
@@ -1098,4 +1109,3 @@ def beer_lambert(alphas, fraction, dist):
     output = fraction[:, None]*alphas[:, None]*expn
 
     return output/1e9
-
