@@ -887,6 +887,11 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     # errors.
     T_list[T_list < 1e-30] = 1e-30
 
+    # For incoherent calculations at non-normal incidence, where total internal reflection should be occurring,
+    # can sometimes get values of R and T > 1. This is a hack to fix that.
+    R_list[R_list > 1] = 1
+    T_list[T_list > 1] = 1
+
     L_list = [np.nan]  # L_0 is not defined because 0'th layer has no beginning.
     Ltilde = (np.array([[np.ones_like(lam_vac), -R_list[1, 0]],
                      [R_list[0, 1],
@@ -896,6 +901,7 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
     # Ltilde = Ltilde.transpose(2,0,1)
 
     for i in range(1, num_inc_layers - 1):
+
         L = np.matmul(
             np.array([[1 / P_list[i], np.zeros(len(lam_vac))], [np.zeros(len(lam_vac)), P_list[i]]]).transpose(2, 0, 1),
             np.array([[np.ones_like(lam_vac), -R_list[i + 1, i]],
