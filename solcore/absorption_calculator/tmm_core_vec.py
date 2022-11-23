@@ -1073,12 +1073,18 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zer
     This function is vectorized. Analogous to position_resolved, but
     for layers (incoherent or coherent) in (partly) incoherent stacks.
     This is a new function, not from Steven Byrnes' tmm package.
+    It assumes that in incoherent layers, we can assume the absorption has
+    a Beer-Lambert profile (this is not really correct; actually, the absorption
+    profile will depend on the coherence length, as discussed in the
+    documentation for the tmm package). This is an approximation in order
+    to be able to generate absorption profiles for partly coherent stacks.
     Starting with output of inc_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """
 
     layers = list(set(layer)) # unique layer indices
     A_per_layer = np.array(inc_absorp_in_each_layer(inc_tmm_data))
+    print(layers)
     fraction_reaching = 1 - np.cumsum(A_per_layer, axis = 0)
     A_local = np.zeros((len(alphas[0]), len(dist)))
     for i, l in enumerate(layers):
@@ -1088,7 +1094,7 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zer
             A_layer = fn.run(dist[layer == l])
 
         else:
-            A_layer = beer_lambert(alphas[l] * 1e9, fraction_reaching[i], dist[layer == l] * 1e-9)
+            A_layer = beer_lambert(alphas[l] * 1e9, fraction_reaching[i], dist[layer == l] * 1e-9, A_per_layer[l])
 
         A_layer[fraction_reaching[i] < zero_threshold, :] = 0
         A_local[:, layer == l] = np.real(A_layer)
@@ -1096,16 +1102,23 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zer
     return A_local
 
 
-def beer_lambert(alphas, fraction, dist):
+def beer_lambert(alphas, fraction, dist, A_total):
     """
     Calculates absorption profile according to the Beer-Lambert law given alphas (in m-1)
     and a vector of distance into the layer (in m) and the fraction of incident light
     reaching the front of the layer. This is used to calculate the absorption profile in
     incoherent layers within (partly) incoherent stacks. Vectorized over wavelengths.
+
+    Note that the Beer-Lambert law is used to generate the absorption profile in incoherent
+    layers as an approximation. The absorption profile in incoherent layers will actually
+    be dependent on the coherence length, as discussed in the documentation for the tmm package.
     """
 
     expn = np.exp(- alphas[:, None] * dist[None,:])
 
-    output = fraction[:, None]*alphas[:, None]*expn
+    A_integrated = fraction*(1-np.exp(-alphas*max(dist)))
+
+    # scale to total absorption in layer (see docstring)
+    output = (A_total/A_integrated)[:,None]*fraction[:, None]*alphas[:, None]*expn
 
     return output/1e9
