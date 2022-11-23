@@ -1084,7 +1084,6 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zer
 
     layers = list(set(layer)) # unique layer indices
     A_per_layer = np.array(inc_absorp_in_each_layer(inc_tmm_data))
-    print(layers)
     fraction_reaching = 1 - np.cumsum(A_per_layer, axis = 0)
     A_local = np.zeros((len(alphas[0]), len(dist)))
     for i, l in enumerate(layers):
