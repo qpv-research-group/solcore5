@@ -1333,9 +1333,11 @@ def test_beer_lambert():
 
     alphas = np.linspace(0, 1, 5)
     fraction = np.linspace(0.2, 1, 5)
+    A_total = np.array([0, 9.99999989e-09, 2.99999992e-08, 5.99999978e-08,
+                    9.99999950e-08])
     dist = np.linspace(0, 100e-9, 4)
 
-    assert beer_lambert(alphas, fraction, dist)*1e9 == approx(np.array([[0, 0, 0, 0],
+    assert beer_lambert(alphas, fraction, dist, A_total)*1e9 == approx(np.array([[0, 0, 0, 0],
        [0.1, 0.1, 0.1, 0.1],
        [0.3, 0.3, 0.29999999, 0.29999999],
        [0.6, 0.59999999, 0.59999997, 0.59999996],

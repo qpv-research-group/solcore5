@@ -1118,6 +1118,7 @@ def beer_lambert(alphas, fraction, dist, A_total):
     A_integrated = fraction*(1-np.exp(-alphas*max(dist)))
 
     # scale to total absorption in layer (see docstring)
-    output = (A_total/A_integrated)[:,None]*fraction[:, None]*alphas[:, None]*expn
+    scale = np.divide(A_total, A_integrated, out=np.zeros_like(A_total), where=A_integrated!=0)
+    output = scale[:,None]*fraction[:, None]*alphas[:, None]*expn
 
     return output/1e9
