@@ -103,7 +103,7 @@ def test_interface_T():
     from solcore.absorption_calculator.tmm_core_vec import interface_T
     th1 = np.array([0.2, np.pi/2])
     n1 = np.array([2, 2])
-    n2 = np.array([3,3 ])
+    n2 = np.array([3, 3])
     th2 = np.arcsin((n1/n2)*np.sin(th1))
 
     assert(interface_T('s', n1, n2, th1, th2) == approx([0.9578062873191139, 0]))
