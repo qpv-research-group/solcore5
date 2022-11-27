@@ -1,0 +1,38 @@
+[build-system]
+build-backend = 'mesonpy'
+requires = [
+    'meson-python',
+    'numpy',
+    'cython'
+]
+
+[project]
+name = 'solcore'
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "scipy",
+    "tmm",
+    "natsort",
+    "regex",
+    "cycler",
+    "pyyaml",
+    "yabox",
+    "joblib",
+]
+
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "nbconvert",
+    "nbformat",
+    "pytest-rerunfailures",
+    "pytest-xdist",
+]
+doc = ["Sphinx", "recommonmark"]
+
+dev = ["pre-commit"]
