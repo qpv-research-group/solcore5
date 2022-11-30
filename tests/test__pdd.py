@@ -184,3 +184,41 @@ def test_find_voltage_limits(bandgap, p_on_n, vmax, vmin, exp_vmax, exp_vmin):
     act_vmax, act_vmin = find_voltage_limits(bandgap, vmax, vmin, p_on_n, T=300)
     assert act_vmax == exp_vmax
     assert act_vmin == exp_vmin
+
+
+def test_consolidate_iv():
+    from solcore.poisson_drift_diffusion.DriftDiffusionUtilities import (
+        consolidate_iv,
+    )
+
+    import numpy as np
+
+    vmax = 5.1
+    vmin = -5.1
+    positive = {
+        "V": np.arange(0, vmax, 1),
+        "I": np.arange(0, vmax, 1),
+    }
+    negative = {
+        "V": np.arange(0, vmin, -1),
+        "I": np.arange(0, vmin, -1),
+    }
+    total = {
+        "V": np.arange(min(negative["V"]), vmax, 1),
+        "I": np.arange(min(negative["I"]), vmax, 1),
+    }
+
+    # Only positive
+    actual = consolidate_iv(positive, {})
+    for mag in actual.keys():
+        assert actual[mag] == approx(positive[mag])
+
+    # Only negative
+    actual = consolidate_iv({}, negative)
+    for mag in actual.keys():
+        assert actual[mag] == approx(negative[mag])
+
+    # Both
+    actual = consolidate_iv(positive, negative)
+    for mag in actual.keys():
+        assert actual[mag] == approx(total[mag])
