@@ -168,7 +168,7 @@ def solve_iv(solar_cell, options):
     for j in solar_cell.junction_indices:
 
         if solar_cell[j].kind == "PDD":
-            PDD.iv_pdd(solar_cell[j], options)
+            PDD.iv_pdd(solar_cell[j], **options)
         elif solar_cell[j].kind == "DA":
             ASC.iv_depletion(solar_cell[j], options)
         elif solar_cell[j].kind == "2D":
