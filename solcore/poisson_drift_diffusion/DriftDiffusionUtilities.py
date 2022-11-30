@@ -60,21 +60,27 @@ pdd_options.output_iv = 1
 pdd_options.output_qe = 1
 
 
-# Functions for creating the streucture in the fortran variables and executing the DD solver
-def ProcessStructure(device, meshpoints):
-    """This function reads a dictionary containing all the device structure, extract the electrical and optical
-    properties of the materials, and loads all that information into the Fortran variables. Finally, it initialises the
-    device (in Fortran) calculating an initial mesh and all the properties as a function of the position.
+def ProcessStructure(device: dict, meshpoints: int = -400) -> dict:
+    """Dump the structure information to the Fotran module and initialise the structure.
 
-    :param device: A dictionary containing the device structure. See PDD.DeviceStructure
-    :return: Dictionary containing the device structure properties as a function of the position.
+    This function reads a dictionary containing all the device structure, extract the
+    electrical and optical properties of the materials, and loads all that information
+    into the Fortran variables. Finally, it initialises the device (in Fortran)
+    calculating an initial mesh and all the properties as a function of the position.
+
+    Args:
+        device: A dictionary containing the device structure. See PDD.DeviceStructure
+        meshpoints (int, optional): _description_. Defaults to -400.
+
+    Returns:
+        Dictionary with a "Properties" key containing the device structure properties as
+        a function of the position.
     """
     print("Processing structure...")
     # First, we clean any previous data from the Fortran code
     dd.reset()
     output = {}
 
-    # We dump the structure information to the Fotran module and initialise the structure
     i = 0
     while i < device["numlayers"]:
         layer = device["layers"][i]["properties"]
@@ -98,8 +104,8 @@ def ProcessStructure(device, meshpoints):
         dd.addlayer(args=args_list)
         i = i + device["layers"][i]["numlayers"]
 
-    # We set the surface recombination velocities. This needs to be improved at some point
-    # to consider other boundary conditions
+    # We set the surface recombination velocities.
+    # This needs to be improved at some point to consider other boundary conditions
     dd.frontboundary("ohmic", device["sn"], device["sp"], 0)
     dd.backboundary("ohmic", device["sn"], device["sp"], 0)
 
