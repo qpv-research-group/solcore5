@@ -60,22 +60,36 @@ pdd_options.output_iv = 1
 pdd_options.output_qe = 1
 
 
-def ProcessStructure(device: dict, meshpoints: int = -400) -> dict:
+def process_structure(
+    junction: Junction, T: float = 298.0, meshpoints: int = -400, **options
+) -> dict:
     """Dump the structure information to the Fotran module and initialise the structure.
 
-    This function reads a dictionary containing all the device structure, extract the
-    electrical and optical properties of the materials, and loads all that information
-    into the Fortran variables. Finally, it initialises the device (in Fortran)
-    calculating an initial mesh and all the properties as a function of the position.
+    This function extracts the electrical and optical properties of the materials, and
+    loads all that information into the Fortran variables. Finally, it initialises the
+    device (in Fortran) calculating an initial mesh and all the properties as a function
+    of the position.
 
     Args:
-        device: A dictionary containing the device structure. See PDD.DeviceStructure
-        meshpoints (int, optional): _description_. Defaults to -400.
+        junction: A junction object with layers.
+        T (float, optional): Temperature of the cell. Defaults to 298.0.
+        meshpoints (int, optional): Number of mesh points. If negative, that sets the
+        initial number of points, but the calculation will dynamically adapt those.
+            Defaults to -400.
 
     Returns:
         Dictionary with a "Properties" key containing the device structure properties as
-        a function of the position.
+        a function of the position. Additionally, the state of the fortran solver is
+        updated with the structural information of the cell and the boundary conditions.
     """
+    options = State(**options)
+
+    SetConvergenceParameters(options)
+    SetMeshParameters(options)
+    SetRecombinationParameters(options)
+
+    device = CreateDeviceStructure("Junction", T=T, layers=junction)
+
     print("Processing structure...")
     # First, we clean any previous data from the Fortran code
     dd.reset()
@@ -123,7 +137,7 @@ def equilibrium_pdd(
     output_equilibrium: int = 1,
     meshpoints: int = -400,
     **options
-):
+) -> None:
     """Solves the PDD equations under equilibrium
 
     That is, in the dark with no external current and zero applied voltage.
@@ -136,19 +150,16 @@ def equilibrium_pdd(
         meshpoints (int, optional): Number of mesh points. If negative, that sets the
         initial number of points, but the calculation will dynamically adapt those.
             Defaults to -400.
+
+    Return:
+        None. The input Junction is updated with a new "equilibrium_data" attribute
+        containing a State object with the "Properties" and the "Bandstructure" under
+        equilibrium conditions as a function of the position.
     """
-    options = State(**options)
-
-    SetConvergenceParameters(options)
-    SetMeshParameters(options)
-    SetRecombinationParameters(options)
-
-    device = CreateDeviceStructure("Junction", T=T, layers=junction)
-
-    print("Solving equilibrium...")
-    output = ProcessStructure(device, meshpoints)
+    output = process_structure(junction=junction, T=T, meshpoints=meshpoints, **options)
     dd.gen = 0
 
+    print("Solving equilibrium...")
     dd.equilibrium(output_equilibrium)
     print("...done!\n")
 
