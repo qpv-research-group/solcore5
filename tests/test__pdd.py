@@ -106,3 +106,42 @@ def test_quantum_efficiency(AlGaAs, light_source):
         my_solar_cell[1].eqe(900e-9),
     ]
     assert np.array(output) == approx(expected, abs=1e-3)
+
+
+def test_calculate_iv(mocker):
+    from . import mock_ddModel
+
+    root = "solcore.poisson_drift_diffusion.DriftDiffusionUtilities"
+    mocker.patch(f"{root}.dd", new=mock_ddModel)
+    mock_sc = mocker.patch(f"{root}.short_circuit_pdd")
+    mock_eq = mocker.patch(f"{root}.equilibrium_pdd")
+    mock_bandstructure = mocker.patch(f"{root}.DumpBandStructure")
+    mock_dump_iv = mocker.patch(f"{root}.DumpIV")
+
+    from solcore.structure import Junction
+    from solcore.poisson_drift_diffusion.DriftDiffusionUtilities import calculate_iv
+
+    junction = Junction()
+    vlimit = 1
+    vstep = 0.2
+    output_iv = 1
+
+    # We check all relevant functions are called when running in the dark.
+    out = calculate_iv(junction, vlimit, vstep, light_iv=False, output_iv=output_iv)
+    mock_eq.assert_called()
+    mock_sc.assert_not_called()
+    mock_ddModel.runiv.assert_called_with(vlimit, vstep, output_iv, 0)
+    mock_bandstructure.assert_called()
+    mock_dump_iv.assert_called()
+    assert "Bandstructure" in out and "IV" in out
+
+    # And with illumination
+    mock_eq.reset_mock()
+    mock_sc.reset_mock()
+    out = calculate_iv(junction, vlimit, vstep, light_iv=True, output_iv=output_iv)
+    mock_eq.assert_not_called()
+    mock_sc.assert_called()
+
+    # And if the vlimit is negative, so it will be the step, internally
+    out = calculate_iv(junction, -vlimit, vstep, light_iv=True, output_iv=output_iv)
+    mock_ddModel.runiv.assert_called_with(-vlimit, -vstep, output_iv, 0)
