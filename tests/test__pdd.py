@@ -1,6 +1,6 @@
 """ Poisson_drift_diffusion related tests
 """
-from pytest import approx
+from pytest import approx, mark
 
 
 def test_light_iv(AlGaAs, light_source):
@@ -159,3 +159,28 @@ def test_find_minimum_bandgap():
     junction = Junction([Layer(1, InGaAs(In=x)) for x in (0, 0.1, 0.2)])
     bandgap = find_minimum_bandgap(junction)
     assert bandgap * q == junction[-1].material.band_gap
+
+
+def kbT(T: float = 300) -> float:
+    from solcore.constants import q, kb
+
+    return 3 * kb * T / q
+
+
+@mark.parametrize(
+    ["bandgap", "p_on_n", "vmax", "vmin", "exp_vmax", "exp_vmin"],
+    [
+        [1, True, 1.5, -1.5, 1 + kbT(), -1.5],
+        [1, False, 1.5, -1.5, 1.5, -1 - kbT()],
+        [1.6, True, 1.5, -1.5, 1.5, -1.5],
+        [1.6, False, 1.5, -1.5, 1.5, -1.5],
+    ],
+)
+def test_find_voltage_limits(bandgap, p_on_n, vmax, vmin, exp_vmax, exp_vmin):
+    from solcore.poisson_drift_diffusion.DriftDiffusionUtilities import (
+        find_voltage_limits,
+    )
+
+    act_vmax, act_vmin = find_voltage_limits(bandgap, vmax, vmin, p_on_n, T=300)
+    assert act_vmax == exp_vmax
+    assert act_vmin == exp_vmin

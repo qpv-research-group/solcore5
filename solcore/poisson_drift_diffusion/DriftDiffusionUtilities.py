@@ -535,6 +535,10 @@ def find_voltage_limits(
     the PDD solver cannot handle. So, the maxmum/minimum voltages allowed are ±3kbT
     with respect to the given bandgap or vmax/vmin if they are within those limits.
 
+    FIXME: It seems that the current implementation actually goes above the high
+    injection limit. The signs should be reversed such that the voltage is never higher,
+    in absolute terms, than the bandgap.
+
     Args:
         bandgap: The reference bandgap to use when considering high injection.
         vmax: The desired maximum voltage.
@@ -545,7 +549,7 @@ def find_voltage_limits(
         T: Temperature of the cell.
 
     Returns:
-        Tuple[float, float]: _description_
+        A tuple with the adapted vmax and vmin for the calculation.
     """
 
     if p_on_n:
