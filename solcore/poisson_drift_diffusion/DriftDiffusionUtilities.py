@@ -1,22 +1,19 @@
-from typing import Tuple, Dict
+from typing import Dict, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
 from scipy.interpolate import interp1d
 
 from .. import asUnit, constants
+from ..light_source import LightSource
 from ..registries import (
-    register_short_circuit_solver,
     register_equilibrium_solver,
     register_iv_solver,
+    register_short_circuit_solver,
 )
 from ..state import State
 from ..structure import Junction
-from ..light_source import LightSource
-from .DeviceStructure import (
-    CreateDeviceStructure,
-    CalculateAbsorptionProfile,
-)
+from .DeviceStructure import CalculateAbsorptionProfile, CreateDeviceStructure
 
 try:
     from .ddModel import driftdiffusion as dd
