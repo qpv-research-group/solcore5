@@ -220,7 +220,12 @@ def short_circuit_pdd(
 
 
 def iv_pdd(junction, options):
-    """Calculates the IV curve of the device between 0 V and a given voltage. Depending on the options, the IV will be calculated in the dark (calling the equilibrium_pdd function) or under illumination (calling the short_circuit_pdd function). If the voltage range has possitive and negative values, the problem is solved twice: from 0 V to the maximu positive and from 0 V to the maximum negative, concatenating the results afterwards.
+    """Calculates the IV curve of the device between 0 V and a given voltage. Depending
+    on the options, the IV will be calculated in the dark (calling the equilibrium_pdd
+    function) or under illumination (calling the short_circuit_pdd function). If the
+    voltage range has possitive and negative values, the problem is solved twice: from 0
+    V to the maximu positive and from 0 V to the maximum negative, concatenating the
+    results afterwards.
 
     :param junction: A junction object
     :param options: Options to be passed to the solver
@@ -328,7 +333,8 @@ def iv_pdd(junction, options):
 
 
 def qe_pdd(junction, options):
-    """Calculates the quantum efficiency of the device at short circuit. Internally it calls ShortCircuit
+    """Calculates the quantum efficiency of the device at short circuit. Internally it
+    calls ShortCircuit
 
     :param junction: A junction object
     :param options: Options to be passed to the solver
@@ -353,7 +359,8 @@ def qe_pdd(junction, options):
     junction.qe = State(**output["QE"])
     junction.qe["IQE"] = junction.qe["EQE"] / np.maximum(absorbed_per_wl, 0.00001)
 
-    # The EQE is actually the IQE inside the fortran solver due to an error in the naming --> to be changed
+    # The EQE is actually the IQE inside the fortran solver due to an error in the
+    # naming --> to be changed
     junction.eqe = interp1d(
         options.wavelength,
         output["QE"]["EQE"],
@@ -401,7 +408,8 @@ def DumpBandStructure():
 
 
 def DumpIV(IV_info=False):
-    # Depending of having PN or NP the calculation of the MPP is a bit different. We move everithing to the 1st quadrant and then send it back to normal
+    # Depending of having PN or NP the calculation of the MPP is a bit different. We
+    # move everithing to the 1st quadrant and then send it back to normal
     Nd = dd.get("nd")[0 : dd.m + 1][0]
     Na = dd.get("na")[0 : dd.m + 1][0]
     s = Nd > Na
@@ -464,7 +472,8 @@ def DumpQE():
 
 
 # ----
-# Functions for setting the parameters controling the recombination, meshing and the numerial algorithm
+# Functions for setting the parameters controling the recombination, meshing and the
+# numerial algorithm
 def SetMeshParameters(options):
     dd.set("coarse", options.coarse)
     dd.set("fine", options.fine)
