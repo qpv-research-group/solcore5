@@ -1,6 +1,51 @@
 import pytest
 
 
+def test_generic_register():
+    from solcore import registries
+    from typing import Callable
+
+    REGISTRY = {}
+    SIGNATURE = Callable
+
+    register_a_solver = registries.generic_register(
+        "a-solver",
+        registrator_name="Cool features",
+        registry=REGISTRY,
+        signature=SIGNATURE,
+    )
+
+    @register_a_solver
+    def solver(*args, **kwargs):
+        pass
+
+    assert "a-solver" in REGISTRY
+    assert REGISTRY["a-solver"] == solver
+
+    with pytest.raises(ValueError):
+
+        registries.generic_register(
+            "a-solver",
+            registrator_name="Cool features",
+            registry=REGISTRY,
+            signature=SIGNATURE,
+        )
+
+    register_a_solver = registries.generic_register(
+        "a-solver",
+        registrator_name="Cool features",
+        registry=REGISTRY,
+        signature=SIGNATURE,
+        overwrite=True,
+    )
+
+    @register_a_solver
+    def second_solver(*args, **kwargs):
+        pass
+
+    assert REGISTRY["a-solver"] == second_solver
+
+
 def test_register_action():
     from solcore import registries
 
