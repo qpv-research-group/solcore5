@@ -145,3 +145,17 @@ def test_calculate_iv(mocker):
     # And if the vlimit is negative, so it will be the step, internally
     out = calculate_iv(junction, -vlimit, vstep, light_iv=True, output_iv=output_iv)
     mock_ddModel.runiv.assert_called_with(-vlimit, -vstep, output_iv, 0)
+
+
+def test_find_minimum_bandgap():
+    from solcore.structure import Layer, Junction
+    from solcore import material
+    from solcore.constants import q
+    from solcore.poisson_drift_diffusion.DriftDiffusionUtilities import (
+        find_minimum_bandgap,
+    )
+
+    InGaAs = material("InGaAs")
+    junction = Junction([Layer(1, InGaAs(In=x)) for x in (0, 0.1, 0.2)])
+    bandgap = find_minimum_bandgap(junction)
+    assert bandgap * q == junction[-1].material.band_gap
