@@ -36,3 +36,9 @@ test = [
 doc = ["Sphinx", "recommonmark"]
 
 dev = ["pre-commit"]
+
+[tool.devpy]
+package = 'solcore'
+
+[tool.devpy.commands]
+"Build" = ["devpy.build", "devpy.test"]
