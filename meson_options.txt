@@ -1,0 +1,2 @@
+option('with_pdd', type : 'boolean', value : true,
+        description: 'If set to true builds the fortran PDD module')
