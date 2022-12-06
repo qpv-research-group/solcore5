@@ -1,5 +1,6 @@
 from pytest import fixture, raises
 from pathlib import Path
+import os
 
 
 @fixture
@@ -9,7 +10,9 @@ def user_config(tmpdir):
 
 @fixture
 def default_config():
-    return Path(__file__).parent.parent / "solcore" / "solcore_config.txt"
+    for dirpath, _, filenames in os.walk(Path(__file__).parent.parent):
+        if "solcore_config.txt" in filenames:
+            return Path(dirpath) / "solcore_config.txt"
 
 
 @fixture
