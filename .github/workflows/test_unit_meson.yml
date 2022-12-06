@@ -53,4 +53,4 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           python -m pip install codecov
-          codecov 
+          python -m devpy codecov 
