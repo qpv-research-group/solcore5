@@ -42,8 +42,15 @@ jobs:
         run: |
           python -m devpy build   
 
-      - name: Test
+      - name: Unit and functional tests
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m devpy test
+          python -m devpy test -- -r a -v --cov=solcore/ --ignore tests/test_examples.py -n "auto"
+
+      - name: Codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          python -m pip install codecov
+          codecov
