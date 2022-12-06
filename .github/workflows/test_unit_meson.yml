@@ -1,4 +1,4 @@
-name: Test
+name: Unit test and examples
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read # to fetch code (actions/checkout)
 
 jobs:
-  test_devpy:
+  unit_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -46,11 +46,11 @@ jobs:
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m devpy test -- -r a -v --cov=$HOME/solcore/ --ignore tests/test_examples.py -n "auto"
+          python -m devpy test -- -r a -v --cov=solcore/ --cov-report=html:$HOME/htmlcov --ignore tests/test_examples.py -n "auto"
 
       - name: Codecov
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           python -m pip install codecov
-          codecov --root=$HOME/solcore/
+          codecov 
