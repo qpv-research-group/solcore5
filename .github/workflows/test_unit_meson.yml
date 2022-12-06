@@ -4,20 +4,22 @@ on:
   push:
   pull_request:
 
-env:
-  PYTHON_VERSION: 3.9
-
 permissions:
   contents: read # to fetch code (actions/checkout)
 
 jobs:
   unit_test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Install system dependencies
         run: |
@@ -47,6 +49,57 @@ jobs:
           SOLCORE_SPICE: ngspice
         run: |
           python -m devpy test -- -r a -v --cov=solcore/ --cov-report=html:$HOME/solcore/htmlcov --ignore tests/test_examples.py -n "auto"
+
+      - name: Codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          python -m pip install codecov
+          python -m devpy codecov 
+
+
+  test_examples:
+    needs: unit_test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
+
+      - name: Install Python dependecies
+        run: |
+          pip install pytest meson-python ninja cython numpy git+https://github.com/scientific-python/devpy
+          pip install .[test]
+
+      - name: Install S4
+        run: |
+          git clone https://github.com/phoebe-p/S4
+          cd S4
+          #make boost
+          make S4_pyext
+          cd ..
+          rm -rf S4    
+
+      - name: Build solcore
+        run: |
+          python -m devpy build   
+
+      - name: Unit and functional tests
+        env:
+          SOLCORE_SPICE: ngspice
+        run: |
+          python -m devpy test -- -r a -v tests/test_examples.py -n "auto"
 
       - name: Codecov
         env:
