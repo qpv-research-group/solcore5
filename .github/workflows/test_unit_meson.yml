@@ -43,5 +43,7 @@ jobs:
           python -m devpy build   
 
       - name: Test
+        env:
+          SOLCORE_SPICE: ngspice
         run: |
           python -m devpy test
