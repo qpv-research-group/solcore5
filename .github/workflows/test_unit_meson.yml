@@ -22,7 +22,7 @@ jobs:
       - name: Install system dependencies in Linux
         run: |
           sudo apt-get update
-          sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev ninja-build
+          sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
       - name: Install S4 in Linux
         if: matrix.os == 'ubuntu-latest'
@@ -36,7 +36,7 @@ jobs:
 
       - name: Install Python dependecies
         run: |
-          pip install pytest meson-python ninja cython git+https://github.com/scientific-python/devpy
+          pip install pytest meson-python ninja cython numpy git+https://github.com/scientific-python/devpy
 
       - name: Build solcore
         run: |
