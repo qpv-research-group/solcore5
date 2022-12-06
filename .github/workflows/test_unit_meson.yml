@@ -19,13 +19,12 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install system dependencies in Linux
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
-      - name: Install S4 in Linux
-        if: matrix.os == 'ubuntu-latest'
+      - name: Install S4
         run: |
           git clone https://github.com/phoebe-p/S4
           cd S4
