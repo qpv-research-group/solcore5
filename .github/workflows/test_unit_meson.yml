@@ -37,6 +37,7 @@ jobs:
       - name: Install Python dependecies
         run: |
           pip install pytest meson-python ninja cython numpy git+https://github.com/scientific-python/devpy
+          pip install .[test]
 
       - name: Build solcore
         run: |
