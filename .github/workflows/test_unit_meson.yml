@@ -1,0 +1,47 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+env:
+  PYTHON_VERSION: 3.10
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  test_devpy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install system dependencies in Linux
+        run: |
+          sudo apt-get update
+          sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
+
+      - name: Install S4 in Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          git clone https://github.com/phoebe-p/S4
+          cd S4
+          #make boost
+          make S4_pyext
+          cd ..
+          rm -rf S4
+
+      - name: Install Python dependecies
+        run: |
+          pip install pytest meson-python ninja git+https://github.com/scientific-python/devpy
+
+      - name: Build solcore
+        run: |
+          python -m devpy build -- -Dpython.install_env=venv    
+
+      - name: Test
+        run: |
+          python -m devpy test
