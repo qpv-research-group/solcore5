@@ -40,7 +40,7 @@ jobs:
 
       - name: Build solcore
         run: |
-          python -m devpy build -- -Dpython.install_env=venv    
+          python -m devpy build   
 
       - name: Test
         run: |
