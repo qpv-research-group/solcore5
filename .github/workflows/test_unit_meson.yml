@@ -50,13 +50,13 @@ jobs:
 
       - name: Build solcore
         run: |
-          python -m devpy build   
+          python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true  
 
       - name: Unit and functional tests
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m devpy test -- -r a -v --cov=solcore/ --cov-report=html:$HOME/solcore/htmlcov --ignore tests/test_examples.py -n "auto"
+          python -m devpy test -- -r a -v --cov=solcore/ --ignore tests/test_examples.py -n "auto"
 
       - name: Codecov
         env:
@@ -109,10 +109,10 @@ jobs:
 
       - name: Build solcore
         run: |
-          python -m devpy build   
+           python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true
 
       - name: Unit and functional tests
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m devpy test -- -r a -v tests/test_examples.py -n "auto"
+          python -m devpy test -- -r a -v solcore/tests/test_examples.py -n "auto"

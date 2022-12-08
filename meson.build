@@ -18,5 +18,9 @@ message(py.full_path())
 message(py.get_install_dir())
 
 subdir('solcore')
-install_subdir('tests', install_dir: py.get_install_dir() / 'solcore')
+
+if get_option('install_test')
+    install_subdir('tests', install_dir: py.get_install_dir() / 'solcore')
+    install_subdir('examples', install_dir: py.get_install_dir() / 'solcore')
+endif
 
