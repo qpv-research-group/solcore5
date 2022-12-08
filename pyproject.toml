@@ -42,4 +42,4 @@ package = 'solcore'
 
 [tool.devpy.commands]
 "Build" = ["devpy.build", "devpy.test"]
-"Extensions" = ['.devpy/cmds.py:codecov']
+"Extensions" = ['.devpy/cmds.py:codecov', '.devpy/cmds.py:install_dependencies']
