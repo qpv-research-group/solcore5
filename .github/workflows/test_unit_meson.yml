@@ -37,7 +37,7 @@ jobs:
       - name: Install Python dependecies
         run: |
           pip install pytest meson-python ninja cython numpy wheel git+https://github.com/scientific-python/devpy
-          pip install pytest-cov pytest-mock nbconvert nbformat pytest-rerunfailures pytest-xdist
+          pip install .[test]
 
       - name: Install S4
         run: |
@@ -96,7 +96,7 @@ jobs:
       - name: Install Python dependecies
         run: |
           pip install pytest meson-python ninja cython numpy wheel git+https://github.com/scientific-python/devpy
-          pip install pytest-cov pytest-mock nbconvert nbformat pytest-rerunfailures pytest-xdist
+          pip install .[test]
 
       - name: Install S4
         run: |
