@@ -33,6 +33,7 @@ jobs:
         run: |
           brew reinstall gfortran
           brew install ngspice
+          brew install boost
 
       - name: Install Python dependecies
         run: |
@@ -92,6 +93,7 @@ jobs:
         run: |
           brew reinstall gfortran
           brew install ngspice
+          brew install boost
 
       - name: Install Python dependecies
         run: |
