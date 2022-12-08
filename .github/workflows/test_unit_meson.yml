@@ -56,7 +56,7 @@ jobs:
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m devpy test -- -r a -v --cov=solcore/ --ignore tests/test_examples.py -n "auto"
+          python -m devpy test -- -r a -v --cov=solcore/ --ignore solcore/tests/test_examples.py -n "auto"
 
       - name: Codecov
         env:
