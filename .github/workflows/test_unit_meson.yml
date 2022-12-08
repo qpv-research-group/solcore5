@@ -34,6 +34,7 @@ jobs:
           brew reinstall gfortran
           brew install ngspice
           brew install boost
+          brew install suite-sparse
 
       - name: Install Python dependecies
         run: |
@@ -94,6 +95,7 @@ jobs:
           brew reinstall gfortran
           brew install ngspice
           brew install boost
+          brew install suite-sparse
 
       - name: Install Python dependecies
         run: |
