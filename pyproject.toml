@@ -15,8 +15,7 @@ license = {file = "GNU-LGPL.txt"}
 requires-python = ">=3.7"
 keywords = ["photovoltaics", "modelling", "physics"]
 authors = [
-  {email = "d.alonso-alvarez@imperial.ac.uk"},
-  {name = "The Quantum Photovoltaics Group"}
+  {name = "The Quantum Photovoltaics Group", email = "d.alonso-alvarez@imperial.ac.uk"}
 ]
 classifiers=[
         "Development Status :: 5 - Production/Stable",
