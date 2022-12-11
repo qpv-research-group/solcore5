@@ -1,6 +1,7 @@
 project('solcore',
     'c',
-    version: '0.1',
+    version: '5.8.1',
+    license: 'GNU LGPL',
     meson_version: '>= 0.64.0',
     default_options : [
         'buildtype=debugoptimized',
