@@ -202,3 +202,45 @@ def register_short_circuit_solver(
         overwrite=overwrite,
         reason_to_exclude=reason_to_exclude,
     )
+
+
+EQUILIBRIUM_SOLVER_SIGNATURE = Callable[[Junction, Any], None]
+EQUILIBRIUM_SOLVER_REGISTRY: Dict[str, EQUILIBRIUM_SOLVER_SIGNATURE] = {}
+
+
+def register_equilibrium_solver(
+    name: str, overwrite: bool = False, reason_to_exclude: Optional[str] = None
+) -> Callable:
+    """Registers a function that solves a junction under equilibrium conditions.
+
+    The solver must accept as first argument a Junction object and can also have as
+    input a variable number of parameters needed to perform the calculation, as well as
+    a generic **kwargs.
+
+    After running the function, the input Junction object will be updated with the
+    bandstructure profile at equilibrium, available in a new `equilibrium_data`
+    attribute of the junction object as a State object.
+
+    Args:
+        name (str): Name of the solver.
+        overwrite (bool, optional): If the method should overwrite an existing one with
+            the same name. Defaults to False.
+        reason_to_exclude (Optional[str], optional): If there is any reason to exclude
+            this solver from the registry. If not None, the method will be excluded.
+            Defaults to None.
+
+    Raises:
+        ValueError: If the name of the solver exists already in the registry and
+            overwrite is False.
+
+    Returns:
+        Callable: The inner decorator that will actually register the function.
+    """
+    return generic_register(
+        name=name,
+        registrator_name="Equilibrium solver",
+        registry=EQUILIBRIUM_SOLVER_REGISTRY,
+        signature=EQUILIBRIUM_SOLVER_SIGNATURE,
+        overwrite=overwrite,
+        reason_to_exclude=reason_to_exclude,
+    )
