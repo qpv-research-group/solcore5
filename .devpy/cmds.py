@@ -30,7 +30,7 @@ def install_dependencies(test_dep=False, doc_dep=False):
     )
     if test_dep:
         test_dependencies = config["project.optional-dependencies"]['test']
-        print("Installing test-dependencies", config["project.optional-dependencies"]['test'])
+        print("Installing test-dependencies", test_dependencies)
         run(
             ["pip", "install"] + list(test_dependencies),
         )

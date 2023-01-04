@@ -14,13 +14,23 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.8", "3.9", "3.10" ]
+        # python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+        python-version: [ "3.8", "3.9", "3.10" ]
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: install-rtools
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install rtools --no-progress
+          echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
 
       - name: Install system dependencies in Linux
         if: matrix.os == 'ubuntu-latest'
@@ -44,17 +54,17 @@ jobs:
           python3 -m devpy install-dependencies -test-dep
 
       - name: Install S4
+        if: matrix.os != 'windows-latest'
         run: |
           git clone https://github.com/phoebe-p/S4
           cd S4
-          #make boost
           make S4_pyext
           cd ..
           rm -rf S4    
 
       - name: Build solcore
         run: |
-          python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true  
+          python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true
 
       - name: Unit and functional tests
         env:
@@ -76,16 +86,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+        python-version: [ "3.8", "3.9", "3.10" ]
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install system dependencies Linux
+      - name: install-rtools
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install rtools --no-progress
+          echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
+
+      - name: Install system dependencies in Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
@@ -97,23 +117,27 @@ jobs:
           brew reinstall gfortran
           brew install ngspice boost suite-sparse
 
+      - name: Install system dependencies in Windows
+        if: matrix.os == 'windows-latest'
+        run: choco install ngspice
+
       - name: Install Python dependecies
         run: |
           pip install pytest meson-python ninja cython numpy git+https://github.com/scientific-python/devpy
           python3 -m devpy install-dependencies -test-dep
 
       - name: Install S4
+        if: matrix.os != 'windows-latest'
         run: |
           git clone https://github.com/phoebe-p/S4
           cd S4
-          #make boost
           make S4_pyext
           cd ..
           rm -rf S4    
 
       - name: Build solcore
         run: |
-           python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true
+          python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true
 
       - name: Unit and functional tests
         env:
