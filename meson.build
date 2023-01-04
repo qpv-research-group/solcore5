@@ -10,7 +10,22 @@ project('solcore',
     ]
 )
 
-add_languages('fortran', 'cython')
+cc = meson.get_compiler('c')
+# TODO: the below -Wno flags are all needed to silence warnings in
+# f2py-generated code. This should be fixed in f2py itself.
+_global_c_args = cc.get_supported_arguments(
+  '-Wno-unused-but-set-variable',
+  '-Wno-unused-function',
+  '-Wno-conversion',
+  '-Wno-misleading-indentation',
+  '-Wno-incompatible-pointer-types',
+)
+add_project_arguments(_global_c_args, language : 'c')
+
+add_languages('fortran', native: false)
+add_languages('cython')
+
+is_windows = host_machine.system() == 'windows'
 
 py_mod = import('python')
 py = py_mod.find_installation('python3', pure: false)
