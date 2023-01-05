@@ -1,0 +1,99 @@
+name: Upload Python Package
+
+on:
+  push:
+
+jobs:
+
+  deploy_wheels_linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Deploy wheels - Install dependencies
+        run: |
+          python -m pip install --upgrade wheel pip twine
+
+      - name: Deploy wheels - Build manylinux binary wheels - py3.x - x86_64
+        uses: RalfG/python-wheels-manylinux-build@v0.6.0
+        with:
+          python-versions: 'cp38-cp38 cp39-cp39 cp310-cp310'
+          build-requirements: 'mesonpy'
+          system-packages: 'gcc-gfortran'
+          pip-wheel-args: '-w'
+
+      - name: Deploy wheels - Build manylinux2014 binary wheels - py3.x - i686
+        uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2014_i686
+        with:
+          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
+          build-requirements: 'mesonpy'
+          system-packages: 'gcc-gfortran'
+          pip-wheel-args: '-w'
+
+      #- name: Publish wheels to PyPI
+      #  if: startsWith(github.ref, 'refs/tags')
+      #  env:
+      #    TWINE_USERNAME: '__token__'
+      #    TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      #  run: |
+      #    twine upload dist/*-manylinux*.whl --skip-existing
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: linux_wheels
+          path: dist/
+
+  deploy_wheels_macos_windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        python-version: ['3.8', '3.9', '3.10']
+    name: Building for ${{ matrix.os }} - python ${{ matrix.python-version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install system dependencies in MacOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew reinstall gfortran
+
+      - name: install-rtools in windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install rtools --no-progress
+          echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
+
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade wheel pip twine
+
+      - name: Build Solcore
+        run: |
+          python -m build -w
+
+      #- name: Publish wheels to PyPI
+      #  if: startsWith(github.ref, 'refs/tags')
+      #  env:
+      #    TWINE_USERNAME: '__token__'
+      #    TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      #  run: |
+      #    twine upload dist/*.whl --skip-existing
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}_wheels
+          path: dist/
