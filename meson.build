@@ -28,6 +28,11 @@ add_project_arguments(_global_c_args, language : 'c')
 add_languages('cython')
 add_languages('fortran', native: false)
 
+cross = meson.is_cross_build()
+message('CROSS:', cross)
+if cross
+    add_languages('fortran', native: true)
+endif
 
 ff = meson.get_compiler('fortran')
 _global_ff_args = ff.get_supported_arguments(
