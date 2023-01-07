@@ -3,7 +3,8 @@ build-backend = 'mesonpy'
 requires = [
     'meson-python',
     'numpy',
-    'cython'
+    'cython',
+    'pyproject-metadata>=0.6.1',
 ]
 
 [project]
