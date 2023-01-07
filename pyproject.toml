@@ -9,7 +9,7 @@ requires = [
 [project]
 name = 'solcore'
 description= "Python-based solar cell simulator"
-# readme = "README.md"
+# readme = "README.md" WAIT FOR NEW RELEASE OF pyproject-metadata (0.6.2)
 license = {file = "GNU-LGPL.txt"}
 requires-python = ">=3.7"
 keywords = ["photovoltaics", "modelling", "physics"]
