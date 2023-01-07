@@ -61,7 +61,7 @@ jobs:
           CIBW_ARCHS: ${{ matrix.buildplat[2] }}
           CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
           CIBW_BEFORE_BUILD_MACOS: brew reinstall gfortran
-          CIBW_BEFORE_BUILD_WINDOWS: pip freeze
+          CIBW_BEFORE_BUILD_WINDOWS: echo $(pip freeze)
 
       - name: Build Solcore
         if: >-
