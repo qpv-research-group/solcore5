@@ -27,7 +27,7 @@ jobs:
           # will probably require that the prebuilt openBLAS is updated.
           # xref https://github.com/andyfaff/scipy/pull/28#issuecomment-1203496836
           - [ macos-latest, macosx, x86_64 ]
-          # - [ macos-latest, macosx, arm64]
+          - [ macos-latest, macosx, arm64]
           - [ windows-2019, win, AMD64 ]
 
         python: [[ "cp38", "3.8" ], [ "cp39", "3.9" ], [ "cp310", "3.10" ], [ "cp311", "3.11.0-alpha - 3.11.0" ]]
@@ -70,8 +70,10 @@ jobs:
           CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
           CIBW_ARCHS: ${{ matrix.buildplat[2] }}
           CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
-          CIBW_BEFORE_BUILD_MACOS: bash {project}/build_tools/cibw_before_build_macos_arm.sh && meson setup --cross-file={project}/build_tools/x86_64-w64-arm64.ini build
-          CIBW_CONFIG_SETTINGS_MACOS: builddir=build
+          CIBW_BEFORE_BUILD_MACOS: brew reinstall gfortran
+          CIBW_ENVIRONMENT: CFLAGS='-target arm64-apple-macos'
+          # CIBW_BEFORE_BUILD_MACOS: bash {project}/build_tools/cibw_before_build_macos_arm.sh && meson setup --cross-file={project}/build_tools/x86_64-w64-arm64.ini build
+          # CIBW_CONFIG_SETTINGS_MACOS: builddir=build
 
       #- name: Publish wheels to PyPI
       #  if: startsWith(github.ref, 'refs/tags')
