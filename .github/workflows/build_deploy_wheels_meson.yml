@@ -27,7 +27,7 @@ jobs:
           # will probably require that the prebuilt openBLAS is updated.
           # xref https://github.com/andyfaff/scipy/pull/28#issuecomment-1203496836
           - [ macos-latest, macosx, x86_64 ]
-          - [ macos-latest, macosx, arm64]
+          # - [ macos-latest, macosx, arm64]
           - [ windows-2019, win, AMD64 ]
 
         python: [[ "cp38", "3.8" ], [ "cp39", "3.9" ], [ "cp310", "3.10" ], [ "cp311", "3.11.0-alpha - 3.11.0" ]]
