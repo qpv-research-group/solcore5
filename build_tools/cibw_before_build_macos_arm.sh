@@ -1,25 +1,46 @@
-echo "Installing gfortran for arm64"
-curl -L https://github.com/fxcoudert/gfortran-for-macOS/releases/download/12.1-monterey/gfortran-ARM-12.1-Monterey.dmg -o gfortran.dmg
-GFORTRAN_SHA256=$(shasum -a 256 gfortran.dmg)
-KNOWN_SHA256="e2e32f491303a00092921baebac7ffb7ae98de4ca82ebbe9e6a866dd8501acdf  gfortran.dmg"
-
-if [ "$GFORTRAN_SHA256" != "$KNOWN_SHA256" ]; then
-    echo sha256 mismatch
+echo "++++++ Installing arm64_cross_gfortran"
+curl -L -O https://github.com/isuruf/gcc/releases/download/gcc-11.3.0-2/gfortran-darwin-arm64-cross.tar.gz
+export GFORTRAN_SHA=527232845abc5af21f21ceacc46fb19c190fe804
+if [[ "$(shasum gfortran-darwin-arm64-cross.tar.gz)" != "${GFORTRAN_SHA}  gfortran-darwin-arm64-cross.tar.gz" ]]; then
+    echo "shasum mismatch for gfortran-darwin-arm64-cross"
     exit 1
 fi
+sudo mkdir -p /opt/
+sudo cp "gfortran-darwin-arm64-cross.tar.gz" /opt/gfortran-darwin-arm64-cross.tar.gz
+pushd /opt
+    sudo tar -xvf gfortran-darwin-arm64-cross.tar.gz
+    sudo rm gfortran-darwin-arm64-cross.tar.gz
+popd
+export FC_ARM64="$(find /opt/gfortran-darwin-arm64-cross/bin -name "*-gfortran")"
 
-hdiutil attach -mountpoint /Volumes/gfortran gfortran.dmg
-sudo installer -pkg /Volumes/gfortran/gfortran.pkg -target /
-sudo mv /usr/local/bin/gfortran /usr/local/bin/gfortran_arm64
-type -p gfortran_arm64
+export FC_LOC=/opt/gfortran-darwin-arm64-cross/bin
+libgfortran="$(find /opt/gfortran-darwin-arm64-cross/lib -name libgfortran.dylib)"
+libdir=$(dirname $libgfortran)
 
+echo $FC_ARM64
 
-echo "Installing gfortran for x86_64"
-brew reinstall gfortran
+export FC_LIBDIR=$libdir
+export FC_ARM64_LDFLAGS="-L$libdir -Wl,-rpath,$libdir"
+echo $FC_ARM64_LDFLAGS
+if [[ "${PLAT:-}" == "arm64" ]]; then
+    export FC=$FC_ARM64
+fi
+
+which gfortran
 type -p gfortran
 
-echo '\n Installing ninja'
+/opt/gfortran-darwin-arm64-cross/bin/arm64-apple-darwin20.0.0-gfortran --version
+
+sudo xcode-select -switch /Applications/Xcode_12.5.1.app
+export SDKROOT=/Applications/Xcode_12.5.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk
+
+printf '\n++++++ Re-installing gfortran x86_64 \n'
+brew reinstall gfortran
+type -p gfortran
+type -p gcc
+
+printf '\n++++++ Installing ninja \n '
 brew install ninja
 
-echo '\n Installing build system'
+printf '\n++++++ Installing build system \n'
 pip install meson-python cython numpy

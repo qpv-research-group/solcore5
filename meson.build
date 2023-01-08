@@ -30,9 +30,6 @@ add_languages('fortran', native: false)
 
 cross = meson.is_cross_build()
 message('CROSS:', cross)
-if cross
-    add_languages('/usr/local/bin/gfortran_arm64', native: true)
-endif
 
 ff = meson.get_compiler('fortran')
 _global_ff_args = ff.get_supported_arguments(
