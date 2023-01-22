@@ -17,7 +17,7 @@ export FC_ARM64="$(find /opt/gfortran-darwin-arm64-cross/bin -name "*-gfortran")
 
 export FC_LOC=/opt/gfortran-darwin-arm64-cross/bin
 libgfortran="$(find /opt/gfortran-darwin-arm64-cross/lib -name libgfortran.dylib)"
-libdir="$(dirname $libgfortran)"
+libdir="$(dirname "$libgfortran")"
 
 export FC_LIBDIR=$libdir
 export FC_ARM64_LDFLAGS="-L$libdir -Wl,-rpath,$libdir"
