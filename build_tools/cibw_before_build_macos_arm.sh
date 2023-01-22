@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "++++++ Installing arm64_cross_gfortran"
 curl -L -O https://github.com/isuruf/gcc/releases/download/gcc-11.3.0-2/gfortran-darwin-arm64-cross.tar.gz
 export GFORTRAN_SHA=527232845abc5af21f21ceacc46fb19c190fe804
@@ -15,13 +17,10 @@ export FC_ARM64="$(find /opt/gfortran-darwin-arm64-cross/bin -name "*-gfortran")
 
 export FC_LOC=/opt/gfortran-darwin-arm64-cross/bin
 libgfortran="$(find /opt/gfortran-darwin-arm64-cross/lib -name libgfortran.dylib)"
-libdir=$(dirname $libgfortran)
-
-echo $FC_ARM64
+libdir="$(dirname $libgfortran)"
 
 export FC_LIBDIR=$libdir
 export FC_ARM64_LDFLAGS="-L$libdir -Wl,-rpath,$libdir"
-echo $FC_ARM64_LDFLAGS
 if [[ "${PLAT:-}" == "arm64" ]]; then
     export FC=$FC_ARM64
 fi
