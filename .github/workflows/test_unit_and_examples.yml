@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+  # every day at 3 am UTC
+  schedule:
+    - cron:  '0 3 * * *'
+
 permissions:
   contents: read # to fetch code (actions/checkout)
 
