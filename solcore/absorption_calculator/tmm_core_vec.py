@@ -173,6 +173,16 @@ def interface_R(polarization, n_i, n_f, th_i, th_f):
     Fraction of light intensity reflected at an interface.
     """
     r = interface_r(polarization, n_i, n_f, th_i, th_f)
+
+    # If the outgoing angle is pi/2, that means the light is totally internally reflected
+    # and we can set r = R = 1. If not, can get unphysical results for r.
+
+    # Note that while T actually CAN be > 1 (when you have incidence from an absorbing
+    # medium), I don't think R can ever be > 1.
+
+    r[th_f.real > (np.pi / 2) - 1e-6] = 1
+    r[th_i.real > (np.pi / 2) - 1e-6] = 1
+
     return R_from_r(r)
 
 
@@ -181,6 +191,14 @@ def interface_T(polarization, n_i, n_f, th_i, th_f):
     Fraction of light intensity transmitted at an interface.
     """
     t = interface_t(polarization, n_i, n_f, th_i, th_f)
+
+    # If the incoming angle is pi/2, that means (most likely) that the light was previously
+    # totally internally reflected. That means the light will never reach this interface and
+    # we can safely set t = T = 0; otherwise we get numerical issues which give unphysically large
+    # values of T because in T_from_t we divide by cos(th_i) which is ~ 0.
+
+    t[th_i.real > (np.pi / 2) - 1e-6] = 0
+
     return T_from_t(polarization, t, n_i, n_f, th_i, th_f)
 
 
@@ -333,12 +351,6 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
             'vw_list': vw_list, 'kz_list': kz_list, 'th_list': th_list,
             'pol': pol, 'n_list': n_list, 'd_list': d_list, 'th_0': th_0,
             'lam_vac': lam_vac}
-
-    # return {'r': r, 't': t, 'R': R, 'T': T, 'power_entering': power_entering,
-    #         'kz_list': kz_list, 'th_list': th_list,
-    #         'pol': pol, 'n_list': n_list, 'd_list': d_list, 'th_0': th_0,
-    #         'lam_vac': lam_vac}
-
 
 def coh_tmm_reverse(pol, n_list, d_list, th_0, lam_vac):
     """
@@ -921,7 +933,6 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
         VW = np.matmul(L_list[i], VW_list[i+1].T[:, :, None])
         VW_list[i, :, :] = VW.transpose()
 
-
     # stackFB_list[n]=[F,B] means that F is light traveling forward towards n'th
     # stack and B is light traveling backwards towards n'th stack.
     # Reminder: inc_from_stack[i] = j means that the i'th stack comes after the
@@ -962,6 +973,12 @@ def inc_tmm(pol, n_list, d_list, c_list, th_0, lam_vac):
         stackFB_list_ans = np.stack(stackFB_list).transpose(2, 0, 1)
     else:
         stackFB_list_ans = []
+
+    # despite checking in interface_T and interface_R, still sometimes end up with
+    # unphysical R or T values of incident from medium with n > 1
+    R[R > 1] = 1
+    T[T < 0] = 0
+
     #('VWlist', VW_list.transpose(2, 0, 1))
     ans = {'T': T, 'R': R, 'VW_list': VW_list.transpose(2, 0, 1),
            'coh_tmm_data_list': coh_tmm_data_list,
@@ -1056,6 +1073,11 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zer
     This function is vectorized. Analogous to position_resolved, but
     for layers (incoherent or coherent) in (partly) incoherent stacks.
     This is a new function, not from Steven Byrnes' tmm package.
+    It assumes that in incoherent layers, we can assume the absorption has
+    a Beer-Lambert profile (this is not really correct; actually, the absorption
+    profile will depend on the coherence length, as discussed in the
+    documentation for the tmm package). This is an approximation in order
+    to be able to generate absorption profiles for partly coherent stacks.
     Starting with output of inc_tmm(), calculate the Poynting vector
     and absorbed energy density a distance "dist" into layer number "layer"
     """
@@ -1071,7 +1093,7 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zer
             A_layer = fn.run(dist[layer == l])
 
         else:
-            A_layer = beer_lambert(alphas[l] * 1e9, fraction_reaching[i], dist[layer == l] * 1e-9)
+            A_layer = beer_lambert(alphas[l] * 1e9, fraction_reaching[i], dist[layer == l] * 1e-9, A_per_layer[l])
 
         A_layer[fraction_reaching[i] < zero_threshold, :] = 0
         A_local[:, layer == l] = np.real(A_layer)
@@ -1079,17 +1101,24 @@ def inc_position_resolved(layer, dist, inc_tmm_data, coherency_list, alphas, zer
     return A_local
 
 
-def beer_lambert(alphas, fraction, dist):
+def beer_lambert(alphas, fraction, dist, A_total):
     """
     Calculates absorption profile according to the Beer-Lambert law given alphas (in m-1)
     and a vector of distance into the layer (in m) and the fraction of incident light
     reaching the front of the layer. This is used to calculate the absorption profile in
     incoherent layers within (partly) incoherent stacks. Vectorized over wavelengths.
+
+    Note that the Beer-Lambert law is used to generate the absorption profile in incoherent
+    layers as an approximation. The absorption profile in incoherent layers will actually
+    be dependent on the coherence length, as discussed in the documentation for the tmm package.
     """
 
     expn = np.exp(- alphas[:, None] * dist[None,:])
 
-    output = fraction[:, None]*alphas[:, None]*expn
+    A_integrated = fraction*(1-np.exp(-alphas*max(dist)))
+
+    # scale to total absorption in layer (see docstring)
+    scale = np.divide(A_total, A_integrated, out=np.zeros_like(A_total), where=A_integrated!=0)
+    output = scale[:,None]*fraction[:, None]*alphas[:, None]*expn
 
     return output/1e9
-

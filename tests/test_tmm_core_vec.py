@@ -1,7 +1,6 @@
 import numpy as np
 from pytest import approx, raises
 
-
 def test_make_2x2_array():
     from solcore.absorption_calculator.tmm_core_vec import make_2x2_array
     z = np.zeros(3)
@@ -91,24 +90,24 @@ def test_power_entering_from_r():
 
 def test_interface_R():
     from solcore.absorption_calculator.tmm_core_vec import interface_R
-    th1 = 0.2
-    n1 = 2
-    n2 = 3
+    th1 = np.array([0.2, np.pi/2])
+    n1 = np.array([2, 2])
+    n2 = np.array([3, 3])
     th2 = np.arcsin((n1/n2)*np.sin(th1))
 
-    assert(interface_R('s', n1, n2, th1, th2) == approx(0.042193712680886314))
-    assert(interface_R('p', n1, n2, th1, th2) == approx(0.037860088421452116))
+    assert(interface_R('s', n1, n2, th1, th2) == approx([0.042193712680886314,1]))
+    assert(interface_R('p', n1, n2, th1, th2) == approx([0.037860088421452116,1]))
 
 
 def test_interface_T():
     from solcore.absorption_calculator.tmm_core_vec import interface_T
-    th1 = 0.2
-    n1 = 2
-    n2 = 3
+    th1 = np.array([0.2, np.pi/2])
+    n1 = np.array([2, 2])
+    n2 = np.array([3, 3])
     th2 = np.arcsin((n1/n2)*np.sin(th1))
 
-    assert(interface_T('s', n1, n2, th1, th2) == approx(0.9578062873191139))
-    assert(interface_T('p', n1, n2, th1, th2) == approx(0.962139911578548))
+    assert(interface_T('s', n1, n2, th1, th2) == approx([0.9578062873191139, 0]))
+    assert(interface_T('p', n1, n2, th1, th2) == approx([0.962139911578548, 0]))
 
 ### Test for coh_tmm
 def test_coh_tmm_exceptions():
@@ -1334,9 +1333,11 @@ def test_beer_lambert():
 
     alphas = np.linspace(0, 1, 5)
     fraction = np.linspace(0.2, 1, 5)
+    A_total = np.array([0, 9.99999989e-09, 2.99999992e-08, 5.99999978e-08,
+                    9.99999950e-08])
     dist = np.linspace(0, 100e-9, 4)
 
-    assert beer_lambert(alphas, fraction, dist)*1e9 == approx(np.array([[0, 0, 0, 0],
+    assert beer_lambert(alphas, fraction, dist, A_total)*1e9 == approx(np.array([[0, 0, 0, 0],
        [0.1, 0.1, 0.1, 0.1],
        [0.3, 0.3, 0.29999999, 0.29999999],
        [0.6, 0.59999999, 0.59999997, 0.59999996],

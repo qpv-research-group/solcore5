@@ -1,16 +1,19 @@
+from typing import Dict, Tuple
+
 import numpy as np
 from numpy.typing import NDArray
 from scipy.interpolate import interp1d
 
 from .. import asUnit, constants
-from ..registries import register_short_circuit_solver
+from ..light_source import LightSource
+from ..registries import (
+    register_equilibrium_solver,
+    register_iv_solver,
+    register_short_circuit_solver,
+)
 from ..state import State
 from ..structure import Junction
-from ..light_source import LightSource
-from .DeviceStructure import (
-    CreateDeviceStructure,
-    CalculateAbsorptionProfile,
-)
+from .DeviceStructure import CalculateAbsorptionProfile, CreateDeviceStructure
 
 try:
     from .ddModel import driftdiffusion as dd
@@ -60,26 +63,41 @@ pdd_options.output_iv = 1
 pdd_options.output_qe = 1
 
 
-# Functions for creating the streucture in the fortran variables and executing the DD solver
-def ProcessStructure(device, meshpoints, wavelengths=None):
-    """This function reads a dictionary containing all the device structure, extract the electrical and optical
-    properties of the materials, and loads all that information into the Fortran variables. Finally, it initialises the
-    device (in Fortran) calculating an initial mesh and all the properties as a function of the position.
+def process_structure(
+    junction: Junction, T: float = 298.0, meshpoints: int = -400, **options
+) -> dict:
+    """Dump the structure information to the Fotran module and initialise the structure.
 
-    :param device: A dictionary containing the device structure. See PDD.DeviceStructure
-    :param wavelengths: (Optional) Wavelengths at which to calculate the optical properties.
-    :return: Dictionary containing the device structure properties as a function of the position.
+    This function extracts the electrical and optical properties of the materials, and
+    loads all that information into the Fortran variables. Finally, it initialises the
+    device (in Fortran) calculating an initial mesh and all the properties as a function
+    of the position.
+
+    Args:
+        junction: A junction object with layers.
+        T (float, optional): Temperature of the cell. Defaults to 298.0.
+        meshpoints (int, optional): Number of mesh points. If negative, that sets the
+        initial number of points, but the calculation will dynamically adapt those.
+            Defaults to -400.
+
+    Returns:
+        Dictionary with a "Properties" key containing the device structure properties as
+        a function of the position. Additionally, the state of the fortran solver is
+        updated with the structural information of the cell and the boundary conditions.
     """
+    options = State(**options)
+
+    SetConvergenceParameters(options)
+    SetMeshParameters(options)
+    SetRecombinationParameters(options)
+
+    device = CreateDeviceStructure("Junction", T=T, layers=junction)
+
     print("Processing structure...")
     # First, we clean any previous data from the Fortran code
     dd.reset()
     output = {}
 
-    if wavelengths is not None:
-        output["Optics"] = {}
-        output["Optics"]["wavelengths"] = wavelengths
-
-    # We dump the structure information to the Fotran module and initialise the structure
     i = 0
     while i < device["numlayers"]:
         layer = device["layers"][i]["properties"]
@@ -103,8 +121,8 @@ def ProcessStructure(device, meshpoints, wavelengths=None):
         dd.addlayer(args=args_list)
         i = i + device["layers"][i]["numlayers"]
 
-    # We set the surface recombination velocities. This needs to be improved at some point
-    # to consider other boundary conditions
+    # We set the surface recombination velocities.
+    # This needs to be improved at some point to consider other boundary conditions
     dd.frontboundary("ohmic", device["sn"], device["sp"], 0)
     dd.backboundary("ohmic", device["sn"], device["sp"], 0)
 
@@ -115,29 +133,37 @@ def ProcessStructure(device, meshpoints, wavelengths=None):
     return output
 
 
-def equilibrium_pdd(junction, **options):
-    """Solves the PDD equations under equilibrium: in the dark with no external current and zero applied voltage.
+@register_equilibrium_solver("PDD", reason_to_exclude=reason_to_exclude)
+def equilibrium_pdd(
+    junction: Junction,
+    T: float = 298.0,
+    output_equilibrium: int = 1,
+    meshpoints: int = -400,
+    **options
+) -> None:
+    """Solves the PDD equations under equilibrium
 
-    :param junction: A junction object
-    :param options: Options to be passed to the solver
-    :return: None
+    That is, in the dark with no external current and zero applied voltage.
+
+    Args:
+        junction: A junction object with layers.
+        T (float, optional): Temperature of the cell. Defaults to 298.0.
+        output_equilibrium:  If the ouput of the equilibrium calculation process
+            should be shown. Defaults to 1.
+        meshpoints (int, optional): Number of mesh points. If negative, that sets the
+        initial number of points, but the calculation will dynamically adapt those.
+            Defaults to -400.
+
+    Return:
+        None. The input Junction is updated with a new "equilibrium_data" attribute
+        containing a State object with the "Properties" and the "Bandstructure" under
+        equilibrium conditions as a function of the position.
     """
-    options = State(**options)
-    T = options.T
-    wl = options.wavelength
-    output_info = options.output_equilibrium
-
-    SetConvergenceParameters(options)
-    SetMeshParameters(options)
-    SetRecombinationParameters(options)
-
-    device = CreateDeviceStructure("Junction", T=T, layers=junction)
-
-    print("Solving equilibrium...")
-    output = ProcessStructure(device, options.meshpoints, wavelengths=wl)
+    output = process_structure(junction=junction, T=T, meshpoints=meshpoints, **options)
     dd.gen = 0
 
-    dd.equilibrium(output_info)
+    print("Solving equilibrium...")
+    dd.equilibrium(output_equilibrium)
     print("...done!\n")
 
     output["Bandstructure"] = DumpBandStructure()
@@ -173,13 +199,7 @@ def short_circuit_pdd(
             should be shown. Defaults to 1.
     """
 
-    equilibrium_pdd(
-        junction,
-        wavelength=wavelength,
-        light_source=light_source,
-        output_sc=output_sc,
-        **options
-    )
+    equilibrium_pdd(junction, **options)
 
     _, ph = light_source.spectrum(x=wavelength, output_units="photon_flux_per_m")
 
@@ -195,105 +215,127 @@ def short_circuit_pdd(
     dd.lightsc(output_sc, 1)
     print("...done!\n")
 
-    output = {"Bandstructure": DumpBandStructure()}
+    output = {
+        "Bandstructure": DumpBandStructure(),
+        "Optics": {"wavelengths": wavelength},
+    }
     junction.short_circuit_data = State(**output)
 
 
-def iv_pdd(junction, options):
-    """Calculates the IV curve of the device between 0 V and a given voltage. Depending on the options, the IV will be calculated in the dark (calling the equilibrium_pdd function) or under illumination (calling the short_circuit_pdd function). If the voltage range has possitive and negative values, the problem is solved twice: from 0 V to the maximu positive and from 0 V to the maximum negative, concatenating the results afterwards.
+def calculate_iv(
+    junction: Junction,
+    vlimit: float,
+    vstep: float,
+    light_iv: bool = False,
+    output_iv: int = 1,
+    **options
+) -> Dict[str, Dict[str, NDArray]]:
+    """Launches the actual IV calculation from 0V to the chosen limit.
 
-    :param junction: A junction object
-    :param options: Options to be passed to the solver
-    :return: None
+    Args:
+        junction: A junction object with layers.
+        vlimit: Limit of the voltage range. Can be positive or negative.
+        vstep: Voltage step. Its sign is adjusted internally to match that
+        of the vlimit, becoming possitive if vlimit is possitive and negative
+        otherwise.
+        light_iv: If light IV should be calculated. Defaults to False.
+        output_iv: If IV calculation information should be output. Defaults to 1.
+
+    Returns:
+        Returns a dictionary with the "Bandstructure" at the last voltage point in the
+        calculation (a dictionary itself) and the "IV" data (another dictionary).
     """
-    print("Solving IV...")
-    light = options.light_iv
-    output_info = options.output_iv
-    T = options.T
-
-    junction.voltage = options.internal_voltages
-
-    Eg = 10
-    for layer in junction:
-        Eg = min([Eg, layer.material.band_gap / q])
-
-    s = True if junction[0].material.Na >= junction[0].material.Nd else False
-
-    if s:
-        vmax = min(Eg + 3 * kb * T / q, max(junction.voltage))
-        vmin = min(junction.voltage)
+    vstep = vlimit / abs(vlimit) * abs(vstep)
+    if light_iv:
+        short_circuit_pdd(junction, **options)
     else:
-        vmax = max(junction.voltage)
-        vmin = max(-Eg - 3 * kb * T / q, min(junction.voltage))
+        equilibrium_pdd(junction, **options)
 
-    vstep = junction.voltage[1] - junction.voltage[0]
+    dd.runiv(vlimit, vstep, output_iv, 0)
+    return {"Bandstructure": DumpBandStructure(), "IV": DumpIV()}
 
-    # POSITIVE RANGE
-    output_pos = None
-    if vmax > 0:
-        if light:
-            short_circuit_pdd(junction, **options)
-        else:
-            equilibrium_pdd(junction, **options)
 
-        dd.runiv(vmax, vstep, output_info, 0)
-        output_pos = {"Bandstructure": DumpBandStructure(), "IV": DumpIV()}
+@register_iv_solver("PDD", reason_to_exclude=reason_to_exclude)
+def iv_pdd(
+    junction: Junction,
+    internal_voltages: NDArray,
+    T: float = 298.0,
+    light_iv: bool = False,
+    output_iv: int = 1,
+    **options
+):
+    """Calculates the IV curve of the device between 0 V and a given voltage.
 
-    # NEGATIVE RANGE
-    output_neg = None
-    if vmin < 0:
-        if light:
-            short_circuit_pdd(junction, **options)
-        else:
-            equilibrium_pdd(junction, **options)
+    Depending on the options, the IV will be calculated in the dark (calling the
+    equilibrium_pdd function) or under illumination (calling the short_circuit_pdd
+    function). If the voltage range has positive and negative values, the problem is
+    solved twice: from 0 V to the maximum positive and from 0 V to the maximum negative,
+    concatenating the results afterwards.
 
-        dd.runiv(vmin, (-1 * vstep), output_info, 0)
-        output_neg = {"Bandstructure": DumpBandStructure(), "IV": DumpIV()}
+    Args:
+        junction: A junction object with layers.
+        internal_voltages (NDArray): Array of internal voltages used for the calculation
+        of the IV curve of the junction.
+        T: Temperature of the cell. Defaults to 298.0.
+        light_iv: If light IV should be calculated. Defaults to False.
+        output_iv: If IV calculation information should be output. Defaults to 1.
 
-    print("...done!\n")
+    Returns:
+        None. The junction object is updated with the follwing attributes:
 
-    # Now we need to put together the data for the possitive and negative regions.
-    junction.pdd_data = State({"possitive_V": output_pos, "negative_V": output_neg})
+            - voltage: Array with the internal voltages (ideltical to the input).
+            - current: Array with the current at the internal voltages.
+            - recombination_currents: State object with the recombination currents at
+              the internal voltages (Jsrh, Jrad, Jaug, Jsur)
+            - pdd_data: State object with the raw "positive_V" and "negative_V" data
+              produced byt the Fotran solver.
+            - iv: A method that takes as input a voltage and produce the correspoinding
+              current by interpolating the voltage and current above.
 
-    if output_pos is None:
-        V = output_neg["IV"]["V"]
-        J = output_neg["IV"]["J"]
-        Jrad = output_neg["IV"]["Jrad"]
-        Jsrh = output_neg["IV"]["Jsrh"]
-        Jaug = output_neg["IV"]["Jaug"]
-        Jsur = output_neg["IV"]["Jsur"]
-    elif output_neg is None:
-        V = output_pos["IV"]["V"]
-        J = output_pos["IV"]["J"]
-        Jrad = output_pos["IV"]["Jrad"]
-        Jsrh = output_pos["IV"]["Jsrh"]
-        Jaug = output_pos["IV"]["Jaug"]
-        Jsur = output_pos["IV"]["Jsur"]
-    else:
-        V = np.concatenate((output_neg["IV"]["V"][:0:-1], output_pos["IV"]["V"]))
-        J = np.concatenate((output_neg["IV"]["J"][:0:-1], output_pos["IV"]["J"]))
-        Jrad = np.concatenate(
-            (output_neg["IV"]["Jrad"][:0:-1], output_pos["IV"]["Jrad"])
-        )
-        Jsrh = np.concatenate(
-            (output_neg["IV"]["Jsrh"][:0:-1], output_pos["IV"]["Jsrh"])
-        )
-        Jaug = np.concatenate(
-            (output_neg["IV"]["Jaug"][:0:-1], output_pos["IV"]["Jaug"])
-        )
-        Jsur = np.concatenate(
-            (output_neg["IV"]["Jsur"][:0:-1], output_pos["IV"]["Jsur"])
-        )
-
-    # Finally, we calculate the currents at the desired voltages
+        This is in addition to the attributes added by the equilibrium and the short
+        circuit calculations, as relevant. See the description of those functions.
+    """
+    junction.voltage = internal_voltages
     R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, "R_shunt") else 1e14
 
-    junction.current = np.interp(junction.voltage, V, J) + junction.voltage / R_shunt
-    Jrad = np.interp(junction.voltage, V, Jrad)
-    Jsrh = np.interp(junction.voltage, V, Jsrh)
-    Jaug = np.interp(junction.voltage, V, Jaug)
-    Jsur = np.interp(junction.voltage, V, Jsur)
+    # Find the appropriate voltage limits
+    min_bandgap = find_minimum_bandgap(junction)
+    p_on_n = True if junction[0].material.Na >= junction[0].material.Nd else False
+    vmax, vmin = find_voltage_limits(
+        min_bandgap, max(junction.voltage), min(junction.voltage), p_on_n, T
+    )
+    vstep = junction.voltage[1] - junction.voltage[0]
 
+    # Run the calculation for the positive and negative voltage ranges separately
+    print("Solving IV...")
+    output_pos = (
+        calculate_iv(junction, vmax, vstep, light_iv, output_iv, **options)
+        if vmax > 0
+        else {}
+    )
+    output_neg = (
+        calculate_iv(junction, vmin, vstep, light_iv, output_iv, **options)
+        if vmin < 0
+        else {}
+    )
+    print("...done!\n")
+
+    # Now we need to put together the data for the positive and negative regions.
+    total = consolidate_iv(output_pos.get("IV", {}), output_neg.get("IV", {}))
+
+    # Finally, we calculate the currents at the desired voltages and update the junction
+    junction.pdd_data = State({"positive_V": output_pos, "negative_V": output_neg})
+    junction.current = (
+        np.interp(junction.voltage, total["V"], total["J"]) + junction.voltage / R_shunt
+    )
+    junction.recombination_currents = State(
+        {
+            curr: np.interp(junction.voltage, total["V"], total[curr])
+            for curr in ("Jrad", "Jsrh", "Jaug", "Jsur")
+        }
+    )
+
+    # And an interpolator
     junction.iv = interp1d(
         junction.voltage,
         junction.current,
@@ -302,13 +344,11 @@ def iv_pdd(junction, options):
         assume_sorted=True,
         fill_value=(junction.current[0], junction.current[-1]),
     )
-    junction.recombination_currents = State(
-        {"Jrad": Jrad, "Jsrh": Jsrh, "Jaug": Jaug, "Jsur": Jsur}
-    )
 
 
 def qe_pdd(junction, options):
-    """Calculates the quantum efficiency of the device at short circuit. Internally it calls ShortCircuit
+    """Calculates the quantum efficiency of the device at short circuit. Internally it
+    calls ShortCircuit
 
     :param junction: A junction object
     :param options: Options to be passed to the solver
@@ -333,7 +373,8 @@ def qe_pdd(junction, options):
     junction.qe = State(**output["QE"])
     junction.qe["IQE"] = junction.qe["EQE"] / np.maximum(absorbed_per_wl, 0.00001)
 
-    # The EQE is actually the IQE inside the fortran solver due to an error in the naming --> to be changed
+    # The EQE is actually the IQE inside the fortran solver due to an error in the
+    # naming --> to be changed
     junction.eqe = interp1d(
         options.wavelength,
         output["QE"]["EQE"],
@@ -381,7 +422,8 @@ def DumpBandStructure():
 
 
 def DumpIV(IV_info=False):
-    # Depending of having PN or NP the calculation of the MPP is a bit different. We move everithing to the 1st quadrant and then send it back to normal
+    # Depending of having PN or NP the calculation of the MPP is a bit different. We
+    # move everithing to the 1st quadrant and then send it back to normal
     Nd = dd.get("nd")[0 : dd.m + 1][0]
     Na = dd.get("na")[0 : dd.m + 1][0]
     s = Nd > Na
@@ -444,7 +486,8 @@ def DumpQE():
 
 
 # ----
-# Functions for setting the parameters controling the recombination, meshing and the numerial algorithm
+# Functions for setting the parameters controling the recombination, meshing and the
+# numerial algorithm
 def SetMeshParameters(options):
     dd.set("coarse", options.coarse)
     dd.set("fine", options.fine)
@@ -465,3 +508,78 @@ def SetConvergenceParameters(options):
     dd.set("clamp", options.clamp)
     dd.set("atol", options.ATol)
     dd.set("rtol", options.RTol)
+
+
+def find_minimum_bandgap(junction: Junction) -> float:
+    """Finds the minimum bandgap of the stack of layers of the junction.
+
+    Args:
+        junction: The junction to find the minimum bandgap for.
+
+    Returns:
+        The minimum banfdgap
+    """
+    return min([layer.material.band_gap / q for layer in junction])
+
+
+def find_voltage_limits(
+    bandgap: float, vmax: float, vmin: float, p_on_n: bool, T: float
+) -> Tuple[float, float]:
+    """Finds the voltage limits based on a given bandgap.
+
+    This is needed to ensure that the IV calculation doest not go to a too high
+    voltage which could drive the material into the high injection regime, something
+    the PDD solver cannot handle. So, the maxmum/minimum voltages allowed are ±3kbT
+    with respect to the given bandgap or vmax/vmin if they are within those limits.
+
+    FIXME: It seems that the current implementation actually goes above the high
+    injection limit. The signs should be reversed such that the voltage is never higher,
+    in absolute terms, than the bandgap.
+
+    Args:
+        bandgap: The reference bandgap to use when considering high injection.
+        vmax: The desired maximum voltage.
+        vmin: The desired minimum voltage.
+        p_on_n: The polarity of the junction. For P-on-N junctions, the maximum
+        voltage is the one to be limitted. For N-on-P junctions, it is the minimum
+        one.
+        T: Temperature of the cell.
+
+    Returns:
+        A tuple with the adapted vmax and vmin for the calculation.
+    """
+
+    if p_on_n:
+        vmax = min(bandgap + 3 * kb * T / q, vmax)
+    else:
+        vmin = max(-bandgap - 3 * kb * T / q, vmin)
+
+    return vmax, vmin
+
+
+def consolidate_iv(
+    positive: Dict[str, NDArray], negative: Dict[str, NDArray]
+) -> Dict[str, NDArray]:
+    """Consolidate the positive and negative IV curves in a single array.
+
+    If there is no positive range, the negative is returned; if there is no
+    negative, the positive is return; and if both are present, the arrays are
+    concatenated.
+
+    Args:
+        positive: The positive range of the IV curves.
+        negative: The negative range of the IV curves.
+
+    Returns:
+        A dictionary with the same keys than the inputs but with the ranges
+        concatenaded, if relevant.
+    """
+    if not positive:
+        return negative
+    elif not negative:
+        return positive
+    else:
+        return {
+            mag: np.concatenate((negative[mag][:0:-1], positive[mag]))
+            for mag in negative.keys()
+        }
