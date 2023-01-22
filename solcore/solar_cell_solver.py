@@ -18,6 +18,7 @@ from .registries import (
     register_action,
     OPTICS_METHOD_REGISTRY,
     SHORT_CIRCUIT_SOLVER_REGISTRY,
+    EQUILIBRIUM_SOLVER_REGISTRY,
 )
 from .solar_cell import SolarCell
 from .state import State
@@ -167,7 +168,7 @@ def solve_iv(solar_cell, options):
     for j in solar_cell.junction_indices:
 
         if solar_cell[j].kind == "PDD":
-            PDD.iv_pdd(solar_cell[j], options)
+            PDD.iv_pdd(solar_cell[j], **options)
         elif solar_cell[j].kind == "DA":
             ASC.iv_depletion(solar_cell[j], options)
         elif solar_cell[j].kind == "2D":
@@ -241,19 +242,26 @@ def solve_qe(solar_cell, options):
 
 
 @register_action("equilibrium")
-def solve_equilibrium(solar_cell, options):
-    """Uses the PDD solver to calculate the properties of all the all the junctions under equilibrium
+def solve_equilibrium(solar_cell: SolarCell, options: State):
+    """Solves the electronic properfies of the cell at equilibrium conditons.
 
-    :param solar_cell: A solar_cell object
-    :param options: Options for the solvers
-    :return: None
+    The junction objects are updated with the bandstructure and recombination profiles.
+
+    Args:
+        solar_cell: The solar cell to solve.
+        options: Options required by the solver.
     """
     for j in solar_cell.junction_indices:
+        solver = EQUILIBRIUM_SOLVER_REGISTRY.get(solar_cell[j].kind, None)
 
-        if solar_cell[j].kind == "PDD":
-            PDD.equilibrium_pdd(solar_cell[j], **options)
-        else:
-            print('WARNING: Only PDD junctions can be solved in "equilibrium".')
+        if solver is None:
+            warn(
+                "ERROR in 'solve_equilibrium' - Valid equilibrium solvers are "
+                f"{list(EQUILIBRIUM_SOLVER_REGISTRY.keys())}."
+            )
+            continue
+
+        solver(solar_cell[j], **options)
 
 
 @register_action("short_circuit")
@@ -277,6 +285,7 @@ def solve_short_circuit(solar_cell: SolarCell, options: State):
                 "ERROR in 'solve_short_circuit' - Valid short circuit solvers are "
                 f"{list(SHORT_CIRCUIT_SOLVER_REGISTRY.keys())}."
             )
+            continue
 
         solver(solar_cell[j], **options)
 
