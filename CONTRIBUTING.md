@@ -22,7 +22,7 @@ The following is a set of guidelines for contributing to Solcore, a multi-scale,
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by the [Solcore Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [the repository Administrator](mailto:d.alonso-alvarez@imperial.ac.uk).
+This project and everyone participating in it is governed by the [Solcore Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [the repository Administrator](mailto:nekins@unsw.edu.au).
 
 ## How Can I Contribute?
 
