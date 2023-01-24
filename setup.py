@@ -127,7 +127,7 @@ setup(
         "Solcore research paper": "https://doi.org/10.1007/s10825-018-1171-3",
     },
     author="The Quantum Photovoltaics Group",
-    author_email="d.alonso-alvarez@imperial.ac.uk",
+    author_email="nekins@unsw.edu.au",
     license="GNU LGPL",
     python_requires=">=3.7",
     classifiers=[
