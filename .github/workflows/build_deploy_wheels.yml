@@ -8,92 +8,72 @@ on:
 
 jobs:
 
-  deploy_wheels_linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Deploy wheels - Setup python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Deploy wheels - Install dependencies
-        run: |
-          python -m pip install --upgrade setuptools==65.5.1 wheel pip twine numpy
-      - name: Deploy wheels - Build manylinux2014 binary wheels - py3.x - x86_64
-        uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2014_x86_64
-        with:
-          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
-          build-requirements: 'numpy'
-          system-packages: 'gcc-gfortran'
-          pre-build-command: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
-
-      - name: Deploy wheels - Build manylinux2014 binary wheels - py3.x - i686
-        uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2014_i686
-        with:
-          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
-          build-requirements: 'numpy==1.21.4'
-          system-packages: 'gcc-gfortran'
-          pre-build-command: 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/; export SOLCORE_WITH_PDD=1'
-
-      - name: Publish wheels to PyPI
-        if: startsWith(github.ref, 'refs/tags')
-        env:
-          TWINE_USERNAME: '__token__'
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          twine upload dist/*-manylinux*.whl --skip-existing
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: linux_wheels
-          path: dist/
-
-  deploy_wheels_macos_windows:
-    runs-on: ${{ matrix.os }}
+  deploy_wheels:
+    runs-on: ${{ matrix.buildplat[0] }}
     strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
-    name: Building for ${{ matrix.os }} - python ${{ matrix.python-version }}
+        # Github Actions doesn't support pairing matrix values together, let's improvise
+        # https://github.com/github/feedback/discussions/7835#discussioncomment-1769026
+        buildplat:
+          # should also be able to do multi-archs on a single entry, e.g.
+          # [windows-2019, win*, "AMD64 x86"]. However, those two require a different compiler setup
+          # so easier to separate out here.
+          - [ ubuntu-latest, manylinux, x86_64]
+          - [ ubuntu-latest, manylinux, i686]
+          - [ macos-latest, macosx, x86_64 ]
+          - [ macos-11, macosx, arm64] # cross compiled
+          - [ windows-2019, win, AMD64 ]
+
+        python: [[ "cp37", "3.7" ], [ "cp38", "3.8" ], [ "cp39", "3.9" ], [ "cp310", "3.10" ]]
+
+    name: Build wheel for ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }} ${{ matrix.buildplat[2] }}
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
-          architecture: x64
+          python-version: 3.8
 
-      - name: Install system dependencies in MacOS
-        if: matrix.os == 'macos-latest'
+      - name: install-rtools needed for windows
+        if: ${{ runner.os == 'Windows' }}
         run: |
-          brew reinstall gfortran
+          choco install rtools --no-progress
+          echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
 
-      - name: Install python dependencies
-        run: |
-          python -m pip install --upgrade setuptools==65.5.1 wheel pip twine numpy==1.21.4
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.11.4
 
-      - name: Build Solcore Windows
-        if: matrix.os == 'windows-latest'
+      - name: Build Solcore
+        if: >-
+          ( ! contains(matrix.buildplat[2], 'arm64' ) )
+        uses: pypa/cibuildwheel@v2.11.4
         env:
-          FC: gfortran
-          CC: gcc
-          SOLCORE_WITH_PDD: 1
-        run: |
-          echo "[build]`ncompiler=mingw32" | Out-File -Encoding ASCII ~/pydistutils.cfg
-          python setup.py sdist bdist_wheel
-        shell: powershell
+          CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
+          CIBW_ARCHS: ${{ matrix.buildplat[2] }}
+          CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
+          CIBW_BEFORE_BUILD_MACOS: brew reinstall gfortran
 
-      - name: Build Solcore MacOS
-        if: matrix.os != 'windows-latest'
-        env:
-          FC: gfortran
-          CC: gcc
-          SOLCORE_WITH_PDD: 1
+      - name: Set extra env for arm64
+        if: >-
+          ( contains(matrix.buildplat[2], 'arm64' ) )
         run: |
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
-          python setup.py sdist bdist_wheel
+            echo "LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib" >> $GITHUB_ENV;
+            echo "LIBRARY_PATH=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib" >> $GITHUB_ENV;
+
+      - name: Cross-build Solcore for arm64
+        if: ${{ (matrix.python[0] != 'cp37') && ( contains(matrix.buildplat[2], 'arm64') )}} # image not present for python3.7
+        uses: pypa/cibuildwheel@v2.11.4
+        env:
+          CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
+          CIBW_ARCHS: ${{ matrix.buildplat[2] }}
+          CIBW_ENVIRONMENT: CFLAGS='-target arm64-apple-macos'
+          CIBW_BEFORE_BUILD_MACOS: bash {project}/build_tools/cibw_before_build_macos_arm.sh && meson setup --cross-file={project}/build_tools/x86_64-w64-arm64.ini build
+          CIBW_CONFIG_SETTINGS_MACOS: builddir=build
 
       - name: Publish wheels to PyPI
         if: startsWith(github.ref, 'refs/tags')
@@ -105,5 +85,5 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}_wheels
-          path: dist/
+          name: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
+          path: ./wheelhouse/*.whl

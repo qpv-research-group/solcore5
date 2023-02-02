@@ -1,7 +1,8 @@
 import sys
 from pytest import mark, approx
 
-@mark.skipif(sys.platform != "linux", reason="Only works under linux")
+
+@mark.skipif(sys.platform in ["win32", "cygwin"], reason="Only works under unix based  systems")
 def test_calculate_rat_rcwa():
     import numpy as np
 
@@ -31,7 +32,7 @@ def test_calculate_rat_rcwa():
         assert v.shape[0] == len(wl)
 
 
-@mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform in ["win32", "cygwin"], reason="Only works under unix based  systems")
 def test_calculate_absorption_profile_rcwa():
     import numpy as np
 
@@ -74,7 +75,7 @@ def test_calculate_absorption_profile_rcwa():
     assert result["absorption"] == approx(parallel_result["absorption"], abs=1e-5)
 
 
-@mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform in ["win32", "cygwin"], reason="Only works under unix based  systems")
 def test_pol_rcwa():
     import numpy as np
 
@@ -130,7 +131,7 @@ def test_pol_rcwa():
     assert result_u["absorption"] == approx(0.5*(result_s["absorption"] + result_p["absorption"]))
 
 
-@mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform in ["win32", "cygwin"], reason="Only works under unix based  systems")
 def test_arbitrary_pol_rcwa():
     import numpy as np
 
@@ -178,7 +179,7 @@ def test_arbitrary_pol_rcwa():
     assert result["absorption"] == approx(result_s["absorption"])
 
 
-@mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform in ["win32", "cygwin"], reason="Only works under unix based  systems")
 def test_rcwa_polygon():
     import numpy as np
 
@@ -240,7 +241,7 @@ def test_rcwa_polygon():
     assert result_polygon["absorption"] == approx(result_square["absorption"], abs=0.001)
 
 
-@mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform in ["win32", "cygwin"], reason="Only works under unix based  systems")
 @mark.parametrize("pol", ['s', 'p', 'u'])
 @mark.parametrize("angle", [0, 60])
 def test_tmm_rcwa_structure_comparison(pol, angle):
@@ -284,7 +285,7 @@ def test_tmm_rcwa_structure_comparison(pol, angle):
     assert np.sum(rcwa_result['A_per_layer'], 1) + rcwa_result['R'] + rcwa_result['T'] == approx(1)
 
 
-@mark.skipif(sys.platform != "linux", reason="Only works under linux")
+@mark.skipif(sys.platform in ["win32", "cygwin"], reason="Only works under unix based  systems")
 @mark.parametrize("pol", ['s', 'p', 'u'])
 @mark.parametrize("angle", [0, 60])
 def test_tmm_rcwa_structure_profile_comparison(pol, angle):

@@ -1,0 +1,84 @@
+[build-system]
+build-backend = 'mesonpy'
+requires = [
+    'meson-python',
+    'numpy',
+    'cython'
+]
+
+[project]
+name = 'solcore'
+description= "Python-based solar cell simulator"
+readme = "README.md"
+license = {file = "GNU-LGPL.txt"}
+requires-python = ">=3.7"
+keywords = ["photovoltaics", "modelling", "physics"]
+authors = [
+  {name = "The Quantum Photovoltaics Group", email = "nekins@unsw.edu.au"}
+]
+classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Physics",
+    ]
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "scipy",
+    "tmm",
+    "natsort",
+    "regex",
+    "cycler",
+    "pyyaml",
+    "yabox",
+    "joblib",
+]
+dynamic = ["version"]
+
+[project.urls]
+homepage = "https://www.solcore.solar/"
+documentation = "http://solcore5.readthedocs.io"
+repository = "https://github.com/qpv-research-group/solcore5"
+changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
+
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "nbconvert",
+    "nbformat",
+    "pytest-rerunfailures",
+    "pytest-xdist",
+]
+doc = ["Sphinx", "recommonmark"]
+
+dev = ["pre-commit"]
+
+[tool.devpy]
+package = 'solcore'
+
+[tool.devpy.commands]
+"Build" = ["devpy.build", "devpy.test"]
+"Extensions" = ['.devpy/cmds.py:codecov', '.devpy/cmds.py:install_dependencies']
+
+[tool.pytest.ini_options]
+addopts = "--cov=solcore --cov-report=html:htmlcov -p no:warnings -n \"auto\" -v"
+
+[tool.isort]
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+
+[tool.flake8]
+max-line-length = 88
+exclude = ".venv/"
+extend-ignore = ["E203"]

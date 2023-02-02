@@ -2,7 +2,6 @@ from pytest import fixture
 import numpy as np
 from unittest.mock import patch
 import os
-import tempfile
 
 
 @fixture(autouse=True)

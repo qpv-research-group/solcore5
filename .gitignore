@@ -131,3 +131,6 @@ dmypy.json
 
 # macOS
 .DS_Store
+
+# meson
+.mesonpy-native-file.ini
