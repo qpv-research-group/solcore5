@@ -1,7 +1,5 @@
-import sys
+from .conftest import skip_s4_test
 from pytest import mark, approx
-
-from tests.conftest import skip_s4_test
 
 
 @mark.skipif(skip_s4_test(), reason="Only works if S4 installed")
