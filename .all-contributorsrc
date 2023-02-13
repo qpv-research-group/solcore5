@@ -272,6 +272,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "eli-schwartz",
+      "name": "Eli Schwartz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6551424?v=4",
+      "profile": "https://github.com/eli-schwartz",
+      "contributions": [
+        "infra"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -279,5 +288,6 @@
   "projectOwner": "qpv-research-group",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "angular"
 }
