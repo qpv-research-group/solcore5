@@ -35,14 +35,15 @@ Installation details
 ^^^^^^^^^^^^^^^^^^^^
 
 Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient,
-and the RCWA (rigorous coupled-wave analysis) solver uses the package S4 which is written in C++. Solcore uses pre-built
+and the RCWA (rigorous coupled-wave analysis) solver uses the package `S4 <https://web.stanford.edu/group/fan/S4/>`_ which
+is written in C++. Solcore uses pre-built
 binary wheels for the PDD solver to make installation as easy as possible (these are built for Windows, Linux, and MacOS,
 including for ARM/M1 chip architectures).
 
 The package S4, which supports Solcore's RCWA capabilities (used to calculate the optical effects of diffraction grating
 and other periodic structures) is not installed automatically. If you want to use these features you will need to install it
 yourself :doc:`as described here <s4_installation>`. If you would like to use S4 on Windows please
-`see the suggestions here <https://s4.org/installation/>`_.
+:doc:`see the suggestions here <Solcore_on_Windows>`.
 
 If you would like to compile the PDD solver locally (**not necessary in general**), you will need to have a
 :doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`. Assuming you have a Fortran compiler
