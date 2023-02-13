@@ -15,45 +15,15 @@ Once you are ready to install it in your own machine, go to the next section.
 
 Installing Solcore
 ^^^^^^^^^^^^^^^^^^
-
-Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient,
-and the RCWA (rigorous coupled-wave analysis) solver uses the package S4 which is written in C++.
-The following instructions are expected to work in most systems, but check the sections below for OS specific instructions and caveats.
-In order to install Solcore in your computer, you will need the following:
-
-- Python >3.7
-- pip
-- setuptools
-- :doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`
-- :doc:`the S4 package (only needed for RCWA functionality) <s4_installation>`
-
-*Pip* is normally part of the standard Python installation, but you might need to
-install it. You also need to make sure the *setuptools* and *wheel* packages are
-available. To make sure these packages are installed and up to date, run::
-
-    pip install -U pip setuptools wheel
-
-Now, installing Solcore should be as easy as writing in the terminal::
+The only requirement for install Solcore is having Python version 3.7 or higher. Installing Solcore (version 5.9 or higher)
+should be as easy as running the following command in your terminal::
 
     pip install solcore
 
-This will download Solcore form the PyPI repository and install the package within the
-Python packages tree. **From Solcore v5.8.1 this will also install the PDD solver if you
-are in Linux or Windows**.
 
-If you are in MacOS - or if there are no binary wheels for yous
-specific Python version and system architecture combination -, this command will *NOT*
-install the PDD solver, for which you need a suitable Fortran compiler :doc:`(read this
-to install your Fortran compiler) <compilation>`. Assuming you have a Fortran compiler
-correctly installed and configured, you can install Solcore with the PDD solver by
-doing::
-
-    pip install solcore
-    pip install --no-deps --force-reinstall --install-option="--with_pdd" solcore
-
-**NOTE**: Pip passes the --install-option to all the dependencies of the package and therefore the installation will fail since those dependencies do not have the option "--with_pdd". That is the reason why, for now, Solcore needs to be installed twice: the first one to install Solcore normally with all the dependencies and the second one re-installs Solcore with PDD support. 
-
-And that's all! Solcore should be available to be used as with any Python package::
+This will download Solcore form the PyPI repository and install the package within the active Python environment. Depending
+on your operating system/Python installation you may need to use `pip3` instead of `pip`. And that's all! Solcore should
+be available to be used as with any Python package::
 
     >>> import solcore
 
@@ -61,10 +31,36 @@ And that's all! Solcore should be available to be used as with any Python packag
         Copyright (c) 2018, Imperial College, London All rights reserved.
         Software released under the GNU Lesser General Public License.
 
-Alternative installation method
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Installation details
+^^^^^^^^^^^^^^^^^^^^
 
-Alternatively, you can `download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_, either using 'git' or as a zip file using one of the links on the right. If you want to install it, unpack it and run from the directory where *setup.py* is located (you still need *pip*, *setuptools* and *numpy* installed; see above)::
+Solcore is written mostly in Python, but the Poisson-Drift-diffusion (PDD) solver is written in Fortran to make it more efficient,
+and the RCWA (rigorous coupled-wave analysis) solver uses the package S4 which is written in C++. Solcore uses pre-built
+binary wheels for the PDD solver to make installation as easy as possible (these are built for Windows, Linux, and MacOS,
+including for ARM/M1 chip architectures).
+
+The package S4, which supports Solcore's RCWA capabilities (used to calculate the optical effects of diffraction grating
+and other periodic structures) is not installed automatically. If you want to use these features you will need to install it
+yourself :doc:`as described here <s4_installation>`. If you would like to use S4 on Windows please
+`see the suggestions here <https://s4.org/installation/>`_.
+
+If you would like to compile the PDD solver locally (**not necessary in general**), you will need to have a
+:doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`. Assuming you have a Fortran compiler
+correctly installed and configured, you can install Solcore with the PDD solver by doing::
+
+    pip install solcore
+    pip install --no-deps --force-reinstall --install-option="--with_pdd" solcore
+
+**NOTE**: Pip passes the --install-option to all the dependencies of the package and therefore the installation will fail
+since those dependencies do not have the option "--with_pdd". That is the reason why, for now, Solcore needs to be installed
+twice: the first one to install Solcore normally with all the dependencies and the second one re-installs Solcore with PDD support.
+
+Installing from source
+^^^^^^^^^^^^^^^^^^^^^^
+
+Alternatively, you can `download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_,
+either using `git clone` or as a zip file using one of the links on the right. If you want to install it, unpack it and
+run from the directory where *setup.py* is located::
 
     pip install .
 
@@ -72,16 +68,8 @@ or::
 
     pip install . --install-option="--with_pdd"
 
-If you want to test first if Solcore will work in your computer, without actually installing it, or if you want to become a developer and therefore you need to have it in a more accessible place, you can test if Solcore works with::
-
-    python setup.py test
-
-This will also install the Solcore dependencies and run a few tests that probe several of the Solcore tools. If it fails, it will indicate which parts failed to work and why, and you could try to solve them. At the moment, this only cover some of Solcore's functionality, but it will be expanded with time. The tests related to the PDD solver will fail, of course, since the PDD solver will not be compiled. If you want to test everything, compiling the the PDD solver, just run::
-
-    python setup.py test --with_pdd
-
-Install in development mode
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Installing in development mode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are planning to develop Solcore further, you would want to have all the files in an accessible place but still being able to use the package from other places and examples, behaving as if it were truly installed. For this, install Solcore in development mode. `Download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_ as above and then::
 
@@ -105,7 +93,9 @@ After installing Solcore (or even without installing it), there are a few things
 - :doc:`Windows 10 <Solcore_on_Windows>`
 - :doc:`Mac OS X <Solcore_on_MacOSX>`
 
-1. **Create a user configuration file:** The first time Solcore is run, it will create a hidden folder in your user directory. This folder will contain the local configuration and will store custom materials and other parameters. You can customize the location of by setting the environmental variable :code:`SOLCORE_USER_DATA`. You can check the current configuration with:
+1. **Create a user configuration file:** The first time Solcore is run, it will create a hidden folder in your user directory.
+This folder will contain the local configuration and will store custom materials and other parameters. You can customize the
+location of by setting the environmental variable :code:`SOLCORE_USER_DATA`. You can check the current configuration with:
 
 .. code:: python
 
@@ -114,7 +104,10 @@ After installing Solcore (or even without installing it), there are a few things
 	
 You can find all the functionality of the :code:`config` object in `The config_tools`_.
 
-2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in the main Solcore paper in the `Journal of Computational Electronics (2018) <https://doi.org/10.1007/s10825-018-1171-3>`_ and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over time. You can try the examples directly using `MyBinder.org <https://mybinder.org/v2/gh/qpv-research-group/solcore5/deployment>`_.
+2. **Check Solcore examples:** This is the fastest way of getting started. These examples include all the scripts used in
+the main Solcore paper in the `Journal of Computational Electronics (2018) <https://doi.org/10.1007/s10825-018-1171-3>`_
+and a few others to explore other functionality. We hope to increase the number and usefulness of these examples over
+time. You can try the examples directly using `MyBinder.org <https://mybinder.org/v2/gh/qpv-research-group/solcore5/deployment>`_.
 
 3. **Set the location of a SPICE executable and the SMARTS folder:** You will need to do this if you want to use those tools::
 
@@ -126,9 +119,15 @@ You can find all the functionality of the :code:`config` object in `The config_t
 	config.smarts('/path/to/the/SMARTS/folder')
 
 
-4. **Installing S4:** The rigorous-coupled wave analysis (RCWA) solver S4, created by the Stanford University, needs to be installed separately using `the fork by Phoebe Pearce <http://github.com/phoebe-p/S4>`_. The original version **does not work** with Python 3.x, only with Python 2. You can find more information about the solver in the `project webpage <http://web.stanford.edu/group/fan/S4/>`_. An example of its use with Solcore is included in the examples folder :doc:`here </Examples/example_optics_comparison>`.
+4. **Installing S4:** The rigorous-coupled wave analysis (RCWA) solver S4, created by the Stanford University, needs to
+be installed separately using `the fork by Phoebe Pearce <http://github.com/phoebe-p/S4>`_. The original version
+**does not work** with Python 3.x, only with Python 2. You can find more information about the solver in the
+`project webpage <http://web.stanford.edu/group/fan/S4/>`_. An example of its use with Solcore is included in the
+examples folder :doc:`here </Examples/example_optics_comparison>`.
 
-5. **Getting specific information about Solcore:** Even though the documentation "should" be more complete, you can get information about any object in python (including any Solcore function, module and package) using the :code:`help` built-in function, for example::
+5. **Getting specific information about Solcore:** Even though the documentation "should" be more complete, you can get
+information about any object in python (including any Solcore function, module and package) using the :code:`help` built-in
+function, for example::
 
 .. code:: python
 
@@ -141,14 +140,21 @@ Problems with the installation
 
 There are several things that can go wrong in the above description, specially in Windows.
 
-1. **The tests associated with the Poisson-Drift-Diffusion solver fail**: This is usually the result of not having a Fortran compiler installed in your system, not being correctly configured or having a temperamental F2PY version, the tool - included in numpy - that makes Fortran code accesible from Python. Please, make sure you follow all the steps indicated in the :doc:`Fortran compiler section <compilation>` and above to have the PDD solver up and running.
+1. **The tests associated with the Poisson-Drift-Diffusion solver fail**: This is usually the result of not having a
+Fortran compiler installed in your system, not being correctly configured or having a temperamental F2PY version,
+the tool - included in numpy - that makes Fortran code accesible from Python. Please, make sure you follow all the
+steps indicated in the :doc:`Fortran compiler section <compilation>` and above to have the PDD solver up and running.
 
-2. **Some of the dependencies fail to install**: That is rarely the case, as all dependencies are in the main Python repositories. However, there might be issues with Numpy, Matplotlib and Scipy. Depending on your Python distribution, some of these packages might need to be compiled and it is often easy to get them as a scientific bundle. You can check `Anaconda <https://www.continuum.io/downloads>`_ which provides all these packages together already configured for the correct OS.
+2. **Some of the dependencies fail to install**: That is rarely the case, as all dependencies are in the main
+Python repositories. However, there might be issues with Numpy, Matplotlib and Scipy. Depending on your Python
+distribution, some of these packages might need to be compiled and it is often easy to get them as a scientific bundle.
+You can check `Anaconda <https://www.continuum.io/downloads>`_ which provides all these packages together already
+configured for the correct OS.
 
 3. **The PDD solver throws an error, even though I installed it and the installation appeared to be successful**:
-   This can happen if you are trying to call PDD functions when the solcore5 directory (downloaded from GitHub) is
-   the current working directory. Try calling the functions from a different working directory (by e.g. copying the file you
-   are trying to run to a different directory) and seeing if the error persists.
+This can happen if you are trying to call PDD functions when the solcore5 directory (downloaded from GitHub) is
+the current working directory. Try calling the functions from a different working directory (by e.g. copying the file you
+are trying to run to a different directory) and seeing if the error persists.
 
 The config_tools
 ^^^^^^^^^^^^^^^^

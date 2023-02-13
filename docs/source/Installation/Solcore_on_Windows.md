@@ -1,14 +1,10 @@
 Solcore on Windows 10
 =====================
-The Python part of Solcore, which is the majority, should work under Windows with no problems. However, we have had some
-trouble trying to make the parts and complements that require compilation to work properly (the PDD solver, S4, SMARTS 
-and SPICE). For those who need to use those tools and encounter issues on Windows, please follow the instructions below. 
 
-Note that in principle, out of the packages listed above (the PDD solver, S4, SMARTS and SPICE), all can be
-installed on Windows **except S4**, which to date we have not been able to produce Windows installation instructions for. 
-To compile the PDD, you need to do [a few extra steps](compilation.md) to get a suitable compiler working. Steps
-for (optionally) installing SMARTS are given below.
-S4 is only required to use the rigorous coupled-wave analysis (RCWA) functionality in Solcore, used to calculate diffraction
+These instructions should be relevant only if you are a Windows user who would like to use Solcore's rigorous coupled-wave
+analysis (RCWA) functionality, requiring the S4 package, for which we unfortunately do not have installation instructions 
+for Windows. All other parts of Solcore, and the optional SMARTS and SPICE dependencies, can be installed on Windows. S4 
+is only required to use the rigorous coupled-wave analysis (RCWA) functionality in Solcore, used to calculate diffraction
 from periodic structures (e.g. diffraction gratings, photonic crystals). Thus, if you do not need this functionality, you 
 can stick with Windows.
 
