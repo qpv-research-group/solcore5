@@ -179,7 +179,8 @@
       "profile": "https://github.com/Abelarm",
       "contributions": [
         "code",
-        "infra"
+        "infra",
+        "test"
       ]
     },
     {
@@ -279,5 +280,6 @@
   "projectOwner": "qpv-research-group",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "angular"
 }
