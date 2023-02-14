@@ -27,9 +27,10 @@ Example of using the DB solver to calculate the efficiency map of a 3J solar cel
 
     # This function assembles the solar cell and calculates the IV cruve
     def solve_MJ(EgBot, EgMid, EgTop):
-        db_junction0 = Junction(kind='DB', T=T, Eg=EgBot, A=1, R_shunt=np.inf, n=3.5)
-        db_junction1 = Junction(kind='DB', T=T, Eg=EgMid, A=1, R_shunt=np.inf, n=3.5)
-        db_junction2 = Junction(kind='DB', T=T, Eg=EgTop, A=1, R_shunt=np.inf, n=3.5)
+        db_junction0 = Junction(kind='DB', T=T, Eg=EgBot, A=1, R_shunt=np.inf, n=1)
+        db_junction1 = Junction(kind='DB', T=T, Eg=EgMid, A=1, R_shunt=np.inf, n=1)
+        db_junction2 = Junction(kind='DB', T=T, Eg=EgTop, A=1, R_shunt=np.inf, n=1)
+        # n is the ideality factor of the diode. It is 1 for a perfect diode, but can be higher for a real diode.
 
         my_solar_cell = SolarCell([db_junction2, db_junction1, db_junction0], T=T, R_series=0)
 
