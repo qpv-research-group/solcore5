@@ -15,7 +15,7 @@ Once you are ready to install it in your own machine, go to the next section.
 
 Installing Solcore
 ^^^^^^^^^^^^^^^^^^
-The only requirement for install Solcore is having Python version 3.7 or higher (Python 3.8 or higher if you are installing
+The only requirement for installing Solcore is having Python version 3.7 or higher (Python 3.8 or higher if you are installing
 on a MacOS device with an ARM/Apple M1 chip). Installing Solcore (version 5.9 onwards) should be as easy as running the
 following command in your terminal::
 
