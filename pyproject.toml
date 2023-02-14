@@ -82,3 +82,9 @@ include_trailing_comma = true
 max-line-length = 88
 exclude = ".venv/"
 extend-ignore = ["E203"]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.mypy-setup]
+ignore_errors = true
