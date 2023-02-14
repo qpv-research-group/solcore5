@@ -28,7 +28,7 @@ be available to be used as with any Python package::
 
     >>> import solcore
 
-        Welcome to Solcore - version 5.6.0
+        Welcome to Solcore - version 5.9.0
         Copyright (c) 2018, Imperial College, London All rights reserved.
         Software released under the GNU Lesser General Public License.
 
