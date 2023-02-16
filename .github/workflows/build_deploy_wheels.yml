@@ -87,14 +87,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.8
-
-      - name: Install twine
-        run: pip install twine
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
@@ -102,7 +94,6 @@ jobs:
 
       - name: Move wheels to dist directory
         run: |
-          shopt -s globstar
           mkdir dist
           cp wheelhouse/**/*.whl dist
           ls dist/
