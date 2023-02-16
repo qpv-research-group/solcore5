@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - develop
+    tags:
+      - "**"
 
 jobs:
 
-  deploy_wheels:
+  build_wheels:
     runs-on: ${{ matrix.buildplat[0] }}
     strategy:
       # Ensure that a wheel builder finishes even if another fails
@@ -75,15 +77,33 @@ jobs:
           CIBW_BEFORE_BUILD_MACOS: bash {project}/build_tools/cibw_before_build_macos_arm.sh && meson setup --cross-file={project}/build_tools/x86_64-w64-arm64.ini build
           CIBW_CONFIG_SETTINGS_MACOS: builddir=build
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
+          path: ./wheelhouse/*.whl
+
+  upload_wheels:
+    needs: build_wheels
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      - name: Install twine
+        run: pip install twine
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
       - name: Publish wheels to PyPI
         if: startsWith(github.ref, 'refs/tags')
         env:
           TWINE_USERNAME: '__token__'
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          twine upload dist/*.whl --skip-existing
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}
-          path: ./wheelhouse/*.whl
+        run: twine upload */*.whl --skip-existing
