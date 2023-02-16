@@ -97,13 +97,20 @@ jobs:
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
+        with:
+          path: wheelhouse
 
-      - name: Display structure of downloaded files
-        run: ls -R
+      - name: Move wheels to dist directory
+        run: |
+          shopt -s globstar
+          mkdir dist
+          cp wheelhouse/**/*.whl dist
+          ls dist/
 
-      - name: Publish wheels to PyPI
-        if: startsWith(github.ref, 'refs/tags')
-        env:
-          TWINE_USERNAME: '__token__'
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: twine upload */*.whl --skip-existing
+      - name: Publish package
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages_dir: dist/
+          skip_existing: true
