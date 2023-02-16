@@ -68,7 +68,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Solcore'
-copyright = u'2020, Quantum Photovoltaics Group, Imperial College London'
+copyright = u'2023, Quantum Photovoltaics Group, Imperial College London'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
