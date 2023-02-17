@@ -1,0 +1,10 @@
+# this data is identical to the data included for InP in the SOPRA database.
+# The original source for this data appears (not confirmed, just from plotting the data)
+# to be a combination of the following two sources:
+#
+# 1) D. E. Aspnes and A. A. Studna. Dielectric functions and optical parameters of Si, Ge,
+# GaP, GaAs, GaSb, InP, InAs, and InSb from 1.5 to 6.0 eV, Phys. Rev. B 27, 985-1009 (1983)
+# 2) G. D. Pettit and W. J. Turner. Refractive index of InP, J. Appl. Phys. 36, 2081 (1965)
+#
+# Data for 1) from 207 to ~900 nm (around the bandgap), data from 2) from ~900 to 2478 nm
+
