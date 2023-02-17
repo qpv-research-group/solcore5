@@ -21,16 +21,11 @@ following command in your terminal::
 
     pip install solcore
 
-
 This will download Solcore form the PyPI repository and install the package within the active Python environment. Depending
 on your operating system/Python installation you may need to use `pip3` instead of `pip`. And that's all! Solcore should
 be available to be used as with any Python package::
 
     >>> import solcore
-
-        Welcome to Solcore - version 5.9.0
-        Copyright (c) 2018, Imperial College, London All rights reserved.
-        Software released under the GNU Lesser General Public License.
 
 Installation details
 ^^^^^^^^^^^^^^^^^^^^
@@ -46,42 +41,36 @@ and other periodic structures) is not installed automatically. If you want to us
 yourself :doc:`as described here <s4_installation>`. If you would like to use S4 on Windows please
 :doc:`see the suggestions here <Solcore_on_Windows>`.
 
-If you would like to compile the PDD solver locally (**not necessary in general**), you will need to have a
-:doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`. Assuming you have a Fortran compiler
-correctly installed and configured, you can install Solcore with the PDD solver by doing::
-
-    pip install solcore
-    pip install --no-deps --force-reinstall --install-option="--with_pdd" solcore
-
-**NOTE**: Pip passes the --install-option to all the dependencies of the package and therefore the installation will fail
-since those dependencies do not have the option "--with_pdd". That is the reason why, for now, Solcore needs to be installed
-twice: the first one to install Solcore normally with all the dependencies and the second one re-installs Solcore with PDD support.
-
 Installing from source
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Alternatively, you can `download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_,
+Alternatively, you can `download the source from the Solcore GitHub repository <https://github.com/qpv-research-group/solcore5>`_,
 either using `git clone` or as a zip file using one of the links on the right. If you want to install it, unpack it and
-run from the directory where *setup.py* is located::
+run from the directory where *pyproject.toml* is located::
 
     pip install .
 
-or::
+This will compile the PDD solver locally, so you will need to have a
+:doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`.
 
-    pip install . --install-option="--with_pdd"
 
 Installing in development mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you are planning to develop Solcore further, you would want to have all the files in an accessible place but still being able to use the package from other places and examples, behaving as if it were truly installed. For this, install Solcore in development mode. `Download the source from the Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_ as above and then::
+If you are planning to develop Solcore further, you may want to have all the files in an accessible place (as opposed to
+the default installation location for pip), while still being able to use the package from other places and examples, so
+that if you make changes to the solcore5 folder those changes will be reflected in installed versions of the package.
+To achieve this, you need to install Solcore in editable/development mode. Download or clone the source from the
+`Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_ as above, make sure the dependencies are installed
+(the easiest way to do this is to run `pip install solcore`, which will install Solcore with dependencies as usual,
+followed by `pip uninstall solcore`). In the folder where *pyproject.toml* is located run::
 
-    pip install -e ".[dev]"
+    pip install meson-python==0.13.0rc0 cython ninja
+    pip install -e . --no-build-isolation --no-deps
 
-or::
-
-    pip install -e ".[dev]" --install-option="--with_pdd"
-    
-Solcore uses *pre-commit* to do a few things before committing the changes (for example, clearing the output of Jupyter Notebooks). The *pre-commit* package is installed automatically with the above commands, but each user needs to be initialise it before it can work. This can be done with::
+If you are developing Solcore using Git/GitHub, we recommend you use *pre-commit* to do a few things before committing changes
+(for example, clearing the output of Jupyter Notebooks). The *pre-commit* package is installed automatically with the
+above commands, but each user needs to be initialise it before it can work. This can be done with::
 
     pre-commit install
    
