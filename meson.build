@@ -1,6 +1,6 @@
 project('solcore',
     'c',
-    version: '5.9.0',
+    version: '5.9.1',
     license: 'GNU LGPL',
     meson_version: '>= 0.64.0',
     default_options : [
