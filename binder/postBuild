@@ -1,3 +1,8 @@
 set -ex
 
 pip install .
+git clone https://github.com/phoebe-p/S4
+cd S4
+make S4_pyext --file="Makefile.m1"
+cd ..
+rm -rf S4
