@@ -63,12 +63,12 @@ doc = ["Sphinx", "recommonmark"]
 
 dev = ["pre-commit"]
 
-[tool.devpy]
+[tool.spin]
 package = 'solcore'
 
-[tool.devpy.commands]
-"Build" = ["devpy.build", "devpy.test"]
-"Extensions" = ['.devpy/cmds.py:codecov', '.devpy/cmds.py:install_dependencies']
+[tool.spin.commands]
+"Build" = ["spin.cmds.meson.build", "spin.cmds.meson.test"]
+"Extensions" = ['.spin/cmds.py:codecov', '.spin/cmds.py:install_dependencies']
 
 [tool.pytest.ini_options]
 addopts = "--cov=solcore --cov-report=html:htmlcov -p no:warnings -n \"auto\" -v"
