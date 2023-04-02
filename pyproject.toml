@@ -67,7 +67,7 @@ dev = ["pre-commit"]
 package = 'solcore'
 
 [tool.devpy.commands]
-"Build" = ["devpy.build", "devpy.test"]
+"Build" = ["devpy.cmds.meson.build", "devpy.cmds.meson.test"]
 "Extensions" = ['.devpy/cmds.py:codecov', '.devpy/cmds.py:install_dependencies']
 
 [tool.pytest.ini_options]
