@@ -189,8 +189,6 @@ def calculate_absorption_tmm(tmm_out, initial=1):
     all_z = tmm_out["position"] * 1e-9
     all_abs = initial * tmm_out["absorption"] / 1e-9
 
-    print(all_abs.shape)
-
     def diff_absorption(z):
         idx = all_z.searchsorted(z)
         idx = np.where(idx <= len(all_z) - 1, idx, len(all_z) - 1)
@@ -202,7 +200,7 @@ def calculate_absorption_tmm(tmm_out, initial=1):
 
             f = np.divide(z - z1, z2 - z1,
                           out=np.zeros_like(z), where=np.abs(z2-z1) > 1e-12)
-            # this is to avoid divide by zero errors (|f| gets very larger) when z1 = z2
+            # this is to avoid divide by zero errors (|f| gets very large) when z1 = z2
             out = (1-f) * all_abs[:, idx - 1] + f * all_abs[:, idx]
 
         except IndexError:
