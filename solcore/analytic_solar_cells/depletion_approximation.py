@@ -64,7 +64,7 @@ def identify_layers(junction):
 
         else:
             raise RuntimeError(
-                'ERROR processing junctions: A layer following the '
+                "ERROR processing junctions: A layer following the "
                 '"intrinsic" layer must be defined as "base".'
             )
 
@@ -752,9 +752,9 @@ def qe_depletion(junction, options):
     current_absorbed = np.trapz(gg, zz, axis=0)
 
     # why does this happen sometimes?
-    j_sc_top[j_sc_top < 0] = 0
-    j_sc_bot[j_sc_bot < 0] = 0
-    j_sc_scr[j_sc_scr < 0] = 0
+    # j_sc_top[j_sc_top < 0] = 0
+    # j_sc_bot[j_sc_bot < 0] = 0
+    # j_sc_scr[j_sc_scr < 0] = 0
 
     # Now, we put everything together
     j_sc = j_sc_top + j_sc_bot + j_sc_scr
@@ -820,15 +820,11 @@ def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
     gg = g(zz) * ph
     out = np.trapz(gg, zz, axis=0)
 
-    # print("SCR",out)
-
     return out
 
 
 def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
-    zz = np.linspace(
-        xa, xb, 1001, endpoint=False
-    )
+    zz = np.linspace(xa, xb, 1001, endpoint=False)
     # excluding the last point - depending on the mesh/floating point errors,
     # sometimes this is actually in the next layer
 
@@ -848,6 +844,7 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
 
             def A(x):
                 return np.interp(x, zz, gg[:, i]) / D + y0 / L**2
+
             # generation and n0/p0 term in differential equation
             # (eq. 6.15 & 6.20 in Jenny Nelson, Physics of Solar Cells)
 
@@ -870,14 +867,10 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
             if side == "top":
 
                 def bc(ya, yb):
-                    left = ya[1] - S / D * (
-                        ya[0] - y0
-                    )
+                    left = ya[1] - S / D * (ya[0] - y0)
                     # eq. 6.18 - b.c. at front of junction (surface recombination)
 
-                    right = (
-                        yb[0] - y0
-                    )
+                    right = yb[0] - y0
                     # eq. 6.17 - b.c. edge of depletion region, top half of junction
                     # added - y0 (generally very small so makes almost no difference)
                     return np.array([left, right])
@@ -885,15 +878,12 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
             else:
 
                 def bc(ya, yb):
-                    left = (
-                        ya[0] - y0
-                    )
+                    left = ya[0] - y0
                     # eq. 6.21 - b.c. edge of depletion region, bottom half of junction
                     # added - y0 (generally very small so makes almost no difference)
 
-                    right = yb[1] + S / D * (
-                        yb[0] - y0
-                    )  # eq. 6.22 - b.c. at back of junction (surface recombination)
+                    right = yb[1] + S / D * (yb[0] - y0)
+                    # eq. 6.22 - b.c. at back of junction (surface recombination)
                     # changed sign! Current is going the other way
                     return np.array([left, right])
 
@@ -906,14 +896,10 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
             sol_success[i] = solution.status
 
             if side == "top":
-                out[i] = solution.y[1][
-                    -1
-                ]
+                out[i] = solution.y[1][-1]
                 # current at edge of depletion region (top half of junction), eq. 6.33
             else:
-                out[i] = solution.y[1][
-                    0
-                ]
+                out[i] = solution.y[1][0]
                 # current at edge of depletion region (bottom half of junction), eq 6.38
 
         # give a warning f any of the solution statuses are not 0 using warnings.warn:
