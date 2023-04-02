@@ -53,8 +53,8 @@ jobs:
 
       - name: Install Python dependecies
         run: |
-          pip install pytest meson-python ninja cython numpy spin
-          python3 -m spin install-dependencies -test-dep
+          pip install pytest meson-python ninja cython numpy git+https://github.com/scientific-python/devpy@v0.1
+          python3 -m devpy install-dependencies -test-dep
 
       - name: Install S4
         if: matrix.os != 'windows-latest'
@@ -126,8 +126,8 @@ jobs:
 
       - name: Install Python dependecies
         run: |
-          pip install pytest meson-python ninja cython numpy spin
-          python3 -m spin install-dependencies -test-dep
+          pip install pytest meson-python ninja cython numpy git+https://github.com/scientific-python/devpy@v0.1
+          python3 -m devpy install-dependencies -test-dep
 
       - name: Install S4
         if: matrix.os != 'windows-latest'

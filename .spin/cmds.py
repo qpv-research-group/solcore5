@@ -1,6 +1,6 @@
 import click
-from spin import util
-from spin.cmds.meson import _get_site_packages
+from devpy import util
+from devpy.cmds.meson import _get_site_packages
 
 
 @click.command()
