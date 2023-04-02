@@ -226,9 +226,9 @@ def iv_depletion(junction, options):
 
     science_reference(
         "SRH current term.",
-        "C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and Recombination"
-        " in P-N Junctions and P-N Junction Characteristics,” presented at the "
-        "Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.",
+        "C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and "
+        "Recombination in P-N Junctions and P-N Junction Characteristics,” presented "
+        "at the Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.",
     )
     Jrec = get_Jsrh(ni, V, Vbi, lifetime_p, lifetime_n, w, kbT)
 
@@ -260,10 +260,17 @@ def iv_depletion(junction, options):
             )
         else:
             xbb = xb - (xb - xa) / 1001.0
+
+            zz = np.linspace(xa, xb, 1001, endpoint=False)
+            gg = ph * g(zz)
+            g_vs_z = np.trapz(gg, wl, axis=1)
+            g_vs_z[np.isnan(g_vs_z)] = 0
+            g_vs_z = interp1d(zz, g_vs_z, axis=0)
+
             deriv = get_J_sc_diffusion_green(
-                xa, xbb, g, d_top, l_top, min_top, s_top, ph, side="top"
+                xa, xbb, g_vs_z, d_top, l_top, s_top, 1, side="top"
             )
-            deriv = np.trapz(deriv, wl)
+
         J_sc_top = q * d_top * abs(deriv)
 
         # The contribution from the Base (bottom side).
@@ -275,10 +282,17 @@ def iv_depletion(junction, options):
             )
         else:
             xbb = xb - (xb - xa) / 1001.0
+            zz = np.linspace(xa, xb, 1001, endpoint=False)
+            gg = ph * g(zz)
+            g_vs_z = np.trapz(gg, wl, axis=1)
+            g_vs_z[np.isnan(g_vs_z)] = 0
+            g_vs_z = interp1d(zz, g_vs_z, axis=0)
+
             deriv = get_J_sc_diffusion_green(
-                xa, xbb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side="bottom"
+                xa, xbb, g_vs_z, d_bottom, l_bottom, s_bottom, 1, side="bottom"
             )
-            deriv = np.trapz(deriv, wl)
+            # photogeneration is included in g_vs_z, so set ph=1
+
         J_sc_bot = q * d_bottom * abs(deriv)
 
         # The contribution from the SCR (includes the intrinsic region, if present).
@@ -425,6 +439,8 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
     :return: out
     """
 
+    # see comments in get_J_sc_diffusion_vs_WL for details on how differential
+    # equations are solved
     zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
 
@@ -545,6 +561,7 @@ def _conv_green_top(x, xa, xb, g, L, phoD, crvel):
     )
     Pkern = np.cosh(xc) + crvel * np.sinh(xc)
     Gx = g(xv) * phoD
+
     return Pkern * Gx
 
 
@@ -572,7 +589,7 @@ def _conv_green_bottom(x, xb, g, L, phoD, crvel):
     return Pkern * Gx
 
 
-def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side="top"):
+def get_J_sc_diffusion_green(xa, xb, g, D, L, S, ph, side="top"):
     """Computes the derivative of the minority carrier concentration at the edge of the
     junction by approximating the convolution integral resulting from applying the
     Green's function method to the drift-diffusion equation.
@@ -606,29 +623,27 @@ def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side="top"):
     # if L too low in comparison to junction width, avoid nan's
     if xbL > 1.0e2:
         if side == "top":
-            cadd = -y0 / L
             fun = partial(_conv_exp_top, xa=xa, xb=xb, g=g, L=L, phoD=ph_over_D)
         else:
-            cadd = y0 / L
             fun = partial(_conv_exp_bottom, xa=xa, g=g, L=L, phoD=ph_over_D)
         cp = 1.0
+
     else:
         if side == "top":
             cp = -np.cosh(xbL) - crvel * np.sinh(xbL)
-            cadd = (np.sinh(xbL) + crvel * np.cosh(xbL)) * y0 / L
+
             fun = partial(
                 _conv_green_top, xa=xa, xb=xb, g=g, L=L, phoD=ph_over_D, crvel=crvel
             )
         else:
-            cp = np.cosh(xbL) - crvel * np.sinh(xbL)
-            cadd = (np.sinh(xbL) - crvel * np.cosh(xbL)) * y0 / L
+            cp = np.cosh(xbL) + crvel * np.sinh(xbL)
+
             fun = partial(
-                _conv_green_bottom, xb=xb, g=g, L=L, phoD=ph_over_D, crvel=crvel
+                _conv_green_bottom, xb=xb, g=g, L=L, phoD=ph_over_D, crvel=-crvel
             )
 
-    out, err, info = quad_vec(fun, xa, xb, epsrel=1.0e-5, full_output=True)
-    # print(info)
-    return (out.squeeze() + cadd) / cp
+    out, err = quad_vec(fun, xa, xb, epsrel=1.0e-5)
+    return out.squeeze() / cp
 
 
 def get_J_sc_SCR(xa, xb, g, wl, ph):
@@ -674,8 +689,6 @@ def qe_depletion(junction, options):
 
     wn, wp = get_depletion_widths(junction, es, Vbi, 0, Na, Nd, xi)
 
-    # print(pn_or_np, wn, wp)
-
     # Now it is time to calculate currents
     if pn_or_np == "pn":
         l_top, l_bottom = ln, lp
@@ -714,11 +727,10 @@ def qe_depletion(junction, options):
     else:
         xbb = xb - (xb - xa) / 1001.0
         deriv = get_J_sc_diffusion_green(
-            xa, xbb, g, d_top, l_top, min_top, s_top, ph, side="top"
+            xa, xbb, g, d_top, l_top, s_top, ph, side="top"
         )
 
     j_sc_top = d_top * abs(deriv)
-    # print("deriv top", j_sc_top)
 
     # The contribution from the Base (bottom side).
     xa = cum_widths[id_bottom] + w_bottom
@@ -731,13 +743,10 @@ def qe_depletion(junction, options):
     else:
         xbb = xb - (xb - xa) / 1001.0
         deriv = get_J_sc_diffusion_green(
-            xa, xbb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side="bottom"
+            xa, xbb, g, d_bottom, l_bottom, s_bottom, ph, side="bottom"
         )
 
     j_sc_bot = d_bottom * abs(deriv)
-    # print("deriv bottom", j_sc_bot)
-    # print("d", d_top, d_bottom)
-    # print("ph", ph)
 
     # The contribution from the SCR (includes the intrinsic region, if present).
     xa = cum_widths[id_top + 1] - w_top

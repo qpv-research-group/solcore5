@@ -63,7 +63,7 @@ doc = ["Sphinx", "recommonmark"]
 
 dev = ["pre-commit"]
 
-[tool.spin]
+[tool.devpy]
 package = 'solcore'
 
 [tool.devpy.commands]

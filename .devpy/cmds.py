@@ -13,12 +13,14 @@ from devpy.cmds.meson import _get_site_packages
 def install_dependencies(test_dep=False, doc_dep=False):
     """
     Accesses the `pyproject.toml` configuration to retrieve the dependencies
+
     Parameters
     ----------
     test_dep: bool
         Flag for installing the test's dependencies
     doc_dep: bool
         Flag for installing the documentation dependencies
+
     """
     config = util.get_config()
     default_dependencies = config["project"]['dependencies']
@@ -49,6 +51,7 @@ def codecov(build_dir, codecov_args):
     """🔧 Run codecov in the build directory
     CODECOV_ARGS are passed through directly to codecov, e.g.:
     ./dev.py codecov -- -v
+
     Parameters
     ----------
     build_dir: str

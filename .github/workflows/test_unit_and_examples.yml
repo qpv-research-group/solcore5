@@ -67,21 +67,20 @@ jobs:
 
       - name: Build solcore
         run: |
-          python -m spin build -- -Dwith_pdd=true -Dinstall_test=true
+          python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true
 
       - name: Unit and functional tests
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m spin test -- -r a -v --cov=solcore/ --ignore 
-          solcore/tests/test_examples.py -n "auto"
+          python -m devpy test -- -r a -v --cov=solcore/ --ignore solcore/tests/test_examples.py -n "auto"
 
       - name: Codecov
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           python -m pip install codecov
-          python -m spin codecov 
+          python -m devpy codecov 
 
 
   test_examples:
@@ -140,16 +139,16 @@ jobs:
 
       - name: Build solcore
         run: |
-          python -m spin build -- -Dwith_pdd=true -Dinstall_test=true
+          python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true
 
       - name: Unit and functional tests (MacOS and Linux)
         if: matrix.os != 'windows-latest'
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m spin test -- -r a -v solcore/tests/test_examples.py -n "auto"
+          python -m devpy test -- -r a -v solcore/tests/test_examples.py -n "auto"
 
       - name: Unit and functional tests (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          python -m spin test -- -r a -v solcore/tests/test_examples.py -n "auto"
+          python -m devpy test -- -r a -v solcore/tests/test_examples.py -n "auto"
