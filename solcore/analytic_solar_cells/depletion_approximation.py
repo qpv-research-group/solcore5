@@ -11,7 +11,7 @@ from solcore.light_source import LightSource
 import warnings
 
 da_options = State()
-da_options.da_mode = "bvp"
+da_options.da_mode = "green"
 
 
 def identify_layers(junction):
@@ -773,10 +773,8 @@ def qe_depletion(junction, options):
     eqe_base = j_sc_bot / ph
     eqe_scr = j_sc_scr / ph
 
-    iqe = j_sc / current_absorbed
-    iqe[
-        np.isnan(iqe)
-    ] = 0  # if zero current_absorbed, get NaN in previous line; want 0 IQE
+    iqe = np.divide(j_sc, current_absorbed,
+                    out=np.zeros_like(j_sc), where=current_absorbed!=0)
 
     junction.iqe = interp1d(wl, iqe)
 

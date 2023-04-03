@@ -238,7 +238,7 @@ def test_get_J_sc_diffusion_top():
     guess = minority * np.ones((2, zz.size))
     guess[1] = np.zeros_like(guess[0])
 
-    solution = solve_bvp(fun, bc, zz, guess)
+    solution = solve_bvp(fun, bc, zz, guess, max_nodes=2 * zz.shape[0])
 
     expected = solution.y[1][-1]
 
@@ -299,7 +299,7 @@ def test_get_J_sc_diffusion_bottom():
     guess = minority * np.ones((2, zz.size))
     guess[1] = np.zeros_like(guess[0])
 
-    solution = solve_bvp(fun, bc, zz, guess)
+    solution = solve_bvp(fun, bc, zz, guess, max_nodes=2 * zz.shape[0])
 
     expected = solution.y[1][0]
 
@@ -619,7 +619,7 @@ def test_get_J_sc_diffusion_green_bottom():
 
     # theoreical value from Fonash, Solar cell device physics eq 4.15
     beta2 = (xb - xa) * alphas
-    beta3 = -L * s / D
+    beta3 = L * s / D
     c1 = beta2 * beta2 / (beta2 * beta2 - beta1 * beta1) * np.exp(-alphas * xa)
     c2 = (beta3 * beta1 / beta2 - 1.0) / (beta3 * np.sinh(beta1) + np.cosh(beta1))
     expected = (beta3 * np.cosh(beta1) + np.sinh(beta1)) / (
