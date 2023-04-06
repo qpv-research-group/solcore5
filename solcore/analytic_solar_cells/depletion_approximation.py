@@ -8,24 +8,29 @@ from solcore.science_tracker import science_reference
 from solcore.state import State
 from solcore.light_source import LightSource
 
+import warnings
+
 da_options = State()
-da_options.da_mode = 'bvp'
+da_options.da_mode = "green"
+
 
 def identify_layers(junction):
     # First we have to figure out if we are talking about a PN, NP, PIN or NIP junction
     # We search for the emitter and check if it is n-type or p-type
     idx = 0
-    pn_or_np = 'pn'
+    pn_or_np = "pn"
     homojunction = True
 
     for layer in junction:
-        if layer.role.lower() != 'emitter':
+        if layer.role.lower() != "emitter":
             idx += 1
         else:
             Na = 0
             Nd = 0
-            if hasattr(layer.material, 'Na'): Na = layer.material.Na
-            if hasattr(layer.material, 'Nd'): Nd = layer.material.Nd
+            if hasattr(layer.material, "Na"):
+                Na = layer.material.Na
+            if hasattr(layer.material, "Nd"):
+                Nd = layer.material.Nd
             if Na < Nd:
                 pn_or_np = "np"
                 nRegion = junction[idx]
@@ -37,10 +42,10 @@ def identify_layers(junction):
             break
 
     # Now we check for an intrinsic region and, if there is, for the base.
-    if junction[idx + 1].role.lower() == 'intrinsic':
+    if junction[idx + 1].role.lower() == "intrinsic":
         iRegion = junction[idx + 1]
 
-        if junction[idx + 2].role.lower() == 'base':
+        if junction[idx + 2].role.lower() == "base":
             if pn_or_np == "pn":
                 nRegion = junction[idx + 2]
 
@@ -48,16 +53,23 @@ def identify_layers(junction):
                 pRegion = junction[idx + 2]
 
             id_bottom = idx + 2
-            homojunction = homojunction and nRegion.material.material_string == pRegion.material.material_string
-            homojunction = homojunction and nRegion.material.material_string == iRegion.material.material_string
+            homojunction = (
+                homojunction
+                and nRegion.material.material_string == pRegion.material.material_string
+            )
+            homojunction = (
+                homojunction
+                and nRegion.material.material_string == iRegion.material.material_string
+            )
 
         else:
             raise RuntimeError(
-                'ERROR processing junctions: A layer following the "intrinsic" layer must be defined as '
-                '"base".')
+                "ERROR processing junctions: A layer following the "
+                '"intrinsic" layer must be defined as "base".'
+            )
 
     # If there is no intrinsic region, we check directly the base
-    elif junction[idx + 1].role.lower() == 'base':
+    elif junction[idx + 1].role.lower() == "base":
         if pn_or_np == "pn":
             nRegion = junction[idx + 1]
 
@@ -67,22 +79,24 @@ def identify_layers(junction):
         iRegion = None
 
         id_bottom = idx + 1
-        homojunction = homojunction and nRegion.material.material_string == pRegion.material.material_string
+        homojunction = (
+            homojunction
+            and nRegion.material.material_string == pRegion.material.material_string
+        )
 
     else:
         raise RuntimeError(
-            'ERROR processing junctions: A layer following the "emitter" must be defined as "intrinsic"'
-            'or "base".')
+            'ERROR processing junctions: A layer following the "emitter" '
+            'must be defined as "intrinsic" or "base".'
+        )
 
     # We assert that we are really working with an homojunction
-    assert homojunction, 'ERROR: The DA solver only works with homojunctions, for now.'
-
+    assert homojunction, "ERROR: The DA solver only works with homojunctions, for now."
 
     return id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np
 
 
 def identify_parameters(junction, T, pRegion, nRegion, iRegion):
-
     kbT = kb * T
 
     xp = pRegion.width
@@ -98,7 +112,8 @@ def identify_parameters(junction, T, pRegion, nRegion, iRegion):
     else:
         es = nRegion.material.permittivity  # equal for n and p.  I hope.
 
-    # For the diffusion length, subscript n and p refer to the carriers, electrons and holes
+    # For the diffusion length, subscript n and p refer to the carriers,
+    # electrons and holes
     if hasattr(junction, "ln"):
         ln = junction.ln
     else:
@@ -109,7 +124,8 @@ def identify_parameters(junction, T, pRegion, nRegion, iRegion):
     else:
         lp = nRegion.material.hole_diffusion_length
 
-    # For the diffusion coefficient, n and p refer to the regions, n side and p side. Yeah, it's confusing...
+    # For the diffusion coefficient, n and p refer to the regions,
+    # n side and p side. Yeah, it's confusing...
     if hasattr(junction, "mup"):
         dp = junction.mup * kbT / q
     else:
@@ -129,32 +145,42 @@ def identify_parameters(junction, T, pRegion, nRegion, iRegion):
 
 
 def iv_depletion(junction, options):
-    """ Calculates the IV curve of a junction object using the depletion approximation as described in J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003). The junction is then updated with an "iv" function that calculates the IV curve at any voltage.
+    """Calculates the IV curve of a junction object using the depletion approximation as
+    described in J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).
+    The junction is then updated with an "iv" function that calculates the IV curve at
+    any voltage.
 
     :param junction: A junction object.
     :param options: Solver options.
     :return: None.
     """
 
-    science_reference('Depletion approximation',
-                      'J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).')
+    science_reference(
+        "Depletion approximation",
+        "J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).",
+    )
 
     junction.voltage = options.internal_voltages
     T = options.T
     kbT = kb * T
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(junction)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(junction, T, pRegion, nRegion, iRegion)
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(
+        junction, T, pRegion, nRegion, iRegion
+    )
 
     niSquared = ni**2
 
-    Vbi = (kbT / q) * np.log(Nd * Na / niSquared) if not hasattr(junction, "Vbi") else junction.Vbi  # Jenny p146
+    Vbi = (
+        (kbT / q) * np.log(Nd * Na / niSquared)
+        if not hasattr(junction, "Vbi")
+        else junction.Vbi
+    )  # Jenny p146
 
-    #Na, Nd, ni, niSquared, xi, ln, lp, xn, xp, sn, sp, dn, dp, es, id_top, id_bottom, Vbi, pn_or_np = process_junction(junction, options)
+    R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, "R_shunt") else 1e14
 
-    R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, 'R_shunt') else 1e14
-
-    # And now we account for the possible applied voltage, which can be, at most, equal to Vbi
+    # And now we account for the possible applied voltage,
+    # which can be, at most, equal to Vbi
     V = np.where(junction.voltage < Vbi - 0.001, junction.voltage, Vbi - 0.001)
 
     wn, wp = get_depletion_widths(junction, es, Vbi, V, Na, Nd, xi)
@@ -178,24 +204,32 @@ def iv_depletion(junction, options):
         min_bot, min_top = niSquared / Na, niSquared / Nd
 
     JtopDark = get_j_dark(x_top, w_top, l_top, s_top, d_top, V, min_top, T)
-    JbotDark = get_j_dark(x_bottom, w_bottom, l_bottom, s_bottom, d_bottom, V, min_bot, T)
+    JbotDark = get_j_dark(
+        x_bottom, w_bottom, l_bottom, s_bottom, d_bottom, V, min_bot, T
+    )
 
-    # hereby we define the subscripts to refer to the layer in which the current is generated:
+    # hereby we define the subscripts to refer to the layer in which
+    # the current is generated:
     if pn_or_np == "pn":
         JnDark, JpDark = JbotDark, JtopDark
     else:
         JpDark, JnDark = JbotDark, JtopDark
 
-    # These might not be the right lifetimes. Actually, they are not as they include all recombination processes, not
-    # just SRH recombination, which is what the equation in Jenny, p159 refers to. Let´ leave them, for now.
-    lifetime_n = ln ** 2 / dn
-    lifetime_p = lp ** 2 / dp  # Jenny p163
+    # These might not be the right lifetimes. Actually, they are not as
+    # they include all recombination processes, not just SRH recombination,
+    # which is what the equation in Jenny, p159 refers to. Let´s leave them, for now.
+    lifetime_n = ln**2 / dn
+    lifetime_p = lp**2 / dp  # Jenny p163
 
-    # Here we use the full version of the SRH recombination term as calculated by Sah et al. Works for positive bias
-    # and moderately negative ones.
+    # Here we use the full version of the SRH recombination term as calculated by
+    # Sah et al. Works for positive bias and moderately negative ones.
 
-    science_reference('SRH current term.',
-                      'C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and Recombination in P-N Junctions and P-N Junction Characteristics,” presented at the Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.')
+    science_reference(
+        "SRH current term.",
+        "C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and "
+        "Recombination in P-N Junctions and P-N Junction Characteristics,” presented "
+        "at the Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.",
+    )
     Jrec = get_Jsrh(ni, V, Vbi, lifetime_p, lifetime_n, w, kbT)
 
     J_sc_top = 0
@@ -203,7 +237,6 @@ def iv_depletion(junction, options):
     J_sc_scr = 0
 
     if options.light_iv:
-
         widths = []
         for layer in junction:
             widths.append(layer.width)
@@ -212,30 +245,54 @@ def iv_depletion(junction, options):
 
         g = junction.absorbed
         wl = options.wavelength
-        wl_sp, ph = options.light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+        wl_sp, ph = options.light_source.spectrum(
+            output_units="photon_flux_per_m", x=wl
+        )
         id_v0 = np.argmin(abs(V))
 
         # The contribution from the Emitter (top side).
         xa = cum_widths[id_top]
         xb = cum_widths[id_top + 1] - w_top[id_v0]
 
-        if options.da_mode == 'bvp':
-            deriv = get_J_sc_diffusion(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
+        if options.da_mode == "bvp":
+            deriv = get_J_sc_diffusion(
+                xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side="top"
+            )
         else:
-            xbb = xb - (xb - xa)/1001.
-            deriv = get_J_sc_diffusion_green(xa, xbb, g, d_top, l_top, min_top, s_top, ph, side='top')
-            deriv = np.trapz(deriv, wl)
+            xbb = xb - (xb - xa) / 1001.0
+
+            zz = np.linspace(xa, xb, 1001, endpoint=False)
+            gg = ph * g(zz)
+            g_vs_z = np.trapz(gg, wl, axis=1)
+            g_vs_z[np.isnan(g_vs_z)] = 0
+            g_vs_z = interp1d(zz, g_vs_z, axis=0)
+
+            deriv = get_J_sc_diffusion_green(
+                xa, xbb, g_vs_z, d_top, l_top, s_top, 1, side="top"
+            )
+
         J_sc_top = q * d_top * abs(deriv)
 
         # The contribution from the Base (bottom side).
         xa = cum_widths[id_bottom] + w_bottom[id_v0]
         xb = cum_widths[id_bottom + 1]
-        if options.da_mode == 'bvp':
-            deriv = get_J_sc_diffusion(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
+        if options.da_mode == "bvp":
+            deriv = get_J_sc_diffusion(
+                xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side="bottom"
+            )
         else:
-            xbb = xb - (xb - xa)/1001.
-            deriv = get_J_sc_diffusion_green(xa, xbb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
-            deriv = np.trapz(deriv, wl)
+            xbb = xb - (xb - xa) / 1001.0
+            zz = np.linspace(xa, xb, 1001, endpoint=False)
+            gg = ph * g(zz)
+            g_vs_z = np.trapz(gg, wl, axis=1)
+            g_vs_z[np.isnan(g_vs_z)] = 0
+            g_vs_z = interp1d(zz, g_vs_z, axis=0)
+
+            deriv = get_J_sc_diffusion_green(
+                xa, xbb, g_vs_z, d_bottom, l_bottom, s_bottom, 1, side="bottom"
+            )
+            # photogeneration is included in g_vs_z, so set ph=1
+
         J_sc_bot = q * d_bottom * abs(deriv)
 
         # The contribution from the SCR (includes the intrinsic region, if present).
@@ -244,18 +301,34 @@ def iv_depletion(junction, options):
         J_sc_scr = q * get_J_sc_SCR(xa, xb, g, wl, ph)
 
     # And, finally, we output the currents
-    junction.current = Jrec + JnDark + JpDark + V / R_shunt - J_sc_top - J_sc_bot - J_sc_scr
-    junction.iv = interp1d(junction.voltage, junction.current, kind='linear', bounds_error=False, assume_sorted=True,
-                           fill_value=(junction.current[0], junction.current[-1]))
-    junction.region_currents = State({"Jn_dif": JnDark, "Jp_dif": JpDark, "Jscr_srh": Jrec,
-                                      "J_sc_top": J_sc_top, "J_sc_bot": J_sc_bot, "J_sc_scr": J_sc_scr})
+    junction.current = (
+        Jrec + JnDark + JpDark + V / R_shunt - J_sc_top - J_sc_bot - J_sc_scr
+    )
+    junction.iv = interp1d(
+        junction.voltage,
+        junction.current,
+        kind="linear",
+        bounds_error=False,
+        assume_sorted=True,
+        fill_value=(junction.current[0], junction.current[-1]),
+    )
+    junction.region_currents = State(
+        {
+            "Jn_dif": JnDark,
+            "Jp_dif": JpDark,
+            "Jscr_srh": Jrec,
+            "J_sc_top": J_sc_top,
+            "J_sc_bot": J_sc_bot,
+            "J_sc_scr": J_sc_scr,
+        }
+    )
 
 
-def get_j_dark(x, w, l, s, d, V, minority, T):
+def get_j_dark(x, w, L, s, d, V, minority, T):
     """
     :param x: width of top junction
     :param w: depletion width in top junction
-    :param l: diffusion length
+    :param L: diffusion length
     :param s: surface recombination velocity
     :param d: diffusion coefficient
     :param V: voltage
@@ -266,24 +339,31 @@ def get_j_dark(x, w, l, s, d, V, minority, T):
     """
     # We calculate some fractions
 
-    harg = (x - w) / l
+    harg = (x - w) / L
     sinh_harg = np.sinh(harg)
     cosh_harg = np.cosh(harg)
-    lsod = (l * s) / d
+    lsod = (L * s) / d
 
     # And then we are ready to calculate the different currents
     # Missing the voltage dependent part of these equations.
     # They should be 6.34 and 6.39, not 6.62 and 6.63
 
-    J_dark = (q * d * minority / l) * (np.exp(q * V / kb / T) - 1) * \
-                 ((lsod * cosh_harg + sinh_harg) / (lsod * sinh_harg + cosh_harg))
+    J_dark = (
+        (q * d * minority / L)
+        * (np.exp(q * V / kb / T) - 1)
+        * ((lsod * cosh_harg + sinh_harg) / (lsod * sinh_harg + cosh_harg))
+    )
 
     return J_dark
 
 
 def get_Jsrh(ni, V, Vbi, tp, tn, w, kbT, dEt=0):
-    science_reference('SRH current term.',
-                      'C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and Recombination in P-N Junctions and P-N Junction Characteristics,” presented at the Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.')
+    science_reference(
+        "SRH current term.",
+        "C. T. Sah, R. N. Noyce, and W. Shockley, “Carrier Generation and Recombination"
+        " in P-N Junctions and P-N Junction Characteristics,” presented at the "
+        "Proceedings of the IRE, 1957, vol. 45, no. 9, pp. 1228–1243.",
+    )
 
     out = np.zeros(V.shape)
 
@@ -294,7 +374,8 @@ def get_Jsrh(ni, V, Vbi, tp, tn, w, kbT, dEt=0):
 
 
 def forward(ni, V, Vbi, tp, tn, w, kbT, dEt=0):
-    """ Equation 27 of Sah's paper. Strictly speaking, it is not valid for intermediate negative bias. """
+    """Equation 27 of Sah's paper. Strictly speaking, it is not valid for
+    intermediate negative bias."""
 
     J0 = 2 * q * ni * w / np.sqrt(tn * tp)
     f = factor(V, Vbi, tp, tn, kbT, dEt)
@@ -304,8 +385,8 @@ def forward(ni, V, Vbi, tp, tn, w, kbT, dEt=0):
 
 
 def factor(V, Vbi, tp, tn, kbT, dEt=0):
-    """ The integral of Eq. 27 in Sah's paper. While it is coninuum (in principle) it has to be done in two parts.
-    (or three) """
+    """The integral of Eq. 27 in Sah's paper. While it is continuum (in principle) it
+    has to be done in two parts (or three)"""
     trap = q * dEt / kbT + np.log(tp / tn) / 2
     b = np.exp(-q * V / kbT / 2) * np.cosh(trap)
 
@@ -324,7 +405,7 @@ def factor(V, Vbi, tp, tn, kbT, dEt=0):
     # For b values >= 1 and <=1e7
     m = (b >= 1) * (b <= 1e7)
     xx = b[m]
-    yy = np.sqrt(xx ** 2 - 1)
+    yy = np.sqrt(xx**2 - 1)
 
     top = np.log(abs(z2[m] - yy + xx) / abs(z2[m] + yy + xx))
     bot = np.log(abs(z1[m] - yy + xx) / abs(z1[m] + yy + xx))
@@ -342,7 +423,7 @@ def factor(V, Vbi, tp, tn, kbT, dEt=0):
     return out
 
 
-def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
+def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
     """
     :param xa:
     :param xb:
@@ -358,6 +439,8 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
     :return: out
     """
 
+    # see comments in get_J_sc_diffusion_vs_WL for details on how differential
+    # equations are solved
     zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
 
@@ -365,39 +448,54 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
 
     g_vs_z[np.isnan(g_vs_z)] = 0
 
-    A = lambda x: np.interp(x, zz, g_vs_z) / D + y0 / L ** 2
+    def A(x):
+        return np.interp(x, zz, g_vs_z) / D + y0 / L**2
 
     def fun(x, y):
         out1 = y[1]
-        out2 = y[0] / L ** 2 - A(x)
+        out2 = y[0] / L**2 - A(x)
         return np.vstack((out1, out2))
 
-    if side == 'top':
+    if side == "top":
+
         def bc(ya, yb):
             left = ya[1] - S / D * (ya[0] - y0)
-            right = yb[0]
+            right = yb[0] - y0
             return np.array([left, right])
+
     else:
+
         def bc(ya, yb):
-            left = ya[0]
-            right = yb[1] - S / D * (yb[0] - y0)
+            left = ya[0] - y0
+            right = yb[1] + S / D * (yb[0] - y0)
             return np.array([left, right])
 
     guess = y0 * np.ones((2, zz.size))
     guess[1] = np.zeros_like(guess[0])
 
-    solution = solve_bvp(fun, bc, zz, guess)
+    solution = solve_bvp(fun, bc, zz, guess, max_nodes=2 * zz.shape[0])
 
-    if side == 'top':
+    if side == "top":
         out = solution.y[1][-1]
     else:
         out = solution.y[1][0]
+
+    if solution.status != 0:
+        warnings.warn(
+            "Depletion approximation (DA) I-V calculation: "
+            "solve_bvp did not converge as expected",
+            RuntimeWarning,
+        )
 
     return out
 
 
 def _conv_exp_top(x, xa, xb, g, L, phoD):
-    """Convolution of the carrier generation rate with the approximate Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the top edge. This kernel approximates the original one when the diffusion length is 2 orders of magnitude higher than the junction width by assuming that sinh(x) = cosh(x) = .5 * exp(x).
+    """Convolution of the carrier generation rate with the approximate Green's function
+    kernel at point x. To be used with the numerical integration routine to compute the
+    minority carrier derivative on the top edge. This kernel approximates the original
+    one when the diffusion length is 2 orders of magnitude higher than the junction
+    width by assuming that sinh(x) = cosh(x) = .5 * exp(x).
 
     :param x: Coordinate in the junction (variable to be integrated).
     :param xa: Coordinate at the start the junction.
@@ -407,14 +505,22 @@ def _conv_exp_top(x, xa, xb, g, L, phoD):
     :param phoD: Light spectrum divided by the diffusion constant D.
     """
     xc = (xa - x) / L
-    xv = np.array([xa + xb - x, ])
+    xv = np.array(
+        [
+            xa + xb - x,
+        ]
+    )
     Pkern = -np.exp(xc)
     Gx = g(xv) * phoD
-    return Pkern*Gx
+    return Pkern * Gx
 
 
 def _conv_exp_bottom(x, xa, g, L, phoD):
-    """Convolution of the carrier generation rate with the approximate Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the bottom edge. This kernel approximates the original one when the diffusion length is 2 orders of magnitude higher than the junction width by assuming that sinh(x) = cosh(x) = .5 * exp(x).
+    """Convolution of the carrier generation rate with the approximate Green's function
+    kernel at point x. To be used with the numerical integration routine to compute the
+    minority carrier derivative on the bottom edge. This kernel approximates the
+    original one when the diffusion length is 2 orders of magnitude higher than
+    the junction width by assuming that sinh(x) = cosh(x) = .5 * exp(x).
 
     :param x: Coordinate in the junction (variable to be integrated).
     :param xa: Coordinate at the start the junction.
@@ -423,14 +529,20 @@ def _conv_exp_bottom(x, xa, g, L, phoD):
     :param phoD: Light spectrum divided by the diffusion constant D.
     """
     xc = (xa - x) / L
-    xv = np.array([x, ])
+    xv = np.array(
+        [
+            x,
+        ]
+    )
     Pkern = np.exp(xc)
     Gx = g(xv) * phoD
-    return Pkern*Gx
+    return Pkern * Gx
 
 
 def _conv_green_top(x, xa, xb, g, L, phoD, crvel):
-    """Convolution of the carrier generation rate with the Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the top edge.
+    """Convolution of the carrier generation rate with the Green's function kernel at
+    point x. To be used with the numerical integration routine to compute the minority
+    carrier derivative on the top edge.
 
     :param x: Coordinate in the junction (variable to be integrated).
     :param xa: Coordinate at the start the junction.
@@ -438,34 +550,49 @@ def _conv_green_top(x, xa, xb, g, L, phoD, crvel):
     :param g: Carrier generation rate at point x (expected as function).
     :param L: Diffusion length.
     :param phoD: Light spectrum divided by the diffusion constant D.
-    :param crvel: Coefficient computed as S / D * L, with S the surface recombination velocity.
+    :param crvel: Coefficient computed as S / D * L, with S the surface recombination
+         velocity.
     """
     xc = (xb - x) / L
-    xv = np.array([xa + xb - x, ])
+    xv = np.array(
+        [
+            xa + xb - x,
+        ]
+    )
     Pkern = np.cosh(xc) + crvel * np.sinh(xc)
     Gx = g(xv) * phoD
-    return Pkern*Gx
+
+    return Pkern * Gx
 
 
 def _conv_green_bottom(x, xb, g, L, phoD, crvel):
-    """Convolution of the carrier generation rate with the Green's function kernel at point x. To be used with the numerical integration routine to compute the minority carrier derivative on the bottom edge.
+    """Convolution of the carrier generation rate with the Green's function kernel at
+    point x. To be used with the numerical integration routine to compute the minority
+    carrier derivative on the bottom edge.
 
     :param x: Coordinate in the junction (variable to be integrated).
     :param xb: Coordinate at the end the junction.
     :param g: Carrier generation rate at point x (expected as function).
     :param L: Diffusion length.
     :param phoD: Light spectrum divided by the diffusion constant D.
-    :param crvel: Coefficient computed as S / D * L, with S the surface recombination velocity.
+    :param crvel: Coefficient computed as S / D * L, with S the surface recombination
+        velocity.
     """
     xc = (xb - x) / L
-    xv = np.array([x, ])
+    xv = np.array(
+        [
+            x,
+        ]
+    )
     Pkern = np.cosh(xc) - crvel * np.sinh(xc)
     Gx = g(xv) * phoD
-    return Pkern*Gx
+    return Pkern * Gx
 
 
-def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side='top'):
-    """Computes the derivative of the minority carrier concentration at the edge of the junction by approximating the convolution integral resulting from applying the Green's function method to the drift-diffusion equation.
+def get_J_sc_diffusion_green(xa, xb, g, D, L, S, ph, side="top"):
+    """Computes the derivative of the minority carrier concentration at the edge of the
+    junction by approximating the convolution integral resulting from applying the
+    Green's function method to the drift-diffusion equation.
 
     :param xa: Coordinate at the start the junction.
     :param xb: Coordinate at the end the junction.
@@ -477,41 +604,46 @@ def get_J_sc_diffusion_green(xa, xb, g, D, L, y0, S, ph, side='top'):
     :param ph: Light spectrum.
     :param side: String to indicate the edge of interest. Either 'top' or 'bottom'.
 
-    :return: The derivative of the minority carrier concentration at the edge of the junction.
+    :return: The derivative of the minority carrier concentration at the edge of the
+        junction.
     """
 
-    science_reference('DA Green\'s function method.',
-                      'T. Vasileiou, J. M. Llorens, J. Buencuerpo, J. M. Ripalda, D. Izzo and L. Summerer, “Light absorption enhancement and radiation hardening for triple junction solar cell through bioinspired nanostructures,” Bioinspir. Biomim., vol. 16, no. 5, pp. 056010, 2021.')
+    science_reference(
+        "DA Green's function method.",
+        "T. Vasileiou, J. M. Llorens, J. Buencuerpo, J. M. Ripalda, D. Izzo and "
+        "L. Summerer, “Light absorption enhancement and radiation hardening for triple "
+        "junction solar cell through bioinspired nanostructures,” "
+        "Bioinspir. Biomim., vol. 16, no. 5, pp. 056010, 2021.",
+    )
 
     xbL = (xb - xa) / L
     crvel = S / D * L
     ph_over_D = ph / D
 
     # if L too low in comparison to junction width, avoid nan's
-    if xbL > 1.e2:
-        if side == 'top':
-            cadd = -y0 / L
-            fun = partial(_conv_exp_top, xa=xa, xb=xb, g=g,
-                          L=L, phoD=ph_over_D)
+    if xbL > 1.0e2:
+        if side == "top":
+            fun = partial(_conv_exp_top, xa=xa, xb=xb, g=g, L=L, phoD=ph_over_D)
         else:
-            cadd = y0 / L
-            fun = partial(_conv_exp_bottom, xa=xa, g=g,
-                          L=L, phoD=ph_over_D)
-        cp = 1.
-    else:
-        if side == 'top':
-            cp = -np.cosh(xbL) - crvel * np.sinh(xbL)
-            cadd = (np.sinh(xbL) + crvel * np.cosh(xbL)) * y0 / L
-            fun = partial(_conv_green_top, xa=xa, xb=xb, g=g,
-                          L=L, phoD=ph_over_D, crvel=crvel)
-        else:
-            cp = np.cosh(xbL) - crvel * np.sinh(xbL)
-            cadd = (np.sinh(xbL) - crvel * np.cosh(xbL)) * y0 / L
-            fun = partial(_conv_green_bottom, xb=xb, g=g,
-                          L=L, phoD=ph_over_D, crvel=crvel)
+            fun = partial(_conv_exp_bottom, xa=xa, g=g, L=L, phoD=ph_over_D)
+        cp = 1.0
 
-    out, err = quad_vec(fun, xa, xb, epsrel=1.e-5)
-    return (out.squeeze() + cadd) / cp
+    else:
+        if side == "top":
+            cp = -np.cosh(xbL) - crvel * np.sinh(xbL)
+
+            fun = partial(
+                _conv_green_top, xa=xa, xb=xb, g=g, L=L, phoD=ph_over_D, crvel=crvel
+            )
+        else:
+            cp = np.cosh(xbL) + crvel * np.sinh(xbL)
+
+            fun = partial(
+                _conv_green_bottom, xb=xb, g=g, L=L, phoD=ph_over_D, crvel=-crvel
+            )
+
+    out, err = quad_vec(fun, xa, xb, epsrel=1.0e-5)
+    return out.squeeze() / cp
 
 
 def get_J_sc_SCR(xa, xb, g, wl, ph):
@@ -523,27 +655,37 @@ def get_J_sc_SCR(xa, xb, g, wl, ph):
 
 
 def qe_depletion(junction, options):
-    """ Calculates the QE curve of a junction object using the depletion approximation as described in J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003). The junction is then updated with an "iqe" and several "eqe" functions that calculates the QE curve at any wavelength.
+    """Calculates the QE curve of a junction object using the depletion approximation as
+    described in J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).
+    The junction is then updated with an "iqe" and several "eqe" functions that
+    calculates the QE curve at any wavelength.
 
     :param junction: A junction object.
     :param options: Solver options.
     :return: None.
     """
 
-    science_reference('Depletion approximation',
-                      'J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).')
-
+    science_reference(
+        "Depletion approximation",
+        "J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).",
+    )
 
     # First we have to figure out if we are talking about a PN, NP, PIN or NIP junction
     T = options.T
     kbT = kb * T
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(junction)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(junction, T, pRegion, nRegion, iRegion)
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(
+        junction, T, pRegion, nRegion, iRegion
+    )
 
-    niSquared = ni ** 2
+    niSquared = ni**2
 
-    Vbi = (kbT / q) * np.log(Nd * Na / niSquared) if not hasattr(junction, "Vbi") else junction.Vbi  # Jenny p146
+    Vbi = (
+        (kbT / q) * np.log(Nd * Na / niSquared)
+        if not hasattr(junction, "Vbi")
+        else junction.Vbi
+    )  # Jenny p146
 
     wn, wp = get_depletion_widths(junction, es, Vbi, 0, Na, Nd, xi)
 
@@ -569,29 +711,41 @@ def qe_depletion(junction, options):
 
     g = junction.absorbed
     wl = options.wavelength
-    wl_sp, ph = LightSource(source_type='black body', x=wl, T=6000).spectrum(output_units='photon_flux_per_m', x=wl)
-
+    wl_sp, ph = LightSource(source_type="black body", x=wl, T=6000).spectrum(
+        output_units="photon_flux_per_m", x=wl
+    )
+    # wl_sp, ph = options.light_source.spectrum(output_units='photon_flux_per_m', x=wl)
+    ph = 1e10 * np.ones_like(ph)
     # The contribution from the Emitter (top side).
     xa = cum_widths[id_top]
     xb = cum_widths[id_top + 1] - w_top
 
-    if options.da_mode == 'bvp':
-        deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side='top')
+    if options.da_mode == "bvp":
+        deriv = get_J_sc_diffusion_vs_WL(
+            xa, xb, g, d_top, l_top, min_top, s_top, wl, ph, side="top"
+        )
     else:
-        xbb = xb - (xb - xa)/1001.
-        deriv = get_J_sc_diffusion_green(xa, xbb, g, d_top, l_top, min_top, s_top, ph, side='top')
-    j_sc_top = d_top * abs(deriv)
+        xbb = xb - (xb - xa) / 1001.0
+        deriv = get_J_sc_diffusion_green(
+            xa, xbb, g, d_top, l_top, s_top, ph, side="top"
+        )
 
+    j_sc_top = d_top * abs(deriv)
 
     # The contribution from the Base (bottom side).
     xa = cum_widths[id_bottom] + w_bottom
     xb = cum_widths[id_bottom + 1]
 
-    if options.da_mode == 'bvp':
-        deriv = get_J_sc_diffusion_vs_WL(xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side='bottom')
+    if options.da_mode == "bvp":
+        deriv = get_J_sc_diffusion_vs_WL(
+            xa, xb, g, d_bottom, l_bottom, min_bot, s_bottom, wl, ph, side="bottom"
+        )
     else:
-        xbb = xb - (xb - xa)/1001.
-        deriv = get_J_sc_diffusion_green(xa, xbb, g, d_bottom, l_bottom, min_bot, s_bottom, ph, side='bottom')
+        xbb = xb - (xb - xa) / 1001.0
+        deriv = get_J_sc_diffusion_green(
+            xa, xbb, g, d_bottom, l_bottom, s_bottom, ph, side="bottom"
+        )
+
     j_sc_bot = d_bottom * abs(deriv)
 
     # The contribution from the SCR (includes the intrinsic region, if present).
@@ -602,9 +756,14 @@ def qe_depletion(junction, options):
     # The total light absorbed, but not necessarily collected, is:
     xa = cum_widths[id_top]
     xb = cum_widths[id_bottom + 1]
-    zz = np.linspace(xa, xb, 10001)
+    zz = np.linspace(xa, xb, 1001)
     gg = g(zz) * ph
     current_absorbed = np.trapz(gg, zz, axis=0)
+
+    # why does this happen sometimes?
+    # j_sc_top[j_sc_top < 0] = 0
+    # j_sc_bot[j_sc_bot < 0] = 0
+    # j_sc_scr[j_sc_scr < 0] = 0
 
     # Now, we put everything together
     j_sc = j_sc_top + j_sc_bot + j_sc_scr
@@ -614,22 +773,54 @@ def qe_depletion(junction, options):
     eqe_base = j_sc_bot / ph
     eqe_scr = j_sc_scr / ph
 
-    iqe =  j_sc / current_absorbed
-    iqe[np.isnan(iqe)] = 0 # if zero current_absorbed, get NaN in previous line; want 0 IQE
+    iqe = np.divide(j_sc, current_absorbed,
+                    out=np.zeros_like(j_sc), where=current_absorbed!=0)
 
     junction.iqe = interp1d(wl, iqe)
 
-    junction.eqe = interp1d(wl, eqe, kind='linear', bounds_error=False, assume_sorted=True,
-                            fill_value=(eqe[0], eqe[-1]))
-    junction.eqe_emitter = interp1d(wl, eqe_emitter, kind='linear', bounds_error=False, assume_sorted=True,
-                                    fill_value=(eqe_emitter[0], eqe_emitter[-1]))
-    junction.eqe_base = interp1d(wl, eqe_base, kind='linear', bounds_error=False, assume_sorted=True,
-                                 fill_value=(eqe_base[0], eqe_base[-1]))
-    junction.eqe_scr = interp1d(wl, eqe_scr, kind='linear', bounds_error=False, assume_sorted=True,
-                                fill_value=(eqe_scr[0], eqe_scr[-1]))
+    junction.eqe = interp1d(
+        wl,
+        eqe,
+        kind="linear",
+        bounds_error=False,
+        assume_sorted=True,
+        fill_value=(eqe[0], eqe[-1]),
+    )
+    junction.eqe_emitter = interp1d(
+        wl,
+        eqe_emitter,
+        kind="linear",
+        bounds_error=False,
+        assume_sorted=True,
+        fill_value=(eqe_emitter[0], eqe_emitter[-1]),
+    )
+    junction.eqe_base = interp1d(
+        wl,
+        eqe_base,
+        kind="linear",
+        bounds_error=False,
+        assume_sorted=True,
+        fill_value=(eqe_base[0], eqe_base[-1]),
+    )
+    junction.eqe_scr = interp1d(
+        wl,
+        eqe_scr,
+        kind="linear",
+        bounds_error=False,
+        assume_sorted=True,
+        fill_value=(eqe_scr[0], eqe_scr[-1]),
+    )
+    junction.qe = State(
+        {
+            "WL": wl,
+            "IQE": junction.iqe(wl),
+            "EQE": junction.eqe(wl),
+            "EQE_emitter": junction.eqe_emitter(wl),
+            "EQE_base": junction.eqe_base(wl),
+            "EQE_scr": junction.eqe_scr(wl),
+        }
+    )
 
-    junction.qe = State({'WL': wl, 'IQE': junction.iqe(wl), 'EQE': junction.eqe(wl), 'EQE_emitter': junction.eqe_emitter(wl),
-                         'EQE_base': junction.eqe_base(wl), 'EQE_scr': junction.eqe_scr(wl)})
 
 def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
     zz = np.linspace(xa, xb, 1001, endpoint=False)
@@ -639,67 +830,123 @@ def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
     return out
 
 
-def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side='top'):
-    zz = np.linspace(xa, xb, 1001, endpoint=False) # excluding the last point - depending on the mesh/floating point errors, sometimes this is actually in the next layer
-    gg = g(zz) * ph
+def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
+    zz = np.linspace(xa, xb, 1001, endpoint=False)
+    # excluding the last point - depending on the mesh/floating point errors,
+    # sometimes this is actually in the next layer
+
+    gg = g(zz) * ph  # generation rate * photon flux
+
     out = np.zeros_like(wl)
+    sol_success = np.zeros_like(wl)  # keep track of whether solve_bvp is converging
 
     for i in range(len(wl)):
-
-        if np.all(gg[:,i] == 0): # no reason to solve anything if no generation at this wavelength
+        if np.all(
+            gg[:, i] == 0
+        ):  # no reason to solve anything if no generation at this wavelength
             out[i] = 0
+            sol_success[i] = 0
 
         else:
-            A = lambda x: np.interp(x, zz, gg[:, i]) / D + y0 / L ** 2
+
+            def A(x):
+                return np.interp(x, zz, gg[:, i]) / D + y0 / L**2
+
+            # generation and n0/p0 term in differential equation
+            # (eq. 6.15 & 6.20 in Jenny Nelson, Physics of Solar Cells)
 
             def fun(x, y):
-                out1 = y[1]
-                out2 = y[0] / L ** 2 - A(x)
+                # differential equation (eq. 6.15 & 6.20 in Jenny Nelson,
+                # Physics of Solar Cells)
+                # solve_bvp solves equation of form:
+                # dy / dx = f(x, y, p), a <= x <= b
+                # in this case y = [n or p, dn/dx or dp/dx]
+                # y[0] = carrier concentration (n or p)
+                # y[1] = carrier concentration gradient (dn/dx or dp/dx)
+                out1 = y[1]  # by definition! dy/dx = dy/dx
+
+                out2 = y[0] / L**2 - A(x)
+                # actually solving the differential equation (6.15 & 6.20)
+
                 return np.vstack((out1, out2))
 
-            if side == 'top':
+            # boundary conditions for solve_bvp:
+            if side == "top":
+
                 def bc(ya, yb):
                     left = ya[1] - S / D * (ya[0] - y0)
-                    right = yb[0]
+                    # eq. 6.18 - b.c. at front of junction (surface recombination)
+
+                    right = yb[0] - y0
+                    # eq. 6.17 - b.c. edge of depletion region, top half of junction
+                    # added - y0 (generally very small so makes almost no difference)
                     return np.array([left, right])
+
             else:
+
                 def bc(ya, yb):
-                    left = ya[0]
-                    right = yb[1] - S / D * (yb[0] - y0)
+                    left = ya[0] - y0
+                    # eq. 6.21 - b.c. edge of depletion region, bottom half of junction
+                    # added - y0 (generally very small so makes almost no difference)
+
+                    right = yb[1] + S / D * (yb[0] - y0)
+                    # eq. 6.22 - b.c. at back of junction (surface recombination)
+                    # changed sign! Current is going the other way
                     return np.array([left, right])
 
             guess = y0 * np.ones((2, zz.size))
             guess[1] = np.zeros_like(guess[0])
-            solution = solve_bvp(fun, bc, zz, guess)
 
-            if side == 'top':
+            solution = solve_bvp(fun, bc, zz, guess, max_nodes=2 * zz.shape[0])
+            # increase max_nodes to avoid "too many mesh points" message
+
+            sol_success[i] = solution.status
+
+            if side == "top":
                 out[i] = solution.y[1][-1]
+                # current at edge of depletion region (top half of junction), eq. 6.33
             else:
                 out[i] = solution.y[1][0]
+                # current at edge of depletion region (bottom half of junction), eq 6.38
+
+        # give a warning f any of the solution statuses are not 0 using warnings.warn:
+        if np.any(sol_success != 0):
+            warnings.warn(
+                "Depletion approximation (DA) EQE calculation: "
+                "solve_bvp did not converge as expected for some wavelengths",
+                RuntimeWarning,
+            )
 
     return out
 
 
 def get_depletion_widths(junction, es, Vbi, V, Na, Nd, xi):
-
     if not hasattr(junction, "wp") or not hasattr(junction, "wn"):
-
-        if hasattr(junction, "depletion_approximation") and junction.depletion_approximation == "one-sided abrupt":
+        if (
+            hasattr(junction, "depletion_approximation")
+            and junction.depletion_approximation == "one-sided abrupt"
+        ):
             print("using one-sided abrupt junction approximation for depletion width")
             one_sided = True
         else:
             one_sided = False
 
-
         if one_sided:
-            science_reference("Sze abrupt junction approximation",
-                              "Sze: The Physics of Semiconductor Devices, 2nd edition, John Wiley & Sons, Inc (2007)")
+            science_reference(
+                "Sze abrupt junction approximation",
+                "Sze: The Physics of Semiconductor Devices, "
+                "2nd edition, John Wiley & Sons, Inc (2007)",
+            )
             wn = np.sqrt(2 * es * (Vbi - V) / (q * Nd))
             wp = np.sqrt(2 * es * (Vbi - V) / (q * Na))
 
         else:
-            wn = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Nd / Na)
-            wp = (-xi + np.sqrt(xi ** 2 + 2. * es * (Vbi - V) / q * (1 / Na + 1 / Nd))) / (1 + Na / Nd)
+            wn = (
+                -xi + np.sqrt(xi**2 + 2.0 * es * (Vbi - V) / q * (1 / Na + 1 / Nd))
+            ) / (1 + Nd / Na)
+            wp = (
+                -xi + np.sqrt(xi**2 + 2.0 * es * (Vbi - V) / q * (1 / Na + 1 / Nd))
+            ) / (1 + Na / Nd)
 
     wn = wn if not hasattr(junction, "wn") else junction.wn
     wp = wp if not hasattr(junction, "wp") else junction.wp

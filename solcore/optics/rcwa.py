@@ -186,14 +186,17 @@ def calculate_absorption_rcwa(tmm_out, initial=1):
 
     def diff_absorption(z):
         idx = all_z.searchsorted(z)
-        idx = np.where(idx <= len(all_z) - 2, idx, len(all_z) - 2)
+        idx = np.where(idx <= len(all_z) - 1, idx, len(all_z) - 1)
+        idx = np.where(idx > 0, idx, 1)
+
         try:
-            z1 = all_z[idx]
-            z2 = all_z[idx + 1]
+            z1 = all_z[idx - 1]
+            z2 = all_z[idx]
 
-            f = (z - z1) / (z2 - z1)
-
-            out = f * all_abs[:, idx] + (1 - f) * all_abs[:, idx + 1]
+            f = np.divide(z - z1, z2 - z1,
+                          out=np.zeros_like(z), where=np.abs(z2-z1) > 1e-12)
+            # this is to avoid divide by zero errors (|f| gets very large) when z1 = z2
+            out = (1-f) * all_abs[:, idx - 1] + f * all_abs[:, idx]
 
         except IndexError:
             out = all_abs[:, idx]

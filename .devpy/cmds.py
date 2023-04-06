@@ -1,6 +1,6 @@
 import click
 from devpy import util
-from devpy.cmds.util import get_site_packages, set_pythonpath, run
+from devpy.cmds.meson import _get_site_packages
 
 
 @click.command()
@@ -25,19 +25,19 @@ def install_dependencies(test_dep=False, doc_dep=False):
     config = util.get_config()
     default_dependencies = config["project"]['dependencies']
     print("Installing dependencies", default_dependencies)
-    run(
+    util.run(
         ["pip", "install"] + list(default_dependencies),
     )
     if test_dep:
         test_dependencies = config["project.optional-dependencies"]['test']
         print("Installing test-dependencies", test_dependencies)
-        run(
+        util.run(
             ["pip", "install"] + list(test_dependencies),
         )
     if doc_dep:
         doc_dependencies = config["project.optional-dependencies"]['doc']
         print("Installing doc-dependencies", doc_dependencies)
-        run(
+        util.run(
             ["pip", "install"] + list(doc_dependencies),
         )
 
@@ -60,9 +60,9 @@ def codecov(build_dir, codecov_args):
         codecov parameters
     """
 
-    site_path = get_site_packages(build_dir)
+    site_path = _get_site_packages()
 
-    run(
+    util.run(
         ["codecov"] + list(codecov_args),
         cwd=site_path,
     )

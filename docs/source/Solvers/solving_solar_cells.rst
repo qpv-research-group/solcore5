@@ -97,7 +97,7 @@ The options available as well as the default values are:
         If the Boltzmann approximation should be used in the detailed balance solver. Any other choice will result in using the full Plank equation, which will be slower, in general.
 
 - :doc:`Depletion approximation solver options <depletion>`
-    - **da_mode** = 'bvp'
+    - **da_mode** = 'green'
         Selects the numerical approximation method for the drift-diffusion equation in the depletion approximation solver. Possible values are “bvp” for numerical solution using the `solve_bvp` method of the `scipy.integrate` module or 'green' for a semi-analytic solution using Green's functions. The latter is expected to be faster. 
 
 - :doc:`Poisson-drift diffusion solver options <DriftDiffusionUtilities>`

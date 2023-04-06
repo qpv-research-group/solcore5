@@ -243,7 +243,7 @@ def test_substrate_presence_profile():
         },
     )
 
-    z_pos = np.linspace(0, my_structure.width, 10)
+    z_pos = np.linspace(0, my_structure.width, 50)
 
     profile_subs = my_structure[0].absorbed(z_pos)
 
