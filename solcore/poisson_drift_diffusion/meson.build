@@ -1,5 +1,9 @@
 if get_option('with_pdd')
     # NumPy include directory
+    
+    add_languages('c')
+    add_languages('cython')
+    add_languages('fortran', native: false)
 
     cc = meson.get_compiler('c')
     # TODO: the below -Wno flags are all needed to silence warnings in
@@ -14,9 +18,6 @@ if get_option('with_pdd')
         '-Wno-incompatible-pointer-types',
     )
     add_project_arguments(_global_c_args, language : 'c')
-
-    add_languages('cython')
-    add_languages('fortran', native: false)
 
     ff = meson.get_compiler('fortran')
     _global_ff_args = ff.get_supported_arguments(
