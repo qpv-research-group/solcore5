@@ -32,7 +32,7 @@ jobs:
       - name: install-rtools
         if: matrix.os == 'windows-latest'
         run: |
-          choco install rtools --no-progress
+          choco install rtools --version=4.0.0.20220206 --no-progress --force
           echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
 
       - name: Install system dependencies in Linux
@@ -59,6 +59,7 @@ jobs:
       - name: Install S4
         if: matrix.os != 'windows-latest'
         run: |
+          pip install wheel
           git clone https://github.com/phoebe-p/S4
           cd S4
           make S4_pyext
