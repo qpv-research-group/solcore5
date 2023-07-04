@@ -4,7 +4,7 @@ Publications
 =============
 
 A list of publications which use Solcore (and `RayFlare <https://github
-.com/qpv-research-group/rayflare>`_.) can be found here. If you used our packages and
+.com/qpv-research-group/rayflare>`_) can be found here. If you used our packages and
 your paper is not here, please let us know!
 
 .. container:: references csl-bib-body
