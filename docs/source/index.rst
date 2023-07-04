@@ -5,7 +5,8 @@
 
 `D. Alonso-Álvarez, T. Wilson, P. Pearce, M. Führer, D. Farrell, N. Ekins-Daukes, Journal of Computational Electronics (2018) <https://doi.org/10.1007/s10825-018-1171-3>`_.
 
-Please, cite this article if you find Solcore useful for your research.
+Please, cite this article if you find Solcore useful for your research. A list of papers
+which have used Solcore can be found :ref:`here<publications>`.
 
 .. image:: Infographics.jpg
     :align: center
