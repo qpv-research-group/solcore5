@@ -1,5 +1,41 @@
 if get_option('with_pdd')
     # NumPy include directory
+    
+    add_languages('c')
+    add_languages('cython')
+    add_languages('fortran', native: false)
+
+    cc = meson.get_compiler('c')
+    # TODO: the below -Wno flags are all needed to silence warnings in
+    # f2py-generated code. This should be fixed in f2py itself.
+    _global_c_args = cc.get_supported_arguments(
+        '-Wno-unused-but-set-variable',
+        '-Wno-unused-function',
+        '-Wno-unused-variable',
+        '-Wno-surprising',
+        '-Wno-conversion',
+        '-Wno-misleading-indentation',
+        '-Wno-incompatible-pointer-types',
+    )
+    add_project_arguments(_global_c_args, language : 'c')
+
+    ff = meson.get_compiler('fortran')
+    _global_ff_args = ff.get_supported_arguments(
+        '-Wno-unused-variable',
+        '-Wno-surprising',
+        '-Wno-conversion',
+        '-Wno-maybe-uninitialized',
+        '-Wno-unused-dummy-argument'
+    )
+    add_project_arguments(_global_ff_args, language: 'fortran')
+
+    if is_windows and meson.get_compiler('fortran').get_id() == 'gcc'
+        # For mingw-w64, link statically against the UCRT.
+        gcc_link_args = ['-lucrt', '-static']
+        add_project_link_arguments(gcc_link_args, language: ['fortran'])
+    endif
+
+    py_dep = py.dependency()
 
     if is_windows
         incdir_numpy = run_command(py,

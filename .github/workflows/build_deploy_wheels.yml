@@ -44,7 +44,7 @@ jobs:
       - name: install-rtools needed for windows
         if: ${{ runner.os == 'Windows' }}
         run: |
-          choco install rtools --no-progress
+          choco install rtools --version=4.0.0.20220206 --no-progress --force
           echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
 
       - name: Install cibuildwheel

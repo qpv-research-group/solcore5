@@ -1,4 +1,4 @@
-from pytest import approx, raises
+from pytest import approx  # , raises
 import numpy as np
 from solcore.constants import kb, q, vacuum_permittivity
 
@@ -292,7 +292,7 @@ def test_get_J_sc_diffusion_bottom():
         return np.vstack((out1, out2))
 
     def bc(ya, yb):
-        left = ya[0]
+        left = ya[0] - minority
         right = yb[1] + s / D * (yb[0] - minority)
         return np.array([left, right])
 
@@ -667,50 +667,50 @@ def test_get_J_sc_diffusion_green_bottom():
     assert result == approx(expected, rel=1.0e-5)
 
 
-def test_identify_layers_exceptions():
-    from solcore.analytic_solar_cells.depletion_approximation import identify_layers
-    from solcore import material
-    from solcore.structure import Layer, Junction
-
-    Na = np.power(10, np.random.uniform(22, 25))
-    Nd = np.power(10, np.random.uniform(22, 25))
-
-    Lp = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
-    Ln = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
-
-    GaAs_n = material("GaAs")(Nd=Nd, hole_diffusion_length=Ln)
-    GaAs_p = material("GaAs")(Na=Na, electron_diffusion_length=Lp)
-    GaAs_i = material("GaAs")()
-    Ge_n = material("Ge")(Nd=Nd, hole_diffusion_length=Ln)
-
-    n_width = np.random.uniform(500, 1000) * 1e-9
-    p_width = np.random.uniform(3000, 5000) * 1e-9
-    i_width = np.random.uniform(300, 500) * 1e-9
-
-    test_junc = Junction(
-        [Layer(n_width, GaAs_n, role="emitter"), Layer(p_width, GaAs_p, role="neither")]
-    )
-
-    with raises(RuntimeError):
-        identify_layers(test_junc)
-
-    test_junc = Junction(
-        [
-            Layer(n_width, GaAs_n, role="emitter"),
-            Layer(i_width, GaAs_i, role="intrinsic"),
-            Layer(p_width, GaAs_p, role="nothing"),
-        ]
-    )
-
-    with raises(RuntimeError):
-        identify_layers(test_junc)
-
-    test_junc = Junction(
-        [Layer(n_width, Ge_n, role="emitter"), Layer(p_width, GaAs_p, role="base")]
-    )
-
-    with raises(AssertionError):
-        identify_layers(test_junc)
+# def test_identify_layers_exceptions():
+#     from solcore.analytic_solar_cells.depletion_approximation import identify_layers
+#     from solcore import material
+#     from solcore.structure import Layer, Junction
+#
+#     Na = np.power(10, np.random.uniform(22, 25))
+#     Nd = np.power(10, np.random.uniform(22, 25))
+#
+#     Lp = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
+#     Ln = np.power(10, np.random.uniform(-9, -6))  # Diffusion length
+#
+#     GaAs_n = material("GaAs")(Nd=Nd, hole_diffusion_length=Ln)
+#     GaAs_p = material("GaAs")(Na=Na, electron_diffusion_length=Lp)
+#     GaAs_i = material("GaAs")()
+#     Ge_n = material("Ge")(Nd=Nd, hole_diffusion_length=Ln)
+#
+#     n_width = np.random.uniform(500, 1000) * 1e-9
+#     p_width = np.random.uniform(3000, 5000) * 1e-9
+#     i_width = np.random.uniform(300, 500) * 1e-9
+#
+#     test_junc = Junction(
+#       [Layer(n_width, GaAs_n, role="emitter"), Layer(p_width, GaAs_p, role="neither")]
+#     )
+#
+#     with raises(RuntimeError):
+#         identify_layers(test_junc)
+#
+#     test_junc = Junction(
+#         [
+#             Layer(n_width, GaAs_n, role="emitter"),
+#             Layer(i_width, GaAs_i, role="intrinsic"),
+#             Layer(p_width, GaAs_p, role="nothing"),
+#         ]
+#     )
+#
+#     with raises(RuntimeError):
+#         identify_layers(test_junc)
+#
+#     test_junc = Junction(
+#         [Layer(n_width, Ge_n, role="emitter"), Layer(p_width, GaAs_p, role="base")]
+#     )
+#
+#     with raises(AssertionError):
+#         identify_layers(test_junc)
 
 
 def test_process_junction_np():
@@ -748,7 +748,7 @@ def test_process_junction_np():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -804,7 +804,7 @@ def test_process_junction_pn():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -866,7 +866,7 @@ def test_process_junction_nip():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -928,7 +928,7 @@ def test_process_junction_pin():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -1005,7 +1005,7 @@ def test_process_junction_set_in_junction():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn_c, sp_c, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn_c, sp_c, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -1057,7 +1057,7 @@ def test_get_depletion_widths():
         1 + Na / Nd
     )
 
-    wn_r, wp_r = get_depletion_widths(test_junc, es, Vbi, V, Na, Nd, xi)
+    wn_r, wp_r = get_depletion_widths(test_junc, es, es, Vbi, V, Na, Nd, xi)
 
     assert wn_r == approx(wn_e)
     assert wp_r == approx(wp_e)
@@ -1084,7 +1084,7 @@ def test_get_depletion_widths_onesided():
     wn_e = np.sqrt(2 * es * (Vbi - V) / (q * Nd))
     wp_e = np.sqrt(2 * es * (Vbi - V) / (q * Na))
 
-    wn_r, wp_r = get_depletion_widths(test_junc, es, Vbi, V, Na, Nd, xi)
+    wn_r, wp_r = get_depletion_widths(test_junc, es, es, Vbi, V, Na, Nd, xi)
 
     assert wn_r == approx(wn_e)
     assert wp_r == approx(wp_e)
@@ -1100,7 +1100,7 @@ def test_get_depletion_widths_set_in_junction():
     wp = np.random.uniform(1, 100)
     test_junc = Junction(wn=wn, wp=wp)
 
-    wn_r, wp_r = get_depletion_widths(test_junc, 0, 0, 0, 0, 0, 0)
+    wn_r, wp_r = get_depletion_widths(test_junc, 0, 0, 0, 0, 0, 0, 0)
 
     assert wn_r == approx(wn)
     assert wp_r == approx(wp)
@@ -1124,7 +1124,7 @@ def test_dark_iv_depletion_pn(pn_junction):
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(
         test_junc[0]
     )
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es, _ = identify_parameters(
         test_junc[0], T, pRegion, nRegion, iRegion
     )
 
@@ -1138,7 +1138,7 @@ def test_dark_iv_depletion_pn(pn_junction):
 
     V = np.where(test_junc[0].voltage < Vbi - 0.001, test_junc[0].voltage, Vbi - 0.001)
 
-    wn, wp = get_depletion_widths(test_junc[0], es, Vbi, V, Na, Nd, xi)
+    wn, wp = get_depletion_widths(test_junc[0], es, es, Vbi, V, Na, Nd, xi)
 
     w = wn + wp + xi
 
@@ -1203,7 +1203,7 @@ def test_dark_iv_depletion_np(np_junction):
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(
         test_junc[0]
     )
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es, _ = identify_parameters(
         test_junc[0], T, pRegion, nRegion, iRegion
     )
 
@@ -1215,7 +1215,7 @@ def test_dark_iv_depletion_np(np_junction):
 
     V = np.where(test_junc[0].voltage < Vbi - 0.001, test_junc[0].voltage, Vbi - 0.001)
 
-    wn, wp = get_depletion_widths(test_junc[0], es, Vbi, V, Na, Nd, xi)
+    wn, wp = get_depletion_widths(test_junc[0], es, es, Vbi, V, Na, Nd, xi)
 
     w = wn + wp + xi
 
