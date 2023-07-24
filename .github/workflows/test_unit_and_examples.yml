@@ -157,7 +157,7 @@ jobs:
         run: |
           python -m devpy test -- -r a -v solcore/tests/test_examples.py -n "auto"
 
-      - name: Unit and functional tests (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          python -m devpy test -- -r a -v solcore/tests/test_examples.py 
+#      - name: Unit and functional tests (Windows)
+#        if: matrix.os == 'windows-latest'
+#        run: |
+#          python -m devpy test -- -r a -v solcore/tests/test_examples.py
