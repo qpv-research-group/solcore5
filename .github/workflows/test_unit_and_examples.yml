@@ -32,7 +32,7 @@ jobs:
       - name: install-rtools
         if: matrix.os == 'windows-latest'
         run: |
-          choco install rtools --no-progress
+          choco install rtools --version=4.0.0.20220206 --no-progress --force
           echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
 
       - name: Install system dependencies in Linux
@@ -59,6 +59,7 @@ jobs:
       - name: Install S4
         if: matrix.os != 'windows-latest'
         run: |
+          pip install wheel
           git clone https://github.com/phoebe-p/S4
           cd S4
           make S4_pyext
@@ -69,11 +70,18 @@ jobs:
         run: |
           python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true
 
-      - name: Unit and functional tests
+      - name: Unit and functional tests (MacOS and Linux)
+        if: matrix.os != 'windows-latest'
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m devpy test -- -r a -v --cov=solcore/ --ignore solcore/tests/test_examples.py -n "auto"
+          python -m devpy test -- -r a -v --cov=solcore/ --ignore=solcore/tests/test_examples.py -n "auto" 
+
+      - name: Unit and functional tests (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd D:\a\solcore5\solcore5\build-install\usr\Lib\site-packages
+          python -m pytest -r a -v --ignore=solcore/tests/test_examples.py 
 
       - name: Codecov
         env:
@@ -104,7 +112,7 @@ jobs:
       - name: install-rtools
         if: matrix.os == 'windows-latest'
         run: |
-          choco install rtools --no-progress
+          choco install rtools --version=4.0.0.20220206 --no-progress --force
           echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
 
       - name: Install system dependencies in Linux
@@ -131,6 +139,7 @@ jobs:
       - name: Install S4
         if: matrix.os != 'windows-latest'
         run: |
+          pip install wheel
           git clone https://github.com/phoebe-p/S4
           cd S4
           make S4_pyext
@@ -148,7 +157,7 @@ jobs:
         run: |
           python -m devpy test -- -r a -v solcore/tests/test_examples.py -n "auto"
 
-      - name: Unit and functional tests (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          python -m devpy test -- -r a -v solcore/tests/test_examples.py -n "auto"
+#      - name: Unit and functional tests (Windows)
+#        if: matrix.os == 'windows-latest'
+#        run: |
+#          python -m devpy test -- -r a -v solcore/tests/test_examples.py

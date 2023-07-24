@@ -21,11 +21,20 @@ following command in your terminal::
 
     pip install solcore
 
-This will download Solcore form the PyPI repository and install the package within the active Python environment. Depending
+This will download Solcore from the PyPI repository and install the package within the
+active Python environment. Depending
 on your operating system/Python installation you may need to use `pip3` instead of `pip`. And that's all! Solcore should
 be available to be used as with any Python package::
 
     >>> import solcore
+
+Note that the above should install the Fortran-based Poisson drift-diffusion (PDD)
+solver, without requiring local compilation (i.e. you do not need to have Fortran
+compiler installed on your computer -- see further details below). If you would like to
+install Solcore without
+the PDD solver, you can do so by running::
+
+    pip install solcore --config-setting=setup-args="-Dwith_pdd=false"
 
 Installation details
 ^^^^^^^^^^^^^^^^^^^^
@@ -51,7 +60,10 @@ run from the directory where *pyproject.toml* is located::
     pip install .
 
 This will compile the PDD solver locally, so you will need to have a
-:doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`.
+:doc:`a suitable Fortran compiler (only needed for the PDD solver) <compilation>`. If
+you wish to install Solcore from source without compiling the PDD solver, you can do so by running::
+
+    pip install . --config-setting=setup-args="-Dwith_pdd=false"
 
 
 Installing in development mode
@@ -61,7 +73,8 @@ If you are planning to develop Solcore further, you may want to have all the fil
 the default installation location for pip), while still being able to use the package from other places and examples, so
 that if you make changes to the solcore5 folder those changes will be reflected in installed versions of the package.
 To achieve this, you need to install Solcore in editable/development mode. Download or clone the source from the
-`Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_ as above, make sure the dependencies are installed
+`Solcore GitHub repository <https://github.com/dalonsoa/solcore5>`_ as above, and make
+sure the dependencies are installed
 (the easiest way to do this is to run `pip install solcore`, which will install Solcore with dependencies as usual,
 followed by `pip uninstall solcore`). In the folder where *pyproject.toml* is located run::
 

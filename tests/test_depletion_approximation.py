@@ -292,7 +292,7 @@ def test_get_J_sc_diffusion_bottom():
         return np.vstack((out1, out2))
 
     def bc(ya, yb):
-        left = ya[0]
+        left = ya[0] - minority
         right = yb[1] + s / D * (yb[0] - minority)
         return np.array([left, right])
 
@@ -681,14 +681,14 @@ def test_identify_layers_exceptions():
     GaAs_n = material("GaAs")(Nd=Nd, hole_diffusion_length=Ln)
     GaAs_p = material("GaAs")(Na=Na, electron_diffusion_length=Lp)
     GaAs_i = material("GaAs")()
-    Ge_n = material("Ge")(Nd=Nd, hole_diffusion_length=Ln)
+    # Ge_n = material("Ge")(Nd=Nd, hole_diffusion_length=Ln)
 
     n_width = np.random.uniform(500, 1000) * 1e-9
     p_width = np.random.uniform(3000, 5000) * 1e-9
     i_width = np.random.uniform(300, 500) * 1e-9
 
     test_junc = Junction(
-        [Layer(n_width, GaAs_n, role="emitter"), Layer(p_width, GaAs_p, role="neither")]
+      [Layer(n_width, GaAs_n, role="emitter"), Layer(p_width, GaAs_p, role="neither")]
     )
 
     with raises(RuntimeError):
@@ -705,12 +705,12 @@ def test_identify_layers_exceptions():
     with raises(RuntimeError):
         identify_layers(test_junc)
 
-    test_junc = Junction(
-        [Layer(n_width, Ge_n, role="emitter"), Layer(p_width, GaAs_p, role="base")]
-    )
-
-    with raises(AssertionError):
-        identify_layers(test_junc)
+    # test_junc = Junction(
+    #     [Layer(n_width, Ge_n, role="emitter"), Layer(p_width, GaAs_p, role="base")]
+    # )
+    #
+    # with raises(AssertionError):
+    #     identify_layers(test_junc)
 
 
 def test_process_junction_np():
@@ -748,7 +748,7 @@ def test_process_junction_np():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -804,7 +804,7 @@ def test_process_junction_pn():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -866,7 +866,7 @@ def test_process_junction_nip():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -928,7 +928,7 @@ def test_process_junction_pin():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -1005,7 +1005,7 @@ def test_process_junction_set_in_junction():
     )
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(test_junc)
-    xn, xp, xi, sn_c, sp_c, ln, lp, dn, dp, Nd_c, Na_c, ni, es = identify_parameters(
+    xn, xp, xi, sn_c, sp_c, ln, lp, dn, dp, Nd_c, Na_c, ni, es, _ = identify_parameters(
         test_junc, options.T, pRegion, nRegion, iRegion
     )
 
@@ -1057,7 +1057,7 @@ def test_get_depletion_widths():
         1 + Na / Nd
     )
 
-    wn_r, wp_r = get_depletion_widths(test_junc, es, Vbi, V, Na, Nd, xi)
+    wn_r, wp_r = get_depletion_widths(test_junc, es, es, Vbi, V, Na, Nd, xi)
 
     assert wn_r == approx(wn_e)
     assert wp_r == approx(wp_e)
@@ -1084,7 +1084,7 @@ def test_get_depletion_widths_onesided():
     wn_e = np.sqrt(2 * es * (Vbi - V) / (q * Nd))
     wp_e = np.sqrt(2 * es * (Vbi - V) / (q * Na))
 
-    wn_r, wp_r = get_depletion_widths(test_junc, es, Vbi, V, Na, Nd, xi)
+    wn_r, wp_r = get_depletion_widths(test_junc, es, es, Vbi, V, Na, Nd, xi)
 
     assert wn_r == approx(wn_e)
     assert wp_r == approx(wp_e)
@@ -1100,7 +1100,7 @@ def test_get_depletion_widths_set_in_junction():
     wp = np.random.uniform(1, 100)
     test_junc = Junction(wn=wn, wp=wp)
 
-    wn_r, wp_r = get_depletion_widths(test_junc, 0, 0, 0, 0, 0, 0)
+    wn_r, wp_r = get_depletion_widths(test_junc, 0, 0, 0, 0, 0, 0, 0)
 
     assert wn_r == approx(wn)
     assert wp_r == approx(wp)
@@ -1124,7 +1124,7 @@ def test_dark_iv_depletion_pn(pn_junction):
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(
         test_junc[0]
     )
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es, _ = identify_parameters(
         test_junc[0], T, pRegion, nRegion, iRegion
     )
 
@@ -1138,7 +1138,7 @@ def test_dark_iv_depletion_pn(pn_junction):
 
     V = np.where(test_junc[0].voltage < Vbi - 0.001, test_junc[0].voltage, Vbi - 0.001)
 
-    wn, wp = get_depletion_widths(test_junc[0], es, Vbi, V, Na, Nd, xi)
+    wn, wp = get_depletion_widths(test_junc[0], es, es, Vbi, V, Na, Nd, xi)
 
     w = wn + wp + xi
 
@@ -1203,7 +1203,7 @@ def test_dark_iv_depletion_np(np_junction):
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(
         test_junc[0]
     )
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es, _ = identify_parameters(
         test_junc[0], T, pRegion, nRegion, iRegion
     )
 
@@ -1215,7 +1215,7 @@ def test_dark_iv_depletion_np(np_junction):
 
     V = np.where(test_junc[0].voltage < Vbi - 0.001, test_junc[0].voltage, Vbi - 0.001)
 
-    wn, wp = get_depletion_widths(test_junc[0], es, Vbi, V, Na, Nd, xi)
+    wn, wp = get_depletion_widths(test_junc[0], es, es, Vbi, V, Na, Nd, xi)
 
     w = wn + wp + xi
 
@@ -1422,3 +1422,86 @@ def test_iv_depletion_pn(pn_junction):
     assert abs(test_junc[0].iv(0)) <= Jph
     assert approx_Voc < test_junc[0][1].material.band_gap / q
     assert np.all(power < options.light_source.power_density)
+
+
+def test_depletion_width():
+    from solcore import material
+    from solcore.solar_cell import Junction, Layer
+    from solcore.analytic_solar_cells.depletion_approximation \
+        import get_depletion_widths
+    from solcore.analytic_solar_cells.depletion_approximation \
+        import qe_depletion, iv_depletion
+    from solcore.state import State
+    from solcore.solar_cell_solver import prepare_solar_cell, SolarCell
+    from solcore.optics import solve_beer_lambert
+    from solcore.light_source import LightSource
+
+    Na_top = 1e18*1e6
+    Nd_bottom = 1e18*1e6
+
+    Ln = 1e-6
+    Lp = 1e-6
+
+    InGaP = material("GaInP")
+
+    top_cell_p_material = InGaP(
+        In=0.48,
+        Na=Na_top,
+        electron_diffusion_length=Lp,
+    )
+    top_cell_n_material = InGaP(
+        In=0.48,
+        Nd=Nd_bottom,
+        hole_diffusion_length=Ln,
+    )
+
+    rel_perm = 10 * vacuum_permittivity
+
+    n_width = 30e-9
+    p_width = 30e-9
+
+    test_junc = Junction(
+                [
+                    Layer(n_width, material=top_cell_n_material, role="emitter"),
+                    Layer(p_width, material=top_cell_p_material, role="base"),
+                ],
+                sn=100,
+                sp=100,
+                kind="DA",
+            )
+
+    T = 300
+    Vbi = 2.1
+
+    wn, wp = get_depletion_widths(test_junc, rel_perm, rel_perm, Vbi, 0, Na_top,
+                                  Nd_bottom, 0)
+
+    assert wn > n_width
+    assert wp > p_width
+
+    options = State()
+    wl = np.linspace(290, 700, 150) * 1e-9
+    options.T = T
+    options.wavelength = wl
+    options.position = None
+    options.internal_voltages = np.linspace(-2, 2, 50)
+    options.da_mode = 'green'
+    options.light_iv = True
+
+    light_source = LightSource(source_type="standard", version="AM1.5g")
+
+    options.light_source = light_source
+
+    solar_cell = SolarCell([test_junc])
+
+    prepare_solar_cell(solar_cell, options)
+    solve_beer_lambert(solar_cell, **options)
+
+    iv_depletion(test_junc, options)
+    qe_depletion(test_junc, options)
+
+    max_current = np.trapz(solar_cell.absorbed * light_source.spectrum(
+        output_units="photon_flux_per_m", x=wl)[1], wl) * q
+
+    assert np.all(test_junc.eqe(wl) <= 1)
+    assert np.abs(test_junc.iv(0)) <= max_current

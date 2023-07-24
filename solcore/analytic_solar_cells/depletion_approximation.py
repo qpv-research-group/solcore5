@@ -19,7 +19,7 @@ def identify_layers(junction):
     # We search for the emitter and check if it is n-type or p-type
     idx = 0
     pn_or_np = "pn"
-    homojunction = True
+    # homojunction = True
 
     for layer in junction:
         if layer.role.lower() != "emitter":
@@ -53,20 +53,18 @@ def identify_layers(junction):
                 pRegion = junction[idx + 2]
 
             id_bottom = idx + 2
-            homojunction = (
-                homojunction
-                and nRegion.material.material_string == pRegion.material.material_string
-            )
-            homojunction = (
-                homojunction
-                and nRegion.material.material_string == iRegion.material.material_string
-            )
+            # homojunction = (
+            #   homojunction
+            #   and nRegion.material.material_string == pRegion.material.material_string
+            # )
+            # homojunction = (
+            #   homojunction
+            #   and nRegion.material.material_string == iRegion.material.material_string
+            # )
 
         else:
-            raise RuntimeError(
-                "ERROR processing junctions: A layer following the "
-                '"intrinsic" layer must be defined as "base".'
-            )
+            raise RuntimeError("ERROR processing junctions: A layer following the "
+                               '"intrinsic" layer must be defined as "base".')
 
     # If there is no intrinsic region, we check directly the base
     elif junction[idx + 1].role.lower() == "base":
@@ -79,19 +77,18 @@ def identify_layers(junction):
         iRegion = None
 
         id_bottom = idx + 1
-        homojunction = (
-            homojunction
-            and nRegion.material.material_string == pRegion.material.material_string
-        )
+        # homojunction = (
+        #     homojunction
+        #     and nRegion.material.material_string == pRegion.material.material_string
+        # )
 
     else:
-        raise RuntimeError(
-            'ERROR processing junctions: A layer following the "emitter" '
-            'must be defined as "intrinsic" or "base".'
-        )
+        raise RuntimeError('ERROR processing junctions: A layer following the '
+                           '"emitter" must be defined as "intrinsic" or "base".')
 
     # We assert that we are really working with an homojunction
-    assert homojunction, "ERROR: The DA solver only works with homojunctions, for now."
+    # assert homojunction, "ERROR: The DA solver only works with homojunctions,
+    # for now."
 
     return id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np
 
@@ -107,10 +104,13 @@ def identify_parameters(junction, T, pRegion, nRegion, iRegion):
     sp = 0 if not hasattr(junction, "sp") else junction.sp
 
     # Now we have to get all the material parameters needed for the calculation
+    # labels for permittivity refer to the doping of the layer
     if hasattr(junction, "permittivity"):
-        es = junction.permittivity
+        es_n = junction.permittivity
+        es_p = junction.permittivity
     else:
-        es = nRegion.material.permittivity  # equal for n and p.  I hope.
+        es_n = nRegion.material.permittivity
+        es_p = pRegion.material.permittivity
 
     # For the diffusion length, subscript n and p refer to the carriers,
     # electrons and holes
@@ -141,7 +141,7 @@ def identify_parameters(junction, T, pRegion, nRegion, iRegion):
     Na = pRegion.material.Na
     Nd = nRegion.material.Nd
 
-    return xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es
+    return xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es_n, es_p
 
 
 def iv_depletion(junction, options):
@@ -165,7 +165,7 @@ def iv_depletion(junction, options):
     kbT = kb * T
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(junction)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es_n, es_p = identify_parameters(
         junction, T, pRegion, nRegion, iRegion
     )
 
@@ -183,7 +183,13 @@ def iv_depletion(junction, options):
     # which can be, at most, equal to Vbi
     V = np.where(junction.voltage < Vbi - 0.001, junction.voltage, Vbi - 0.001)
 
-    wn, wp = get_depletion_widths(junction, es, Vbi, V, Na, Nd, xi)
+    wn, wp = get_depletion_widths(junction, es_n, es_p, Vbi, V, Na, Nd, xi)
+
+    # if the depletion region is calculated to be wider than the width of the n/p
+    # region itself, the whole region is depleted:
+
+    wn[wn > xn] = xn
+    wp[wp > xp] = xp
 
     w = wn + wp + xi
 
@@ -675,7 +681,7 @@ def qe_depletion(junction, options):
     kbT = kb * T
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(junction)
-    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es = identify_parameters(
+    xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es_n, es_p = identify_parameters(
         junction, T, pRegion, nRegion, iRegion
     )
 
@@ -687,7 +693,16 @@ def qe_depletion(junction, options):
         else junction.Vbi
     )  # Jenny p146
 
-    wn, wp = get_depletion_widths(junction, es, Vbi, 0, Na, Nd, xi)
+    wn, wp = get_depletion_widths(junction, es_n, es_p, Vbi, 0, Na, Nd, xi)
+
+    # if the depletion region is calculated to be wider than the width of the n/p
+    # region itself, the whole region is depleted:
+
+    if wn > xn:
+        wn = xn
+
+    if wp > xp:
+        wp = xp
 
     # Now it is time to calculate currents
     if pn_or_np == "pn":
@@ -774,7 +789,7 @@ def qe_depletion(junction, options):
     eqe_scr = j_sc_scr / ph
 
     iqe = np.divide(j_sc, current_absorbed,
-                    out=np.zeros_like(j_sc), where=current_absorbed!=0)
+                    out=np.zeros_like(j_sc), where=current_absorbed != 0)
 
     junction.iqe = interp1d(wl, iqe)
 
@@ -920,7 +935,7 @@ def get_J_sc_diffusion_vs_WL(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
     return out
 
 
-def get_depletion_widths(junction, es, Vbi, V, Na, Nd, xi):
+def get_depletion_widths(junction, es_n, es_p, Vbi, V, Na, Nd, xi):
     if not hasattr(junction, "wp") or not hasattr(junction, "wn"):
         if (
             hasattr(junction, "depletion_approximation")
@@ -937,18 +952,114 @@ def get_depletion_widths(junction, es, Vbi, V, Na, Nd, xi):
                 "Sze: The Physics of Semiconductor Devices, "
                 "2nd edition, John Wiley & Sons, Inc (2007)",
             )
-            wn = np.sqrt(2 * es * (Vbi - V) / (q * Nd))
-            wp = np.sqrt(2 * es * (Vbi - V) / (q * Na))
+            wn = np.sqrt(2 * es_n * (Vbi - V) / (q * Nd))
+            wp = np.sqrt(2 * es_p * (Vbi - V) / (q * Na))
 
         else:
             wn = (
-                -xi + np.sqrt(xi**2 + 2.0 * es * (Vbi - V) / q * (1 / Na + 1 / Nd))
+                -xi + np.sqrt(xi**2 + 2.0 * es_n * (Vbi - V) / q * (1 / Na + 1 / Nd))
             ) / (1 + Nd / Na)
             wp = (
-                -xi + np.sqrt(xi**2 + 2.0 * es * (Vbi - V) / q * (1 / Na + 1 / Nd))
+                -xi + np.sqrt(xi**2 + 2.0 * es_p * (Vbi - V) / q * (1 / Na + 1 / Nd))
             ) / (1 + Na / Nd)
 
     wn = wn if not hasattr(junction, "wn") else junction.wn
     wp = wp if not hasattr(junction, "wp") else junction.wp
 
     return wn, wp
+
+
+# def iv_depletion_analytical(junction, options):
+#     """Calculates the IV curve of a junction object using the analytical solutions to
+#     the depletion approximation with Beer-Lambert absorption as described in e.g. J.
+#     Nelson, “The Physics of Solar Cells”, Imperial College Press (2003). Note that the
+#     equations used here are not exactly those from the book, as they contain typos.
+#     The junction is then updated with an "iv" function that calculates the IV curve at
+#     any voltage.
+#
+#     :param junction: A junction object.
+#     :param options: Solver options.
+#     :return: None.
+#     """
+#
+#     pass
+
+
+# def minority_carrier_top_analytical(x, L, alpha, xa, D, S, n0, A):
+#     aL = alpha * L
+#     a1 = -aL * np.exp(2 * alpha * (x + xa) + (2 * x / L)) + aL * np.exp(
+#         2 * alpha * (x + xa) + (2 * xa / L)
+#     )
+#
+#     a2 = np.exp(2 * alpha * x + alpha * xa + (xa / L)) - np.exp(
+#         alpha * x + 2 * alpha * xa + (x / L)
+#     )
+#
+#     a3 = np.exp(((aL + 1) * (2 * x + xa)) / L) - np.exp(((aL + 1) * (x + 2 * xa)) / L)
+#
+#     b1 = np.exp(((aL + 1) * (2 * x + xa)) / L) - np.exp(((aL + 1) * (x + 2 * xa)) / L)
+#
+#     b2 = np.exp(alpha * x + 2 * alpha * xa + (x / L)) - np.exp(
+#         2 * alpha * x + alpha * xa + (xa / L)
+#     )
+#
+#     b3 = -np.exp(2 * alpha * (x + xa) + (2 * x / L)) + np.exp(
+#         2 * alpha * (x + xa) + (2 * xa / L)
+#     )
+#
+#     numerator = (
+#         A
+#         * L**2
+#         * np.exp(-2 * alpha * (x + xa) - (x / L))
+#         * (D * (a1 + a2 + a3) + L * S * (b1 + b2 + b3))
+#     )
+#     denominator = (
+#         D
+#         * (alpha**2 * L**2 - 1)
+#         * (D * (np.exp(2 * xa / L) + 1) + L * S * (np.exp(2 * xa / L) - 1))
+#     )
+#     result = numerator / denominator + n0
+#
+#     return result
+
+
+# def minority_carrier_bottom_analytical(x, L, alpha, xb, D, S, p0, A):
+#     aL = alpha * L
+#     denominator = (
+#         D
+#         * (-1 + alpha**2 * L**2)
+#         * (D * (1 + np.exp((2 * xb) / L)) + (-1 + np.exp((2 * xb) / L)) * L * S)
+#     )
+#
+#     a1 = np.exp((2 * xb) / L + 2 * alpha * (x + xb)) - np.exp(
+#         (((1 + aL) * (x + 2 * xb)) / L)
+#     )
+#
+#     a2 = np.exp((2 * x) / L + 2 * alpha * (x + xb)) - np.exp(
+#         alpha * x + x / L + 2 * alpha * xb
+#     )
+#
+#     a3 = (
+#         alpha * np.exp(2 * alpha * x + alpha * xb + xb / L) * L
+#         - alpha * np.exp(((1 + aL) * (2 * x + xb)) / L) * L
+#     )
+#
+#     b1 = np.exp(((1 + aL) * (2 * x + xb)) / L) - np.exp(((1 + aL) * (x + 2 * xb)) / L)
+#
+#     b2 = +np.exp(alpha * x + x / L + 2 * alpha * xb) - np.exp(
+#         2 * alpha * x + alpha * xb + xb / L
+#     )
+#
+#     b3 = np.exp((2 * xb) / L + 2 * alpha * (x + xb)) - np.exp(
+#         (2 * x) / L + 2 * alpha * (x + xb)
+#     )
+#
+#     numerator = (
+#         A
+#         * np.exp(-(x / L) - 2 * alpha * (x + xb))
+#         * L**2
+#         * (D * (a1 + a2 + a3) + (b1 + b2 + b3) * L * S)
+#     )
+#
+#     p = p0 + numerator / denominator
+#     return p
