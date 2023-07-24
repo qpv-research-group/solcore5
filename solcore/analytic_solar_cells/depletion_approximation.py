@@ -63,10 +63,8 @@ def identify_layers(junction):
             # )
 
         else:
-            raise RuntimeError(
-                "ERROR processing junctions: A layer following the "
-                '"intrinsic" layer must be defined as "base".'
-            )
+            raise RuntimeError("ERROR processing junctions: A layer following the "
+                               '"intrinsic" layer must be defined as "base".')
 
     # If there is no intrinsic region, we check directly the base
     elif junction[idx + 1].role.lower() == "base":
@@ -85,10 +83,8 @@ def identify_layers(junction):
         # )
 
     else:
-        raise RuntimeError(
-            'ERROR processing junctions: A layer following the "emitter" '
-            'must be defined as "intrinsic" or "base".'
-        )
+        raise RuntimeError('ERROR processing junctions: A layer following the '
+                           '"emitter" must be defined as "intrinsic" or "base".')
 
     # We assert that we are really working with an homojunction
     # assert homojunction, "ERROR: The DA solver only works with homojunctions,
