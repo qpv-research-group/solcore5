@@ -22,6 +22,7 @@ def interpolate_critical_points(critical_points, target):
 
     result_critical_points = {k: lower_points[k] + fraction_along * (upper_points[k] - lower_points[k]) for k in
                               lower_points.keys()}
+
     return result_critical_points, (lower, upper), fraction_along
 
 
