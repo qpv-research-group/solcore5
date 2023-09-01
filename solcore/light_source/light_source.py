@@ -405,10 +405,10 @@ class LightSource:
                 wl = x_data
                 spectrum = y_data * (c * h * 1e9 / wl)
             elif units == "power_density_per_m":
-                wl = x_data * 1e-9
+                wl = x_data * 1e9
                 spectrum = y_data * 1e-9
             elif units == "photon_flux_per_m":
-                wl = x_data * 1e-9
+                wl = x_data * 1e9
                 spectrum = y_data * (c * h / wl)
             elif units == "power_density_per_eV":
                 wl, spectrum = spectral_conversion_nm_ev(x_data, y_data)
