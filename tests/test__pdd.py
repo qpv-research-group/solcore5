@@ -119,7 +119,7 @@ def test_calculate_iv(mocker):
     mock_dump_iv = mocker.patch(f"{root}.DumpIV")
 
     from solcore.structure import Junction
-    from solcore.poisson_drift_diffusion.DriftDiffusionUtilities import calculate_iv
+    from solcore.poisson_drift_diffusion import calculate_iv
 
     junction = Junction()
     vlimit = 1
@@ -151,7 +151,7 @@ def test_find_minimum_bandgap():
     from solcore.structure import Layer, Junction
     from solcore import material
     from solcore.constants import q
-    from solcore.poisson_drift_diffusion.DriftDiffusionUtilities import (
+    from solcore.poisson_drift_diffusion import (
         find_minimum_bandgap,
     )
 
@@ -177,7 +177,7 @@ def kbT(T: float = 300) -> float:
     ],
 )
 def test_find_voltage_limits(bandgap, p_on_n, vmax, vmin, exp_vmax, exp_vmin):
-    from solcore.poisson_drift_diffusion.DriftDiffusionUtilities import (
+    from solcore.poisson_drift_diffusion import (
         find_voltage_limits,
     )
 
@@ -187,7 +187,7 @@ def test_find_voltage_limits(bandgap, p_on_n, vmax, vmin, exp_vmax, exp_vmin):
 
 
 def test_consolidate_iv():
-    from solcore.poisson_drift_diffusion.DriftDiffusionUtilities import (
+    from solcore.poisson_drift_diffusion import (
         consolidate_iv,
     )
 

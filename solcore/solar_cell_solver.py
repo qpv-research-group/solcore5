@@ -4,7 +4,7 @@ from warnings import warn
 
 import numpy as np
 
-from . import analytic_solar_cells as ASC
+from . import analytic_solar_cells as ASC, sesame_drift_diffusion as sesame_PDD, poisson_drift_diffusion as PDD
 from .light_source import LightSource
 from .optics import (  # noqa
     rcwa_options,
@@ -25,7 +25,6 @@ from .state import State
 from .structure import Junction, Layer, TunnelJunction
 
 try:
-    from . import poisson_drift_diffusion as PDD
 
     a = PDD.pdd_options
 except AttributeError:
@@ -169,6 +168,8 @@ def solve_iv(solar_cell, options):
 
         if solar_cell[j].kind == "PDD":
             PDD.iv_pdd(solar_cell[j], **options)
+        elif solar_cell[j].kind == "sesame_PDD":
+            sesame_PDD.iv_sesame(solar_cell[j], **options)
         elif solar_cell[j].kind == "DA":
             ASC.iv_depletion(solar_cell[j], options)
         elif solar_cell[j].kind == "2D":

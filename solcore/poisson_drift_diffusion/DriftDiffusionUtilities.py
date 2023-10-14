@@ -4,15 +4,15 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.interpolate import interp1d
 
-from .. import asUnit, constants
-from ..light_source import LightSource
-from ..registries import (
+from solcore import asUnit, constants
+from solcore.light_source import LightSource
+from solcore.registries import (
     register_equilibrium_solver,
     register_iv_solver,
     register_short_circuit_solver,
 )
-from ..state import State
-from ..structure import Junction
+from solcore.state import State
+from solcore.structure import Junction
 from .DeviceStructure import CalculateAbsorptionProfile, CreateDeviceStructure
 
 try:

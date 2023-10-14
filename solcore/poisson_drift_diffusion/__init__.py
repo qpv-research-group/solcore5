@@ -10,4 +10,3 @@ except Exception as err:
     print('WARNING: The Poisson - Drift-Diffusion solver will not be available because '
           'the ddModel fortran library could not be imported.')
     print(err)
-
