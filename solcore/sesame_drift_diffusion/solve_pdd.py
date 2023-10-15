@@ -79,6 +79,7 @@ def process_structure(junction):
     junction.sesame_sys = sesame.Builder(junction.mesh_cm) # Sesame system
 
     edges = np.insert(np.cumsum(layer_width), 0, 0)
+    edges[-1] = edges[-1] + 1e-10 # otherwise final point will not be assigned any values
 
     for i1 in range(len(junction)):
         junction.sesame_sys.add_material(material_list[i1],
@@ -170,14 +171,12 @@ def iv_sesame(junction, options):
     # equilibrium solution:
     # j0, result0 = sesame.IVcurve(junction.sesame_sys, [0])
 
-    voltages = np.concatenate((np.linspace(0, 0.55, 8, endpoint=False),
-                               np.linspace(0.55, 0.7, 12, endpoint=False),
-                               np.linspace(0.7, 0.8, 12)))
+    voltages = options.voltages
 
     j, result = sesame.IVcurve(junction.sesame_sys, voltages)  # , verbose=False)
     j = j * junction.sesame_sys.scaling.current
 
-    Jsc = j[0] # units?
+    Jsc = j[0]*1e4 # units?
 
     # jsc = q*np.trapz(eqe*light_source.spectrum()[1], wls) # A/m2
 
@@ -188,8 +187,9 @@ def iv_sesame(junction, options):
     Voc = voltages[zero_crossing] + (voltages[zero_crossing + 1] - voltages[zero_crossing]) * j_above / (
                 j_above - j_below)
 
-    Vmpp = voltages[np.nanargmax(j * voltages)]
-    Jmpp = j[np.nanargmax(j * voltages)] * 1e4
+    voltages_for_mpp = voltages * (np.abs(voltages) <= Voc)
+    Vmpp = voltages[np.nanargmax(np.abs(j * voltages_for_mpp))]
+    Jmpp = j[np.nanargmax(np.abs(j * voltages_for_mpp))] * 1e4
 
     FF = Vmpp * Jmpp / (Jsc * Voc)
 
@@ -261,6 +261,7 @@ options.optics_method = 'TMM'
 options.light_iv = True
 options.light_source = LightSource(source_type="standard",
                            version="AM1.5g", x=options.wavelength, output_units="photon_flux_per_m")
+options.voltages = np.linspace(0, 2, 100)
 
 T = 293
 
