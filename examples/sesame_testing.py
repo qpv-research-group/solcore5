@@ -144,7 +144,6 @@ doping_profile = nD * erfc(x/150e-7) # characteristic depth of 150 nm
 
 doping_profile_rear = - nA * erfc((L - x)/200e-7) # characteristic depth of 200 nm
 
-
 overall_profile = doping_profile + doping_profile_rear - bulk_doping
 # Create a system
 sys = sesame.Builder(x)
@@ -168,6 +167,8 @@ material_Si = {'Nc': 3e19, 'Nv': 1e19, 'Eg': 1.12, 'affinity': 4.05, 'epsilon': 
             # can be scalars or callable functions similar to the location
             # argument.
 # can all be location dependent
+
+
 
 # Add the material to the system
 sys.add_material(material_Si)
@@ -259,6 +260,7 @@ gg = base_light.spectrum(wls, output_units="photon_flux_per_m")[1][:, None] * ge
 # g_vs_z = np.trapz(gg, wls, axis=1) / 1e4 # m-2 cm-1 -> cm-3
 g_vs_z = (1-shading)*np.trapz(gg, wls, axis=0) / 1e4
 g_vs_z[np.isnan(g_vs_z)] = 0
+
 
 # somehow missing a factor of 100 somewhere (with Beer-Lambert)...
 # g_vs_z = 100*g_vs_z
@@ -469,3 +471,7 @@ print(total_J - np.sum(J_list))
 # Jsc: 41.16
 # Voc: 0.751
 # FF: 86.5
+
+# 33.91
+# 0.777
+# 22.766
