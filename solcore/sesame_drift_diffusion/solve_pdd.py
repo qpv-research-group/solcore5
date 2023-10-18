@@ -2,7 +2,7 @@ from sesame import Builder, IVcurve, Analyzer
 import numpy as np
 from solcore.constants import q
 from solcore.light_source import LightSource
-from solcore.interpolate import interp1d
+from scipy.interpolate import interp1d
 from solcore.state import State
 
 from solcore.registries import (
@@ -148,7 +148,9 @@ def equilibrium():
 
 @register_iv_solver("sesame_PDD", reason_to_exclude=reason_to_exclude)
 def iv_sesame(junction, options):
+    print('hello')
 
+    # TODO: inclusion of shunt resistance
     if ~hasattr(junction, "sesame_sys"):
         process_structure(junction)
 
@@ -174,24 +176,37 @@ def iv_sesame(junction, options):
     voltages = options.voltages
 
     j, result = sesame.IVcurve(junction.sesame_sys, voltages)  # , verbose=False)
-    j = j * junction.sesame_sys.scaling.current
+    j = j * junction.sesame_sys.scaling.current * 1e4 # cm-2 -> m-2
+    print(result['v'])
 
-    Jsc = j[0]*1e4 # units?
+    # Jsc = j[0] # units?
+    junction.current = j
 
+    junction.iv = interp1d(
+        voltages,
+        j,
+        kind="linear",
+        bounds_error=False,
+        assume_sorted=True,
+        fill_value=(junction.current[0], junction.current[-1]),
+    )
+
+    junction.voltage = voltages
     # jsc = q*np.trapz(eqe*light_source.spectrum()[1], wls) # A/m2
 
-    zero_crossing = np.where(np.diff(np.sign(j)))[0][0]
-    j_above = j[zero_crossing]
-    j_below = j[zero_crossing + 1]
-
-    Voc = voltages[zero_crossing] + (voltages[zero_crossing + 1] - voltages[zero_crossing]) * j_above / (
-                j_above - j_below)
-
-    voltages_for_mpp = voltages * (np.abs(voltages) <= Voc)
-    Vmpp = voltages[np.nanargmax(np.abs(j * voltages_for_mpp))]
-    Jmpp = j[np.nanargmax(np.abs(j * voltages_for_mpp))] * 1e4
-
-    FF = Vmpp * Jmpp / (Jsc * Voc)
+    # this is all done externally, same for all junction types
+    # zero_crossing = np.where(np.diff(np.sign(j)))[0][0]
+    # j_above = j[zero_crossing]
+    # j_below = j[zero_crossing + 1]
+    #
+    # Voc = voltages[zero_crossing] + (voltages[zero_crossing + 1] - voltages[zero_crossing]) * j_above / (
+    #             j_above - j_below)
+    #
+    # voltages_for_mpp = voltages * (np.abs(voltages) <= Voc)
+    # Vmpp = voltages[np.nanargmax(np.abs(j * voltages_for_mpp))]
+    # Jmpp = j[np.nanargmax(np.abs(j * voltages_for_mpp))] * 1e4
+    #
+    # FF = Vmpp * Jmpp / (Jsc * Voc)
 
 
 def qe_sesame(junction, options):
@@ -205,11 +220,26 @@ def qe_sesame(junction, options):
 
     voltages = [0]
 
+    # profile_func = interp1d(bulk_positions_cm, 1e7 * Si_profile, kind='linear', bounds_error=False, fill_value=0)
+    profile_func = junction.absorbed
+
+    A = np.trapz(junction.absorbed, junction.mesh, axis=0)
+    print(A)
+    print(junction.layer_absorption)
+
+    def make_gfcn_fun(wl_index, flux):
+        def gcfn_fun(x, y):
+            return flux * profile_func(x/100)[wl_index]/100 # convert to cm-1 from m-1
+
+        return gcfn_fun
+
     for i1, wl in enumerate(wls):
 
         flux = 1e20
         print(wl)
-        junction.sesame_sys.generation(gfcn_fun(i1, flux))
+        junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
+        print(make_gfcn_fun(i1, flux)(0, 0))
+        print(make_gfcn_fun(i1, flux)(1e-6, 0))
 
         if i1 == 0:
             guess = None
@@ -219,14 +249,14 @@ def qe_sesame(junction, options):
 
         j, result = sesame.IVcurve(junction.sesame_sys, voltages, guess=guess)
 
-        eqe[i1] = j / (q * flux)
+        eqe[i1] = np.abs(j) / (q * flux)
+        print('j, q, flux', j, q, flux)
 
-    A = junction.layer_absorption
+    eqe = eqe * junction.sesame_sys.scaling.current
     iqe = eqe / A
 
     # convert dimensionless current to dimension-ful current
-    eqe = eqe * junction.sesame_sys.scaling.current
-    iqe = iqe * junction.sesame_sys.scaling.current
+    # iqe = iqe * junction.sesame_sys.scaling.current
 
     junction.iqe = interp1d(wls, iqe)
 
@@ -249,47 +279,3 @@ def qe_sesame(junction, options):
 
 
 
-from solcore import material, si
-from solcore.solar_cell import SolarCell, Junction, Layer
-from solcore.state import State
-from solcore.solar_cell_solver import solar_cell_solver
-from solcore.light_source import LightSource
-
-options = State()
-options.wavelength = np.linspace(280, 600, 20)*1e-9
-options.optics_method = 'TMM'
-options.light_iv = True
-options.light_source = LightSource(source_type="standard",
-                           version="AM1.5g", x=options.wavelength, output_units="photon_flux_per_m")
-options.voltages = np.linspace(0, 2, 100)
-
-T = 293
-
-add_args = {'relative_permittivity': 10, 'electron_minority_lifetime': 5e-6,
-            'hole_minority_lifetime': 5e-6,
-            'electron_auger_recombination': 1e-45,
-            'hole_auger_recombination': 1e-45}
-
-ARC = material('Si3N4')()
-window = material('AlGaAs')(T=T, Na=5e24, Al=0.8, **add_args)
-p_AlGaAs = material('AlGaAs')(T=T, Na=1e24, Al=0.4, **add_args)
-n_AlGaAs = material('AlGaAs')(T=T, Nd=8e22, Al=0.4, **add_args)
-bsf = material('AlGaAs')(T=T, Nd=2e24, Al=0.6, **add_args)
-
-junction = Junction([Layer(width=si('30nm'), material=window, role="Window"),
-                   Layer(width=si('150nm'), material=p_AlGaAs, role="Emitter"),
-                   Layer(width=si('1000nm'), material=n_AlGaAs, role="Base"),
-                   Layer(width=si('200nm'), material=bsf, role="BSF")], sn=1e6, sp=1e6, T=T, kind='PDD')
-
-widths = [layer.width for layer in junction]
-junction.mesh = np.linspace(0, np.sum(widths), 1000)
-
-solar_cell = SolarCell(
-    [Layer(60e-0, ARC), junction]
-)
-
-solar_cell_solver(solar_cell, 'optics', options)
-
-# qe_sesame(solar_cell[1], options)
-
-iv_sesame(solar_cell[1], options)

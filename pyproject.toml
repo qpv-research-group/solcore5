@@ -39,6 +39,7 @@ dependencies = [
     "pyyaml",
     "yabox",
     "joblib",
+    "sesame@git+https://github.com/phoebe-p/sesame.git"
 ]
 dynamic = ["version"]
 

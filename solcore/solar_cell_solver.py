@@ -169,7 +169,7 @@ def solve_iv(solar_cell, options):
         if solar_cell[j].kind == "PDD":
             PDD.iv_pdd(solar_cell[j], **options)
         elif solar_cell[j].kind == "sesame_PDD":
-            sesame_PDD.iv_sesame(solar_cell[j], **options)
+            sesame_PDD.iv_sesame(solar_cell[j], options)
         elif solar_cell[j].kind == "DA":
             ASC.iv_depletion(solar_cell[j], options)
         elif solar_cell[j].kind == "2D":
@@ -225,6 +225,8 @@ def solve_qe(solar_cell, options):
     for j in solar_cell.junction_indices:
         if solar_cell[j].kind == "PDD":
             PDD.qe_pdd(solar_cell[j], options)
+        elif solar_cell[j].kind == "sesame_PDD":
+            sesame_PDD.qe_sesame(solar_cell[j], options)
         elif solar_cell[j].kind == "DA":
             ASC.qe_depletion(solar_cell[j], options)
         elif solar_cell[j].kind == "2D":

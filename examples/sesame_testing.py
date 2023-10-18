@@ -214,7 +214,8 @@ for i1, wl in enumerate(wls):
     flux = 1e20
     print(wl)
     sys.generation(gfcn_fun_rt(i1, flux))
-
+    print(gfcn_fun_rt(i1, flux)(0, 0))
+    print(gfcn_fun_rt(i1, flux)(1e-6, 0))
     voltages = [0]
 
     if i1 == 0:
