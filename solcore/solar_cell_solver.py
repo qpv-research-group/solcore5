@@ -31,9 +31,9 @@ except AttributeError:
     PDD.pdd_options = {}
 
 default_options = State()
-pdd_options = PDD.pdd_options
-asc_options = ASC.db_options
-
+# pdd_options = PDD.pdd_options
+# asc_options = ASC.db_options
+# sesame_options = sesame_PDD.sesame_options
 
 def merge_dicts(*dict_args):
     """
@@ -72,7 +72,7 @@ default_options.optics_method = "BL"
 default_options.recalculate_absorption = False
 
 default_options = merge_dicts(
-    default_options, ASC.db_options, ASC.da_options, PDD.pdd_options, rcwa_options
+    default_options, ASC.db_options, ASC.da_options, PDD.pdd_options, rcwa_options,
 )
 
 

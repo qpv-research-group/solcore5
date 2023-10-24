@@ -103,8 +103,8 @@ def iv_multijunction(solar_cell, options):
         try:
             Isc = np.interp([0], VV, II)[0]
             Voc = np.interp([0], -II, VV)[0]
-            Pmpp = np.max(PP)
-            idx = np.argmax(PP)
+            Pmpp = np.nanmax(PP)
+            idx = np.nanargmax(PP)
             Vmpp = VV[idx]
             Impp = II[idx]
             FF = Pmpp / (Isc * Voc)
