@@ -11,7 +11,7 @@ def iv_multijunction(solar_cell, options):
     points. If photocurrent is not provided, the resultant IV characteristics are purely recombination currents,
     otherwise light IVs are returned.
 
-    In the end, the soalr_cell object is updated with an "iv" attribute containing a dictionary with:
+    In the end, the solar_cell object is updated with an "iv" attribute containing a dictionary with:
         "IV": (V, I) Calculated IV characteristics
         "junction IV": [(V junc 1, I junc 1), (V junc 2, I junc 2), ...]
         "Rseries IV": (V, I) Calculated IV characteristics of the series resistance

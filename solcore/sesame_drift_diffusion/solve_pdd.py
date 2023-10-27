@@ -26,21 +26,39 @@ except ImportError:
 
 def process_structure(junction, options):
 
-    # get material parameters from the junction and convert them to format required by Sesame (dictionary)
-    # convert from Solcore units (i.e. base SI units like m) to Sesame's units (cm, eV).
-    # Note that internally in sesame, and its outputs, many quantities are scaled/dimensionless.
+    """
+    Process the layers in the junction and convert it to a format which can be used by Sesame. This includes unit
+    conversions from Solcore base SI units to the units used by Sesame (eV, cm). This function also sets the mesh,
+    either from a user-supplied junction.mesh (in m) attribute, or by guessing an appropriate mesh depending on the
+    doping profile and layer thicknesses. It will also extract the doping profile, which can be supplied in
+    the following formats:
 
-    # acceptable formats would be:
-    # single material with a doping profile
-    # two materials (same or different underlying base material, i.e. homojunction or heterojunction) with different,
-    # constant doping profiles n and p-type
-    # two materials with a doping profile
-    # Should be able to set a doping profile for the whole junction OR per layer in the junction
+        - a constant value for each layer, set by the Nd or Na attribute of the material
+        - a doping profile for the whole junction, passed as a function which accepts a depth in the junction in m
+          and returns doping in m-3
+        - a doping profile for each layer, passed as a function which accepts a depth in the layer in m and returns
+          doping in m-3
+        - Combinations of the above
 
-    materials = []
-    layer_widths = []
-    doping_profile_functions = []
-    offset = 0
+    Note that since we can specify a doping profile for the whole junction, the Sesame solver can support a junction
+    which is made up of a single layer, unlike the depletion approximation and Fortran-based PDD solvers.
+
+    This function will add or update the following attributes in the Junction object:
+
+        - mesh: the mesh used by the Sesame solver, in m
+        - mesh_cm: the mesh used by the Sesame solver, in cm
+        - sesame_sys: a Sesame Builder object defining the junction in Sesame format, used to solve the IV and QE
+
+    :param junction: a Junction object
+    :param options: a State object containing options for the solver
+
+    """
+
+    materials = [] # list of dictionaries for Sesame
+    layer_widths = [] # layer widths in cm
+    doping_profile_functions = [] # list of functions which take an argument of depth in junction in m and
+    # return doping in cm-3
+    offset = 0 # offset relative to front of junction of the current layer in cm
 
     for layer in junction:
 
@@ -52,6 +70,7 @@ def process_structure(junction, options):
 
         layer_widths.append(layer.width*1e2) # m to cm
 
+        # this will always be set, even if the layer has a doping profile
         constant_doping = layer.material.Nd / 1e6 if layer.material.Nd > layer.material.Na else -layer.material.Na /1e6
 
         if hasattr(layer, "doping_profile"):
@@ -63,7 +82,6 @@ def process_structure(junction, options):
                                                      [constant_doping, constant_doping]))
             # to be consistent with functions passed by user, this should be a function which takes an argument in m
             # and returns doping in cm-3
-
 
         new_mat = {
             'Nc': layer.material.Nc * 1e-6, # effective density of states at CB edge (cm-3)
@@ -82,73 +100,59 @@ def process_structure(junction, options):
         }
 
         offset += layer.width*1e2
-        # Note: all of these can be functions of position as well as constants!
+        # Note: in Sesame, all of these can be functions of position as well as constants - but this is untested!
 
         materials.append(new_mat)
 
     # see if we can determine the junction depth:
 
-    edges = np.insert(np.cumsum(layer_widths), 0, 0)
+    edges = np.insert(np.cumsum(layer_widths), 0, 0) # locations of interfaces between layers
     edges[-1] = edges[-1] + 1e-10 # otherwise final point will not be assigned any values
 
     print('edges', edges)
 
     if hasattr(junction, "doping_profile"):
         junction_depth = 100*root(junction.doping_profile, np.sum(layer_widths) / (2*100)).x # in cm
+        # this is where doping crosses zero - not necessarily the junction depth, but not sure how best to determine
+        # this. Maybe want to find slope of doping profile and identify locations where it is steepest?
 
     else:
+        # identify where the doping profile changes sign for constant doping layers or individual doping profiles
+        # per layer
         doping_sign = [np.sign(doping_profile_functions[i1](edges[i1]+1e-9)) for i1 in range(len(edges) - 1)]
         junction_depth = edges[np.where(np.diff(doping_sign))[0] + 1]
 
     if not hasattr(junction, "mesh"):
-        print("set mesh")
+        # calculate appropriate mesh (hopefully) if not supplied as input in junction.mesh
         make_mesh(junction, layer_widths, options, junction_depth)
 
     else:
+        # user-provided mesh
         junction.mesh_cm = junction.mesh*1e2 # m to cm
-
-    print('junction depth', junction_depth)
-    print('mesh points', len(junction.mesh))
 
     if hasattr(junction, "doping_profile"):
         doping_profile_x = junction.doping_profile(junction.mesh) / 1e6 # in cm-3
 
     else:
-
         doping_profile_x = np.zeros(len(junction.mesh_cm))
         for i1, doping_profile_fn in enumerate(doping_profile_functions):
             doping_profile_x[np.all((junction.mesh_cm >= edges[i1], junction.mesh_cm < edges[i1 + 1]), axis=0)] = (
                 doping_profile_fn(junction.mesh[np.all((junction.mesh_cm >= edges[i1], junction.mesh_cm < edges[i1 + 1]), axis=0)]))
 
-        # doping_profile = np.vectorize(doping_profile)
-    # junction.mesh_cm = junction.mesh*1e2 # m to cm
-
+    # Make Sesame Builder object for simulations
     junction.sesame_sys = Builder(junction.mesh_cm) # Sesame system
 
     junction.sesame_sys.rho = doping_profile_x / junction.sesame_sys.scaling.density
-
-    # import matplotlib.pyplot as plt
-    # plt.figure()
-    # plt.plot(junction.mesh_cm, doping_profile_x)
-    # plt.show()
-    # print(doping_profile_x)
 
     for i1 in range(len(junction)):
         junction.sesame_sys.add_material(materials[i1],
                                          lambda x: np.all((x >= edges[i1], x < edges[i1 + 1]), axis=0))
 
-    # if constant_doping:
-    #     doping_profile = np.zeros_like(junction.mesh_cm)
-    #     for i1, dop in enumerate(doping_list):
-    #         doping_profile[np.all((junction.mesh_cm >= edges[i1], junction.mesh_cm <= edges[i1 + 1]), axis=0)] = dop
-    #
-    # else:
-    #     doping_profile = junction.doping_profile
 
     junction.sesame_sys.contact_type('Ohmic', 'Ohmic')
     # should also be able to choose other options, since Sesame can handle them
 
-    # lower than 1e-6: diverges
+    # get surface recombination velocities
     junction.sesame_sys.contact_S(*get_srv(junction))
 
 
