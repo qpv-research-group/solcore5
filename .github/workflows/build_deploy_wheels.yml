@@ -50,12 +50,12 @@ jobs:
           echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
 
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.11.4
+        run: python -m pip install cibuildwheel==2.16.2
 
       - name: Build Solcore
         if: >-
           ( ! contains(matrix.buildplat[2], 'arm64' ) )
-        uses: pypa/cibuildwheel@v2.11.4
+        uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
           CIBW_ARCHS: ${{ matrix.buildplat[2] }}
@@ -71,7 +71,7 @@ jobs:
 
       - name: Cross-build Solcore for arm64
         if: ${{ (matrix.python[0] != 'cp37') && ( contains(matrix.buildplat[2], 'arm64') )}} # image not present for python3.7
-        uses: pypa/cibuildwheel@v2.11.4
+        uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
           CIBW_ARCHS: ${{ matrix.buildplat[2] }}
