@@ -61,7 +61,7 @@ jobs:
           CIBW_ARCHS: ${{ matrix.buildplat[2] }}
           CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
           CIBW_BEFORE_BUILD_MACOS: brew reinstall gfortran
-          CIBW_BEFORE_BUILD_LINUX: pip install numpy -C-Dallow-noblas=true
+          CIBW_BEFORE_BUILD_LINUX: python -m pip install numpy --config-settings=setup-args="-Dallow-noblas=true"
 
       - name: Set extra env for arm64
         if: >-
