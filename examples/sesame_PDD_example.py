@@ -184,9 +184,12 @@ options.position = np.concatenate((np.linspace(0, front_width, 100), front_width
                                   np.linspace(front_width + d_bulk,
                                               front_width + d_bulk + back_width, 100)))
 
+options.minimum_spacing = 5e-9
+
 Si_junction = [Junction([Layer(d_bulk, Si_pn)],
                         doping_profile=doping_profile_func, kind='sesame_PDD',
-                        mesh=x/100)]
+                        # mesh=x/100
+                        )]
 
 Si_cell = SolarCell(front_materials +
                      Si_junction +
@@ -234,6 +237,69 @@ plt.show()
 # plt.ylim(1e-3,1e8)
 # plt.show()
 
-
-x = np.linspace(0, d_bulk, int(1e7))
-int_A = np.trapz(Si_cell[Si_ind].absorbed(x), x, axis=0)
+#
+# x = np.linspace(0, d_bulk, int(1e7))
+# int_A = np.trapz(Si_cell[Si_ind].absorbed(x), x, axis=0)
+# def doping_profile_test(x):
+#
+#     L = 8000e-9
+#
+#     doping_profile = - 1e20 * erfc(x / 150e-9)  # characteristic depth of 150 nm
+#
+#     doping_profile_2 = - 5e19 * erfc(x/400e-9) # characteristic depth of 150 nm
+#     # doping_profile = 0
+#     # doping_profile_2 = 0
+#     doping_profile_rear = 5e19 * erfc(((L/2)- x)/200e-9) # characteristic depth of 200 nm
+#
+#     doping_profile_3 = 1e20 * erfc((L - x) / 150e-9)  # characteristic depth of 150 nm
+#
+#     return (doping_profile + doping_profile_2 + doping_profile_3 +
+#             doping_profile_rear + 1e16)
+#
+# x_test = np.linspace(0, 8000, 1000)*1e-9
+#
+# doping_test = doping_profile_test(x_test)
+#
+# diff_rho = np.abs(np.gradient(doping_test, x_test))
+#
+#
+#
+#
+# doping_change = np.where(diff_rho/np.max(diff_rho) > 1e-3)[0]
+#
+# # identify continuous stretches of high doping change, and where there are gaps:
+#
+# change_point = np.where(np.diff(doping_change) != 1)[0]
+#
+# last_points = doping_change[change_point]
+# first_points  = doping_change[change_point + 1]
+#
+# first_points = np.insert(first_points, 0, doping_change[0])
+# last_points = np.append(last_points, doping_change[-1])
+#
+# first_x = x_test[first_points]
+# last_x = x_test[last_points]
+#
+# plt.figure()
+# plt.plot(x_test*1e9, doping_test/np.max(doping_test), 'o-')
+# plt.plot(x_test*1e9, diff_rho/np.max(diff_rho), 'o--')
+# plt.plot(x_test[first_points]*1e9, [0.5]*len(first_points), 'xr')
+# plt.plot(x_test[last_points]*1e9, [0.5]*len(last_points), 'xk')
+# plt.show()
+#
+# current_mesh = x_test
+#
+# minimum_spacing = 1e-9
+#
+# for i1 in range(len(first_points)):
+#     # want to make mesh denser where there are large changes in doping
+#
+#     mesh_above = current_mesh[current_mesh < first_x[i1]]
+#     mesh_below = current_mesh[current_mesh >= last_x[i1]]
+#     mesh_dense = np.arange(first_x[i1], last_x[i1] - 1e-12, minimum_spacing)  # last point not included
+#
+#     current_mesh = np.unique(np.concatenate((mesh_above, mesh_dense, mesh_below)))
+#
+# plt.figure()
+# plt.plot(current_mesh*1e9)
+# plt.show()

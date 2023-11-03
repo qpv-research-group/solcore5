@@ -2,7 +2,6 @@ from sesame import Builder, IVcurve, Analyzer
 import numpy as np
 from scipy.optimize import root
 from solcore.constants import q
-from solcore.light_source import LightSource
 from scipy.interpolate import interp1d
 from solcore.state import State
 
@@ -19,10 +18,6 @@ except ImportError:
     reason_to_exclude = (
         "Sesame was not installed."
     )
-
-# sesame_options = State()
-# sesame_options.sesame_minimum_spacing = 1e-9 # in m: 1 nm
-# sesame_options.sesame_maximum_spacing = 1e-7 # in m: 100 nm
 
 def process_structure(junction, options):
 
@@ -83,6 +78,18 @@ def process_structure(junction, options):
             # to be consistent with functions passed by user, this should be a function which takes an argument in m
             # and returns doping in cm-3
 
+        try:
+            auger_electron = layer.material.electron_auger_recombination * 1e12
+
+        except:
+            auger_electron = 0
+
+        try:
+            auger_hole = layer.material.hole_auger_recombination * 1e12
+
+        except:
+            auger_hole = 0
+
         new_mat = {
             'Nc': layer.material.Nc * 1e-6, # effective density of states at CB edge (cm-3)
             'Nv': layer.material.Nv * 1e-6, # effective density of states at VB edge (cm-3)
@@ -95,8 +102,8 @@ def process_structure(junction, options):
             'tau_h': layer.material.hole_minority_lifetime, # hole bulk lifetime (s)
             'Et': bulk_recombination_energy, # energy level of bulk recombination centres (eV)
             'B': layer.material.radiative_recombination*1e6, # radiative recombination constant (cm3/s)
-            'Cn': layer.material.electron_auger_recombination*1e12, # Auger recombination constant for electrons (cm6/s)
-            'Cp': layer.material.hole_auger_recombination*1e12, # Auger recombination constant for holes (cm6/s)
+            'Cn': auger_electron, # Auger recombination constant for electrons (cm6/s)
+            'Cp': auger_hole, # Auger recombination constant for holes (cm6/s)
         }
 
         offset += layer.width*1e2
@@ -125,10 +132,12 @@ def process_structure(junction, options):
     if not hasattr(junction, "mesh"):
         # calculate appropriate mesh (hopefully) if not supplied as input in junction.mesh
         make_mesh(junction, layer_widths, options, junction_depth)
+        user_mesh = False
 
     else:
         # user-provided mesh
         junction.mesh_cm = junction.mesh*1e2 # m to cm
+        user_mesh = True
 
     if hasattr(junction, "doping_profile"):
         doping_profile_x = junction.doping_profile(junction.mesh) / 1e6 # in cm-3
@@ -140,9 +149,27 @@ def process_structure(junction, options):
                 doping_profile_fn(junction.mesh[np.all((junction.mesh_cm >= edges[i1], junction.mesh_cm < edges[i1 + 1]), axis=0)]))
 
     # Make Sesame Builder object for simulations
-    junction.sesame_sys = Builder(junction.mesh_cm) # Sesame system
+    junction.sesame_sys = Builder(junction.mesh_cm, T=options.T) # Sesame system
 
     junction.sesame_sys.rho = doping_profile_x / junction.sesame_sys.scaling.density
+
+    if not user_mesh:
+        update_mesh(junction, layer_widths, options)
+
+        if hasattr(junction, "doping_profile"):
+            doping_profile_x = junction.doping_profile(junction.mesh) / 1e6  # in cm-3
+
+        else:
+            doping_profile_x = np.zeros(len(junction.mesh_cm))
+            for i1, doping_profile_fn in enumerate(doping_profile_functions):
+                doping_profile_x[np.all((junction.mesh_cm >= edges[i1], junction.mesh_cm < edges[i1 + 1]), axis=0)] = (
+                    doping_profile_fn(junction.mesh[
+                                          np.all((junction.mesh_cm >= edges[i1], junction.mesh_cm < edges[i1 + 1]),
+                                                 axis=0)]))
+
+        junction.sesame_sys = Builder(junction.mesh_cm, T=options.T)  # Sesame system
+
+        junction.sesame_sys.rho = doping_profile_x / junction.sesame_sys.scaling.density
 
     for i1 in range(len(junction)):
         junction.sesame_sys.add_material(materials[i1],
@@ -154,6 +181,7 @@ def process_structure(junction, options):
 
     # get surface recombination velocities
     junction.sesame_sys.contact_S(*get_srv(junction))
+    print(*get_srv(junction))
 
 
 def make_mesh(junction, layer_width, options, junction_depth):
@@ -187,7 +215,7 @@ def make_mesh(junction, layer_width, options, junction_depth):
     # identify location of junction. doping_profile is a function
 
     else:
-        edges = np.insert(np.cumsum(layer_width), 0, 0)
+        # edges = np.insert(np.cumsum(layer_width), 0, 0)
 
         front_spacing = np.min([minimum_spacing, 0.5e-7])
 
@@ -248,80 +276,87 @@ def make_mesh(junction, layer_width, options, junction_depth):
                 else:
                     mesh = np.unique(np.concatenate((front, mesh_dense_front, mesh_bulk, mesh_dense)))
 
-        # identify other points of interest and make mesh dense around them
-        #
-        # for i1, layer_edge in enumerate(edges[1:]):
-        #     start_dense = layer_edge - 0.1*layer_width[i1]
-        #
-        #     if i1 < len(layer_width) - 1:
-        #         end_dense = layer_edge + 0.1*layer_width[i1+1]
-        #
-        #     else:
-        #         end_dense = total_width
-        #
-        #     mesh_above = mesh[mesh <= start_dense]
-        #     mesh_dense = np.arange(start_dense, end_dense, minimum_spacing)
-        #     mesh_below = mesh[mesh >= end_dense]
-        #     mesh = np.unique(np.concatenate((mesh_above, mesh_dense, mesh_below)))
-        #
-        #     # plt.figure()
-        #     # plt.plot(mesh)
-        #     # for layer_edge in np.cumsum(layer_width):
-        #     #     plt.axhline(layer_edge, color='k')
-        #     # plt.show()
-        #
-        # if len(junction_depth) > 1:
-        #     for junc_depth in junction_depth[1:]:
-        #
-        #         start_dense = junc_depth - 0.1 * total_width
-        #         start_dense = 0 if start_dense < 0 else start_dense
-        #
-        #         end_dense = junc_depth + 0.1*total_width
-        #         end_dense = total_width if end_dense > total_width else end_dense
-        #
-        #         mesh_above = mesh[mesh <= start_dense]
-        #         mesh_dense = np.arange(start_dense, end_dense, minimum_spacing)
-        #         mesh_below = mesh[mesh >= end_dense]
-        #         mesh = np.unique(np.concatenate((mesh_above, mesh_dense, mesh_below)))
-        #
-
     junction.mesh_cm = mesh
+    junction.mesh = junction.mesh_cm*1e-2 # cm to m
+
+def update_mesh(junction, layer_width, options):
+
+    total_width = np.sum(layer_width)
+
+    # always do 1 nm spacing near front surface?
+
+    if "minimum_spacing" in options.keys():
+        minimum_spacing = options.minimum_spacing*1e2
+
+    else:
+        minimum_spacing = total_width / 1e4 # maximum of 10000 points
+
+    current_mesh = junction.mesh_cm
+
+    diff_rho = np.abs(np.gradient(junction.sesame_sys.rho, current_mesh))
+
+    doping_change = np.where(diff_rho / np.max(diff_rho) > 1e-4)[0]
+
+    # identify continuous stretches of high doping change, and where there are gaps:
+
+    change_point = np.where(np.diff(doping_change) != 1)[0]
+
+    last_points = doping_change[change_point]
+    first_points = doping_change[change_point + 1]
+
+    first_points = np.insert(first_points, 0, doping_change[0])
+    last_points = np.append(last_points, doping_change[-1])
+
+    first_x = current_mesh[first_points]
+    last_x = current_mesh[last_points]
+
+    for i1 in range(len(first_points)):
+        # want to make mesh denser where there are large changes in doping
+        print('denser mesh between', first_x[i1], last_x[i1])
+
+        mesh_above = current_mesh[current_mesh < first_x[i1]]
+        mesh_below = current_mesh[current_mesh >= last_x[i1]]
+        mesh_dense = np.arange(first_x[i1], last_x[i1]-1e-12, minimum_spacing) # last point not included
+
+        current_mesh = np.unique(np.concatenate((mesh_above, mesh_dense, mesh_below)))
+
+    junction.mesh_cm = current_mesh
     junction.mesh = junction.mesh_cm*1e-2 # cm to m
 
 def get_srv(junction):
     # Define the surface recombination velocities for electrons and holes [cm/s]
     if hasattr(junction, "sn_front"):
-        Sn_left = junction.sn_front / 100
+        Sn_left = junction.sn_front * 100
 
     elif hasattr(junction, "sn"):
-        Sn_left = junction.sn / 100
+        Sn_left = junction.sn * 100
 
     else:
         Sn_left = 1e4 # is this the same as the Fortran PDD?
 
     if hasattr(junction, "sp_front"):
-        Sp_left = junction.sp_front / 100
+        Sp_left = junction.sp_front * 100
 
     elif hasattr(junction, "sp"):
-        Sp_left = junction.sp / 100
+        Sp_left = junction.sp * 100
 
     else:
         Sp_left = 1e4
 
     if hasattr(junction, "sn_rear"):
-        Sn_right = junction.sn_front / 100
+        Sn_right = junction.sn_rear * 100
 
     elif hasattr(junction, "sn"):
-        Sn_right = junction.sn / 100
+        Sn_right = junction.sn * 100
 
     else:
         Sn_right = 1e4 # is this the same as the Fortran PDD?
 
     if hasattr(junction, "sp_rear"):
-        Sp_right = junction.sp_front / 100
+        Sp_right = junction.sp_rear * 100
 
     elif hasattr(junction, "sp"):
-        Sp_right = junction.sp / 100
+        Sp_right = junction.sp * 100
 
     else:
         Sp_right = 1e4
@@ -336,13 +371,13 @@ def equilibrium():
 def iv_sesame(junction, options):
 
     # TODO: inclusion of shunt resistance
-    if ~hasattr(junction, "sesame_sys"):
+    if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
 
     # gen_wl = profile_func
 
-
-    if options.light_iv:
+    if options.light_iv and np.all(junction.sesame_sys.g == 0):
+        print('set generation profile for light IV')
 
         gen_wl = junction.absorbed(junction.mesh) / 100 # m-1 -> cm-1
         wls = options.wavelength
@@ -395,7 +430,7 @@ def iv_sesame(junction, options):
 
 def qe_sesame(junction, options):
 
-    if ~hasattr(junction, "sesame_sys"):
+    if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
 
     wls = options.wavelength
@@ -421,7 +456,6 @@ def qe_sesame(junction, options):
     for i1, wl in enumerate(wls):
 
         flux = 1e20
-        print('mesh shape', junction.mesh_cm.shape)
 
         junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
         # print(make_gfcn_fun(i1, flux)(junction.mesh_cm, 0).shape)
@@ -444,11 +478,11 @@ def qe_sesame(junction, options):
     iqe = eqe / A
 
 
-    plt.figure()
-    plt.plot(wls, A)
-    plt.plot(wls, junction.layer_absorption, '--')
-    plt.plot(wls, eqe)
-    plt.show()
+    # plt.figure()
+    # plt.plot(wls, A)
+    # plt.plot(wls, junction.layer_absorption, '--')
+    # plt.plot(wls, eqe)
+    # plt.show()
 
     # convert dimensionless current to dimension-ful current
     # iqe = iqe * junction.sesame_sys.scaling.current

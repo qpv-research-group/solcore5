@@ -344,6 +344,18 @@ class BaseMaterial:
             return 1.0 / self.ni ** 2 * 2 * pi / (h ** 3 * c ** 2) * quad(inter, 0, upper)[0]
         if attrname == "permittivity":
             return self.relative_permittivity * vacuum_permittivity
+        # if attrname == "electron_diffusion_length":
+        #     return np.sqrt(kb * self.T * self.electron_mobility * self.electron_minority_lifetime / q)
+        # if attrname == "hole_diffusion_length":
+        #     return np.sqrt(kb * self.T * self.hole_mobility * self.hole_minority_lifetime / q)
+        # if attrname == "electron_mobility":
+        #     return q * self.electron_diffusion_length**2 / (kb * self.T * self.electron_minority_lifetime)
+        # if attrname == "hole_mobility":
+        #     return q * self.hole_diffusion_length**2 / (kb * self.T * self.hole_minority_lifetime)
+        # if attrname == "electron_minority_lifetime":
+        #     return q * self.electron_diffusion_length**2 / (kb * self.T * self.electron_mobility)
+        # if attrname == "hole_minority_lifetime":
+        #     return q * self.hole_diffusion_length**2 / (kb * self.T * self.hole_mobility)
 
         kwargs = {element: getattr(self, element) for element in self.composition}
         kwargs["T"] = self.T
