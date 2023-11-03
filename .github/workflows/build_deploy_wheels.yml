@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - update_build_312
     tags:
       - "**"
 
@@ -28,7 +29,8 @@ jobs:
           - [ macos-11, macosx, arm64] # cross compiled
           - [ windows-2019, win, AMD64 ]
 
-        python: [[ "cp37", "3.7" ], [ "cp38", "3.8" ], [ "cp39", "3.9" ], [ "cp310", "3.10" ], [ "cp311", "3.11" ]]
+        python: [[ "cp37", "3.7" ], [ "cp38", "3.8" ], [ "cp39", "3.9" ],
+                 [ "cp310", "3.10" ], [ "cp311", "3.11" ], ["cp312", "3.12"]]
 
     name: Build wheel for ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }} ${{ matrix.buildplat[2] }}
 
