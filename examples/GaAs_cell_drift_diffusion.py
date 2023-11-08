@@ -61,7 +61,8 @@ solar_cell = SolarCell(
 
 solar_cell_sesame = SolarCell(
     ARC_layers + [Junction(junction_layers, kind='sesame_PDD', sn=1e6, sp=1e6,
-                           mesh=mesh)],
+                           # mesh=mesh
+                           )],
         substrate=GaAs_substrate)
 
 solar_cell_optics = SolarCell(
@@ -81,6 +82,7 @@ absorption_per_layer = np.array([layer.layer_absorption for layer in solar_cell_
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
 ax1.plot(solar_cell.iv['IV'][0], solar_cell.iv['IV'][1]/10, label='IV')
+ax1.plot(options.voltages, solar_cell[2].iv(options.voltages)/10, label='IV internal')
 
 ax2.stackplot(options.wavelength*1e9, 100*absorption_per_layer[::-1], alpha=0.4)
 ax2.plot(options.wavelength*1e9, 100*solar_cell[2].eqe(options.wavelength), '-k')
@@ -100,6 +102,7 @@ plt.show()
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
 ax1.plot(solar_cell_sesame.iv['IV'][0], solar_cell_sesame.iv['IV'][1]/10, label='IV')
+ax1.plot(options.voltages, solar_cell_sesame[2].iv(options.voltages)/10, label='IV internal')
 
 ax2.stackplot(options.wavelength*1e9, 100*absorption_per_layer[::-1], alpha=0.4)
 ax2.plot(options.wavelength*1e9, 100*solar_cell_sesame[2].eqe(options.wavelength), '-k')

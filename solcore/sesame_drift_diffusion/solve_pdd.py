@@ -370,6 +370,7 @@ def equilibrium():
 @register_iv_solver("sesame_PDD", reason_to_exclude=reason_to_exclude)
 def iv_sesame(junction, options):
 
+
     # TODO: inclusion of shunt resistance
     if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
@@ -393,40 +394,106 @@ def iv_sesame(junction, options):
     # equilibrium solution:
     # j0, result0 = sesame.IVcurve(junction.sesame_sys, [0])
 
-    voltages = options.voltages
+    voltages = options.internal_voltages
 
-    j, result = sesame.IVcurve(junction.sesame_sys, voltages)  # , verbose=False)
+    # voltages need to go from 0 (or close) to highest applied +ve or -ve voltage. Split if necessary.
+
+    if junction.sesame_sys.rho[junction.sesame_sys.nx-1] < 0:
+        # this is necessary because Sesame will internally flip the sign for an n-p junction
+        voltages_for_solve = -voltages
+
+    else:
+        voltages_for_solve = voltages
+
+    # split +ve and -ve voltages if necessary:
+    if np.any(voltages_for_solve < 0):
+        if np.any(voltages_for_solve > 0):
+            negative_ind = np.where(voltages_for_solve <= 0)[0]
+            positive_ind = np.where(voltages_for_solve >= 0)[0]
+
+            negative_voltages = voltages_for_solve[negative_ind]
+            positive_voltages = voltages_for_solve[positive_ind]
+
+            negative_voltages_order = np.argsort(negative_voltages)[::-1]
+            positive_voltages_order = np.argsort(positive_voltages)
+
+            negative_voltages = negative_voltages[negative_voltages_order]
+            positive_voltages = positive_voltages[positive_voltages_order]
+
+            j_positive, result_positive = sesame.IVcurve(junction.sesame_sys, positive_voltages)
+            j_negative, result_negative = sesame.IVcurve(junction.sesame_sys, negative_voltages)
+
+            # j_positive = j_positive[positive_voltages_order]
+            # j_negative = j_negative[negative_voltages_order]
+            j_negative = j_negative[::-1]
+
+            result_positive = {key: result_positive[key][positive_voltages_order, :] for key in result_positive.keys()}
+            result_negative = {key: result_negative[key][negative_voltages_order, :] for key in result_negative.keys()}
+
+            if np.any(voltages_for_solve == 0):
+
+                # V = 0 would have been included in both the +ve and -ve voltages, so
+                # exclude it from the negative voltage results when concatenating
+
+                j = np.concatenate((j_negative[:-1], j_positive))
+                result = {key: np.concatenate((result_negative[key][:-1], result_positive[key])) for key in
+                          result_positive.keys()}
+                final_voltages = np.concatenate((negative_voltages[:-1], positive_voltages))
+
+
+            else:
+
+                j = np.concatenate((j_negative, j_positive))
+                result = {key: np.concatenate((result_negative[key], result_positive[key])) for key in result_positive.keys()}
+                final_voltages = np.concatenate((negative_voltages, positive_voltages))
+
+            # this results in j and result in order of increasing values for voltages_for_solve.
+
+
+    else:
+        voltage_order = np.argsort(voltages_for_solve)
+
+        final_voltages = voltages_for_solve[voltage_order]
+
+    # print(voltages_for_solve)
+    # want to include V = 0, and always go from 0 to highest applied potential (positive or negative).
+
+        j, result = sesame.IVcurve(junction.sesame_sys, final_voltages)  # , verbose=False)
+
+    # j = j[voltage_order]
+    # result = {key: result[key][:, voltage_order] for key in result.keys()}
+
+    # final_voltages are the voltages corresponding to the entries in j and result, USING
+    # Sesame's sign convention. So if the voltage sign was flipped above, need to flip it back
+    # for Solcore
+
+    if junction.sesame_sys.rho[junction.sesame_sys.nx-1] < 0:
+        print('flipping back')
+        result_voltage = -final_voltages[::-1]
+        j = j[::-1]
+        result = {key: result[key][::-1, :] for key in result.keys()}
+
+    else:
+        result_voltage = final_voltages
+
     j = j * junction.sesame_sys.scaling.current * 1e4 # cm-2 -> m-2
-
+    print('j', j)
+    print('voltages', result_voltage)
     # Jsc = j[0] # units?
     junction.current = j
 
+    # current_increasing = j[voltage_increasing]
+
     junction.iv = interp1d(
-        voltages,
-        j,
+        result_voltage,
+        j,#_increasing,
         kind="linear",
         bounds_error=False,
         assume_sorted=True,
-        fill_value=(junction.current[0], junction.current[-1]),
+        fill_value=(j[0], j[-1]),
     )
 
-    junction.voltage = voltages
-    # jsc = q*np.trapz(eqe*light_source.spectrum()[1], wls) # A/m2
-
-    # this is all done externally, same for all junction types
-    # zero_crossing = np.where(np.diff(np.sign(j)))[0][0]
-    # j_above = j[zero_crossing]
-    # j_below = j[zero_crossing + 1]
-    #
-    # Voc = voltages[zero_crossing] + (voltages[zero_crossing + 1] - voltages[zero_crossing]) * j_above / (
-    #             j_above - j_below)
-    #
-    # voltages_for_mpp = voltages * (np.abs(voltages) <= Voc)
-    # Vmpp = voltages[np.nanargmax(np.abs(j * voltages_for_mpp))]
-    # Jmpp = j[np.nanargmax(np.abs(j * voltages_for_mpp))] * 1e4
-    #
-    # FF = Vmpp * Jmpp / (Jsc * Voc)
-
+    junction.voltage = result_voltage
 
 def qe_sesame(junction, options):
 
