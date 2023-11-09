@@ -326,22 +326,31 @@ class BaseMaterial:
             except:
                 return calculate_mobility(self.material_string, True, self.Na, self.main_fraction)
         if attrname == "Nc":
+            try:
+                return ParameterSystem().get_parameter(self.material_string, attrname)
             # return 2 * (2 * pi * self.eff_mass_electron_Gamma * m0 * kb * self.T / h ** 2) ** 1.5
             # Changed by Diego 22/10/18: some materials dont have _Gamma but all have the normal electron effective mass
-            return 2 * (2 * pi * self.eff_mass_electron * m0 * kb * self.T / h ** 2) ** 1.5
+            except:
+                return 2 * (2 * pi * self.eff_mass_electron * m0 * kb * self.T / h ** 2) ** 1.5
         if attrname == "Nv":
+            try:
+                return ParameterSystem().get_parameter(self.material_string, attrname)
+            except:
             # Strictly speaking, this is valid only for III-V, zinc-blend semiconductors
-            mhh = self.eff_mass_hh_z
-            mlh = self.eff_mass_lh_z
-            Nvhh = 2 * (2 * pi * mhh * m0 * kb * self.T / h ** 2) ** 1.5
-            Nvlh = 2 * (2 * pi * mlh * m0 * kb * self.T / h ** 2) ** 1.5
-            return Nvhh + Nvlh
+                mhh = self.eff_mass_hh_z
+                mlh = self.eff_mass_lh_z
+                Nvhh = 2 * (2 * pi * mhh * m0 * kb * self.T / h ** 2) ** 1.5
+                Nvlh = 2 * (2 * pi * mlh * m0 * kb * self.T / h ** 2) ** 1.5
+                return Nvhh + Nvlh
         if attrname == "ni":
             return np.sqrt(self.Nc * self.Nv * np.exp(-self.band_gap / (kb * self.T)))
         if attrname == "radiative_recombination":
-            inter = lambda E: self.n(E) ** 2 * self.alphaE(E) * np.exp(-E / (kb * self.T)) * E ** 2
-            upper = self.band_gap + 10 * kb * self.T
-            return 1.0 / self.ni ** 2 * 2 * pi / (h ** 3 * c ** 2) * quad(inter, 0, upper)[0]
+            try:
+                return ParameterSystem().get_parameter(self.material_string, attrname)
+            except:
+                inter = lambda E: self.n(E) ** 2 * self.alphaE(E) * np.exp(-E / (kb * self.T)) * E ** 2
+                upper = self.band_gap + 10 * kb * self.T
+                return 1.0 / self.ni ** 2 * 2 * pi / (h ** 3 * c ** 2) * quad(inter, 0, upper)[0]
         if attrname == "permittivity":
             return self.relative_permittivity * vacuum_permittivity
         if attrname == "electron_diffusion_length":

@@ -25,6 +25,8 @@ electron_affinity=4.0 eV
 electron_auger_recombination=1e-42
 hole_auger_recombination=1e-42
 radiative_recombination=6.4e-20
+Nc=1e25
+Nv=5e24
 
 [Si]
 lattice_constant=5.431 Angstrom
@@ -53,3 +55,5 @@ electron_affinity=4.05 eV
 electron_auger_recombination=1.1e-42
 hole_auger_recombination=3e-43
 radiative_recombination=1.1e-20
+Nc=3e25
+Nv=1e25
