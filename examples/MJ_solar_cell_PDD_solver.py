@@ -1,94 +1,137 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-from solcore.solar_cell import SolarCell, default_GaAs
-from solcore.structure import Layer, Junction
-from solcore import si
-from solcore import material
-from solcore.light_source import LightSource
+from solcore import siUnits, material, si
+from solcore.solar_cell import SolarCell
+from solcore.structure import Junction, Layer
 from solcore.solar_cell_solver import solar_cell_solver
+from solcore.light_source import LightSource
 
-# TODO The purpose of this example needs to be clarified. It is messy
+# Define materials for the anti-reflection coating:
+MgF2 = material("MgF2")()
+ZnS = material("ZnScub")()
 
-T = 298
+ARC_layers = [Layer(si("100nm"), material=MgF2),
+              Layer(si("50nm"), material=ZnS)]
 
-substrate = material('GaAs')(T=T)
+# TOP CELL - InGaP
+# Now we build the top cell, which requires the n and p sides of GaInP and a window
+# layer. We also add some extra parameters needed for the calculation using the
+# depletion approximation: the minority carriers diffusion lengths and the doping.
+
+AlInP = material("AlInP")
+InGaP = material("GaInP")
+window_material = AlInP(Al=0.52, Nd=siUnits(2e18, "cm-3"), relative_permittivity=9)
+
+top_cell_n_material = InGaP(In=0.49, Nd=siUnits(2e18, "cm-3"))
+top_cell_p_material = InGaP(In=0.49, Na=siUnits(1e17, "cm-3"))
+
+# For convenience we will set the carrier transport properties to default values for
+# all the materials in one place. To do that we add the materials to a list called
+# all_materials:
+
+# MID CELL  - GaAs
+GaAs = material("GaAs")
+
+mid_cell_n_material = GaAs(In=0.01, Nd=siUnits(3e18, "cm-3"))
+mid_cell_p_material = GaAs(In=0.01, Na=siUnits(1e17, "cm-3"))
+
+# BOTTOM CELL - Ge
+Ge = material("Ge")
+
+bot_cell_n_material = Ge(Nd=siUnits(2e18, "cm-3"))
+bot_cell_p_material = Ge(Na=siUnits(1e17, "cm-3"))
 
 
-def AlGaAs(T):
-    # We create the other materials we need for the device
-    window = material('AlGaAs')(T=T, Na=5e24, Al=0.8)
-    p_AlGaAs = material('AlGaAs')(T=T, Na=1e24, Al=0.4)
-    n_AlGaAs = material('AlGaAs')(T=T, Nd=8e22, Al=0.4)
-    bsf = material('AlGaAs')(T=T, Nd=2e24, Al=0.6)
+# Now that the layers are configured, we can now assemble the triple junction solar
+# cell. Note that we also specify a metal shading of 2% and a cell area of $1cm^{2}$.
+# SolCore calculates the EQE for all three junctions and light-IV showing the relative
+# contribution of each sub-cell. We set "kind = 'DA'" to use the depletion
+# approximation.
 
-    output = Junction([Layer(width=si('30nm'), material=window, role="Window"),
-                       Layer(width=si('150nm'), material=p_AlGaAs, role="Emitter"),
-                       Layer(width=si('1000nm'), material=n_AlGaAs, role="Base"),
-                       Layer(width=si('200nm'), material=bsf, role="BSF")], sn=1e6, sp=1e6, T=T, kind='PDD')
+solar_cell = SolarCell(
+        ARC_layers +
+        [
+        Junction([
+            # Layer(si("25nm"), material=window_material, role='window'),
+                  Layer(si("100nm"), material=top_cell_n_material, role='emitter'),
+                  Layer(si("400nm"), material=top_cell_p_material, role='base'),
+                  ], sn=1, sp=1, kind='PDD'),
+        Junction([Layer(si("200nm"), material=mid_cell_n_material, role='emitter'),
+                  Layer(si("3000nm"), material=mid_cell_p_material, role='base'),
+                  ], sn=1, sp=1, kind='PDD'),
+        Junction([Layer(si("400nm"), material=bot_cell_n_material, role='emitter'),
+                  Layer(si("100um"), material=bot_cell_p_material, role='base'),
+                  ], sn=1, sp=1, kind='PDD')
+            ],
+        shading=0.02, cell_area=1 * 1 / 1e4)
 
-    return output
+# Choose wavelength range (in m):
+wl = np.linspace(280, 1850, 700) * 1e-9
 
+# Calculate the EQE for the solar cell:
+# solar_cell_solver(solar_cell, 'qe', user_options={'wavelength': wl,
+#                                                   # 'da_mode': 'bvp',
+#                                                   'optics_method': 'TMM'
+#                                                   })
+# # we pass options to use the TMM optical method to calculate realistic R, A and T
+# # values with interference in the ARC (and semiconductor) layers. We can also choose
+# # which solver mode to use for the depletion approximation. The default is 'green',
+# # which uses the (faster) Green's function method. The other method is 'bvp'.
+#
+# plt.figure(1)
+# plt.plot(wl * 1e9, solar_cell[0 + len(ARC_layers)].eqe(wl) * 100, 'b', label='GaInP QE')
+# plt.plot(wl * 1e9, solar_cell[1 + len(ARC_layers)].eqe(wl) * 100, 'g', label='GaAs QE')
+# plt.plot(wl * 1e9, solar_cell[2 + len(ARC_layers)].eqe(wl) * 100, 'r', label='Ge QE')
+# plt.plot(wl * 1e9, solar_cell[0 + len(ARC_layers)].layer_absorption * 100, '--b',
+#          label='GaInP Abs.')
+# plt.plot(wl * 1e9, solar_cell[1 + len(ARC_layers)].layer_absorption * 100, '--g',
+#          label='GaAs Abs.')
+# plt.plot(wl * 1e9, solar_cell[2 + len(ARC_layers)].layer_absorption * 100, '--r',
+#          label='Ge Abs.')
+#
+# plt.plot(wl*1e9, solar_cell.reflected*100, '--k', label="Reflected")
+# plt.legend()
+# plt.ylim(0, 100)
+# plt.ylabel('EQE (%)')
+# plt.xlabel('Wavelength (nm)')
+# plt.show()
 
-my_solar_cell = SolarCell([default_GaAs(T)], T=T, R_series=0, substrate=substrate)
+# Set up the AM0 (space) solar spectrum
+am0 = LightSource(source_type='standard',version='AM0',x=wl,
+                  output_units='photon_flux_per_m')
 
-Vin = np.linspace(-2, 2.61, 201)
-V = np.linspace(0, 2.6, 300)
-wl = np.linspace(350, 1000, 301) * 1e-9
-light_source = LightSource(source_type='standard', version='AM1.5g', x=wl, output_units='photon_flux_per_m',
-                           concentration=1)
+V = np.linspace(-3, 0, 200)
+# internal_voltages = np.linspace(-4, 2, 200)
 
-if __name__ == '__main__':
-    # We calculate the IV curve under illumination
-    solar_cell_solver(my_solar_cell, 'equilibrium')
-                      # ,
-                      # user_options={'T_ambient': T, 'db_mode': 'boltzmann', 'voltages': V, 'light_iv': True,
-                      #               'wavelength': wl, 'optics_method': 'BL', 'mpp': True, 'internal_voltages': Vin,
-                      #               'light_source': light_source})
+# Calculate the current-voltage relationship under illumination:
 
-    # We can plot the electron and hole densities in equilibrium and at short circuit, both calculated automatically
-    # before calculating the IV curve
-    plt.figure(1)
-    for j in my_solar_cell.junction_indices:
-        zz = my_solar_cell[j].equilibrium_data.Properties['x'] + my_solar_cell[j].offset
-        n = my_solar_cell[j].equilibrium_data.Properties['Nd']
-        p = my_solar_cell[j].equilibrium_data.Properties['Na']
-        plt.semilogy(zz, n, 'b')
-        plt.semilogy(zz, p, 'r')
+solar_cell_solver(solar_cell, 'iv', user_options={'light_source': am0,
+                                                  'voltages': V,
+                                                  # 'internal_voltages': internal_voltages,
+                                                  'light_iv': True,
+                                                  'wavelength': wl,
+                                                  'optics_method': 'TMM',
+                                                  'mpp': True,
+                                                  # 'da_mode': 'bvp'
+                                                  })
+# We pass the same options as for solving the EQE, but also set 'light_iv' and 'mpp' to
+# True to indicate we want the IV curve under illumination and to find the maximum
+# power point (MPP). We also pass the AM0 light source and voltages created above.
 
-        zz = my_solar_cell[j].equilibrium_data.Bandstructure['x'] + my_solar_cell[j].offset
-        n = my_solar_cell[j].equilibrium_data.Bandstructure['n']
-        p = my_solar_cell[j].equilibrium_data.Bandstructure['p']
-        plt.semilogy(zz, n, 'b--')
-        plt.semilogy(zz, p, 'r--')
+plt.figure(2)
+plt.plot(abs(V), -solar_cell.iv['IV'][1]/10, 'k', linewidth=3, label='3J cell')
+plt.plot(abs(V), solar_cell[0 + len(ARC_layers)].iv(V)/10, 'b', label='InGaP sub-cell')
+plt.plot(abs(V), solar_cell[1 + len(ARC_layers)].iv(V)/10, 'g', label='GaAs sub-cell')
+plt.plot(abs(V), solar_cell[2 + len(ARC_layers)].iv(V)/10, 'r', label='Ge sub-cell')
+plt.text(0.5,30,f'Jsc= {solar_cell.iv.Isc/10:.2f} mA.cm' + r'$^{-2}$')
+plt.text(0.5,28,f'Voc= {solar_cell.iv.Voc:.2f} V')
+plt.text(0.5,26,f'FF= {solar_cell.iv.FF*100:.2f} %')
+plt.text(0.5,24,f'Eta= {solar_cell.iv.Eta*100:.2f} %')
 
-    plt.xlabel('Position (m)')
-    plt.ylabel('Carrier density (m$^{-3}$)')
-    #
-    # # And the IV curves of the individual junctions and of the MJ device
-    # plt.figure(2)
-    # plt.plot(V, abs(my_solar_cell[0].iv(V)), 'b', label='AlGaAs')
-    # plt.plot(V, abs(my_solar_cell[1].iv(V)), 'r', label='GaAs')
-    # plt.plot(my_solar_cell.iv.IV[0], abs(my_solar_cell.iv.IV[1]), 'k', label='MJ')
-    #
-    # plt.legend()
-    # plt.xlim(0, 2.6)
-    # plt.ylim(0, 200)
-    # plt.xlabel('Bias (V)')
-    # plt.ylabel('Current (A/m$^2}$)')
-    #
-    # # Now we calculate the quantum efficiency
-    # solar_cell_solver(my_solar_cell, 'qe',
-    #                   user_options={'T_ambient': T, 'db_mode': 'boltzmann', 'voltages': V, 'light_iv': True,
-    #                                 'wavelength': wl, 'optics_method': 'BL', 'mpp': True, 'internal_voltages': Vin,
-    #                                 'light_source': light_source})
-    #
-    # plt.figure(3)
-    #
-    # plt.plot(wl * 1e9, my_solar_cell[0].eqe(wl), 'b', label='AlGaAs')
-    # plt.plot(wl * 1e9, my_solar_cell[1].eqe(wl), 'r', label='GaAs')
-    #
-    # plt.xlabel('Wavelength (nm)')
-    # plt.ylabel('EQE')
-
-    plt.show()
+plt.legend()
+plt.ylim(0, 35)
+plt.xlim(0, 3)
+plt.ylabel('Current (mA/cm$^2$)')
+plt.xlabel('Voltage (V)')
+plt.show()

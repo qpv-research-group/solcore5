@@ -4,6 +4,7 @@ from scipy.optimize import root
 from solcore.constants import q
 from scipy.interpolate import interp1d
 from solcore.state import State
+import warnings
 
 from solcore.registries import (
     register_iv_solver,
@@ -61,7 +62,7 @@ def process_structure(junction, options):
             bulk_recombination_energy = layer.material.bulk_recombination_energy
 
         except:
-            bulk_recombination_energy = 0
+            bulk_recombination_energy = 0 # should this be the degau
 
         layer_widths.append(layer.width*1e2) # m to cm
 
@@ -79,13 +80,13 @@ def process_structure(junction, options):
             # and returns doping in cm-3
 
         try:
-            auger_electron = layer.material.electron_auger_recombination * 1e12
+            auger_electron = layer.material.electron_auger_recombination * 1e12 # m6/s to cm6/s
 
         except:
             auger_electron = 0
 
         try:
-            auger_hole = layer.material.hole_auger_recombination * 1e12
+            auger_hole = layer.material.hole_auger_recombination * 1e12 # m6/s to cm6/s
 
         except:
             auger_hole = 0
@@ -395,8 +396,13 @@ def iv_sesame(junction, options):
         # this is necessary because Sesame will internally flip the sign for an n-p junction
         voltages_for_solve = -voltages
 
+        if np.all(options.voltages >= 0):
+            warnings.warn('All voltages are positive, but junction has been identified as n-p, so the '
+                          'open-circuit voltage (Voc) of the junction will be negative.', UserWarning)
+
     else:
         voltages_for_solve = voltages
+
 
     # split +ve and -ve voltages if necessary:
     if np.any(voltages_for_solve < 0):

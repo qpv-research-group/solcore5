@@ -126,12 +126,14 @@ plt.show()
 am0 = LightSource(source_type='standard',version='AM0',x=wl,
                   output_units='photon_flux_per_m')
 
-V = np.linspace(0, 3, 300)
+V = np.linspace(-3, 0, 300)
+internal_voltages = np.linspace(-4, 2, 400)
 
 # Calculate the current-voltage relationship under illumination:
 
 solar_cell_solver(solar_cell, 'iv', user_options={'light_source': am0,
                                                   'voltages': V,
+                                                  'internal_voltages': internal_voltages,
                                                   'light_iv': True,
                                                   'wavelength': wl,
                                                   'optics_method': 'TMM',
@@ -143,10 +145,10 @@ solar_cell_solver(solar_cell, 'iv', user_options={'light_source': am0,
 # power point (MPP). We also pass the AM0 light source and voltages created above.
 
 plt.figure(2)
-plt.plot(V, solar_cell.iv['IV'][1]/10, 'k', linewidth=3, label='3J cell')
-plt.plot(V, -solar_cell[0 + len(ARC_layers)].iv(V)/10, 'b', label='InGaP sub-cell')
-plt.plot(V, -solar_cell[1 + len(ARC_layers)].iv(V)/10, 'g', label='GaAs sub-cell')
-plt.plot(V, -solar_cell[2 + len(ARC_layers)].iv(V)/10, 'r', label='Ge sub-cell')
+plt.plot(abs(V), -solar_cell.iv['IV'][1]/10, 'k', linewidth=3, label='3J cell')
+plt.plot(abs(V), solar_cell[0 + len(ARC_layers)].iv(V)/10, 'b', label='InGaP sub-cell')
+plt.plot(abs(V), solar_cell[1 + len(ARC_layers)].iv(V)/10, 'g', label='GaAs sub-cell')
+plt.plot(abs(V), solar_cell[2 + len(ARC_layers)].iv(V)/10, 'r', label='Ge sub-cell')
 plt.text(0.5,30,f'Jsc= {solar_cell.iv.Isc/10:.2f} mA.cm' + r'$^{-2}$')
 plt.text(0.5,28,f'Voc= {solar_cell.iv.Voc:.2f} V')
 plt.text(0.5,26,f'FF= {solar_cell.iv.FF*100:.2f} %')

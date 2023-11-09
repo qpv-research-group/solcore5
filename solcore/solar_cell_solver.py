@@ -350,6 +350,18 @@ def prepare_solar_cell(solar_cell, options):
 
     process_position(solar_cell, options, layer_widths)
 
+    # check that the voltages are in the expected format (monotonically increasing):
+
+    if np.any(np.diff(options.voltages) < 0):
+        raise ValueError(
+            "ERROR in 'solar_cell_solver' - The voltages must be monotonically increasing."
+        )
+
+    if np.any(np.diff(options.internal_voltages) < 0):
+        raise ValueError(
+            "ERROR in 'solar_cell_solver' - The internal_voltages must be monotonically increasing."
+        )
+
 
 def process_position(solar_cell, options, layer_widths):
     """
