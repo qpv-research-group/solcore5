@@ -5,6 +5,7 @@ from solcore.constants import q
 from scipy.interpolate import interp1d
 from solcore.state import State
 import warnings
+from joblib import Parallel, delayed
 
 from solcore.registries import (
     register_iv_solver,
@@ -404,10 +405,10 @@ def iv_sesame(junction, options):
     else:
         voltages_for_solve = voltages
 
-
     # split +ve and -ve voltages if necessary:
     if np.any(voltages_for_solve < 0):
         if np.any(voltages_for_solve > 0):
+            # positive and negative voltages
 
             negative_voltages = voltages_for_solve[voltages_for_solve <= 0]
             positive_voltages = voltages_for_solve[voltages_for_solve >= 0]
@@ -445,10 +446,15 @@ def iv_sesame(junction, options):
                 result = {key: np.concatenate((result_negative[key], result_positive[key])) for key in result_positive.keys()}
                 final_voltages = np.concatenate((negative_voltages, positive_voltages))
 
-            # this results in j and result in order of increasing values for voltages_for_solve.
-
+            # this results in j and result in order of increasing values for voltages_for_solve
+        else:
+            # negative voltages only
+            voltage_order = np.argsort(voltages_for_solve)[::-1]
+            final_voltages = voltages_for_solve[voltage_order]
+            j, result = sesame.IVcurve(junction.sesame_sys, final_voltages)
 
     else:
+        # positive voltages only
         voltage_order = np.argsort(voltages_for_solve)
 
         final_voltages = voltages_for_solve[voltage_order]
@@ -458,11 +464,13 @@ def iv_sesame(junction, options):
     # Sesame's sign convention. So if the voltage sign was flipped above, need to flip it back
     # for Solcore
 
-    if junction.sesame_sys.rho[junction.sesame_sys.nx-1] < 0:
+    if junction.sesame_sys.rho[junction.sesame_sys.nx - 1] < 0:
         print('flipping back')
-        result_voltage = -final_voltages[::-1]
-        j = j[::-1]
-        result = {key: result[key][::-1, :] for key in result.keys()}
+        result_voltage = -final_voltages
+        sort_result = np.argsort(result_voltage)
+        j = j[sort_result]
+        result = {key: result[key][sort_result, :] for key in result.keys()}
+        result_voltage = result_voltage[sort_result]
 
     else:
         result_voltage = final_voltages
@@ -485,60 +493,61 @@ def iv_sesame(junction, options):
     junction.voltage = result_voltage
 
 def qe_sesame(junction, options):
-
     if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
 
-    wls = options.wavelength
+    # if not options.parallel:
+    #     n_jobs = 1
+    #
+    # else:
+    #     n_jobs = options.n_jobs if hasattr(options, "n_jobs") else -1
+    n_jobs = 1
+    # parallel implementation does not work due to pickling error. Unsure of cause.
 
-    eqe = np.zeros_like(wls)
+    wls = options.wavelength
 
     voltages = [0]
 
     # profile_func = interp1d(bulk_positions_cm, 1e7 * Si_profile, kind='linear', bounds_error=False, fill_value=0)
-    profile_func = junction.absorbed # this returns an array of shape (mesh_points, wavelengths)
+    profile_func = junction.absorbed  # this returns an array of shape (mesh_points, wavelengths)
 
     A = np.trapz(junction.absorbed(junction.mesh), junction.mesh, axis=0)
 
     def make_gfcn_fun(wl_index, flux):
         def gcfn_fun(x, y):
-            # print('internal', profile_func(x / 100).shape)
-            return flux * profile_func(x/100)[wl_index]/100 # convert to cm-1 from m-1
-            # NOTE: this ONLY works if x and y are scalars!
+            return flux * profile_func(x / 100)[wl_index] / 100  # convert to cm-1 from m-1
+
         return gcfn_fun
 
-    import matplotlib.pyplot as plt
+    flux = 1e20
 
-    for i1, wl in enumerate(wls):
+    # for i1, wl in enumerate(wls):
 
-        flux = 1e20
+    def qe_i(i1):
 
         junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
-        # print(make_gfcn_fun(i1, flux)(junction.mesh_cm, 0).shape)
-        # plt.figure()
-        # plt.semilogy(junction.mesh_cm, [make_gfcn_fun(i1, flux)(x, 0) for x in junction.mesh_cm])
-        # plt.xlim(0, 350e-7)
-        # plt.show()
 
-        if i1 == 0:
-            guess = None
+        j, result = sesame.IVcurve(junction.sesame_sys, voltages)
 
-        else:
-            guess = {key: result[key][0, :] for key in result.keys()}
+        eqe = np.abs(j) / (q * flux)
 
-        j, result = sesame.IVcurve(junction.sesame_sys, voltages, guess=guess)
+        return eqe, result
 
-        eqe[i1] = np.abs(j) / (q * flux)
+    allres = Parallel(n_jobs=n_jobs)(
+        delayed(qe_i)(
+            i1,
+        )
+        for i1 in range(len(wls))
+    )
+
+    eqe = np.concatenate([item[0] for item in allres])
+
+    efn = np.concatenate([item[1]['efn'] for item in allres])
+    efp = np.concatenate([item[1]['efp'] for item in allres])
+    vres = np.concatenate([item[1]['v'] for item in allres])
 
     eqe = eqe * junction.sesame_sys.scaling.current
     iqe = eqe / A
-
-
-    # plt.figure()
-    # plt.plot(wls, A)
-    # plt.plot(wls, junction.layer_absorption, '--')
-    # plt.plot(wls, eqe)
-    # plt.show()
 
     # convert dimensionless current to dimension-ful current
     # iqe = iqe * junction.sesame_sys.scaling.current
@@ -556,11 +565,12 @@ def qe_sesame(junction, options):
 
     junction.qe = State(
         {
-            "WL": wl,
-            "IQE": junction.iqe(wl),
-            "EQE": junction.eqe(wl),
+            "WL": wls,
+            "IQE": junction.iqe(wls),
+            "EQE": junction.eqe(wls),
         }
     )
+
 
 
 
