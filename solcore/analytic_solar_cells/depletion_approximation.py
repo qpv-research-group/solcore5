@@ -173,6 +173,11 @@ def iv_depletion(junction, options):
         junction.voltage = -options.internal_voltages
         J_sign = -1
 
+        if np.all(options.voltages >= 0):
+            warnings.warn('All voltages are positive, but junction has been identified as n-p, so the '
+                          'open-circuit voltage (Voc) of the junction will be negative.', UserWarning)
+
+
     xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es_n, es_p = identify_parameters(
         junction, T, pRegion, nRegion, iRegion
     )
