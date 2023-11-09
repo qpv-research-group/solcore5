@@ -1198,7 +1198,7 @@ def test_dark_iv_depletion_np(np_junction):
     options.light_iv = False
     T = options.T
 
-    test_junc[0].voltage = options.internal_voltages
+    test_junc[0].voltage = -options.internal_voltages
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(
         test_junc[0]
@@ -1242,9 +1242,9 @@ def test_dark_iv_depletion_np(np_junction):
     J_sc_bot = 0
     J_sc_scr = 0
 
-    current = Jrec + JnDark + JpDark + V / 1e14 - J_sc_top - J_sc_bot - J_sc_scr
+    current = -(Jrec + JnDark + JpDark + V / 1e14 - J_sc_top - J_sc_bot - J_sc_scr)
     iv = interp1d(
-        test_junc[0].voltage,
+        options.internal_voltages,
         current,
         kind="linear",
         bounds_error=False,
