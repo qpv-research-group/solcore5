@@ -1,5 +1,9 @@
-Poisson - Drift-Diffusion solver (PDD)
-======================================
+Fortran Poisson Drift-Diffusion solver (PDD)
+===============================================
+
+This section documents the functionality of the original, Fortran-based Poisson Drift-Diffusion Solver included in
+Solcore. For the newer interface to the Python-based Sesame solver, which also solves the PDD equations, see
+:doc:`sesame`.
 
 - Example 1: :doc:`Example of a simple 2J solar cell calculated with the PDD solver <../Examples/example_PDD_solver>`
 - Example 2: :doc:`Tutorial: 2J solar cell with QWs in the bottom cell <../Examples/tutorial>`

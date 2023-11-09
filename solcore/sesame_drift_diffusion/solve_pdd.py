@@ -180,6 +180,7 @@ def process_structure(junction, options):
 
     # get surface recombination velocities
     junction.sesame_sys.contact_S(*get_srv(junction))
+    print('mesh points:', len(junction.mesh_cm))
 
 
 def make_mesh(junction, layer_width, options, junction_depth):

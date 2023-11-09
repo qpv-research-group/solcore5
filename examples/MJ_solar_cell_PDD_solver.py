@@ -21,10 +21,13 @@ ARC_layers = [Layer(si("100nm"), material=MgF2),
 
 AlInP = material("AlInP")
 InGaP = material("GaInP")
-window_material = AlInP(Al=0.52, Nd=siUnits(2e18, "cm-3"), relative_permittivity=9)
+window_material = AlInP(Al=0.52, Nd=siUnits(2e18, "cm-3"), relative_permittivity=9,
+                        electron_minority_lifetime=1e-9, hole_minority_lifetime=1e-9)
 
-top_cell_n_material = InGaP(In=0.49, Nd=siUnits(2e18, "cm-3"))
-top_cell_p_material = InGaP(In=0.49, Na=siUnits(1e17, "cm-3"))
+top_cell_n_material = InGaP(In=0.49, Nd=siUnits(2e18, "cm-3"),
+                            electron_minority_lifetime=5e-9, hole_minority_lifetime=5e-9)
+top_cell_p_material = InGaP(In=0.49, Na=siUnits(1e17, "cm-3"),
+                        electron_minority_lifetime=5e-9, hole_minority_lifetime=5e-9)
 
 # For convenience we will set the carrier transport properties to default values for
 # all the materials in one place. To do that we add the materials to a list called
@@ -53,21 +56,21 @@ solar_cell = SolarCell(
         ARC_layers +
         [
         Junction([
-            # Layer(si("25nm"), material=window_material, role='window'),
+            Layer(si("25nm"), material=window_material, role='window'),
                   Layer(si("100nm"), material=top_cell_n_material, role='emitter'),
                   Layer(si("400nm"), material=top_cell_p_material, role='base'),
-                  ], sn=1, sp=1, kind='PDD'),
+                  ], sn=1e4, sp=1e4, kind='PDD'),
         Junction([Layer(si("200nm"), material=mid_cell_n_material, role='emitter'),
                   Layer(si("3000nm"), material=mid_cell_p_material, role='base'),
-                  ], sn=1, sp=1, kind='PDD'),
+                  ], sn=1e4, sp=1e4, kind='PDD'),
         Junction([Layer(si("400nm"), material=bot_cell_n_material, role='emitter'),
                   Layer(si("100um"), material=bot_cell_p_material, role='base'),
-                  ], sn=1, sp=1, kind='PDD')
+                  ], sn=1e4, sp=1e4, kind='PDD')
             ],
         shading=0.02, cell_area=1 * 1 / 1e4)
 
 # Choose wavelength range (in m):
-wl = np.linspace(280, 1850, 700) * 1e-9
+wl = np.linspace(280, 1850, 200) * 1e-9
 
 # Calculate the EQE for the solar cell:
 # solar_cell_solver(solar_cell, 'qe', user_options={'wavelength': wl,
@@ -101,19 +104,19 @@ wl = np.linspace(280, 1850, 700) * 1e-9
 am0 = LightSource(source_type='standard',version='AM0',x=wl,
                   output_units='photon_flux_per_m')
 
-V = np.linspace(-3, 0, 200)
-# internal_voltages = np.linspace(-4, 2, 200)
+# this is an n-p cell, so we need to scan negative voltages
+V = np.linspace(-3, 0, 50)
+internal_voltages = np.linspace(-4, 1.7, 100)
 
 # Calculate the current-voltage relationship under illumination:
 
 solar_cell_solver(solar_cell, 'iv', user_options={'light_source': am0,
                                                   'voltages': V,
-                                                  # 'internal_voltages': internal_voltages,
+                                                  'internal_voltages': internal_voltages,
                                                   'light_iv': True,
                                                   'wavelength': wl,
                                                   'optics_method': 'TMM',
                                                   'mpp': True,
-                                                  # 'da_mode': 'bvp'
                                                   })
 # We pass the same options as for solving the EQE, but also set 'light_iv' and 'mpp' to
 # True to indicate we want the IV curve under illumination and to find the maximum
@@ -124,8 +127,8 @@ plt.plot(abs(V), -solar_cell.iv['IV'][1]/10, 'k', linewidth=3, label='3J cell')
 plt.plot(abs(V), solar_cell[0 + len(ARC_layers)].iv(V)/10, 'b', label='InGaP sub-cell')
 plt.plot(abs(V), solar_cell[1 + len(ARC_layers)].iv(V)/10, 'g', label='GaAs sub-cell')
 plt.plot(abs(V), solar_cell[2 + len(ARC_layers)].iv(V)/10, 'r', label='Ge sub-cell')
-plt.text(0.5,30,f'Jsc= {solar_cell.iv.Isc/10:.2f} mA.cm' + r'$^{-2}$')
-plt.text(0.5,28,f'Voc= {solar_cell.iv.Voc:.2f} V')
+plt.text(0.5,30,f'Jsc= {abs(solar_cell.iv.Isc/10):.2f} mA.cm' + r'$^{-2}$')
+plt.text(0.5,28,f'Voc= {abs(solar_cell.iv.Voc):.2f} V')
 plt.text(0.5,26,f'FF= {solar_cell.iv.FF*100:.2f} %')
 plt.text(0.5,24,f'Eta= {solar_cell.iv.Eta*100:.2f} %')
 
