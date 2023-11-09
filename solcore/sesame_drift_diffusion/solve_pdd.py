@@ -116,8 +116,6 @@ def process_structure(junction, options):
     edges = np.insert(np.cumsum(layer_widths), 0, 0) # locations of interfaces between layers
     edges[-1] = edges[-1] + 1e-10 # otherwise final point will not be assigned any values
 
-    print('edges', edges)
-
     if hasattr(junction, "doping_profile"):
         junction_depth = 100*root(junction.doping_profile, np.sum(layer_widths) / (2*100)).x # in cm
         # this is where doping crosses zero - not necessarily the junction depth, but not sure how best to determine
@@ -181,7 +179,6 @@ def process_structure(junction, options):
 
     # get surface recombination velocities
     junction.sesame_sys.contact_S(*get_srv(junction))
-    print(*get_srv(junction))
 
 
 def make_mesh(junction, layer_width, options, junction_depth):
@@ -312,7 +309,7 @@ def update_mesh(junction, layer_width, options):
 
     for i1 in range(len(first_points)):
         # want to make mesh denser where there are large changes in doping
-        print('denser mesh between', first_x[i1], last_x[i1])
+        # print('denser mesh between', first_x[i1], last_x[i1])
 
         mesh_above = current_mesh[current_mesh < first_x[i1]]
         mesh_below = current_mesh[current_mesh >= last_x[i1]]
@@ -370,15 +367,12 @@ def equilibrium():
 @register_iv_solver("sesame_PDD", reason_to_exclude=reason_to_exclude)
 def iv_sesame(junction, options):
 
-
-    # TODO: inclusion of shunt resistance
     if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
 
     # gen_wl = profile_func
 
     if options.light_iv and np.all(junction.sesame_sys.g == 0):
-        print('set generation profile for light IV')
 
         gen_wl = junction.absorbed(junction.mesh) / 100 # m-1 -> cm-1
         wls = options.wavelength
@@ -391,10 +385,9 @@ def iv_sesame(junction, options):
         # can also pass a function to generation - more flexible?
         junction.sesame_sys.generation(g_vs_z)
 
-    # equilibrium solution:
-    # j0, result0 = sesame.IVcurve(junction.sesame_sys, [0])
-
     voltages = options.internal_voltages
+
+    R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, "R_shunt") else 1e14
 
     # voltages need to go from 0 (or close) to highest applied +ve or -ve voltage. Split if necessary.
 
@@ -408,11 +401,9 @@ def iv_sesame(junction, options):
     # split +ve and -ve voltages if necessary:
     if np.any(voltages_for_solve < 0):
         if np.any(voltages_for_solve > 0):
-            negative_ind = np.where(voltages_for_solve <= 0)[0]
-            positive_ind = np.where(voltages_for_solve >= 0)[0]
 
-            negative_voltages = voltages_for_solve[negative_ind]
-            positive_voltages = voltages_for_solve[positive_ind]
+            negative_voltages = voltages_for_solve[voltages_for_solve <= 0]
+            positive_voltages = voltages_for_solve[voltages_for_solve >= 0]
 
             negative_voltages_order = np.argsort(negative_voltages)[::-1]
             positive_voltages_order = np.argsort(positive_voltages)
@@ -423,12 +414,12 @@ def iv_sesame(junction, options):
             j_positive, result_positive = sesame.IVcurve(junction.sesame_sys, positive_voltages)
             j_negative, result_negative = sesame.IVcurve(junction.sesame_sys, negative_voltages)
 
-            # j_positive = j_positive[positive_voltages_order]
-            # j_negative = j_negative[negative_voltages_order]
             j_negative = j_negative[::-1]
 
             result_positive = {key: result_positive[key][positive_voltages_order, :] for key in result_positive.keys()}
             result_negative = {key: result_negative[key][negative_voltages_order, :] for key in result_negative.keys()}
+
+            negative_voltages = negative_voltages[::-1]
 
             if np.any(voltages_for_solve == 0):
 
@@ -454,14 +445,7 @@ def iv_sesame(junction, options):
         voltage_order = np.argsort(voltages_for_solve)
 
         final_voltages = voltages_for_solve[voltage_order]
-
-    # print(voltages_for_solve)
-    # want to include V = 0, and always go from 0 to highest applied potential (positive or negative).
-
         j, result = sesame.IVcurve(junction.sesame_sys, final_voltages)  # , verbose=False)
-
-    # j = j[voltage_order]
-    # result = {key: result[key][:, voltage_order] for key in result.keys()}
 
     # final_voltages are the voltages corresponding to the entries in j and result, USING
     # Sesame's sign convention. So if the voltage sign was flipped above, need to flip it back
@@ -477,16 +461,14 @@ def iv_sesame(junction, options):
         result_voltage = final_voltages
 
     j = j * junction.sesame_sys.scaling.current * 1e4 # cm-2 -> m-2
-    print('j', j)
-    print('voltages', result_voltage)
-    # Jsc = j[0] # units?
-    junction.current = j
+
+    junction.current = j + result_voltage / R_shunt
 
     # current_increasing = j[voltage_increasing]
 
     junction.iv = interp1d(
         result_voltage,
-        j,#_increasing,
+        junction.current,
         kind="linear",
         bounds_error=False,
         assume_sorted=True,
