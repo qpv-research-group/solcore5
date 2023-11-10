@@ -21,7 +21,19 @@ The *task* has to be "optics", "iv", "qe", "equilibrium" or "short_circuit", the
 
 All of the above calculations modify the original solar cell object, adding attributes or methods to its structure. For example, after calculating the IV curve of my_solar_cell_object, this will have a new attribute called "iv" that is a dictionary with the IV of the total solar cell, the IV curves of each of the junctions, information of the Voc and Isc, if relevant, etc.
 
-More details of the specific electrical solvers included in Solcore can be found in:
+Kinds of junction
+-----------------
+
+The following types of junctions are currently implemented in Solcore, specified through the :literal:`kind` argument passed to
+when creating a :literal:`Junction` object:
+
+1. **DB**: detailed balance (the Shockley-Queisser limit)
+2. **2D**: two-diode model
+3. **DA**: depletion approximation
+4. **PDD**: Poisson-drift-diffusion, using the legacy Fortran solver
+5. **sesame_PDD**: Poisson-drift-diffusion, using the new Python-based Sesame solver
+
+More details of these specific electrical solvers included in Solcore can be found in:
 
 .. toctree::
     :maxdepth: 0
@@ -32,7 +44,6 @@ More details of the specific electrical solvers included in Solcore can be found
     SesameDDsolver
     DDsolver
     multijunction_iv
-
 
 .. _solver-options:
 
