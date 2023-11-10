@@ -29,6 +29,7 @@ More details of the specific electrical solvers included in Solcore can be found
     detailed_balance
     TwoDiode
     depletion
+    SesameDDsolver
     DDsolver
     multijunction_iv
 

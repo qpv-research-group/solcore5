@@ -53,7 +53,8 @@ jobs:
 
       - name: Install Python dependecies
         run: |
-          pip install pytest meson-python ninja cython numpy git+https://github.com/scientific-python/devpy@v0.1
+          pip install numpy --config-settings=setup-args="-Dallow-noblas=true"
+          pip install pytest meson-python ninja cython git+https://github.com/scientific-python/devpy@v0.1
           python3 -m devpy install-dependencies -test-dep
 
       - name: Install S4
