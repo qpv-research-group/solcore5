@@ -54,8 +54,8 @@ jobs:
       - name: Install Python dependecies
         run: |
           pip install numpy --config-settings=setup-args="-Dallow-noblas=true"
-          pip install pytest meson-python ninja cython git+https://github.com/scientific-python/devpy@v0.1
-          python3 -m devpy install-dependencies -test-dep
+          pip install pytest meson-python ninja cython spin
+          python3 -m spin install-dependencies -test-dep
 
       - name: Install S4
         if: matrix.os != 'windows-latest'
@@ -69,14 +69,14 @@ jobs:
 
       - name: Build solcore
         run: |
-          python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true
+          python -m spin build -- -Dwith_pdd=true -Dinstall_test=true
 
       - name: Unit and functional tests (MacOS and Linux)
         if: matrix.os != 'windows-latest'
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m devpy test -- -r a -v --cov=solcore/ --ignore=solcore/tests/test_examples.py -n "auto" 
+          python -m spin test -- -r a -v --cov=solcore/ --ignore=solcore/tests/test_examples.py -n "auto" 
 
       - name: Unit and functional tests (Windows)
         if: matrix.os == 'windows-latest'
@@ -89,7 +89,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           python -m pip install codecov
-          python -m devpy codecov 
+          python -m spin codecov 
 
 
   test_examples:
@@ -134,8 +134,8 @@ jobs:
 
       - name: Install Python dependecies
         run: |
-          pip install pytest meson-python ninja cython numpy git+https://github.com/scientific-python/devpy@v0.1
-          python3 -m devpy install-dependencies -test-dep
+          pip install pytest meson-python ninja cython numpy spin
+          python3 -m spin install-dependencies -test-dep
 
       - name: Install S4
         if: matrix.os != 'windows-latest'
@@ -149,16 +149,16 @@ jobs:
 
       - name: Build solcore
         run: |
-          python -m devpy build -- -Dwith_pdd=true -Dinstall_test=true
+          python -m spin build -- -Dwith_pdd=true -Dinstall_test=true
 
       - name: Unit and functional tests (MacOS and Linux)
         if: matrix.os != 'windows-latest'
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m devpy test -- -r a -v solcore/tests/test_examples.py -n "auto"
+          python -m spin test -- -r a -v solcore/tests/test_examples.py -n "auto"
 
 #      - name: Unit and functional tests (Windows)
 #        if: matrix.os == 'windows-latest'
 #        run: |
-#          python -m devpy test -- -r a -v solcore/tests/test_examples.py
+#          python -m spin test -- -r a -v solcore/tests/test_examples.py

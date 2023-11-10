@@ -5,7 +5,8 @@ on:
     branches:
       - main
       - develop
-      - update_build_312
+      - new_meson
+
     tags:
       - "**"
 
