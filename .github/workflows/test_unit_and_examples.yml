@@ -60,7 +60,7 @@ jobs:
       - name: Install S4
         if: matrix.os != 'windows-latest'
         run: |
-          pip install wheel numpy
+          pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
           make S4_pyext
