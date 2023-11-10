@@ -72,8 +72,8 @@ class ParameterSystem(SourceManagedClass):
         
         """
 
-        warn('Passing alloy fractions to get_parameter in the material name (e.g. In0.2GaAs) is now deprecated; \
-        pass the alloy fraction as an argument instead.', DeprecationWarning)
+        # warn('Passing alloy fractions to get_parameter in the material name (e.g. In0.2GaAs) is now deprecated; \
+        # pass the alloy fraction as an argument instead.', DeprecationWarning)
 
         relevant_parameters = others
 

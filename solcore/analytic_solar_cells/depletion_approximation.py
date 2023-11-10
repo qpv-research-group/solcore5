@@ -364,9 +364,12 @@ def get_j_dark(x, w, L, s, d, V, minority, T):
 
     :return: J_top_dark
     """
-    # We calculate some fractions
 
     harg = (x - w) / L
+
+    # only do cosh and sinh if harg is < 200 (avoid inf/nan errors)
+    harg[harg > 200] = 200
+
     sinh_harg = np.sinh(harg)
     cosh_harg = np.cosh(harg)
     lsod = (L * s) / d

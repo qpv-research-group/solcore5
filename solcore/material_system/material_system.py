@@ -353,30 +353,6 @@ class BaseMaterial:
                 return 1.0 / self.ni ** 2 * 2 * pi / (h ** 3 * c ** 2) * quad(inter, 0, upper)[0]
         if attrname == "permittivity":
             return self.relative_permittivity * vacuum_permittivity
-        if attrname == "electron_diffusion_length":
-            try:
-                mobility, lifetime = self.electron_mobility, self.electron_minority_lifetime
-                return np.sqrt(kb * self.T * mobility * lifetime / q)
-            except:
-                ValueError("Cannot calculate electron diffusion length. Need electron mobility and lifetime")
-        if attrname == "hole_diffusion_length":
-            try:
-                mobility, lifetime = self.hole_mobility, self.hole_minority_lifetime
-                return np.sqrt(kb * self.T * mobility * lifetime / q)
-            except:
-                ValueError("Cannot calculate hole diffusion length. Need hole mobility and lifetime")
-        if attrname == "electron_minority_lifetime":
-            try:
-                mobility, diffusion_length = self.electron_mobility, self.electron_diffusion_length
-                return q*diffusion_length**2/(kb*self.T*mobility)
-            except:
-                ValueError("Cannot calculate electron minority lifetime. Need electron mobility and diffusion length")
-        if attrname == "hole_minority_lifetime":
-            try:
-                mobility, diffusion_length = self.hole_mobility, self.hole_diffusion_length
-                return q * diffusion_length ** 2 / (kb * self.T * mobility)
-            except:
-                ValueError("Cannot calculate hole minority lifetime. Need hole mobility and diffusion length")
 
         kwargs = {element: getattr(self, element) for element in self.composition}
         kwargs["T"] = self.T

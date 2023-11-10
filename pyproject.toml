@@ -1,7 +1,7 @@
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python==0.13.0rc0',
+    'meson-python',
     'numpy',
     'cython'
 ]
@@ -39,7 +39,7 @@ dependencies = [
     "pyyaml",
     "yabox",
     "joblib",
-    "sesame@git+https://github.com/phoebe-p/sesame.git"
+    "solsesame",
 ]
 dynamic = ["version"]
 
@@ -64,12 +64,12 @@ doc = ["Sphinx", "recommonmark"]
 
 dev = ["pre-commit"]
 
-[tool.devpy]
+[tool.spin]
 package = 'solcore'
 
-[tool.devpy.commands]
-"Build" = ["devpy.cmds.meson.build", "devpy.cmds.meson.test"]
-"Extensions" = ['.devpy/cmds.py:codecov', '.devpy/cmds.py:install_dependencies']
+[tool.spin.commands]
+"Build" = ["spin.cmds.meson.build", "spin.cmds.meson.test"]
+"Extensions" = ['.spin/cmds.py:codecov', '.spin/cmds.py:install_dependencies']
 
 [tool.pytest.ini_options]
 addopts = "--cov=solcore --cov-report=html:htmlcov -p no:warnings -n \"auto\" -v"

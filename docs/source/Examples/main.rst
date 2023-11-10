@@ -17,7 +17,7 @@ Light sources
 Optical methods
 ---------------
 
-- :doc:`Using the TMM solver to calculate the reflextion of a multilayered ARC <example_RAT_of_ARC>`
+- :doc:`Using the TMM solver to calculate the reflection of a multilayered ARC <example_RAT_of_ARC>`
 - :doc:`Looking at the effect of substrate and the no_back_reflection option in the TMM solver <example_substrate>`
 - :doc:`Comparing optical models (TMM, Beer-Lambert, and RCWA) <example_optics_comparison>`
 

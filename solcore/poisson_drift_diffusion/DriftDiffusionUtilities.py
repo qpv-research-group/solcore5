@@ -21,7 +21,7 @@ try:
     reason_to_exclude = None
 except ImportError:
     reason_to_exclude = (
-        "The built-in Poisson-Drift-Difussion solver could not be found."
+        "The built-in Fortran Poisson-Drift-Diffusion solver could not be found."
     )
 
 
@@ -295,6 +295,10 @@ def iv_pdd(
         This is in addition to the attributes added by the equilibrium and the short
         circuit calculations, as relevant. See the description of those functions.
     """
+
+    if np.max(internal_voltages) <= 0:
+        internal_voltages = np.append(internal_voltages, 0.01)
+
     junction.voltage = internal_voltages
     R_shunt = min(junction.R_shunt, 1e14) if hasattr(junction, "R_shunt") else 1e14
 

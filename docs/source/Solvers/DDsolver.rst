@@ -3,12 +3,20 @@ Fortran Poisson Drift-Diffusion solver (PDD)
 
 This section documents the functionality of the original, Fortran-based Poisson Drift-Diffusion Solver included in
 Solcore. For the newer interface to the Python-based Sesame solver, which also solves the PDD equations, see
-:doc:`sesame`.
+:doc:`sesame`. While the two solvers should in principle have the same functionality, the Fortran solver was developed
+specifically to deal with solar cells containing quantum wells (QWs), where the abrupt and frequent change in material parameters
+can cause convergence issues. The Sesame solver has not been tested for the QW use case. The Fortran solver is less
+suitable for cells containing thick (> 10 microns or so) layers, as it was designed for III-V cells. The Sesame solver
+was designed for silicon-based cells and thus can handle thicker layers. The Fortran solver can handle only constant
+values of doping per layer, while the Sesame solver also accepts depth-dependent doping profiles defined by the user.
 
 - Example 1: :doc:`Example of a simple 2J solar cell calculated with the PDD solver <../Examples/example_PDD_solver>`
 - Example 2: :doc:`Tutorial: 2J solar cell with QWs in the bottom cell <../Examples/tutorial>`
 
-The PDD package provide all tools necesary to build a solar cell structure and calculate its properties by solving simultaneously the Poisson equation and the drfit diffusion equations. Normally, these functions will not need to be accessed directly, but are called internally by :literal:`Solcore` when using the higher level methods in the :doc:`solar cell solver <solving_solar_cells>`.
+The PDD package provide all tools necesary to build a solar cell structure and calculate its properties by solving
+simultaneously the Poisson equation and the drfit diffusion equations. Normally, these functions will not need to be
+accessed directly, but are called internally by :literal:`Solcore` when using the higher level methods in the
+:doc:`solar cell solver <solving_solar_cells>`.
 
 For using the PDD package, it is enough to include the following line in your code:
 
