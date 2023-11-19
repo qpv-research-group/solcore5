@@ -90,7 +90,7 @@ d=0 eV
 parent0=GaAs
 parent1=GaN
 x=N
-Eg_Gamma=120.4-100.*x eV
+Eg_Gamma=120.4-100.*N eV
 spin_orbit_splitting=0 eV
 
 [AlGaP]

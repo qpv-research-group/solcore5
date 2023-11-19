@@ -160,11 +160,29 @@ def iv_depletion(junction, options):
         "J. Nelson, “The Physics of Solar Cells”, Imperial College Press (2003).",
     )
 
-    junction.voltage = options.internal_voltages
     T = options.T
     kbT = kb * T
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(junction)
+
+    if pn_or_np == "pn":
+        junction.voltage = options.internal_voltages
+        J_sign = 1
+
+    else:
+        junction.voltage = -options.internal_voltages
+        J_sign = -1
+
+        if np.all(options.internal_voltages >= 0):
+            warnings.warn('All voltages are positive, but junction has been identified as n-p, so the '
+                          'open-circuit voltage (Voc) of the junction will be negative.', UserWarning)
+
+        if "voltages" in options.keys():
+            if np.all(options.voltages >= 0):
+                warnings.warn('All voltages are positive, but junction has been identified as n-p, so the '
+                              'open-circuit voltage (Voc) of the junction will be negative.', UserWarning)
+
+
     xn, xp, xi, sn, sp, ln, lp, dn, dp, Nd, Na, ni, es_n, es_p = identify_parameters(
         junction, T, pRegion, nRegion, iRegion
     )
@@ -307,7 +325,10 @@ def iv_depletion(junction, options):
         J_sc_scr = q * get_J_sc_SCR(xa, xb, g, wl, ph)
 
     # And, finally, we output the currents
-    junction.current = (
+    junction.voltage = J_sign*junction.voltage # this flips the voltage sign back for an n-p junction, or leaves it
+    # unchanged for a p-n junction
+
+    junction.current = J_sign*(
         Jrec + JnDark + JpDark + V / R_shunt - J_sc_top - J_sc_bot - J_sc_scr
     )
     junction.iv = interp1d(
@@ -320,12 +341,12 @@ def iv_depletion(junction, options):
     )
     junction.region_currents = State(
         {
-            "Jn_dif": JnDark,
-            "Jp_dif": JpDark,
-            "Jscr_srh": Jrec,
-            "J_sc_top": J_sc_top,
-            "J_sc_bot": J_sc_bot,
-            "J_sc_scr": J_sc_scr,
+            "Jn_dif": J_sign*JnDark,
+            "Jp_dif": J_sign*JpDark,
+            "Jscr_srh": J_sign*Jrec,
+            "J_sc_top": J_sign*J_sc_top,
+            "J_sc_bot": J_sign*J_sc_bot,
+            "J_sc_scr": J_sign*J_sc_scr,
         }
     )
 
@@ -343,9 +364,12 @@ def get_j_dark(x, w, L, s, d, V, minority, T):
 
     :return: J_top_dark
     """
-    # We calculate some fractions
 
     harg = (x - w) / L
+
+    # only do cosh and sinh if harg is < 200 (avoid inf/nan errors)
+    harg[harg > 200] = 200
+
     sinh_harg = np.sinh(harg)
     cosh_harg = np.cosh(harg)
     lsod = (L * s) / d

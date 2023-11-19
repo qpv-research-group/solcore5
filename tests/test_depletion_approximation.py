@@ -31,12 +31,16 @@ def test_get_j_dark():
 
     w = wn + wp + xi
 
+    arg = (x - w) / L
+
+    arg[arg > 200] = 200
+
     expected = (
         (q * d * minor / L)
         * (np.exp(q * V / (kb * T)) - 1)
         * (
-            (((s * L) / d) * np.cosh((x - w) / L) + np.sinh((x - w) / L))
-            / (((s * L) / d) * np.sinh((x - w) / L) + np.cosh((x - w) / L))
+            (((s * L) / d) * np.cosh(arg) + np.sinh(arg))
+            / (((s * L) / d) * np.sinh(arg) + np.cosh(arg))
         )
     )
 
@@ -1198,7 +1202,7 @@ def test_dark_iv_depletion_np(np_junction):
     options.light_iv = False
     T = options.T
 
-    test_junc[0].voltage = options.internal_voltages
+    test_junc[0].voltage = -options.internal_voltages
 
     id_top, id_bottom, pRegion, nRegion, iRegion, pn_or_np = identify_layers(
         test_junc[0]
@@ -1242,9 +1246,9 @@ def test_dark_iv_depletion_np(np_junction):
     J_sc_bot = 0
     J_sc_scr = 0
 
-    current = Jrec + JnDark + JpDark + V / 1e14 - J_sc_top - J_sc_bot - J_sc_scr
+    current = -(Jrec + JnDark + JpDark + V / 1e14 - J_sc_top - J_sc_bot - J_sc_scr)
     iv = interp1d(
-        test_junc[0].voltage,
+        options.internal_voltages,
         current,
         kind="linear",
         bounds_error=False,

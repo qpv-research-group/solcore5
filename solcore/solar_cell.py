@@ -1,8 +1,6 @@
 from solcore.structure import Layer, Junction, Structure, TunnelJunction
 from solcore import material, si
 
-import numpy as np
-
 
 def default_GaAs(T):
     # We create the other materials we need for the device
@@ -124,34 +122,3 @@ class SolarCell(Structure):
 
     def __call__(self, i):
         return self[self.junction_indices[i]]
-
-
-if __name__ == '__main__':
-    window = material('AlGaAs')(T=298, Na=1e24, Al=0.8)
-    stack = [Layer(width=si("50nm"), material=window),
-             default_GaAs(298)]
-
-    # stack = [default_GaAs(298)]
-
-    my_cell = SolarCell(layers=stack)
-    #
-    # my_cell.append_multiple([default_GaAs(298), default_GaAs(298), default_GaAs(298)])
-    # print(my_cell)
-
-    from solcore.poisson_drift_diffusion.DriftDiffusionUtilities import solve_pdd, default_photon_flux, \
-        default_wavelengths
-    import matplotlib.pyplot as plt
-
-    solve_pdd(my_cell, 'QE', vfin=1.2, vstep=0.05, light=True)
-    QE = my_cell(0).qe
-
-    # Finally, we plot the internal and external quantum efficiencies using the information stored in the output dictionaries
-    plt.plot(QE['QE']['wavelengths'] / 1e-9, QE['QE']['IQE'] * 100, label='IQE')
-    plt.plot(QE['QE']['wavelengths'] / 1e-9, QE['QE']['EQE'] * 100, label='EQE')
-    plt.plot(QE['QE']['wavelengths'] / 1e-9, my_cell.T * 100, label='T')
-    plt.ylim(0, 100)
-    plt.legend(loc='lower left')
-    plt.ylabel('QE (%)')
-    plt.xlabel('Wavelength (nm)')
-
-    plt.show()

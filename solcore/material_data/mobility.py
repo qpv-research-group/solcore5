@@ -48,7 +48,7 @@ def calculate_mobility(material, holes, N, x=0.0, y=0.0, T=300):
     if holes: i = 2
 
     if material not in data.keys():
-        print("Error: Material {0} not in the database for the mobility. Reverting to GaAs.".format(material))
+        print("Warning: material {0} not in the database for the mobility. Reverting to GaAs.".format(material))
         d = data['GaAs'][i]
     elif data[material][0] == 2:
         d = data[material][i]

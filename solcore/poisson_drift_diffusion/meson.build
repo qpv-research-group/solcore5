@@ -68,7 +68,7 @@ if get_option('with_pdd')
                                 input : ['DDmodel-current.f95'],
                                 output : ['ddModelmodule.c', 'ddModel-f2pywrappers2.f90'],
                                 command : [py, '-m', 'numpy.f2py', '-m', 'ddModel', '@INPUT@', '--lower',
-                                           '--build-dir', 'solcore/poisson_drift_diffusion']
+                                           '--build-dir', 'solcore/poisson_drift_diffusion/']
                                 )
 
     py.extension_module('ddModel',
@@ -92,5 +92,5 @@ python_sources = [
 
 py.install_sources(
   python_sources,
-  subdir: 'solcore' / 'poisson_drift_diffusion'
+  subdir: 'solcore' / 'poisson_drift_diffusion',
 )

@@ -1,7 +1,7 @@
 from pytest import approx, fixture
 import random
 from solcore import material
-from solcore.poisson_drift_diffusion.DeviceStructure import CreateDeviceStructure
+from solcore.poisson_drift_diffusion import CreateDeviceStructure
 from solcore.structure import Junction, Layer, SolcoreMaterialToStr, Structure, ToSolcoreMaterial, TunnelJunction
 from solcore.structure import InLineComposition, ToLayer, ToStructure
 

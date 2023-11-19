@@ -51,6 +51,8 @@ def test_example_scripts(example, examples_directory):
         skip("No SMARTS solver found.")
     elif b"RCWASolverError" in process.stderr:
         skip("No RCWA solver found.")
+    elif b"FigureCanvasAgg" in process.stderr:
+        skip("Plotting issue due to non-interactive Agg backend.")
     elif process.stderr != b"":
         raise Exception(process.stderr.decode())
 
@@ -82,5 +84,7 @@ def test_example_notebooks(example, examples_directory):
         skip("No SMARTS solver found.")
     elif b"RCWASolverError" in process.stderr:
         skip("No RCWA solver found.")
+    elif b"FigureCanvasAgg" in process.stderr:
+        skip("Plotting issue due to non-interactive Agg backend.")
     elif process.stderr != b"":
         raise Exception(process.stderr.decode())

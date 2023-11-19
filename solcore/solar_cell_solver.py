@@ -4,7 +4,7 @@ from warnings import warn
 
 import numpy as np
 
-from . import analytic_solar_cells as ASC
+from . import analytic_solar_cells as ASC, sesame_drift_diffusion as sesame_PDD, poisson_drift_diffusion as PDD
 from .light_source import LightSource
 from .optics import (  # noqa
     rcwa_options,
@@ -25,16 +25,15 @@ from .state import State
 from .structure import Junction, Layer, TunnelJunction
 
 try:
-    from . import poisson_drift_diffusion as PDD
 
     a = PDD.pdd_options
 except AttributeError:
     PDD.pdd_options = {}
 
 default_options = State()
-pdd_options = PDD.pdd_options
-asc_options = ASC.db_options
-
+# pdd_options = PDD.pdd_options
+# asc_options = ASC.db_options
+# sesame_options = sesame_PDD.sesame_options
 
 def merge_dicts(*dict_args):
     """
@@ -73,7 +72,7 @@ default_options.optics_method = "BL"
 default_options.recalculate_absorption = False
 
 default_options = merge_dicts(
-    default_options, ASC.db_options, ASC.da_options, PDD.pdd_options, rcwa_options
+    default_options, ASC.db_options, ASC.da_options, PDD.pdd_options, rcwa_options,
 )
 
 
@@ -169,6 +168,8 @@ def solve_iv(solar_cell, options):
 
         if solar_cell[j].kind == "PDD":
             PDD.iv_pdd(solar_cell[j], **options)
+        elif solar_cell[j].kind == "sesame_PDD":
+            sesame_PDD.iv_sesame(solar_cell[j], options)
         elif solar_cell[j].kind == "DA":
             ASC.iv_depletion(solar_cell[j], options)
         elif solar_cell[j].kind == "2D":
@@ -224,6 +225,8 @@ def solve_qe(solar_cell, options):
     for j in solar_cell.junction_indices:
         if solar_cell[j].kind == "PDD":
             PDD.qe_pdd(solar_cell[j], options)
+        elif solar_cell[j].kind == "sesame_PDD":
+            sesame_PDD.qe_sesame(solar_cell[j], options)
         elif solar_cell[j].kind == "DA":
             ASC.qe_depletion(solar_cell[j], options)
         elif solar_cell[j].kind == "2D":
@@ -347,6 +350,18 @@ def prepare_solar_cell(solar_cell, options):
 
     process_position(solar_cell, options, layer_widths)
 
+    # check that the voltages are in the expected format (monotonically increasing):
+    if 'voltages' in options.keys():
+        if np.any(np.diff(options.voltages) < 0):
+            raise ValueError(
+                "ERROR in 'solar_cell_solver' - The voltages must be monotonically increasing."
+            )
+
+    if 'internal_voltages' in options.keys():
+        if np.any(np.diff(options.internal_voltages) < 0):
+            raise ValueError(
+                "ERROR in 'solar_cell_solver' - The internal_voltages must be monotonically increasing."
+            )
 
 def process_position(solar_cell, options, layer_widths):
     """
