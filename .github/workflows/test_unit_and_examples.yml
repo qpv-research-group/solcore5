@@ -67,15 +67,17 @@ jobs:
           cd ..
           rm -rf S4    
 
-      - name: Install S4 (intel Mac)
-        if: matrix.os == 'macos-14'
-        run: |
-          pip install wheel setuptools
-          git clone https://github.com/phoebe-p/S4
-          cd S4
-          make S4_pyext --file="Makefile.m1"
-          cd ..
-          rm -rf S4  
+# this is not working as of early 2024. Doesn't work for either Intel or M1 Macs, different errors:
+# on M1, cannot find the boost libraries, in Intel, gives a 'flat namespace' error.
+#      - name: Install S4 (Mac)
+#        if: matrix.os == 'macos-14'
+#        run: |
+#          pip install wheel setuptools
+#          git clone https://github.com/phoebe-p/S4
+#          cd S4
+#          make S4_pyext --file="Makefile.m1"
+#          cd ..
+#          rm -rf S4
 
       - name: Build solcore
         run: |
@@ -157,15 +159,15 @@ jobs:
           cd ..
           rm -rf S4    
 
-      - name: Install S4 (intel Mac)
-        if: matrix.os == 'macos-latest'
-        run: |
-          pip install wheel setuptools
-          git clone https://github.com/phoebe-p/S4
-          cd S4
-          make S4_pyext --file="Makefile.mac_intel"
-          cd ..
-          rm -rf S4  
+#      - name: Install S4 (intel Mac)
+#        if: matrix.os == 'macos-latest'
+#        run: |
+#          pip install wheel setuptools
+#          git clone https://github.com/phoebe-p/S4
+#          cd S4
+#          make S4_pyext --file="Makefile.mac_intel"
+#          cd ..
+#          rm -rf S4
 
       - name: Build solcore
         run: |
