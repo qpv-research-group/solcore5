@@ -44,7 +44,6 @@ jobs:
       - name: Install system dependencies in MacOS
         if: matrix.os == 'macos-latest' || matrix.os == 'macos-14'
         run: |
-#          brew reinstall gfortran
           brew install ngspice boost suite-sparse
 
       - name: Install system dependencies in Windows
