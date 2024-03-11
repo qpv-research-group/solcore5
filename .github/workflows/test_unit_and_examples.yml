@@ -56,8 +56,18 @@ jobs:
           pip install pytest meson-python ninja cython spin
           python3 -m spin install-dependencies -test-dep
 
+      - name: Install S4 (Mac intel)
+        if: matrix.os == 'macos-latest'
+        run: |
+          pip install wheel setuptools
+          git clone https://github.com/phoebe-p/S4
+          cd S4
+          make S4_pyext --file="Makefile.mac_intel"
+          cd ..
+          rm -rf S4   
+
       - name: Install S4
-        if: (matrix.os == 'macos-latest') || (matrix.os == 'ubuntu-latest')
+        if: matrix.os == 'ubuntu-latest'
         run: |
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
