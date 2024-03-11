@@ -46,8 +46,6 @@ jobs:
         run: |
           brew reinstall gfortran
           brew install ngspice boost suite-sparse
-          export CPATH=/opt/homebrew/include
-          export LIBRARY_PATH=/opt/homebrew/lib
 
       - name: Install system dependencies in Windows
         if: matrix.os == 'windows-latest'
@@ -65,7 +63,7 @@ jobs:
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
-          make S4_pyext
+          make S4_pyext --file="Makefile.m1"
           cd ..
           rm -rf S4    
 
