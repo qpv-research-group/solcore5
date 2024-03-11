@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, macos-14, windows-latest]
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
@@ -42,7 +42,7 @@ jobs:
           sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
       - name: Install system dependencies in MacOS
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-latest' || matrix.os == 'macos-14'
         run: |
           brew reinstall gfortran
           brew install ngspice boost suite-sparse
@@ -58,12 +58,22 @@ jobs:
           python3 -m spin install-dependencies -test-dep
 
       - name: Install S4
-        if: matrix.os != 'windows-latest'
+        if: matrix.os == macos-latest || matrix.os == ubuntu-latest
         run: |
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
           make S4_pyext
+          cd ..
+          rm -rf S4    
+
+      - name: Install S4 (M1)
+        if: matrix.os == macos-14
+        run: |
+          pip install wheel setuptools
+          git clone https://github.com/phoebe-p/S4
+          cd S4
+          make S4_pyext --file="Makefile.m1"
           cd ..
           rm -rf S4    
 
@@ -98,7 +108,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, macos-14, windows-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
@@ -138,7 +148,7 @@ jobs:
           python3 -m spin install-dependencies -test-dep
 
       - name: Install S4
-        if: matrix.os != 'windows-latest'
+        if: matrix.os == macos-latest || matrix.os == ubuntu-latest
         run: |
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
@@ -146,6 +156,17 @@ jobs:
           make S4_pyext
           cd ..
           rm -rf S4    
+
+      - name: Install S4 (M1)
+        if: matrix.os == macos-14
+        run: |
+          pip install wheel setuptools
+          git clone https://github.com/phoebe-p/S4
+          cd S4
+          make S4_pyext --file="Makefile.m1"
+          cd ..
+          rm -rf S4    
+
 
       - name: Build solcore
         run: |
