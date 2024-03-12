@@ -30,7 +30,7 @@ jobs:
           - [ macos-14, macosx, macos-14] # ARM M1 chip
           - [ windows-2019, win, AMD64 ]
 
-        python: [[ "cp37", "3.7" ], [ "cp38", "3.8" ], [ "cp39", "3.9" ],
+        python: [[ "cp38", "3.8" ], [ "cp39", "3.9" ],
                  [ "cp310", "3.10" ], [ "cp311", "3.11" ], ["cp312", "3.12"]]
 
     name: Build wheel for ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }} ${{ matrix.buildplat[2] }}
@@ -42,7 +42,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.11
 
       - name: install-rtools needed for windows
         if: ${{ runner.os == 'Windows' }}
@@ -51,12 +51,10 @@ jobs:
           echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
 
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.16.2
+        run: python -m pip install cibuildwheel==2.17.0
 
       - name: Build Solcore
-        if: >-
-          ( ! contains(matrix.buildplat[2], 'arm64' ) )
-        uses: pypa/cibuildwheel@v2.16.2
+        uses: pypa/cibuildwheel@v2.17.0
         env:
           CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
           CIBW_ARCHS: ${{ matrix.buildplat[2] }}
