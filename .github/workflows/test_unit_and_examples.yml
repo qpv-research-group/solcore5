@@ -45,7 +45,8 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew reinstall gfortran
-          brew install ngspice boost suite-sparse
+          brew install ngspice
+# boost suite-sparse also need to be included in brew install if attempting S4 install
 
       - name: Install system dependencies in Windows
         if: matrix.os == 'windows-latest'
