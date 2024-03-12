@@ -27,8 +27,8 @@ jobs:
           - [ ubuntu-latest, manylinux, x86_64]
           - [ ubuntu-latest, manylinux, i686]
           - [ macos-latest, macosx, x86_64 ] # Intel chip
-          - [ macos-14, macosx, arm64] # ARM M1 chip
-          - [ windows-2019, win, AMD64 ]
+          - [ macos-14, macosx, arm64] # ARM M1/M2 chip
+          - [ windows-latest, win, AMD64]
 
         python: [[ "cp38", "3.8" ], [ "cp39", "3.9" ],
                  [ "cp310", "3.10" ], [ "cp311", "3.11" ], ["cp312", "3.12"]]
@@ -72,24 +72,6 @@ jobs:
           CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
           CIBW_BEFORE_BUILD_MACOS: brew reinstall gfortran
           CIBW_BEFORE_BUILD_LINUX: python -m pip install numpy --config-settings=setup-args="-Dallow-noblas=true"
-
-
-      #      - name: Set extra env for arm64
-#        if: >-
-#          ( contains(matrix.buildplat[2], 'arm64' ) )
-#        run: |
-#            echo "LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib" >> $GITHUB_ENV;
-#            echo "LIBRARY_PATH=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib" >> $GITHUB_ENV;
-
-#      - name: Cross-build Solcore for arm64
-#        if: ${{ (matrix.python[0] != 'cp37') && ( contains(matrix.buildplat[2], 'arm64') )}} # image not present for python3.7
-#        uses: pypa/cibuildwheel@v2.16.2
-#        env:
-#          CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
-#          CIBW_ARCHS: ${{ matrix.buildplat[2] }}
-#          CIBW_ENVIRONMENT: CFLAGS='-target arm64-apple-macos'
-#          CIBW_BEFORE_BUILD_MACOS: bash {project}/build_tools/cibw_before_build_macos_arm.sh && meson setup --cross-file={project}/build_tools/x86_64-w64-arm64.ini build
-#          CIBW_CONFIG_SETTINGS_MACOS: builddir=build
 
       - uses: actions/upload-artifact@v3
         with:
