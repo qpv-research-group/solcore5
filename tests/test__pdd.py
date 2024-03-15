@@ -127,7 +127,8 @@ def test_calculate_iv(mocker):
     output_iv = 1
 
     # We check all relevant functions are called when running in the dark.
-    out = calculate_iv(junction, vlimit, vstep, light_iv=False, output_iv=output_iv)
+    out = calculate_iv(junction, vlimit, vstep, light_iv=False, output_iv=output_iv,
+                       options={"T": 350})
     mock_eq.assert_called()
     mock_sc.assert_not_called()
     mock_ddModel.runiv.assert_called_with(vlimit, vstep, output_iv, 0)
