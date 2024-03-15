@@ -1871,7 +1871,7 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
 
     END FUNCTION OutputCode
 !-------------------------------------------------
-    SUBROUTINE Equilibrium(OutputLevel)                
+    SUBROUTINE Equilibrium(OutputLevel, T_in)
         ! Solve the DD equations at 0V in the Dark         
     
         REAl(KIND=16) :: start_time, end_time
@@ -1880,7 +1880,8 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
         REAl(KIND=16) :: dum1, dum2, dum3, dum4, dum5, dum7    ! Dummy variables that must be different. 
         INTEGER :: dum6
         INTEGER :: OutputLevel
-
+        REAL(KIND=8) :: T_in ! Added by SBH
+        T = REAL(T_in,16) ! Added by SBH
         CALL open_log()
                 
         IF (OutputLevel>=1) THEN
@@ -1926,7 +1927,7 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     
     END SUBROUTINE Equilibrium
 !-------------------------------------------------
-    SUBROUTINE LightSC(OutputLevel, qmode)            
+    SUBROUTINE LightSC(OutputLevel, T_in, qmode)   ! T_in added by SBH
         ! Solve the DD equations at 0V and with illumination.         
     
         REAl(KIND=16) :: start_time, end_time
@@ -1937,7 +1938,8 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
         REAl(KIND=16) :: dum1, dum2, dum3, dum4, dum5, dum7     ! Dummy variables that must be different. 
         INTEGER :: dum6
         INTEGER :: OutputLevel, SWL
-        
+        REAL(KIND=8) :: T_in ! Added by SBH
+        T = REAL(T_in,16) ! Added by SBH
         CALL open_log()
                 
         IF (OutputLevel>=1) THEN
@@ -2002,11 +2004,12 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
     
     END SUBROUTINE LightSC
 !-------------------------------------------------
-    SUBROUTINE RunIV(Vfin, Vstep, OutputLevel, escape)            
+    SUBROUTINE RunIV(Vfin, Vstep, T_in, OutputLevel, escape)       ! T_in added by SBH
         ! Solve the DD equations as a function of voltage in the dark.         
     
         REAl(KIND=16) :: start_time, end_time
         REAl(KIND=8) :: Vini, Vfin, Vstep
+        REAl(KIND=8) :: T_in ! added by SBH, temperature
         REAl(KIND=16) :: Vapp, Vreal, step, Vend, factor
         REAl(KIND=16) :: sum, sum1, sum2, sum3, Jtot, Jsrh, Jrad, Jaug, Jsur
         REAl(KIND=16) :: intertot(3000)
@@ -2018,7 +2021,7 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
         REAl(KIND=16) :: xx, yy, sol
         
         INTEGER :: i
-        
+        T = REAL(T_in,16) ! Added by SBH
         CALL open_log()
                 
         continue_loop = .TRUE.
@@ -2126,7 +2129,7 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
             
     END SUBROUTINE RunIV
 !-------------------------------------------------
-    SUBROUTINE RunIQE(OutputLevel)        
+    SUBROUTINE RunIQE(OutputLevel, T_in) ! Added by SBH
 
         ! External variables
         INTEGER :: OutputLevel
@@ -2141,9 +2144,9 @@ IF(OutputLevel>=2)WRITE(ou,'(1I10,6g14.4,1I10)') niter, Jtot, sum, sum1, sum2, s
         INTEGER :: info, niter
         INTEGER :: i, k, maxsteps
         REAl(KIND=16), DIMENSION(0:6000) :: TempG    
-
+        REAL(KIND=8) :: T_in ! Added by SBH
         CALL open_log()
-            
+        T = REAL(T_in,16) ! Added by SBH
         SC = 1
 
         TempG(0:M) = G(0:M)

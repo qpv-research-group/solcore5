@@ -163,7 +163,7 @@ def equilibrium_pdd(
     dd.gen = 0
 
     print("Solving equilibrium...")
-    dd.equilibrium(output_equilibrium)
+    dd.equilibrium(output_equilibrium, T)  # T added by SBH
     print("...done!\n")
 
     output["Bandstructure"] = DumpBandStructure()
@@ -211,8 +211,7 @@ def short_circuit_pdd(
     dd.gen = 1
 
     dd.illumination(ph)
-
-    dd.lightsc(output_sc, 1)
+    dd.lightsc(output_sc, options['T'], 1)  # options['T'] added by SBH
     print("...done!\n")
 
     output = {
@@ -251,7 +250,7 @@ def calculate_iv(
     else:
         equilibrium_pdd(junction, **options)
 
-    dd.runiv(vlimit, vstep, output_iv, 0)
+    dd.runiv(vlimit, vstep, options['T'], output_iv, 0)  # options['T'] added by SBH
     return {"Bandstructure": DumpBandStructure(), "IV": DumpIV()}
 
 
@@ -259,7 +258,6 @@ def calculate_iv(
 def iv_pdd(
     junction: Junction,
     internal_voltages: NDArray,
-    T: float = 298.0,
     light_iv: bool = False,
     output_iv: int = 1,
     **options
@@ -306,7 +304,8 @@ def iv_pdd(
     min_bandgap = find_minimum_bandgap(junction)
     p_on_n = True if junction[0].material.Na >= junction[0].material.Nd else False
     vmax, vmin = find_voltage_limits(
-        min_bandgap, max(junction.voltage), min(junction.voltage), p_on_n, T
+        min_bandgap, max(junction.voltage), min(junction.voltage), p_on_n, options['T']
+        # SBH: options['T'], originally was just T
     )
     vstep = junction.voltage[1] - junction.voltage[0]
 
@@ -363,7 +362,7 @@ def qe_pdd(junction, options):
 
     short_circuit_pdd(junction, **options)
 
-    dd.runiqe(output_info)
+    dd.runiqe(output_info, options['T'])  # options['T] added by SBH
     print("...done!\n")
 
     output = {}
