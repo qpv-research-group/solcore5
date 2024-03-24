@@ -124,13 +124,13 @@ def R_from_r(r):
     return abs(r) ** 2
 
 
-def T_from_t(pol, t, n_i, n_f, th_i, th_f):
+def T_from_t(pol, t, n_i, n_f, cos_th_i, cos_th_f):
     """
     Calculate transmitted power T, starting with transmission amplitude t.
 
     n_i,n_f are refractive indices of incident and final medium.
 
-    th_i, th_f are (complex) propegation angles through incident & final medium
+    cos_th_i, cos_th_f are cosines of (complex) propegation angles through incident & final medium
     (in radians, where 0=normal). "th" stands for "theta".
 
     In the case that n_i,n_f,th_i,th_f are real, formulas simplify to
@@ -139,15 +139,15 @@ def T_from_t(pol, t, n_i, n_f, th_i, th_f):
     See manual for discussion of formulas
     """
     if (pol == 's'):
-        return abs(t ** 2) * (((n_f * np.cos(th_f)).real) / (n_i * np.cos(th_i)).real)
+        return abs(t ** 2) * (((n_f * cos_th_f).real) / (n_i * cos_th_i).real)
     elif (pol == 'p'):
-        return abs(t ** 2) * (((n_f * np.conj(np.cos(th_f))).real) /
-                              (n_i * np.conj(np.cos(th_i))).real)
+        return abs(t ** 2) * (((n_f * np.conj(cos_th_f)).real) /
+                              (n_i * np.conj(cos_th_i)).real)
     else:
         raise ValueError("Polarization must be 's' or 'p'")
 
 
-def power_entering_from_r(pol, r, n_i, th_i):
+def power_entering_from_r(pol, r, n_i, cos_th_i):
     """
     Calculate the power entering the first interface of the stack, starting with
     reflection amplitude r. Normally this equals 1-R, but in the unusual case
@@ -155,15 +155,15 @@ def power_entering_from_r(pol, r, n_i, th_i):
 
     n_i is refractive index of incident medium.
 
-    th_i is (complex) propegation angle through incident medium
+    cos_th_i is cosine of (complex) propegation angle through incident medium
     (in radians, where 0=normal). "th" stands for "theta".
     """
     if (pol == 's'):
-        return ((n_i * np.cos(th_i) * (1 + np.conj(r)) * (1 - r)).real
-                / (n_i * np.cos(th_i)).real)
+        return ((n_i * cos_th_i * (1 + np.conj(r)) * (1 - r)).real
+                / (n_i * cos_th_i).real)
     elif (pol == 'p'):
-        return ((n_i * np.conj(np.cos(th_i)) * (1 + r) * (1 - np.conj(r))).real
-                / (n_i * np.conj(np.cos(th_i))).real)
+        return ((n_i * np.conj(cos_th_i) * (1 + r) * (1 - np.conj(r))).real
+                / (n_i * np.conj(cos_th_i)).real)
     else:
         raise ValueError("Polarization must be 's' or 'p'")
 
@@ -201,8 +201,10 @@ def interface_T(polarization, n_i, n_f, th_i, th_f):
 
     return T_from_t(polarization, t, n_i, n_f, th_i, th_f)
 
-
-def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
+# 2024-03-23: JW - modified to run at faster speed, execution time roughly 57% of original
+# if further set detailed = False, this function will skip calculations of power_entering 
+# and vw_list, and the function will be faster still, execution time roughly 80% x 57% = 45% of original
+def coh_tmm(pol, n_list, d_list, th_0, lam_vac, detailed=True):
     """
     This function is vectorized.
     Main "coherent transfer matrix method" calc. Given parameters of a stack,
@@ -266,10 +268,12 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # through the layer. Computed with Snell's law. Note that the "angles" may be
     # complex!
     th_list = list_snell(n_list, th_0)
+    cos_th_0 = np.cos(th_0)
+    cos_th_list = np.cos(th_list)
 
     # kz is the z-component of (complex) angular wavevector for forward-moving
     # wave. Positive imaginary part means decaying.
-    kz_list = 2 * np.pi * n_list * np.cos(th_list) / lam_vac
+    kz_list = 2 * np.pi * n_list * cos_th_list / lam_vac
 
     # delta is the total phase accrued by traveling through a given layer.
     # ignore warning about inf multiplication
@@ -291,11 +295,19 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     t_list = np.zeros((num_wl, num_layers, num_layers), dtype=complex)
     r_list = np.zeros((num_wl, num_layers, num_layers), dtype=complex)
 
-    for i in range(num_layers - 1):
-        t_list[:, i, i + 1] = interface_t(pol, n_list[i], n_list[i + 1],
-                                          th_list[i], th_list[i + 1])
-        r_list[:, i, i + 1] = interface_r(pol, n_list[i], n_list[i + 1],
-                                          th_list[i], th_list[i + 1])
+    if pol == 's':
+        t_list[:,:-1] = np.transpose((2 * n_list[:-1] * cos_th_list[:-1]) /
+                (n_list[:-1] * cos_th_list[:-1] + n_list[1:] * cos_th_list[1:]))
+        r_list[:,:-1] = np.transpose((n_list[:-1] * cos_th_list[:-1] - n_list[1:] * cos_th_list[1:]) /
+                (n_list[:-1] * cos_th_list[:-1] + n_list[1:] * cos_th_list[1:]))
+    elif pol == 'p':
+        t_list[:,:-1] = np.transpose((2 * n_list[:-1] * cos_th_list[:-1]) /
+                (n_list[1:] * cos_th_list[:-1] + n_list[:-1] * cos_th_list[1:]))
+        r_list[:,:-1] = np.transpose((n_list[1:] * cos_th_list[:-1] - n_list[:-1] * cos_th_list[1:]) /
+                (n_list[1:] * cos_th_list[:-1] + n_list[:-1] * cos_th_list[1:]))
+    else:
+        raise ValueError("Polarization must be 's' or 'p'")
+    
     # At the interface between the (n-1)st and nth material, let v_n be the
     # amplitude of the wave on the nth side heading forwards (away from the
     # boundary), and let w_n be the amplitude on the nth side heading backwards
@@ -304,48 +316,49 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # My M is a bit different than Sernelius's, but Mtilde is the same.
 
     M_list = np.zeros((num_layers, num_wl, 2, 2), dtype=complex)
-    for i in range(1, num_layers - 1):
-        A = make_2x2_array(np.exp(-1j * delta[i]), np.zeros_like(delta[i]), np.zeros_like(delta[i]), np.exp(1j * delta[i]),
-                           dtype=complex)
-        B = make_2x2_array(np.ones_like(delta[i]), r_list[:, i, i + 1], r_list[:, i, i + 1], np.ones_like(delta[i]),
-                           dtype=complex)
-        d = (1 / t_list[:, i, i + 1])
-
-        M_list[i] = np.transpose(d * np.transpose(np.matmul(A, B)))  # , (1, 2, 0)), (2, 0, 1))
+    for i in range(0, num_layers - 1):
+        exp_ = 1.0
+        if i > 0:
+            exp_ = np.exp(-1j * delta[i])
+        d = (1 / t_list[:, i])
+        M_list[i,:,0,0] = exp_*d
+        M_list[i,:,0,1] = exp_*d*r_list[:, i]
+        M_list[i,:,1,0] = d/exp_*r_list[:, i]
+        M_list[i,:,1,1] = d/exp_
 
     Mtilde = make_2x2_array(np.ones_like(delta[i]), np.zeros_like(delta[i]), np.zeros_like(delta[i]),
                             np.ones_like(delta[i]), dtype=complex)
-    for i in range(1, num_layers - 1):
-        Mtilde = np.matmul(Mtilde, M_list[i])
-
-    A = make_2x2_array(np.ones_like(delta[i]), r_list[:, 0, 1], r_list[:, 0, 1], np.ones_like(delta[i]),
-                       dtype=complex)
-    d = 1 / t_list[:, 0, 1]
-    Mtilde = np.matmul(np.transpose(d * np.transpose(A, (1, 2, 0)), (2, 0, 1)), Mtilde)
+    for i in range(0, num_layers - 1):
+        Mtilde = np.einsum('ijk,ikl->ijl', Mtilde, M_list[i])
 
     # Net complex transmission and reflection amplitudes
     r = Mtilde[:, 1, 0] / Mtilde[:, 0, 0]
     t = np.ones_like(Mtilde[:, 0, 0]) / Mtilde[:, 0, 0]
 
-    # vw_list[n] = [v_n, w_n]. v_0 and w_0 are undefined because the 0th medium
-    # has no left interface.
-    vw_list = np.zeros((num_layers, num_wl, 2), dtype=complex)
-    vw = np.zeros((num_wl, 2, 2), dtype=complex)
-    I = np.identity(2)
-    vw[:, 0, 0] = t
-    vw[:, 0, 1] = t
-    vw_list[-1] = vw[:, 0, :]
-    for i in range(num_layers - 2, 0, -1):
-        vw = np.matmul(M_list[i], vw)
-        vw_list[i, :, :] = vw[:, :, 1]
-    vw_list[-1, :, 1] = 0
+    vw_list = []
+    if detailed:
+        # vw_list[n] = [v_n, w_n]. v_0 and w_0 are undefined because the 0th medium
+        # has no left interface.
+        vw_list = np.zeros((num_layers, num_wl, 2), dtype=complex)
+        vw = np.zeros((num_wl, 2, 2), dtype=complex)
+        I = np.identity(2)
+        vw[:, 0, 0] = t
+        vw[:, 0, 1] = t
+        vw_list[-1] = vw[:, 0, :]
+        for i in range(num_layers - 2, 0, -1):
+            vw = np.einsum('ijk,ikl->ijl', M_list[i], vw)
+            vw_list[i, :, :] = vw[:, :, 1]
+        vw_list[-1, :, 1] = 0
 
     # Net transmitted and reflected power, as a proportion of the incoming light
     # power.
     R = R_from_r(r)
-    T = T_from_t(pol, t, n_list[0], n_list[-1], th_0, th_list[-1])
-    power_entering = power_entering_from_r(
-        pol, r, n_list[0], th_0)
+    T = T_from_t(pol, t, n_list[0], n_list[-1], cos_th_0, cos_th_list[-1])
+
+    power_entering = []
+    if detailed:
+        power_entering = power_entering_from_r(
+            pol, r, n_list[0], cos_th_0)
 
     return {'r': r, 't': t, 'R': R, 'T': T, 'power_entering': power_entering,
             'vw_list': vw_list, 'kz_list': kz_list, 'th_list': th_list,
