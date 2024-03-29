@@ -17,8 +17,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+         os: [ubuntu-latest, macos-13, windows-latest, macos-14]
+         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+         exclude:
+           - os: macos-14
+             python-version: 3.7
+           - os: macos-14
+             python-version: 3.8
+           - os: macos-14
+             python-version: 3.9
 
     steps:
       - name: Checkout
@@ -42,11 +49,11 @@ jobs:
           sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
       - name: Install system dependencies in MacOS
-        if: matrix.os == 'macos-latest'
+        if: >-
+          ( contains(matrix.os, 'macos') )
         run: |
-          brew reinstall gfortran
+          brew reinstall gfortran openblas pkg-config
           brew install ngspice boost suite-sparse
-          brew info suite-sparse
 
       - name: Install system dependencies in Windows
         if: matrix.os == 'windows-latest'
@@ -54,19 +61,42 @@ jobs:
 
       - name: Install Python dependecies
         run: |
+          pip install --upgrade pip
+          
           pip install numpy --config-settings=setup-args="-Dallow-noblas=true"
           pip install pytest meson-python ninja cython spin
+          
           python3 -m spin install-dependencies -test-dep
 
-      - name: Install S4
-        if: matrix.os != 'windows-latest'
+      - name: Install S4 (macOS - x86)
+        if: matrix.os == 'macos-13'
+        run: |
+          pip install wheel setuptools
+          git clone https://github.com/phoebe-p/S4
+          cd S4
+          make S4_pyext --file="Makefile.mac_intel"
+          cd ..
+          rm -rf S4
+
+      - name: Install S4 (macOS - arm)
+        if: matrix.os == 'macos-14'
+        run: |
+          pip install wheel setuptools
+          git clone https://github.com/Abelarm/S4
+          cd S4
+          make S4_pyext --file="Makefile.m1"
+          cd ..
+          rm -rf S4
+
+      - name: Install S4 (ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
           make S4_pyext
           cd ..
-          rm -rf S4    
+          rm -rf S4
 
       - name: Build solcore
         run: |
@@ -83,7 +113,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cd D:\a\solcore5\solcore5\build-install\usr\Lib\site-packages
-          python -m pytest -r a -v --ignore=solcore/tests/test_examples.py 
+          python -m pytest -r a -v --ignore=solcore/tests/test_examples.py -n "auto"
 
       - name: Codecov
         env:
@@ -99,8 +129,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+         os: [ubuntu-latest, macos-13, windows-latest, macos-14]
+         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+         exclude:
+           - os: macos-14
+             python-version: 3.7
+           - os: macos-14
+             python-version: 3.8
+           - os: macos-14
+             python-version: 3.9
 
     steps:
       - name: Checkout
@@ -124,22 +161,47 @@ jobs:
           sudo apt install -y gfortran ngspice python3-tk libboost-all-dev libopenblas-dev libfftw3-dev libsuitesparse-dev
 
       - name: Install system dependencies in MacOS
-        if: matrix.os == 'macos-latest'
+        if: >-
+          ( contains(matrix.os, 'macos') )
         run: |
-          brew reinstall gfortran
+          brew reinstall gfortran openblas pkg-config
           brew install ngspice boost suite-sparse
 
-#      - name: Install system dependencies in Windows
-#        if: matrix.os == 'windows-latest'
-#        run: choco install ngspice
+      - name: Install system dependencies in Windows
+        if: matrix.os == 'windows-latest'
+        run: choco install ngspice
 
       - name: Install Python dependecies
         run: |
-          pip install pytest meson-python ninja cython numpy spin
+          pip install --upgrade pip
+          
+          pip install numpy --config-settings=setup-args="-Dallow-noblas=true"
+          pip install pytest meson-python ninja cython spin
+          
           python3 -m spin install-dependencies -test-dep
 
-      - name: Install S4
-        if: matrix.os != 'windows-latest'
+      # - name: Install S4 (macOS - x86)
+      #   if: if: matrix.os == 'macos-13'
+      #   run: |
+      #     pip install wheel setuptools
+      #     git clone https://github.com/phoebe-p/S4
+      #     cd S4
+      #     make S4_pyext --file="Makefile.mac_intel"
+      #     cd ..
+      #     rm -rf S4
+
+      - name: Install S4 (macOS - arm)
+        if: matrix.os == 'macos-14'
+        run: |
+          pip install wheel setuptools
+          git clone https://github.com/Abelarm/S4
+          cd S4
+          make S4_pyext --file="Makefile.m1"
+          cd ..
+          rm -rf S4
+
+      - name: Install S4 (ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
@@ -158,8 +220,3 @@ jobs:
           SOLCORE_SPICE: ngspice
         run: |
           python -m spin test -- -r a -v solcore/tests/test_examples.py -n "auto"
-
-#      - name: Unit and functional tests (Windows)
-#        if: matrix.os == 'windows-latest'
-#        run: |
-#          python -m spin test -- -r a -v solcore/tests/test_examples.py
