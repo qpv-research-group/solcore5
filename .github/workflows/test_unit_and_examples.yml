@@ -68,15 +68,15 @@ jobs:
           
           python3 -m spin install-dependencies -test-dep
 
-      - name: Install S4 (macOS - x86)
-        if: matrix.os == 'macos-13'
-        run: |
-          pip install wheel setuptools
-          git clone https://github.com/phoebe-p/S4
-          cd S4
-          make S4_pyext --file="Makefile.mac_intel"
-          cd ..
-          rm -rf S4
+      # - name: Install S4 (macOS - x86)
+      #   if: matrix.os == 'macos-13'
+      #   run: |
+      #     pip install wheel setuptools
+      #     git clone https://github.com/phoebe-p/S4
+      #     cd S4
+      #     make S4_pyext --file="Makefile.mac_intel"
+      #     cd ..
+      #     rm -rf S4
 
       - name: Install S4 (macOS - arm)
         if: matrix.os == 'macos-14'
