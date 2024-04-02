@@ -12,20 +12,22 @@ import warnings
 
 from solcore.registries import register_iv_solver, register_equilibrium_solver
 
-@register_equilibrium_solver("sesame_PDD")
-def equilibrium(junction: Junction,
-                **kwargs):
-    """
-     Solve at equilibrium (no illumination, no applied voltage) using the Sesame solver.
 
-     :param junction: a Junction object
-     :param options: a State object containing options for the solver
-     """
+@register_equilibrium_solver("sesame_PDD")
+def equilibrium(junction: Junction, **kwargs):
+    """
+    Solve at equilibrium (no illumination, no applied voltage) using the Sesame solver.
+
+    :param junction: a Junction object
+    :param options: a State object containing options for the solver
+    """
 
     # TODO: pass output from 'result' parameter to the user, similar to the Fortran PDD solver, so that
     # band structures etc. can be plotted.
 
-    options = State(kwargs) # needs to be passed as kwargs to be compatible with Fortran equilibrium solver
+    options = State(
+        kwargs
+    )  # needs to be passed as kwargs to be compatible with Fortran equilibrium solver
     # in registries
 
     if not hasattr(junction, "sesame_sys"):
@@ -133,8 +135,7 @@ def iv_sesame(junction, options):
             j_negative = j_negative[::-1]
 
             result_negative = {
-                key: result_negative[key][::-1]
-                for key in result_negative.keys()
+                key: result_negative[key][::-1] for key in result_negative.keys()
             }
 
             negative_voltages = negative_voltages[::-1]
@@ -174,9 +175,7 @@ def iv_sesame(junction, options):
         voltage_order = np.argsort(voltages_for_solve)
 
         final_voltages = voltages_for_solve[voltage_order]
-        j, result = IVcurve(
-            junction.sesame_sys, final_voltages
-        )  # , verbose=False)
+        j, result = IVcurve(junction.sesame_sys, final_voltages)  # , verbose=False)
 
     warnings.resetwarnings()
 
@@ -353,36 +352,36 @@ def qe_sesame(junction: Junction, options: State):
 
 def process_sesame_results(sys: Builder, result: dict):
     """
-    Scale the result of a Sesame calculation to SI units, and calculate other quantities like
-    the positions of the conduction and valence band and the recombination rates. Produces a
-    State object with entries:
+        Scale the result of a Sesame calculation to SI units, and calculate other quantities like
+        the positions of the conduction and valence band and the recombination rates. Produces a
+        State object with entries:
 
-        - potential: the potential (V)
-        - n: the electron density (m\ :sup:`-3`)
-        - p: the hole density (m\ :sup:`-3`)
-        - Ec: the level of the conduction band (eV)
-        - Ev the level of the valence band (eV)
-        - Efe: the electron quasi-Fermi level (eV)
-        - Efh the hole quasi-Fermi level (eV)
-        - Rrad: the radiative recombination rate (m\ :sup:`-3` s\ :sup:`-1`)
-        - Raug: the Auger recombination rate (m\ :sup:`-3` s\ :sup:`-1`)
-        - Rsrh: the bulk recombination due to Shockley-Read-Hall processes (m\ :sup:`-3` s\ :sup:`-1`)
+            - potential: the potential (V)
+            - n: the electron density (m\ :sup:`-3`)
+            - p: the hole density (m\ :sup:`-3`)
+            - Ec: the level of the conduction band (eV)
+            - Ev the level of the valence band (eV)
+            - Efe: the electron quasi-Fermi level (eV)
+            - Efh the hole quasi-Fermi level (eV)
+            - Rrad: the radiative recombination rate (m\ :sup:`-3` s\ :sup:`-1`)
+            - Raug: the Auger recombination rate (m\ :sup:`-3` s\ :sup:`-1`)
+            - Rsrh: the bulk recombination due to Shockley-Read-Hall processes (m\ :sup:`-3` s\ :sup:`-1`)
 
-Each of these is a 2-dimensional array, with dimensions ``(len(options.internal_voltages), len(mesh))``.
+    Each of these is a 2-dimensional array, with dimensions ``(len(options.internal_voltages), len(mesh))``.
 
 
-    :param sys: a Sesame Builder object
-    :param result: a dictionary containing the results from a Sesame calculation
+        :param sys: a Sesame Builder object
+        :param result: a dictionary containing the results from a Sesame calculation
     """
 
     line = ((0, 0), (np.max(sys.xpts), 0))
     n_voltages = len(result["v"])
 
-    potential = result['v'] * sys.scaling.energy
-    Efe = result['efn'] * sys.scaling.energy
-    Efh = result['efp'] * sys.scaling.energy
-    Ec = -(result['v'] + sys.bl) * sys.scaling.energy
-    Ev = -(result['v'] + sys.bl + sys.Eg) * sys.scaling.energy
+    potential = result["v"] * sys.scaling.energy
+    Efe = result["efn"] * sys.scaling.energy
+    Efh = result["efp"] * sys.scaling.energy
+    Ec = -(result["v"] + sys.bl) * sys.scaling.energy
+    Ev = -(result["v"] + sys.bl + sys.Eg) * sys.scaling.energy
 
     n = np.zeros((n_voltages, sys.nx))
     p = np.zeros((n_voltages, sys.nx))
@@ -396,12 +395,20 @@ Each of these is a 2-dimensional array, with dimensions ``(len(options.internal_
 
         analyzer = Analyzer(sys, result_loop)
 
-        n[i1] = analyzer.electron_density(location=line) * sys.scaling.density * 1e6 # m-3
-        p[i1] = analyzer.hole_density(location=line) * sys.scaling.density * 1e6 # m-3
+        n[i1] = (
+            analyzer.electron_density(location=line) * sys.scaling.density * 1e6
+        )  # m-3
+        p[i1] = analyzer.hole_density(location=line) * sys.scaling.density * 1e6  # m-3
 
-        Rsrh[i1] = analyzer.bulk_srh_rr(location=line) * sys.scaling.generation * 1e6  # m-3
-        Raug[i1] = analyzer.auger_rr(location=line) * sys.scaling.generation * 1e6  # m-3
-        Rrad[i1] = analyzer.radiative_rr(location=line) * sys.scaling.generation * 1e6  # m-3
+        Rsrh[i1] = (
+            analyzer.bulk_srh_rr(location=line) * sys.scaling.generation * 1e6
+        )  # m-3
+        Raug[i1] = (
+            analyzer.auger_rr(location=line) * sys.scaling.generation * 1e6
+        )  # m-3
+        Rrad[i1] = (
+            analyzer.radiative_rr(location=line) * sys.scaling.generation * 1e6
+        )  # m-3
 
     output = State(
         potential=potential,
@@ -417,4 +424,3 @@ Each of these is a 2-dimensional array, with dimensions ``(len(options.internal_
     )
 
     return output
-
