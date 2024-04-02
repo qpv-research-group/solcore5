@@ -125,13 +125,14 @@ def test_calculate_iv(mocker):
     vlimit = 1
     vstep = 0.2
     output_iv = 1
+    T_in = 350
 
     # We check all relevant functions are called when running in the dark.
     out = calculate_iv(junction, vlimit, vstep, light_iv=False, output_iv=output_iv,
-                       T=350)
+                       T=T_in)
     mock_eq.assert_called()
     mock_sc.assert_not_called()
-    mock_ddModel.runiv.assert_called_with(vlimit, vstep, output_iv, 0)
+    mock_ddModel.runiv.assert_called_with(vlimit, vstep, T_in, output_iv, 0)
     mock_bandstructure.assert_called()
     mock_dump_iv.assert_called()
     assert "Bandstructure" in out and "IV" in out
