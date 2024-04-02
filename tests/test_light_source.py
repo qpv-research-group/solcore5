@@ -125,8 +125,9 @@ def test_photon_flux_per_hz(wavelength, gauss_spectrum):
     actual = photon_flux_per_hz(sp_fun, hz)
     assert actual * h * hz == approx(expected)
 
+
 def test_wavelength_array_consistency():
-    #GH 147
+    # GH 147
     from solcore.light_source import LightSource
     import numpy as np
 
@@ -137,3 +138,39 @@ def test_wavelength_array_consistency():
                              output_units='photon_flux_per_m')
     assert ls.spectrum()[1].shape == wl_arr.shape
     assert ls.spectrum(x=wl_arr2)[1].shape == wl_arr2.shape
+
+
+def test_spectral2():
+
+    from solcore.light_source import LightSource
+    import numpy as np
+
+    wls = np.linspace(300, 4000, 10)*1e-9
+
+    c_coefficient = [0.6, 14, 10]
+    d_coefficient = [2, 10, 1, 6]
+
+    aod_models = ['rural', 'urban', 'tropospheric', 'maritime',
+                  [c_coefficient, d_coefficient]]
+
+    for aod_mod in aod_models:
+        ls = LightSource(source_type='SPECTRAL2', x=wls, output_units='photon_flux_per_m',
+                           precipwater=1.0, turbidity=0.05,
+                           aod_model=aod_mod,
+                           latitude=-33.87 * np.pi / 180, longitude=-151.21 * np.pi / 180,
+                           )
+        assert ls.spectrum(np.array([500e-9]))[1] < 3.1e27
+        assert ls.spectrum(np.array([500e-9]))[1] > 2.0e27
+
+    # check if throws error with a different string:
+    try:
+        LightSource(
+            source_type='SPECTRAL2', x=wls, output_units='photon_flux_per_m',
+                           precipwater=1.0, turbidity=0.05,
+                           aod_model='other',
+                           latitude=-33.87 * np.pi / 180, longitude=-151.21 * np.pi / 180,
+                           )
+    except AssertionError:
+        pass
+    else:
+        assert False
