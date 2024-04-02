@@ -1,6 +1,6 @@
 [![image](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/qpv-research-group/solcore5/develop?urlpath=lab)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-26-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-27-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.1185316.svg)](https://doi.org/10.5281/zenodo.1185316)
 [![image](https://img.shields.io/badge/License-LGPLv3-blue.svg)](http://www.gnu.org/licenses/lgpl.html)
@@ -61,6 +61,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Rushil17D070020"><img src="https://avatars.githubusercontent.com/u/89643859?v=4?s=100" width="100px;" alt="Rushil17D070020"/><br /><sub><b>Rushil17D070020</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3ARushil17D070020" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/etervo"><img src="https://avatars.githubusercontent.com/u/51174646?v=4?s=100" width="100px;" alt="Eric Tervo"/><br /><sub><b>Eric Tervo</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3Aetervo" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/eli-schwartz"><img src="https://avatars.githubusercontent.com/u/6551424?v=4?s=100" width="100px;" alt="Eli Schwartz"/><br /><sub><b>Eli Schwartz</b></sub></a><br /><a href="#infra-eli-schwartz" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/sbhasan"><img src="https://avatars.githubusercontent.com/u/61343218?v=4?s=100" width="100px;" alt="sbhasan"/><br /><sub><b>sbhasan</b></sub></a><br /><a href="https://github.com/qpv-research-group/solcore5/issues?q=author%3Asbhasan" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>

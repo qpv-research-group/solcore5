@@ -282,6 +282,15 @@
       "contributions": [
         "infra"
       ]
+    },
+    {
+      "login": "sbhasan",
+      "name": "sbhasan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61343218?v=4",
+      "profile": "https://github.com/sbhasan",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -290,5 +299,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true,
-  "commitConvention": "angular"
+  "commitConvention": "angular",
+  "commitType": "docs"
 }
