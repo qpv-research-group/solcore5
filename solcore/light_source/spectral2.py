@@ -1,5 +1,4 @@
-import numpy
-from numpy import *
+import numpy as np
 from datetime import datetime
 from solcore import spectral_conversion_nm_ev
 from solcore.science_tracker import science_reference
@@ -11,10 +10,10 @@ this_dir = os.path.split(__file__)[0]
 def equation_of_time(day_angle):
     value = 229.18 * (
         0.000075
-        + 0.001868 * cos(day_angle)
-        - 0.032077 * sin(day_angle)
-        - 0.014615 * cos(2 * day_angle)
-        - 0.040849 * sin(2 * day_angle)
+        + 0.001868 * np.cos(day_angle)
+        - 0.032077 * np.sin(day_angle)
+        - 0.014615 * np.cos(2 * day_angle)
+        - 0.040849 * np.sin(2 * day_angle)
     )
     return value
 
@@ -22,7 +21,7 @@ def equation_of_time(day_angle):
 def loadUtilitySpectra():
     global am_zero_wavelength, am_zero_irradiance, waterspectra, ozonespectra, uniformgasspectra
 
-    spctra = numpy.loadtxt(os.path.join(this_dir, "SPCTRAL_si_units.txt"), unpack=True)
+    spctra = np.loadtxt(os.path.join(this_dir, "SPCTRAL_si_units.txt"), unpack=True)
     (
         am_zero_wavelength,
         am_zero_irradiance,
@@ -50,8 +49,8 @@ def get_default_spectral2_object():
     """
     defaults = {}
 
-    defaults["latitude"] = 52.39 / 180 * numpy.pi  # Coventry
-    defaults["longitude"] = -1.56 / 180 * numpy.pi
+    defaults["latitude"] = 52.39 / 180 * np.pi  # Coventry
+    defaults["longitude"] = -1.56 / 180 * np.pi
     defaults["dateAndTime"] = datetime(2011, 6, 30, 12, 30)
     # 12:30pm, 30th of June 2011
     defaults["aod_model"] = "rural"
@@ -89,7 +88,7 @@ def calculate_spectrum_spectral2(
         "http://rredc.nrel.gov/solar/models/spectral/SPCTRAL2/",
     )
 
-    if stateObject == None:
+    if stateObject is None:
         stateObject = get_default_spectral2_object()
 
     latitude = stateObject["latitude"]
@@ -103,19 +102,23 @@ def calculate_spectrum_spectral2(
     precipwater = stateObject["precipwater"]
 
     # aod_model must be a specific string, or else a list of two lists:
-    if type(aod_model) == list:
+    if isinstance(aod_model, list):
         assert len(aod_model) == 2, (
             "aod_model must be a list of two lists, "
             "the first for c_coefficients and the second for d_coefficients"
         )
-        assert type(aod_model[0]) == list and type(aod_model[1]) == list, (
+        assert isinstance(aod_model[0], list) and isinstance(aod_model[1], list), (
             "aod_model must be a list of two lists, the first for c_coefficients and "
             "the second for d_coefficients"
         )
-    else:
 
+        assert len(aod_model[0]) == 3 and len(aod_model[1]) == 4, (
+            "aod_model must be a list of two lists, the first for c_coefficients (length 3) and "
+            "the second for d_coefficients (length 4)"
+        )
+    else:
         assert (
-            aod_model in "rural urban maritime tropospheric".split()
+                aod_model in "rural urban maritime tropospheric".split()
         ), "aod_model must be rural, urban, maritime, or tropospheric"
 
     time_since_new_years = dateAndTime - datetime(
@@ -130,10 +133,10 @@ def calculate_spectrum_spectral2(
 
     # converting back go degrees for longitude rounding
     longitude_degrees = (
-        longitude / numpy.pi * 180
+        longitude / np.pi * 180
     )  # convert(longitude,"radians",u"degrees")
 
-    day_angle = (2.0 * pi * (day_number - 1.0)) / 365.0  # this is in radians
+    day_angle = (2.0 * np.pi * (day_number - 1.0)) / 365.0  # this is in radians
     hour_angle_degrees = (
         15.0
         * (
@@ -146,34 +149,34 @@ def calculate_spectrum_spectral2(
     )  # this is in degrees.
 
     hour_angle = (
-        hour_angle_degrees / 180 * numpy.pi
+        hour_angle_degrees / 180 * np.pi
     )  # convert(hour_angle_degrees, "degrees", "radians")
 
     declination = (
         0.006918
-        - 0.399912 * cos(day_angle)
-        + 0.070257 * sin(day_angle)
-        - 0.006758 * cos(2 * day_angle)
-        + 0.000907 * sin(2 * day_angle)
-        - 0.002697 * cos(3 * day_angle)
-        + 0.00148 * sin(3 * day_angle)
+        - 0.399912 * np.cos(day_angle)
+        + 0.070257 * np.sin(day_angle)
+        - 0.006758 * np.cos(2 * day_angle)
+        + 0.000907 * np.sin(2 * day_angle)
+        - 0.002697 * np.cos(3 * day_angle)
+        + 0.00148 * np.sin(3 * day_angle)
     )
 
     earth_sun_distance_factor = (
         1.00011
-        + 0.034221 * cos(day_angle)
-        + 0.001280 * sin(day_angle)
-        + 0.000719 * cos(2 * day_angle)
-        + 0.000077 * sin(2 * day_angle)
+        + 0.034221 * np.cos(day_angle)
+        + 0.001280 * np.sin(day_angle)
+        + 0.000719 * np.cos(2 * day_angle)
+        + 0.000077 * np.sin(2 * day_angle)
     )
 
-    solar_zenith_angle = arccos(
-        cos(declination) * cos(latitude) * cos(hour_angle)
-        + sin(declination) * sin(latitude)
+    solar_zenith_angle = np.arccos(
+        np.cos(declination) * np.cos(latitude) * np.cos(hour_angle)
+        + np.sin(declination) * np.sin(latitude)
     )
 
     solar_zenith_angle_degrees = (
-        solar_zenith_angle / pi * 180
+        solar_zenith_angle / np.pi * 180
     )  # convert(solar_zenith_angle,"radians",u'degrees')
     # original code checked to stop sun dropping below horizon
     # //Stop sun dropping below horizon
@@ -182,12 +185,12 @@ def calculate_spectrum_spectral2(
 
     # this used to be 1/ could this cause issues in java?
     relative_am = 1.0 / (
-        cos(solar_zenith_angle)
+        np.cos(solar_zenith_angle)
         + (0.15 * pow((93.885 - solar_zenith_angle_degrees), -1.253))
-    )  ##AARG raised to the power of degrees
+    )  # AARG raised to the power of degrees
     pressure_corrected_am = relative_am * (pressure / 101325.33538686013)  # si("1 atm")
     effective_ozone_am = (1.0 + (22.0 / 6370.0)) / (
-        pow((pow(cos(solar_zenith_angle), 2.0) + (2.0 * (22.0 / 6370.0))), 0.5)
+        pow((pow(np.cos(solar_zenith_angle), 2.0) + (2.0 * (22.0 / 6370.0))), 0.5)
     )
 
     # source: PARAMETERIZED TRANSMITTANCE MODEL FOR DIRECT BEAM AND CIRCUMSOLAR SPECTRAL IRRADIANCE,
@@ -208,7 +211,7 @@ def calculate_spectrum_spectral2(
         c_coefficient, d_coefficient = aod_model
 
     # 0.9 degrees * something_in_percent rather than 90 degrees?? Honestly.
-    x_humidity = cos(humidity * pi / 2.0)  # si(0.9,"degrees","radians")
+    x_humidity = np.cos(humidity * np.pi / 2.0)  # si(0.9,"degrees","radians")
 
     alpha1 = (c_coefficient[0] + c_coefficient[1] * x_humidity) / (
         1 + c_coefficient[2] * x_humidity
@@ -221,30 +224,30 @@ def calculate_spectrum_spectral2(
 
     wavelength_um = am_zero_wavelength * 1e6  # convert(am_zero_wavelength, "m", 'um')
 
-    rayleigh_coeff = exp(
+    rayleigh_coeff = np.exp(
         -pressure_corrected_am
         / (wavelength_um**4 * (115.6406 - 1.335 / wavelength_um**2))
     )
 
-    aerosol_coeff = where(
+    aerosol_coeff = np.where(
         wavelength_um <= 0.5,
-        exp(
+        np.exp(
             -pressure_corrected_am
             * turbidity
             * 2.0 ** (alpha2 - alpha1)
             * wavelength_um**-alpha1
         ),
-        exp(-pressure_corrected_am * turbidity * wavelength_um**-alpha2),
+        np.exp(-pressure_corrected_am * turbidity * wavelength_um**-alpha2),
     )
 
-    vapour_coeff = exp(
+    vapour_coeff = np.exp(
         -(0.2385 * precipwater * waterspectra * relative_am)
         / (1.0 + 20.07 * precipwater * waterspectra * relative_am) ** 0.45
     )
 
-    ozone_coeff = exp(-ozonespectra * ozone * effective_ozone_am)
+    ozone_coeff = np.exp(-ozonespectra * ozone * effective_ozone_am)
 
-    mixed_coeff = exp(
+    mixed_coeff = np.exp(
         (-1.41 * uniformgasspectra * pressure_corrected_am)
         / (1.0 + 118.93 * uniformgasspectra * pressure_corrected_am) ** 0.45
     )
@@ -262,7 +265,7 @@ def calculate_spectrum_spectral2(
     )
 
     if suppress_nan:
-        irradiance_per_m = numpy.nan_to_num(irradiance_per_m)
+        irradiance_per_m = np.nan_to_num(irradiance_per_m)
 
     storage = dict()
 
@@ -286,17 +289,17 @@ def calculate_spectrum_spectral2(
         )  # siUnits(irradiance_per_ev, 'J-1')
 
         # integrate to find power density
-        power_density = trapz(x=wavelength_m, y=irradiance_per_m)
+        power_density = np.trapz(x=wavelength_m, y=irradiance_per_m)
 
         storage["incident power density"] = power_density
-        storage["incident spectrum wavelength si"] = array(
+        storage["incident spectrum wavelength si"] = np.array(
             [wavelength_m, irradiance_per_m]
         )
-        storage["incident spectrum wavelength nm"] = array(
+        storage["incident spectrum wavelength nm"] = np.array(
             [wavelength_nm, irradiance_per_nm]
         )
-        storage["incident spectrum energy si"] = array([energy_j, irradiance_per_j])
-        storage["incident spectrum energy eV"] = array([energy_ev, irradiance_per_ev])
+        storage["incident spectrum energy si"] = np.array([energy_j, irradiance_per_j])
+        storage["incident spectrum energy eV"] = np.array([energy_ev, irradiance_per_ev])
 
     return storage
 
