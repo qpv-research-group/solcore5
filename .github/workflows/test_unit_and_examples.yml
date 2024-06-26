@@ -90,6 +90,7 @@ jobs:
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
+          git checkout rename_interpolator
           make S4_pyext --file="Makefile.m1"
           cd ..
           rm -rf S4
@@ -100,6 +101,7 @@ jobs:
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
+          git checkout rename_interpolator
           make S4_pyext
           cd ..
           rm -rf S4
@@ -208,6 +210,7 @@ jobs:
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
+          git checkout rename_interpolator
           make S4_pyext --file="Makefile.m1"
           cd ..
           rm -rf S4
@@ -218,6 +221,7 @@ jobs:
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
+          git checkout rename_interpolator
           make S4_pyext
           cd ..
           rm -rf S4    
