@@ -50,8 +50,10 @@ jobs:
         if: >-
           ( contains(matrix.os, 'macos') )
         run: |
-          brew reinstall gfortran openblas pkg-config
-          brew install ngspice boost suite-sparse
+          brew reinstall gfortran
+        # brew reinstall gfortran openblas pkg-config # only relevant if installing S4
+          brew install ngspice
+        # brew install ngspice boost suite-sparse # only relevant if installing S4
 
       - name: Install system dependencies in Windows
         if: matrix.os == 'windows-latest'
@@ -107,13 +109,13 @@ jobs:
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m pytest -r a -v --ignore=solcore/tests/test_examples -n "auto"
+          python -m spin test -- -r a -v --cov=solcore/ --ignore=tests/test_examples.py -n "auto" 
 
       - name: Unit and functional tests (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           cd D:\a\solcore5\solcore5\build-install\usr\Lib\site-packages
-          python -m pytest -r a -v --ignore=solcore/tests/test_examples -n "auto"
+          python -m pytest -r a -v --ignore=tests/test_examples.py -n "auto"
 
       - name: Codecov
         env:
