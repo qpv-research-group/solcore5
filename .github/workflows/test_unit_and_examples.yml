@@ -65,7 +65,7 @@ jobs:
           pip install --upgrade pip
           
           pip install numpy --config-settings=setup-args="-Dallow-noblas=true"
-          pip install pytest meson-python ninja cython spin
+          pip install pytest meson-python ninja cython spin==0.9
           
           python3 -m spin install-dependencies -test-dep
 
