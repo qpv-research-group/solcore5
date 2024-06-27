@@ -186,7 +186,7 @@ jobs:
           make S4_pyext --file="Makefile.m1"
           cd ..
           rm -rf S4
-
+          
       - name: Install S4 (ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
