@@ -80,7 +80,7 @@ class interp1d(object):
 
         # Force-cast y to a floating-point type, if it's not yet one
         if not issubclass(y.dtype.type, np.inexact):
-            y = y.astype(np.float_)
+            y = y.astype(np.float64)
 
         # Normalize the axis to ensure that it is positive.
         self.axis = axis % len(y.shape)

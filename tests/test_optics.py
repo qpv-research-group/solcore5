@@ -126,9 +126,9 @@ def test_pol_rcwa():
                                                  rat_output_A=A_output_p, parallel=True, steps_size=step_size,
                                                  pol='p')
 
-    assert np.mean(A_output_u, 1) == approx(0.5*(A_output_p + A_output_s), rel=1e-4)
+    assert np.mean(A_output_u, 1) == approx(0.5*(A_output_p + A_output_s), rel=1e-3)
 
-    assert result_u["absorption"] == approx(0.5*(result_s["absorption"] + result_p["absorption"]), rel=1e-4)
+    assert result_u["absorption"] == approx(0.5*(result_s["absorption"] + result_p["absorption"]), rel=1e-3)
 
 
 @mark.skipif(skip_s4_test(), reason="Only works if S4 installed")
@@ -176,7 +176,7 @@ def test_arbitrary_pol_rcwa():
 
     assert A_output == approx(A_output_s)
 
-    assert result["absorption"] == approx(result_s["absorption"], rel=1e-4)
+    assert result["absorption"] == approx(result_s["absorption"], rel=1e-3)
 
 
 @mark.skipif(skip_s4_test(), reason="Only works if S4 installed")

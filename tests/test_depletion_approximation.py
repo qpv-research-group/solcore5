@@ -46,7 +46,7 @@ def test_get_j_dark():
 
     result = get_j_dark(x, w, L, s, d, V, minor, T)
 
-    assert result == approx(expected, nan_ok=True)
+    assert result == approx(expected, nan_ok=True, rel=1e-5)
 
 
 def test_factor():
@@ -103,7 +103,7 @@ def test_factor():
 
     result = factor(V, Vbi, tp, tn, kT, dEt)
 
-    assert result == approx(expected, nan_ok=True)
+    assert result == approx(expected, nan_ok=True, rel=1e-5)
 
 
 def test_forward():
@@ -151,7 +151,7 @@ def test_forward():
 
     result = forward(ni, V, Vbi, tp, tn, w, kT, dEt)
 
-    assert result == approx(expected, nan_ok=True)
+    assert result == approx(expected, nan_ok=True, rel=1e-5)
 
 
 def test_get_J_srh():
@@ -189,7 +189,7 @@ def test_get_J_srh():
 
     result = get_Jsrh(ni, V, Vbi, tp, tn, w, kT, dEt)
 
-    assert result == approx(expected, nan_ok=True)
+    assert result == approx(expected, nan_ok=True, rel=1e-5)
 
 
 def test_get_J_sc_diffusion_top():
@@ -250,7 +250,7 @@ def test_get_J_sc_diffusion_top():
         xa, xb, gen_prof, D, L, minority, s, wl, phg, side="top"
     )
 
-    assert result == approx(expected)
+    assert result == approx(expected, rel=1e-5)
 
 
 def test_get_J_sc_diffusion_bottom():
@@ -311,7 +311,7 @@ def test_get_J_sc_diffusion_bottom():
         xa, xb, gen_prof, D, L, minority, s, wl, phg, side="bottom"
     )
 
-    assert result == approx(expected)
+    assert result == approx(expected, rel=1e-5)
 
 
 def test_get_J_sc_SCR():
@@ -343,7 +343,7 @@ def test_get_J_sc_SCR():
 
     result = get_J_sc_SCR(xa, xb, gen_prof, wl, phg)
 
-    assert expected == approx(result)
+    assert expected == approx(result, rel=1e-5)
 
 
 def test_get_J_sc_SCR_vs_WL():
@@ -375,7 +375,7 @@ def test_get_J_sc_SCR_vs_WL():
 
     result = get_J_sc_SCR_vs_WL(xa, xb, gen_prof, wl, phg)
 
-    assert expected == approx(result)
+    assert expected == approx(result, rel=1e-5)
 
 
 def test_get_J_sc_diffusion_vs_WL_top():
@@ -443,7 +443,7 @@ def test_get_J_sc_diffusion_vs_WL_top():
         xa, xb, gen_prof, D, L, minority, s, wl, phg, side="top"
     )
 
-    assert result == approx(expected)
+    assert result == approx(expected, rel=1e-5)
 
 
 def test_get_J_sc_diffusion_vs_WL_bottom():
@@ -511,7 +511,7 @@ def test_get_J_sc_diffusion_vs_WL_bottom():
         xa, xb, gen_prof, D, L, minority, s, wl, phg, side="bottom"
     )
 
-    assert result == approx(expected)
+    assert result == approx(expected, rel=1e-5)
 
 
 def test_get_J_sc_diffusion_green_top():

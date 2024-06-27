@@ -105,7 +105,7 @@ def eight_band_strain_hamiltonian(kx, ky, kz, Ev0, Ec0, exx, ezz, me_eff, gamma1
     lh = Elh(kx, ky, kz, exx, eyy, ezz)
     so = Eso(kx, ky, kz, exx, eyy, ezz)
 
-    H_ST = np.mat([
+    H_ST = np.asmatrix([
         [cb, -sqrt3 * t, sqrt2 * u, -u, 0, 0, -tc, -sqrt2 * tc],
         [-sqrt3 * tc, hh, sqrt2 * s, -s, 0, 0, -r, -sqrt2 * r],
         [sqrt2 * u, sqrt2 * sc, lh, -sqrt2 * q, tc, r, 0, sqrt3 * s],
