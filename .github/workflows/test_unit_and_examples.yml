@@ -97,6 +97,7 @@ jobs:
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
+          git checkout rename_interpolator
           make S4_pyext
           cd ..
           rm -rf S4
@@ -191,15 +192,16 @@ jobs:
       #     cd ..
       #     rm -rf S4
 
-#      - name: Install S4 (macOS - arm)
-#        if: matrix.os == 'macos-14'
-#        run: |
-#          pip install wheel setuptools
-#          git clone https://github.com/phoebe-p/S4
-#          cd S4
-#          make S4_pyext --file="Makefile.m1"
-#          cd ..
-#          rm -rf S4
+      - name: Install S4 (macOS - arm)
+        if: matrix.os == 'macos-14'
+        run: |
+          pip install wheel setuptools
+          git clone https://github.com/phoebe-p/S4
+          cd S4
+          git checkout rename_interpolator
+          make S4_pyext --file="Makefile.m1"
+          cd ..
+          rm -rf S4
 
       - name: Install S4 (ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -207,6 +209,7 @@ jobs:
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
+          git checkout rename_interpolator
           make S4_pyext
           cd ..
           rm -rf S4    

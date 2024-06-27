@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - build_fixes
 
     tags:
       - "**"
@@ -25,8 +26,8 @@ jobs:
           # so easier to separate out here.
           - [ ubuntu-latest, manylinux, x86_64]
           - [ ubuntu-latest, manylinux, i686]
-          - [ macos-latest, macosx, x86_64 ] # Intel chip
-          - [ macos-14, macosx, arm64] # ARM M1/M2 chip
+          - [ macos-12, macosx, x86_64 ] # Intel chip
+          - [ macos-latest, macosx, arm64] # ARM M1/M2 chip
           - [ windows-latest, win, AMD64]
 
         python: [[ "cp38", "3.8" ], [ "cp39", "3.9" ],
@@ -53,7 +54,7 @@ jobs:
         run: python -m pip install cibuildwheel==2.17.0
 
       - name: Build Solcore
-        if: ${{ matrix.buildplat[0] != 'macos-14' }}
+        if: ${{ matrix.buildplat[0] != 'macos-latest' }}
         uses: pypa/cibuildwheel@v2.17.0
         env:
           CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
@@ -63,7 +64,7 @@ jobs:
           CIBW_BEFORE_BUILD_LINUX: python -m pip install numpy --config-settings=setup-args="-Dallow-noblas=true"
 
       - name: Build Solcore (Apple Silicon M1/M2)
-        if: ${{ matrix.buildplat[0] == 'macos-14' && matrix.python[0] != 'cp38' && matrix.python[0] != 'cp39' }}
+        if: ${{ matrix.buildplat[0] == 'macos-latest' && matrix.python[0] != 'cp38' && matrix.python[0] != 'cp39' }}
         uses: pypa/cibuildwheel@v2.17.0
         env:
           CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
