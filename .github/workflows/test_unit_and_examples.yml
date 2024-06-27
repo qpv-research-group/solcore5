@@ -81,7 +81,7 @@ jobs:
 # No longer working on GitHub Actions as of June 2024 (or possibly earlier). Boost header files not found.
       # This issue cannot be replicated locally on M1 mac.
       - name: Install S4 (macOS - arm)
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-latest'
         run: |
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
