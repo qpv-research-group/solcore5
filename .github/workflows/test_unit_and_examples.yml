@@ -207,7 +207,6 @@ jobs:
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
-          git checkout rename_interpolator
           make S4_pyext
           cd ..
           rm -rf S4    
