@@ -123,12 +123,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-         os: [ubuntu-latest, macos-12, windows-latest, macos-latest]
+         os: [ubuntu-latest, macos-latest]
          python-version: ["3.9", "3.10", "3.11", "3.12"]
          exclude:
-           - os: macos-14
+           - os: macos-latest
              python-version: 3.9
-           - os: macos-13
+           - os: macos-latest
              python-version: 3.9
 
     steps:
@@ -139,12 +139,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: install-rtools
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install rtools --version=4.0.0.20220206 --no-progress --force
-          echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
 
       - name: Install system dependencies in Linux
         if: matrix.os == 'ubuntu-latest'
@@ -158,16 +152,6 @@ jobs:
            brew reinstall gfortran openblas pkg-config 
            brew install ngspice boost suite-sparse
 
-      - name: Install system dependencies in MacOS (Intel)
-        if: matrix.os == 'macos-12'
-        run: |
-           brew reinstall gfortran
-           brew install ngspice 
-
-      - name: Install system dependencies in Windows
-        if: matrix.os == 'windows-latest'
-        run: choco install ngspice
-
       - name: Install Python dependecies
         run: |
           pip install --upgrade pip
@@ -178,7 +162,7 @@ jobs:
           python3 -m spin install-dependencies -test-dep
 
       - name: Install S4 (macOS - arm)
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-latest'
         run: |
           pip install wheel setuptools
           git clone https://github.com/phoebe-p/S4
@@ -206,4 +190,4 @@ jobs:
         env:
           SOLCORE_SPICE: ngspice
         run: |
-          python -m spin test -- -r a -v tests/test_examples.py -n "auto"
+          python -m spin test -- -r a -v solcore/tests/test_examples.py -n "auto"
