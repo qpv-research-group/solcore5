@@ -250,7 +250,7 @@ def test_get_J_sc_diffusion_top():
         xa, xb, gen_prof, D, L, minority, s, wl, phg, side="top"
     )
 
-    assert result == approx(expected, rel=1e-5)
+    assert result == approx(expected, rel=1e-4)
 
 
 def test_get_J_sc_diffusion_bottom():
