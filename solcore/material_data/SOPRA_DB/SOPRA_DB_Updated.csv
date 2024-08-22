@@ -1,6 +1,7 @@
 Filename,Symbol,Range (nm),Description
 Individual Files,,,
 AIR,Air,100     1000000,Air
+PERFECT_MIRROR,perfect_mirror,100     1000000,perfect mirror (high n)
 7059,7059,250      900,Glass 7059
 AG,Ag,187     2066,Silver
 AL,Al,183     2479,Aluminum
