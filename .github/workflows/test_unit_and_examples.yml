@@ -64,7 +64,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install --upgrade pip==24.2 uv
+          python -m pip install --upgrade pip uv
           
           uv pip install --system numpy --config-settings=setup-args="-Dallow-noblas=true"
           uv pip install --system pytest meson-python ninja cython spin==0.9
