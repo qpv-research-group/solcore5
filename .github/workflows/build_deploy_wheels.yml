@@ -25,7 +25,7 @@ jobs:
           # so easier to separate out here.
           - [ ubuntu-latest, manylinux, x86_64]
           - [ ubuntu-latest, manylinux, i686]
-          - [ macos-12, macosx, x86_64 ] # Intel chip
+          - [ macos-13, macosx, x86_64 ] # Intel chip
           - [ macos-latest, macosx, arm64] # ARM M1/M2 chip
           - [ windows-latest, win, AMD64]
 

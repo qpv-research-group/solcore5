@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-         os: [ubuntu-latest, macos-12, windows-latest, macos-latest]
+         os: [ubuntu-latest, macos-13, windows-latest, macos-latest]
          python-version: ["3.9", "3.10", "3.11", "3.12"]
          exclude:
            - os: macos-14
@@ -53,7 +53,7 @@ jobs:
            brew install ngspice boost suite-sparse
 
       - name: Install system dependencies in MacOS (Intel)
-        if: matrix.os == 'macos-12'
+        if: matrix.os == 'macos-13'
         run: |
            brew reinstall gfortran
            brew install ngspice 
@@ -64,7 +64,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install --upgrade pip uv
+          pip install --upgrade pip==24.2 uv
           
           uv pip install --system numpy --config-settings=setup-args="-Dallow-noblas=true"
           uv pip install --system pytest meson-python ninja cython spin==0.9
