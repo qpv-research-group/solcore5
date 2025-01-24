@@ -80,8 +80,8 @@ solar_cell_optics = SolarCell(
     ARC_layers + junction_layers + [Layer(si('100um'), GaAs_substrate)], substrate=Ag,
 )
 
-solar_cell_solver(solar_cell, 'iv', options)
-solar_cell_solver(solar_cell, 'qe', options)
+# solar_cell_solver(solar_cell, 'iv', options)
+# solar_cell_solver(solar_cell, 'qe', options)
 
 solar_cell_solver(solar_cell_sesame, 'iv', options)
 solar_cell_solver(solar_cell_sesame, 'qe', options)
@@ -89,29 +89,29 @@ solar_cell_solver(solar_cell_sesame, 'qe', options)
 solar_cell_solver(solar_cell_optics, 'optics', options)
 
 absorption_per_layer = np.array([layer.layer_absorption for layer in solar_cell_optics])
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
-
-ax1.plot(solar_cell.iv['IV'][0], solar_cell.iv['IV'][1]/10, '--k', label='Overall IV')
-ax1.plot(options.voltages, -solar_cell[2].iv(options.voltages)/10, '-r', label='junction IV')
-
-ax1.legend()
-ax1.set_title("Fortran PDD solver")
-
-ax2.stackplot(options.wavelength*1e9, 100*absorption_per_layer[::-1], alpha=0.4)
-ax2.plot(options.wavelength*1e9, 100*solar_cell[2].eqe(options.wavelength), '-k')
-
-ax2.legend(['substrate', 'GaAs BSF', 'GaAs base', 'GaAs emitter', 'AlGaAs window', 'ZnS', 'MgF$_2$'])
-
-ax1.set_xlabel('Voltage (V)')
-ax1.set_ylabel('Current density (mA/cm$^2$)')
-ax1.set_ylim(-35, 10)
-
-ax2.set_xlabel('Wavelength (nm)')
-ax2.set_ylabel('EQE / Absorption (%)')
-
-plt.tight_layout()
-plt.show()
+#
+# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+#
+# ax1.plot(solar_cell.iv['IV'][0], solar_cell.iv['IV'][1]/10, '--k', label='Overall IV')
+# ax1.plot(options.voltages, -solar_cell[2].iv(options.voltages)/10, '-r', label='junction IV')
+#
+# ax1.legend()
+# ax1.set_title("Fortran PDD solver")
+#
+# ax2.stackplot(options.wavelength*1e9, 100*absorption_per_layer[::-1], alpha=0.4)
+# ax2.plot(options.wavelength*1e9, 100*solar_cell[2].eqe(options.wavelength), '-k')
+#
+# ax2.legend(['substrate', 'GaAs BSF', 'GaAs base', 'GaAs emitter', 'AlGaAs window', 'ZnS', 'MgF$_2$'])
+#
+# ax1.set_xlabel('Voltage (V)')
+# ax1.set_ylabel('Current density (mA/cm$^2$)')
+# ax1.set_ylim(-35, 10)
+#
+# ax2.set_xlabel('Wavelength (nm)')
+# ax2.set_ylabel('EQE / Absorption (%)')
+#
+# plt.tight_layout()
+# plt.show()
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
@@ -134,4 +134,18 @@ ax2.set_xlabel('Wavelength (nm)')
 ax2.set_ylabel('EQE / Absorption (%)')
 
 plt.tight_layout()
+plt.show()
+
+z_pos = np.linspace(0, 3230, 4000)*1e-9
+
+gen_per_wl = solar_cell_sesame[2].absorbed(z_pos)
+
+
+
+gen_total = np.trapz(gen_per_wl * options.light_source.spectrum(options.wavelength, output_units="photon_flux_per_m")[1][None, :], options.wavelength)
+
+plt.figure()
+plt.plot(solar_cell_sesame[2].mesh*1e6, solar_cell_sesame[2].pdd_output.generation, '-k', label='Generation')
+plt.plot(z_pos*1e6, gen_total, '--r')
+
 plt.show()
