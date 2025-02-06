@@ -74,6 +74,7 @@ jobs:
       - name: Install S4 (macOS - arm)
         if: matrix.os == 'macos-latest'
         run: |
+          brew config
           uv pip install --system wheel setuptools
           git clone https://github.com/phoebe-p/S4
           cd S4
