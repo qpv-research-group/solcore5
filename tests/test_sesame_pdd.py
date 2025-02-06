@@ -1,6 +1,7 @@
 import numpy as np
 from pytest import approx, raises
 
+
 def test_constant_doping():
     # test sesame PDD process_structure when constant doping levels are passed
     from solcore import material, si
