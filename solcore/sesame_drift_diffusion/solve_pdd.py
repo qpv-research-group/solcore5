@@ -413,7 +413,7 @@ def process_sesame_results(sys: Builder, result: dict):
         )  # m-3
 
     output = State(
-        generation=generation,
+        G=generation,
         potential=potential,
         Efe=Efe,
         Efh=Efh,
