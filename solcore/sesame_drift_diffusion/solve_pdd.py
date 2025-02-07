@@ -210,7 +210,7 @@ def iv_sesame(junction, options):
         last_non_nan = shunted_current[non_nans[-1]]
 
     else:
-        Exception(
+        raise Exception(
             "No solutions found for IV curve. Try increasing the number of voltage points scanned."
         )
 
