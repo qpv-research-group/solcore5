@@ -210,7 +210,7 @@ def iv_sesame(junction, options):
         last_non_nan = shunted_current[non_nans[-1]]
 
     else:
-        Exception(
+        raise Exception(
             "No solutions found for IV curve. Try increasing the number of voltage points scanned."
         )
 
@@ -369,13 +369,15 @@ def process_sesame_results(sys: Builder, result: dict):
 
     Each of these is a 2-dimensional array, with dimensions ``(len(options.internal_voltages), len(mesh))``.
 
-
         :param sys: a Sesame Builder object
         :param result: a dictionary containing the results from a Sesame calculation
     """
 
     line = ((0, 0), (np.max(sys.xpts), 0))
     n_voltages = len(result["v"])
+
+    generation = sys.g * sys.scaling.generation * 1e6 # multiply by internal sesame scaling factor,
+    # convert from cm-3 to m-3 (area and depth are in m, in sesame they are in cm)
 
     potential = result["v"] * sys.scaling.energy
     Efe = result["efn"] * sys.scaling.energy
@@ -411,6 +413,7 @@ def process_sesame_results(sys: Builder, result: dict):
         )  # m-3
 
     output = State(
+        G=generation,
         potential=potential,
         Efe=Efe,
         Efh=Efh,

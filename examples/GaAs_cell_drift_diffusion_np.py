@@ -135,3 +135,20 @@ ax2.set_ylabel('EQE / Absorption (%)')
 
 plt.tight_layout()
 plt.show()
+
+
+# show that generation rate in optical solver, integrated with the spectrum, and used/saved by
+# Sesame are the same:
+
+z_pos = np.linspace(0, 3230, 4000)*1e-9
+
+gen_per_wl = solar_cell_sesame[2].absorbed(z_pos)
+
+gen_total = np.trapz(gen_per_wl * options.light_source.spectrum(options.wavelength, output_units="photon_flux_per_m")[1][None, :], options.wavelength)
+
+plt.figure()
+plt.plot(solar_cell_sesame[2].mesh*1e6, solar_cell_sesame[2].pdd_output.G, '-k', label='Generation')
+plt.plot(z_pos*1e6, gen_total, '--r')
+plt.xlabel('Position (um)')
+plt.ylabel('Generation rate (m$^{-3}$s$^{-1}$)')
+plt.show()
