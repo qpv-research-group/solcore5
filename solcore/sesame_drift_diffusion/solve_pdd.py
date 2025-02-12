@@ -45,6 +45,22 @@ def equilibrium(junction: Junction, **kwargs):
     junction.sesame_output = result
 
 
+def process_guess(guess, sys):
+    """
+    Process the guess for the Sesame solver. This is necessary because the Sesame solver requires
+    the guess to be in the form of a dictionary with keys 'v', 'efn' and 'efp', each of which is an
+    array of length sys.nx. Units also need to be converted to those used by Sesame internally
+    """
+
+    v = guess["potential"] / sys.scaling.energy
+    efn = guess["Efe"] / sys.scaling.energy
+    efp = guess["Efh"] / sys.scaling.energy
+
+    guess_sesame = {"v": v, "efn": efn, "efp": efp}
+
+    return guess_sesame
+
+
 @register_iv_solver("sesame_PDD")
 def iv_sesame(junction, options):
     """
@@ -63,6 +79,13 @@ def iv_sesame(junction, options):
 
     if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
+
+    if hasattr(junction, "guess"):
+        # guess for the non-equilibrium solution at V = 0
+        guess_sesame = process_guess(junction.guess, junction.sesame_sys)
+
+    else:
+        guess_sesame = None
 
     if options.light_iv:  # and np.all(junction.sesame_sys.g == 0):
         gen_wl = junction.absorbed(junction.mesh) / 100  # m-1 -> cm-1
@@ -126,10 +149,10 @@ def iv_sesame(junction, options):
             positive_voltages = positive_voltages[positive_voltages_order]
 
             j_positive, result_positive = IVcurve(
-                junction.sesame_sys, positive_voltages
+                junction.sesame_sys, positive_voltages, guess=guess_sesame,
             )
             j_negative, result_negative = IVcurve(
-                junction.sesame_sys, negative_voltages
+                junction.sesame_sys, negative_voltages, guess=guess_sesame,
             )
 
             j_negative = j_negative[::-1]
@@ -168,15 +191,14 @@ def iv_sesame(junction, options):
             # negative voltages only
             voltage_order = np.argsort(voltages_for_solve)[::-1]
             final_voltages = voltages_for_solve[voltage_order]
-            j, result = IVcurve(junction.sesame_sys, final_voltages)
+            j, result = IVcurve(junction.sesame_sys, final_voltages, guess=guess_sesame)
 
     else:
         # positive voltages only
         voltage_order = np.argsort(voltages_for_solve)
 
         final_voltages = voltages_for_solve[voltage_order]
-        j, result = IVcurve(junction.sesame_sys, final_voltages)  # , verbose=False)
-
+        j, result = IVcurve(junction.sesame_sys, final_voltages, guess=guess_sesame)  # , verbose=False)
     warnings.resetwarnings()
 
     if np.any(np.isnan(j)):
@@ -317,7 +339,7 @@ def qe_sesame(junction: Junction, options: State):
         else:
             guess = {key: result[key][0, :] for key in result.keys()}
 
-        j, result = IVcurve(junction.sesame_sys, voltages, guess=guess)
+        j, result = IVcurve(junction.sesame_sys, voltages)
 
         eqe[i1] = np.abs(j) / (q * flux)
 
