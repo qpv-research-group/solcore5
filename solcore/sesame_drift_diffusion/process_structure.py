@@ -306,7 +306,7 @@ def make_mesh(
     else:
         # edges = np.insert(np.cumsum(layer_width), 0, 0)
 
-        front_spacing = np.min([minimum_spacing, 0.5e-7])
+        front_spacing = np.max([minimum_spacing, 0.5e-7])
 
         dense_front_width = 200e-7
 
@@ -456,6 +456,8 @@ def update_mesh(junction: Junction, layer_width: list[float], options: State):
 
     junction.mesh_cm = current_mesh
     junction.mesh = junction.mesh_cm * 1e-2  # cm to m
+
+    # np.save("nonconverging_differentmesh/mesh.npy", junction.mesh * 1e6)
 
 
 def get_srv(junction: Junction):

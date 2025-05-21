@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sesame import Builder, IVcurve, Analyzer
+from sesame import Builder, IVcurve, Analyzer, solve
 import numpy as np
 from scipy.optimize import root
 from solcore.constants import q, kb
@@ -87,7 +87,7 @@ def iv_sesame(junction, options):
     else:
         guess_sesame = None
 
-    if options.light_iv:  # and np.all(junction.sesame_sys.g == 0):
+    if options.light_iv and np.all(junction.sesame_sys.g == 0):
         gen_wl = junction.absorbed(junction.mesh) / 100  # m-1 -> cm-1
         wls = options.wavelength
 
@@ -251,6 +251,61 @@ def iv_sesame(junction, options):
     junction.current = junction.iv(options.internal_voltages)
     junction.pdd_output = process_sesame_results(junction.sesame_sys, result)
 
+def j_per_wl(system, guess=None, equilibrium=None, tol=1e-6,
+                periodic_bcs=True, maxiter=300, verbose=True, htp=1):
+    """
+      Solve the Drift Diffusion Poisson equations at V=0.
+      Parameters
+      ----------
+      system: Builder
+          The discretized system.
+      guess: dictionary of numpy arrays of floats (optional)
+          Starting point of the solver. Keys of the dictionary must be 'efn',
+          'efp', 'v' for the electron and quasi-Fermi levels, and the
+          electrostatic potential respectively.
+      tol: float
+          Accepted error made by the Newton-Raphson scheme.
+      periodic_bcs: boolean
+          Defines the choice of boundary conditions in the y-direction. True
+          (False) corresponds to periodic (abrupt) boundary conditions.
+      maxiter: integer
+          Maximum number of steps taken by the Newton-Raphson scheme.
+      verbose: boolean
+          The solver returns the step number and the associated error at every
+          step, and this function prints the current applied voltage if set to True (default).
+      htp: integer
+          Number of homotopic Newton loops to perform.
+
+      Returns
+      -------
+      J: numpy array of floats
+          Steady state current computed for each voltage value.
+
+    """
+
+    # create a dictionary 'result' with efn and efp
+
+    # Call the Drift Diffusion Poisson solver
+    result = solve(system, guess=guess, tol=tol, periodic_bcs=periodic_bcs, \
+                        maxiter=maxiter, verbose=verbose, htp=htp)
+
+    if result is not None:
+
+        try:
+            az = Analyzer(system, result)
+            J = az.full_current()
+
+        except:
+            J = np.nan
+
+
+    else:
+        warnings.warn(("The solver failed to converge.", UserWarning))
+
+        J = np.nan
+
+    return J, result
+
 
 def qe_sesame(junction: Junction, options: State):
     """
@@ -314,7 +369,7 @@ def qe_sesame(junction: Junction, options: State):
     # efp = np.concatenate([item[1]['efp'] for item in allres])
     # vres = np.concatenate([item[1]['v'] for item in allres])
 
-    flux = 1e20
+    flux = 1e3
 
     eqe = np.zeros_like(wls)
 
@@ -325,22 +380,23 @@ def qe_sesame(junction: Junction, options: State):
     wl_solve = np.where(A >= EQE_threshold)[0][::-1]
     # go in backwards order through wavelengths - since generation profile tends to be flatter at longer wavelengths,
     # this increases the change of convergence, since the solution for the previous wavelength is always used as a guess
-    # for the next wavelength. Gaving a good guess helps the short wavelength solutions converge
+    # for the next wavelength. Having a good guess helps the short wavelength solutions converge
 
     warnings.filterwarnings("ignore")
-    # this is to prevent warning from Sesame flooding the output. Not ideal but unsure on best way to solve.
+    # this is to prevent warnings from Sesame flooding the output. Not ideal but unsure on best way to solve.
 
     for i1 in wl_solve:
         junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
 
-        if i1 == wl_solve[0]:
+        if i1 == wl_solve[0] or result is None:
             guess = None
 
         else:
-            guess = {key: result[key][0, :] for key in result.keys()}
+            guess = result
 
-        j, result = IVcurve(junction.sesame_sys, voltages)
-
+        j, result = j_per_wl(junction.sesame_sys, guess=guess)
+        # j, result = IVcurve(junction.sesame_sys, [0], guess=guess)
+        print('wl', i1, j)
         eqe[i1] = np.abs(j) / (q * flux)
 
     if np.any(np.isnan(eqe)):
