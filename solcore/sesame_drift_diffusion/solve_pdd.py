@@ -292,7 +292,7 @@ def qe_sesame(junction: Junction, options: State):
     # efp = np.concatenate([item[1]['efp'] for item in allres])
     # vres = np.concatenate([item[1]['v'] for item in allres])
 
-    flux = 1e20
+    flux = 1e6
 
     eqe = np.zeros_like(wls)
 
