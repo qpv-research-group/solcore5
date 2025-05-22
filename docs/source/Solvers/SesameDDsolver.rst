@@ -74,11 +74,13 @@ IV for with an attribute called ``pdd_output``, which contains the following:
 - ``pdd_output.Ev``: the level of the valence band (eV)
 - ``pdd_output.Efe``: the electron quasi-Fermi level (eV)
 - ``pdd_output.Efh``: the hole quasi-Fermi level (eV)
+- ``pdd_output.G``: the generation rate as a function of position at the locations in the mesh (``junction.mesh``) (m\ :sup:`-3` s\ :sup:`-1`)
 - ``pdd_output.Rrad``: the radiative recombination rate (m\ :sup:`-3` s\ :sup:`-1`)
 - ``pdd_output.Raug``: the Auger recombination rate (m\ :sup:`-3` s\ :sup:`-1`)
 - ``pdd_output.Rsrh``: the bulk recombination due to Shockley-Read-Hall processes (m\ :sup:`-3` s\ :sup:`-1`)
 
-Each of these is a 2-dimensional array, with dimensions ``(len(options.internal_voltages), len(mesh))``.
+Each of these is a 2-dimensional array, with dimensions ``(len(options.internal_voltages), len(mesh))``,
+with the exception of ``G`` which is 1D (only position-dependent, not a function of the voltage).
 
 Sub-function documentation
 ---------------------------

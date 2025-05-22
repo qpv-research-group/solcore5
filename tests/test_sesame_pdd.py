@@ -1,6 +1,7 @@
 import numpy as np
 from pytest import approx, raises
 
+
 def test_constant_doping():
     # test sesame PDD process_structure when constant doping levels are passed
     from solcore import material, si
@@ -512,3 +513,47 @@ def test_reverse_bias():
     assert np.all(np_junction.iv(options.voltages) > 0)
 
 
+def test_generation_rate():
+
+    from solcore import material, si
+    from solcore.structure import Junction, Layer
+    from solcore.solar_cell_solver import solar_cell_solver, SolarCell
+    from solcore.sesame_drift_diffusion.process_structure import carrier_constants
+    from solcore.state import State
+    from solcore.light_source import LightSource
+
+    GaAs_p = material('GaAs')(T=300, Na=1e24,
+                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+    GaAs_n = material('GaAs')(T=300, Nd=1e24,
+                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+
+    GaAs_p.electron_diffusion_length = carrier_constants("electron_diffusion_length", GaAs_p)
+    GaAs_n.hole_diffusion_length = carrier_constants("hole_diffusion_length", GaAs_n)
+
+    options = State()
+    options.wavelength = np.linspace(300, 950, 100)*1e-9
+    options.voltages = np.linspace(-0.5, 1.3, 30)
+    options.internal_voltages = np.linspace(-0.5, 1.3, 30)
+    options.T = 300
+    options.light_iv = True
+    options.light_source = LightSource(source_type='standard', version='AM1.5g', x=options.wavelength, output_units='photon_flux_per_m')
+    options.da_mode = 'green'
+    options.optics_method = 'TMM'
+
+    mesh = np.linspace(0, 2200, 500)*1e-9
+
+    pn_junction = Junction([Layer(si('200nm'), GaAs_p, role='emitter'), Layer(si('2000nm'), GaAs_n, role='base')],
+                           kind='sesame_PDD', R_shunt=0.1, mesh=mesh)
+    solar_cell = SolarCell([pn_junction])
+    solar_cell_solver(solar_cell, 'iv', options)
+
+    z_pos = np.linspace(0, 2200, 500) * 1e-9
+
+    gen_per_wl = solar_cell(0).absorbed(z_pos)
+
+    gen_total = np.trapz(gen_per_wl * options.light_source.spectrum(options.wavelength,
+                                                                    output_units="photon_flux_per_m")[
+                                          1][None, :], options.wavelength)
+
+    gen_G = solar_cell(0).pdd_output.G
+    assert gen_total == approx(gen_G)
