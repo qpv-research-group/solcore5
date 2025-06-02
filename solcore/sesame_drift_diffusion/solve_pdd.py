@@ -259,7 +259,7 @@ def qe_sesame(junction: Junction, options: State):
         junction.absorbed
     )  # this returns an array of shape (mesh_points, wavelengths)
 
-    A = np.trapz(junction.absorbed(junction.mesh), junction.mesh, axis=0)
+    A = np.trapz(np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0)
 
     def make_gfcn_fun(wl_index, flux):
         def gcfn_fun(x, y):
