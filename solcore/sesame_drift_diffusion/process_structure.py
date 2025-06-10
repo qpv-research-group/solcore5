@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sesame import Builder
+from solsesame import Builder
 import numpy as np
 from scipy.optimize import root
 from solcore.constants import q, kb

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sesame import Builder, IVcurve, Analyzer, solve
+from solsesame import Builder, IVcurve, Analyzer, solve
 import numpy as np
 from scipy.optimize import root
 from solcore.constants import q, kb
@@ -251,7 +251,7 @@ def iv_sesame(junction, options):
     junction.current = junction.iv(options.internal_voltages)
     junction.pdd_output = process_sesame_results(junction.sesame_sys, result)
 
-def j_per_wl(system, guess=None, equilibrium=None, tol=1e-6,
+def j_per_wl(system, guess=None, tol=1e-6,
                 periodic_bcs=True, maxiter=300, verbose=True, htp=1):
     """
       Solve the Drift Diffusion Poisson equations at V=0.

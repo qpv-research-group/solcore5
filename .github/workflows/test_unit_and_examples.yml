@@ -81,6 +81,10 @@ jobs:
           make S4_pyext --file="Makefile.m1"
           cd ..
           rm -rf S4
+          
+          git clone https://github.com/qpv-research-group/solsesame
+          cd solsesame
+          pip install .
 
       - name: Install S4 (ubuntu)
         if: matrix.os == 'ubuntu-latest'
