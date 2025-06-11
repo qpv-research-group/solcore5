@@ -96,6 +96,14 @@ jobs:
         run: |
           python -m spin build -- -Dwith_pdd=true -Dinstall_test=true
 
+      - name: Verify installation
+        if: matrix.os == 'windows-latest'
+        run: |
+          python -m pip install .
+          python -c "import solcore; print(f'Solcore installed at: {solcore.__file__}')"
+          python -c "import sys; print('Python path:'); [print(f'  {p}') for p in sys.path]"
+
+
       - name: Unit and functional tests (MacOS and Linux)
         if: matrix.os != 'windows-latest'
         env:
