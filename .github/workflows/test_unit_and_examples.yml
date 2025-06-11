@@ -100,9 +100,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           python -m pip install .
-          python -c "import solcore; print(f'Solcore installed at: {solcore.__file__}')"
-          python -c "import sys; print('Python path:'); [print(f'  {p}') for p in sys.path]"
-
+    # I don't know why this is necessary on Windows
 
       - name: Unit and functional tests (MacOS and Linux)
         if: matrix.os != 'windows-latest'
@@ -114,7 +112,6 @@ jobs:
       - name: Unit and functional tests (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          mv solcore solcore_backup
           python -m pytest tests --ignore=tests/test_examples.py
 #          $IGNORE_FILE = python -c "import site; import os; print(os.path.join(site.getsitepackages()[0], 'solcore/tests/test_examples.py'))"
 #          python -m pytest -r a -v --ignore=$IGNORE_FILE -n "auto"
