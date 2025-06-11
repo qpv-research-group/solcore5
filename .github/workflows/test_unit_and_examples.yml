@@ -106,8 +106,8 @@ jobs:
       - name: Unit and functional tests (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          cd ..
-          python -m pytest solcore5/tests --ignore=solcore5/tests/test_examples.py
+          mv solcore solcore_backup
+          python -m pytest tests --ignore=tests/test_examples.py
 #          $IGNORE_FILE = python -c "import site; import os; print(os.path.join(site.getsitepackages()[0], 'solcore/tests/test_examples.py'))"
 #          python -m pytest -r a -v --ignore=$IGNORE_FILE -n "auto"
 
