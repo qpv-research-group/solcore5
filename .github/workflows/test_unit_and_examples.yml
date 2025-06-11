@@ -114,8 +114,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           mv solcore solcore_backup
-        # need this because otherwise imports locally and compiled pdd modules won't work
           python -m pytest tests --ignore=tests/test_examples.py
+#          need this mv command to rename local folder because otherwise imports locally and compiled pdd modules won't work
 #          $IGNORE_FILE = python -c "import site; import os; print(os.path.join(site.getsitepackages()[0], 'solcore/tests/test_examples.py'))"
 #          python -m pytest -r a -v --ignore=$IGNORE_FILE -n "auto"
 
