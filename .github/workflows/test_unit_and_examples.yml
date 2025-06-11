@@ -106,9 +106,8 @@ jobs:
       - name: Unit and functional tests (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          $SITE_PACKAGES = python -c "import site; print(site.getsitepackages()[0])"
-          cd $SITE_PACKAGES
-          python -m pytest -r a -v --ignore=solcore/tests/test_examples.py -n "auto"
+          $SITE_PACKAGES = python -c "import site; import os; print(os.path.join(site.getsitepackages()[0], 'solcore'))"
+          python -m pytest -r a -v --ignore=tests/test_examples.py -n "auto"
 
       - name: Codecov
         env:
