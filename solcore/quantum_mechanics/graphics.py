@@ -333,7 +333,7 @@ def calculate_in_plane_masses(x, psi, m):
 
     m_out = []
     for ps in psi:
-        m_out.append(np.trapz(ps ** 2 * m, x))
+        m_out.append(np.trapezoid(ps ** 2 * m, x))
 
     return m_out
 

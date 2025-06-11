@@ -319,9 +319,9 @@ def calculate_junction_sr(junc, energies, bs, bs_initial, V, printParameters=Fal
 
     bs_initial = bs_initial[good_indeces]
 
-    Jn = np.trapz(y=jn, x=energies)
-    Jp = np.trapz(y=jp, x=energies)
-    Jgen = np.trapz(y=jgen, x=energies)
+    Jn = np.trapezoid(y=jn, x=energies)
+    Jp = np.trapezoid(y=jp, x=energies)
+    Jgen = np.trapezoid(y=jgen, x=energies)
 
     if printParameters:
         jSum = list((jn + jp + jgen) / bs_initial / q)

@@ -295,8 +295,8 @@ def solve_holes_QW_at_kt_4x4(kt, z, fhh, flh, g1, g2, g3, num=(10, 10), quasicon
     Psi_g1 = np.array(Psi_g1[:, confined_levels]).transpose().real[idx_sorted]
     Psi_g2 = np.array(Psi_g2[:, confined_levels]).transpose().real[idx_sorted]
 
-    norm1 = [(np.sqrt(np.trapz(p * p, x=z))) for p in Psi_g1]
-    norm2 = [(np.sqrt(np.trapz(p * p, x=z))) for p in Psi_g2]
+    norm1 = [(np.sqrt(np.trapezoid(p * p, x=z))) for p in Psi_g1]
+    norm2 = [(np.sqrt(np.trapezoid(p * p, x=z))) for p in Psi_g2]
     # Normalise the wavefunction except if the norm is very small. That's the case for some E at k near 0 only
     for i in range(len(Psi_g1)):
         if norm1[i] > 0.01 * max(norm1):
@@ -327,8 +327,8 @@ def solve_holes_QW_at_kt_4x4(kt, z, fhh, flh, g1, g2, g3, num=(10, 10), quasicon
         Psi_g3 = np.array(Psi_g3[:, confined_levels]).transpose().real
         Psi_g4 = np.array(Psi_g4[:, confined_levels]).transpose().real
 
-        norm3 = [(np.sqrt(np.trapz(p * p, x=z))) for p in Psi_g3]
-        norm4 = [(np.sqrt(np.trapz(p * p, x=z))) for p in Psi_g4]
+        norm3 = [(np.sqrt(np.trapezoid(p * p, x=z))) for p in Psi_g3]
+        norm4 = [(np.sqrt(np.trapezoid(p * p, x=z))) for p in Psi_g4]
         for i in range(len(Psi_g3)):
             if norm3[i] > 0.01 * max(norm3):
                 Psi_g3[i] = Psi_g3[i] / norm3[i]
@@ -427,7 +427,7 @@ def solve_electrons_QW_at_kt_parabolic(kt, z, fe, me, num=(10, 10), quasiconfine
     confined_levels = [i for i, e in enumerate(E) if (e < potmax and i < num[1])]
     E = E[confined_levels].real
     Psi = np.array(Psi[:, confined_levels]).transpose()
-    Psi = [(p / np.sqrt(np.trapz(p * p.conjugate(), x=z))) for p in Psi]
+    Psi = [(p / np.sqrt(np.trapezoid(p * p.conjugate(), x=z))) for p in Psi]
 
     E = E * E0 + offset
 
@@ -489,7 +489,7 @@ def band_sorting(bands, symmetric=False):
         Ee.append(electrons[:, i])
         psi_e.append(Psi_e[:, i, :])
 
-    norm = [(np.sqrt(np.trapz(p * p, x=bands[0][1]["z"]))) for p in Psi_g1[0, :]]
+    norm = [(np.sqrt(np.trapezoid(p * p, x=bands[0][1]["z"]))) for p in Psi_g1[0, :]]
     for i in range(num_hu):
         if norm[i] > 0.5:
             Ehh.append(holes_U[:, i])
@@ -523,7 +523,7 @@ def band_sorting(bands, symmetric=False):
                     # plt.show()
                     # sys.exit()
 
-        norm = [(np.sqrt(np.trapz(p * p, x=bands[0][1]["z"]))) for p in Psi_g4[0, :]]
+        norm = [(np.sqrt(np.trapezoid(p * p, x=bands[0][1]["z"]))) for p in Psi_g4[0, :]]
         for i in range(len(norm)):
             if norm[i] > 0.5:
                 Ehh.append(holes_L[:, i])

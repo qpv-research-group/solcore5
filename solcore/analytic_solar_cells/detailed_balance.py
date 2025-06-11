@@ -50,8 +50,8 @@ def iv_detailed_balance(junction, options):
 
         def emis(v, T):
             boltz = j01 * (As / wl ** 4) * np.exp(- (h * c / wl) / (kb * T))
-            junction.j01 = np.trapz(boltz, wl)
-            out = np.trapz(boltz, wl) * np.exp((q * v) / (kb * T))
+            junction.j01 = np.trapezoid(boltz, wl)
+            out = np.trapezoid(boltz, wl) * np.exp((q * v) / (kb * T))
             return out
 
     else:
@@ -62,14 +62,14 @@ def iv_detailed_balance(junction, options):
             out = []
             for vv in v:
                 fermi = (As / wl ** 4) / (np.exp((h * c / wl - q * vv) / (kb * T)) - 1)
-                out.append(np.trapz(fermi, wl))
+                out.append(np.trapezoid(fermi, wl))
             return j01*np.array(out)
 
     # Now we calculate the generation current, made of thermal generation and photogeneration
     jthermal = emis(np.array([0]), Ta)[0]
     if light:
         _, ph = options.light_source.spectrum(x=wl, output_units='photon_flux_per_m')
-        jsc = q * np.trapz(eqe(wl) * ph, wl) + jthermal
+        jsc = q * np.trapezoid(eqe(wl) * ph, wl) + jthermal
     else:
         jsc = jthermal
 
@@ -94,7 +94,7 @@ def qe_detailed_balance(junction, wl):
     try:
         z = np.linspace(0, junction.width, 1001)
         all_abs = junction.absorbed(z)
-        abs_vs_wl = np.trapz(all_abs, z, axis=0)
+        abs_vs_wl = np.trapezoid(all_abs, z, axis=0)
         junction.eqe = interp1d(wl, abs_vs_wl, bounds_error=False, fill_value=(0, 0))
 
     except AttributeError:

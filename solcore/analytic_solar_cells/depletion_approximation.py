@@ -287,7 +287,7 @@ def iv_depletion(junction, options):
 
             zz = np.linspace(xa, xb, 1001, endpoint=False)
             gg = ph * g(zz)
-            g_vs_z = np.trapz(gg, wl, axis=1)
+            g_vs_z = np.trapezoid(gg, wl, axis=1)
             g_vs_z[np.isnan(g_vs_z)] = 0
             g_vs_z = interp1d(zz, g_vs_z, axis=0)
 
@@ -308,7 +308,7 @@ def iv_depletion(junction, options):
             xbb = xb - (xb - xa) / 1001.0
             zz = np.linspace(xa, xb, 1001, endpoint=False)
             gg = ph * g(zz)
-            g_vs_z = np.trapz(gg, wl, axis=1)
+            g_vs_z = np.trapezoid(gg, wl, axis=1)
             g_vs_z[np.isnan(g_vs_z)] = 0
             g_vs_z = interp1d(zz, g_vs_z, axis=0)
 
@@ -474,7 +474,7 @@ def get_J_sc_diffusion(xa, xb, g, D, L, y0, S, wl, ph, side="top"):
     zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
 
-    g_vs_z = np.trapz(gg, wl, axis=1)
+    g_vs_z = np.trapezoid(gg, wl, axis=1)
 
     g_vs_z[np.isnan(g_vs_z)] = 0
 
@@ -679,7 +679,7 @@ def get_J_sc_diffusion_green(xa, xb, g, D, L, S, ph, side="top"):
 def get_J_sc_SCR(xa, xb, g, wl, ph):
     zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
-    out = np.trapz(np.trapz(gg, wl, axis=1), zz)
+    out = np.trapezoid(np.trapezoid(gg, wl, axis=1), zz)
 
     return out
 
@@ -797,7 +797,7 @@ def qe_depletion(junction, options):
     xb = cum_widths[id_bottom + 1]
     zz = np.linspace(xa, xb, 1001)
     gg = g(zz) * ph
-    current_absorbed = np.trapz(gg, zz, axis=0)
+    current_absorbed = np.trapezoid(gg, zz, axis=0)
 
     # why does this happen sometimes?
     # j_sc_top[j_sc_top < 0] = 0
@@ -864,7 +864,7 @@ def qe_depletion(junction, options):
 def get_J_sc_SCR_vs_WL(xa, xb, g, wl, ph):
     zz = np.linspace(xa, xb, 1001, endpoint=False)
     gg = g(zz) * ph
-    out = np.trapz(gg, zz, axis=0)
+    out = np.trapezoid(gg, zz, axis=0)
 
     return out
 

@@ -204,7 +204,7 @@ def solve_radiative_coupling(solar_cell, options, V_junction_array):
 
             # Now the coupling factors are defined, we need to calculate the coupling current, integrating over wavlenegth
             # We use the boltzmann approximation to make our life easier (and faster).
-            coupling_currents[i, j - 1] = np.trapz(boltz, wl)
+            coupling_currents[i, j - 1] = np.trapezoid(boltz, wl)
 
             # And we reduce the fraction of light reaching the next junction
             Btrans = Btrans * Bab

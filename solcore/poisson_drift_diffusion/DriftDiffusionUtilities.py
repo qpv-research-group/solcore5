@@ -370,7 +370,7 @@ def qe_pdd(junction, options):
     output["QE"]["WL"] = options.wavelength
 
     z = junction.short_circuit_data["Bandstructure"]["x"]
-    absorbed_per_wl = np.trapz(junction.absorbed(z), z, axis=0)
+    absorbed_per_wl = np.trapezoid(junction.absorbed(z), z, axis=0)
 
     # This is redundant but useful to keep the same format than the other solvers
     junction.qe = State(**output["QE"])
