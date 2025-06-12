@@ -39,7 +39,7 @@ dependencies = [
     "pyyaml",
     "yabox",
     "joblib",
-    "solsesame",
+#    "solsesame",
 ]
 dynamic = ["version"]
 
