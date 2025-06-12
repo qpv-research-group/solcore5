@@ -1,4 +1,3 @@
-from numpy import ones, array, sqrt, trapz
 from scipy.sparse import dia_matrix
 from scipy.sparse.linalg import eigs
 from solcore.science_tracker import science_reference
@@ -32,7 +31,7 @@ def tridiag_euler(V, z, m, periodic=False, num_eigenvalues=10, quasiconfined=0):
 
     N = len(V)
     dz = np.gradient(z)
-    m = m * ones(N)
+    m = m * np.ones(N)
 
     # Vectorise effective mass differences to avoid a loop
     m = np.insert(m, (0, len(m)), (m[0], m[-1]))
@@ -70,8 +69,8 @@ def tridiag_euler(V, z, m, periodic=False, num_eigenvalues=10, quasiconfined=0):
 
     # Allow for quasi confined levels to go through. They can be discarded later with the filter
     confined_levels = [i for i, e in enumerate(E) if e < quasiconfined * q]
-    E, Psi = E[confined_levels].real, array(Psi[:, confined_levels]).transpose()
-    Psi = [(p / sqrt(trapz(p * p, x=z))).real for p in Psi]
+    E, Psi = E[confined_levels].real, np.array(Psi[:, confined_levels]).transpose()
+    Psi = [(p / np.sqrt(np.trapezoid(p * p, x=z))).real for p in Psi]
 
     E, Psi = sort_simultaneous(E, Psi)
 
@@ -185,7 +184,7 @@ def discard_unconfined(x, structure, E, psi, threshold=0.8):
 
         E, psi = zip(*[(E_i, psi_i)
                        for (E_i, psi_i) in zip(E, psi)
-                       if np.trapz(psi_i[indx] ** 2, x=x[indx]) / np.trapz(psi_i ** 2, x=x) >= threshold])
+                       if np.trapezoid(psi_i[indx] ** 2, x=x[indx]) / np.trapezoid(psi_i ** 2, x=x) >= threshold])
     except ValueError as exception:
         print("Warning: wavefunction filter removed all states for this band, try reducing the filter strength.")
         return ([], [])

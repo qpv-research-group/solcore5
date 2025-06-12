@@ -289,7 +289,7 @@ def calculate_spectrum_spectral2(
         )  # siUnits(irradiance_per_ev, 'J-1')
 
         # integrate to find power density
-        power_density = np.trapz(x=wavelength_m, y=irradiance_per_m)
+        power_density = np.trapezoid(x=wavelength_m, y=irradiance_per_m)
 
         storage["incident power density"] = power_density
         storage["incident spectrum wavelength si"] = np.array(

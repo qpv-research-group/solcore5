@@ -70,7 +70,7 @@ def alpha_c_hh_TE(E, z, E_e, E_hh, psi_e, psi_hh, well_width, me, mhh, Ep, nr):
     DOS_2D = mr / (np.pi * hbar ** 2 * well_width)
     Mbsq_3D = m0 / 6 * Ep
     Mbsq_2D = 3 / 2 * Mbsq_3D
-    Ieh = np.trapz(psi_e * psi_hh, z) ** 2
+    Ieh = np.trapezoid(psi_e * psi_hh, z) ** 2
     return C0 * Ieh * Mbsq_2D * DOS_2D * H(E - (E_e - E_hh))
 
 
@@ -98,7 +98,7 @@ def alpha_c_lh_TE(E, z, E_e, E_lh, psi_e, psi_lh, well_width, me, mlh, Ep, nr):
     DOS_2D = mr / (np.pi * hbar ** 2 * well_width)
     Mbsq_3D = m0 / 6 * Ep
     Mbsq_2D = 1 / 2 * Mbsq_3D
-    Ieh = np.trapz(psi_e * psi_lh, z) ** 2
+    Ieh = np.trapezoid(psi_e * psi_lh, z) ** 2
     return C0 * Ieh * Mbsq_2D * DOS_2D * H(E - (E_e - E_lh))
 
 
@@ -137,7 +137,7 @@ def alpha_exciton_ehh_TE(exciton_index, E, z, E_e, E_hh, psi_e, psi_hh, well_wid
     DOS_2D = mr / (np.pi * hbar ** 2 * well_width)
     Mbsq_3D = m0 / 6 * Ep
     Mbsq_2D = 3 / 2 * Mbsq_3D
-    Ieh = np.trapz(psi_e * psi_hh, z) ** 2
+    Ieh = np.trapezoid(psi_e * psi_hh, z) ** 2
 
     # Excitions are considered by modiftying the bulk absorption coefficient using an oscillator strength
     Ry_eff = exciton_rydberg_energy_2d(me, mhh, eps / vacuum_permittivity)
@@ -190,7 +190,7 @@ def alpha_exciton_elh_TE(exciton_index, E, z, E_e, E_lh, psi_e, psi_lh, well_wid
     DOS_2D = mr / (np.pi * hbar ** 2 * well_width)
     Mbsq_3D = m0 / 6 * Ep
     Mbsq_2D = 1 / 2 * Mbsq_3D
-    Ieh = np.trapz(psi_e * psi_lh, z) ** 2
+    Ieh = np.trapezoid(psi_e * psi_lh, z) ** 2
 
     # Excitions are considered by modiftying the bulk absorption coefficient using an oscillator strength
     Ry_eff = exciton_rydberg_energy_2d(me, mlh, eps / vacuum_permittivity)

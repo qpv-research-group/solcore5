@@ -35,7 +35,7 @@ cbar.set_label('Absorption (1/nm)')
 A = np.zeros_like(wl)
 
 for i, absorption in enumerate(out['absorption'][:]):
-    A[i] = np.trapz(absorption, out['position'])
+    A[i] = np.trapezoid(absorption, out['position'])
 
 plt.figure(2)
 plt.plot(wl, A)

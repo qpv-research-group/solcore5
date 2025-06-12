@@ -98,7 +98,7 @@ def iv_sesame(junction, options):
             * gen_wl.T
         )
 
-        g_vs_z = np.trapz(gg, wls, axis=0) / 1e4  # m^2 -> cm^2
+        g_vs_z = np.trapezoid(gg, wls, axis=0) / 1e4  # m^2 -> cm^2
         g_vs_z[np.isnan(g_vs_z)] = 0
 
         # can also pass a function to generation - more flexible?
@@ -336,7 +336,7 @@ def qe_sesame(junction: Junction, options: State):
         junction.absorbed
     )  # this returns an array of shape (mesh_points, wavelengths)
 
-    A = np.trapz(np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0)
+    A = np.trapezoid(np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0)
 
     def make_gfcn_fun(wl_index, flux):
         def gcfn_fun(x, y):

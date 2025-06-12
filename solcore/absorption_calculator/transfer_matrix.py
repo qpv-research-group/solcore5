@@ -861,7 +861,7 @@ if __name__ == "__main__":
     # A = np.zeros_like(wavelength)
     # #
     # for i, absorption in enumerate(out['absorption'][:]):
-    #     A[i] = np.trapz(absorption, out['position'])
+    #     A[i] = np.trapezoid(absorption, out['position'])
     # #
     # plt.plot(wavelength, A, 'k', label='Integrated Abs')
 

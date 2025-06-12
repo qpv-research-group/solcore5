@@ -224,7 +224,7 @@ def test_get_J_sc_diffusion_top():
     zz = np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
 
-    g_vs_z = np.trapz(gg, wl, axis=1)
+    g_vs_z = np.trapezoid(gg, wl, axis=1)
 
     def A(x):
         return np.interp(x, zz, g_vs_z) / D + minority / L**2
@@ -285,7 +285,7 @@ def test_get_J_sc_diffusion_bottom():
     zz = np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
 
-    g_vs_z = np.trapz(gg, wl, axis=1)
+    g_vs_z = np.trapezoid(gg, wl, axis=1)
 
     def A(x):
         return np.interp(x, zz, g_vs_z) / D + minority / L**2
@@ -339,7 +339,7 @@ def test_get_J_sc_SCR():
 
     zz = np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
-    expected = np.trapz(np.trapz(gg, wl, axis=1), zz)
+    expected = np.trapezoid(np.trapezoid(gg, wl, axis=1), zz)
 
     result = get_J_sc_SCR(xa, xb, gen_prof, wl, phg)
 
@@ -371,7 +371,7 @@ def test_get_J_sc_SCR_vs_WL():
 
     zz = np.linspace(xa, xb, 1002)[:-1]
     gg = gen_prof(zz) * phg
-    expected = np.trapz(gg, zz, axis=0)
+    expected = np.trapezoid(gg, zz, axis=0)
 
     result = get_J_sc_SCR_vs_WL(xa, xb, gen_prof, wl, phg)
 
@@ -1365,7 +1365,7 @@ def test_iv_depletion_np(np_junction):
     iv_depletion(test_junc[0], options)
 
     wl_sp, ph = options.light_source.spectrum(output_units="photon_flux_per_m", x=wl)
-    Jph = q * np.trapz(test_junc.absorbed * ph, wl)
+    Jph = q * np.trapezoid(test_junc.absorbed * ph, wl)
 
     approx_Voc = V[np.argmin(abs(test_junc[0].iv(V)))]
 
@@ -1402,7 +1402,7 @@ def test_iv_depletion_pn(pn_junction):
     iv_depletion(test_junc[0], options)
 
     wl_sp, ph = options.light_source.spectrum(output_units="photon_flux_per_m", x=wl)
-    Jph = q * np.trapz(test_junc.absorbed * ph, wl)
+    Jph = q * np.trapezoid(test_junc.absorbed * ph, wl)
 
     approx_Voc = V[np.argmin(abs(test_junc[0].iv(V)))]
 
@@ -1504,7 +1504,7 @@ def test_depletion_width():
     iv_depletion(test_junc, options)
     qe_depletion(test_junc, options)
 
-    max_current = np.trapz(solar_cell.absorbed * light_source.spectrum(
+    max_current = np.trapezoid(solar_cell.absorbed * light_source.spectrum(
         output_units="photon_flux_per_m", x=wl)[1], wl) * q
 
     assert np.all(test_junc.eqe(wl) <= 1)
