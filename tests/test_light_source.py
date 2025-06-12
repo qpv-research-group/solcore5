@@ -36,11 +36,11 @@ def test_power_density_per_m(wavelength, gauss_spectrum):
     import numpy as np
 
     sp, sp_fun = gauss_spectrum
-    expected = np.trapz(sp, wavelength)
+    expected = np.trapezoid(sp, wavelength)
 
     wl_m = wavelength * 1.0e-9
     actual = power_density_per_m(sp_fun, wl_m)
-    actual = np.trapz(actual, wl_m)
+    actual = np.trapezoid(actual, wl_m)
     assert actual == approx(expected)
 
 

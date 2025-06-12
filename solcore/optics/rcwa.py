@@ -203,6 +203,6 @@ def calculate_absorption_rcwa(tmm_out, initial=1):
 
         return out
 
-    all_absorbed = np.trapz(diff_absorption(all_z), all_z)
+    all_absorbed = np.trapezoid(diff_absorption(all_z), all_z)
 
     return diff_absorption, all_absorbed

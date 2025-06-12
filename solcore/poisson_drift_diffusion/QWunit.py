@@ -124,7 +124,7 @@ class QWunit(Structure):
             ind = np.searchsorted(x, cumul[i:i + 2])
             yy = y[ind[0]:ind[1] - 1]
             xx = x[ind[0]:ind[1] - 1]
-            aver[i] = np.trapz(yy, xx) / (xx[-1] - xx[0])
+            aver[i] = np.trapezoid(yy, xx) / (xx[-1] - xx[0])
 
         return aver
 
@@ -144,7 +144,7 @@ class QWunit(Structure):
             ind = np.searchsorted(x, cumul[i:i + 2])
             yy = y[ind[0]:ind[1] - 1]
             xx = x[ind[0]:ind[1] - 1]
-            aver[i] = np.trapz(yy, xx)
+            aver[i] = np.trapezoid(yy, xx)
 
         return aver
 
@@ -397,7 +397,7 @@ class QWunit(Structure):
             # And the radiative recombination parameter
             inter = lambda E: 1.0 / layer_mat.ni ** 2 * 2 * pi / (h ** 3 * c ** 2) * layer_mat.n(
                 1240e-9 / (E / q)) ** 2 * layer_mat.alphaE(E) * np.exp(-E / (kb * self.T)) * E ** 2
-            Br = -np.trapz(np.nan_to_num(inter(1240e-9 / self.wl * q)), 1240e-9 / self.wl * q)
+            Br = -np.trapezoid(np.nan_to_num(inter(1240e-9 / self.wl * q)), 1240e-9 / self.wl * q)
             layer_mat.radiative_recombination = Br
 
             # And add the layer to the list of layers

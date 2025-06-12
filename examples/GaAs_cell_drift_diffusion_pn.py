@@ -141,7 +141,7 @@ z_pos = np.linspace(0, 3230, 4000)*1e-9
 
 gen_per_wl = solar_cell_sesame[2].absorbed(z_pos)
 
-gen_total = np.trapz(gen_per_wl * options.light_source.spectrum(options.wavelength, output_units="photon_flux_per_m")[1][None, :], options.wavelength)
+gen_total = np.trapezoid(gen_per_wl * options.light_source.spectrum(options.wavelength, output_units="photon_flux_per_m")[1][None, :], options.wavelength)
 
 plt.figure()
 plt.plot(solar_cell_sesame[2].mesh*1e6, solar_cell_sesame[2].pdd_output.G, '-k', label='Generation')

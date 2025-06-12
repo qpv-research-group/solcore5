@@ -245,9 +245,9 @@ class UnitsSystem(SourceManagedClass):
         >>> import numpy as np
         >>> x = np.array([1,2,3])
         >>> y = np.array([1,1,1])
-        >>> area_before = np.trapz(y, x=x)
+        >>> area_before = np.trapezoid(y, x=x)
         >>> x_new, y_new = spectral_conversion_nm_ev(x, y)
-        >>> area_after = np.trapz(y_new, x=x_new)
+        >>> area_after = np.trapezoid(y_new, x=x_new)
         >>> compare_floats(area_before, area_after, relative_precision=0.2)
         True
 
@@ -286,9 +286,9 @@ class UnitsSystem(SourceManagedClass):
         >>> import numpy as np
         >>> x = np.array([1,2,3])
         >>> y = np.array([1,1,1])
-        >>> area_before = np.trapz(y, x=x)
+        >>> area_before = np.trapezoid(y, x=x)
         >>> x_new, y_new = spectral_conversion_nm_hz(x, y)
-        >>> area_after = np.trapz(y_new, x=x_new)
+        >>> area_after = np.trapezoid(y_new, x=x_new)
         >>> compare_floats(area_before, area_after, relative_precision=0.2)
         True
 

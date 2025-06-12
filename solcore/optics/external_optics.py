@@ -48,7 +48,7 @@ def solve_external_optics(
 
     # We calculate the total amount of light absorbed in the solar cell, integrating
     # over its whole thickness with a step of 1 nm
-    all_absorbed = np.trapz(diff_absorption(position), position)
+    all_absorbed = np.trapezoid(diff_absorption(position), position)
 
     # Each building block (layer or junction) needs to have access to the absorbed light
     # in its region.

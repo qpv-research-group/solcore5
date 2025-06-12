@@ -114,10 +114,10 @@ class calc_min_Jsc():
         A_Ge = RAT['A_per_layer'][6]
 
         ## calculate photo-generated currents using the AM1.5 G spectrum for each layer
-        Jsc_InGaP = 0.1 * q * np.trapz(A_InGaP* self.spectr, self.wl)
-        Jsc_GaAs = 0.1 * q * np.trapz(A_GaAs * self.spectr, self.wl)
-        Jsc_SiGeSn = 0.1 * q * np.trapz(A_SiGeSn* self.spectr, self.wl)
-        Jsc_Ge = 0.1 * q* np.trapz(A_Ge * self.spectr, self.wl)
+        Jsc_InGaP = 0.1 * q * np.trapezoid(A_InGaP* self.spectr, self.wl)
+        Jsc_GaAs = 0.1 * q * np.trapezoid(A_GaAs * self.spectr, self.wl)
+        Jsc_SiGeSn = 0.1 * q * np.trapezoid(A_SiGeSn* self.spectr, self.wl)
+        Jsc_Ge = 0.1 * q* np.trapezoid(A_Ge * self.spectr, self.wl)
 
         # find the limiting current by checking which junction has the lowest current. Then take the negative since
         # we need to minimize (not maximize)

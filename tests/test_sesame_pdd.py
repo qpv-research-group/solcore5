@@ -551,7 +551,7 @@ def test_generation_rate():
 
     gen_per_wl = solar_cell(0).absorbed(z_pos)
 
-    gen_total = np.trapz(gen_per_wl * options.light_source.spectrum(options.wavelength,
+    gen_total = np.trapezoid(gen_per_wl * options.light_source.spectrum(options.wavelength,
                                                                     output_units="photon_flux_per_m")[
                                           1][None, :], options.wavelength)
 

@@ -211,7 +211,7 @@ class LightSource:
 
             self.x_internal = wl
             self.power_density = (
-                np.trapz(y=spectrum, x=wl) * self.concentration
+                np.trapezoid(y=spectrum, x=wl) * self.concentration
             )
             output = interp1d(
                 x=wl, y=spectrum, bounds_error=False, fill_value=0, assume_sorted=True
@@ -323,7 +323,7 @@ class LightSource:
 
         self.x_internal = wl
         self.power_density = (
-            np.trapz(y=irradiance, x=wl) * self.concentration
+            np.trapezoid(y=irradiance, x=wl) * self.concentration
         )
         output = interp1d(
             x=wl, y=irradiance, bounds_error=False, fill_value=0, assume_sorted=True
@@ -362,7 +362,7 @@ class LightSource:
 
             self.x_internal = out[0]
             self.power_density = (
-                np.trapz(y=out[output], x=out[0]) * self.concentration
+                np.trapezoid(y=out[output], x=out[0]) * self.concentration
             )
             output = interp1d(
                 x=out[0],
@@ -434,7 +434,7 @@ class LightSource:
 
             self.x_internal = wl
             self.power_density = (
-                np.trapz(y=spectrum, x=wl) * self.concentration
+                np.trapezoid(y=spectrum, x=wl) * self.concentration
             )
             output = interp1d(
                 x=wl, y=spectrum, bounds_error=False, fill_value=0, assume_sorted=True
