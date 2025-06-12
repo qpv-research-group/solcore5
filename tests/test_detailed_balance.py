@@ -99,7 +99,7 @@ def test_iv_detailed_balance_dark():
     options.db_mode = "boltzmann"
     options.T_ambient = 300
     options.wavelength = np.linspace(300, 1000, 50) * 1e-9
-    options.internal_voltages = np.linspace(0, 1.5, 20)
+    options.internal_voltages = np.linspace(0, 1.2, 20)
 
     junc = Junction(Eg=1.3, A=0.9)
 
@@ -110,14 +110,6 @@ def test_iv_detailed_balance_dark():
     junc.reflected = lambda x: 0.05 * np.ones_like(x)  # some reflection
     iv_detailed_balance(junc, options)
 
-    import matplotlib.pyplot as plt
-
-    plt.figure()
-    plt.plot(
-        options.internal_voltages, junc.iv(options.internal_voltages), label="IV curve"
-    )
-    plt.show()
-
     iv_nobackref = junc.iv(options.internal_voltages)
 
     junc.back_reflector = True
@@ -126,3 +118,44 @@ def test_iv_detailed_balance_dark():
     iv_backref = junc.iv(options.internal_voltages)
 
     assert iv_nobackref / 2 == approx(iv_backref, rel=0.01)
+
+    options.db_mode = "planck"
+    iv_detailed_balance(junc, options)
+
+    iv_planck = junc.iv(options.internal_voltages)
+
+    assert iv_planck == approx(iv_backref, rel=0.01)
+
+
+
+
+
+def test_iv_detailed_balance_light():
+    from solcore.light_source import LightSource
+    options = State()
+    options.T = 300
+    options.light_iv = True
+    options.db_mode = "boltzmann"
+    options.T_ambient = 300
+    options.wavelength = np.linspace(300, 1000, 50) * 1e-9
+    options.internal_voltages = np.linspace(0, 1.3, 20)
+    options.light_source = LightSource(source_type='standard', x=options.wavelength,
+                                       version='AM1.5g',
+                           output_units="photon_flux_per_m")
+
+    junc = Junction(Eg=1.3, A=0.9)
+
+    junc.n = 3  # refractive index
+    junc.reflected = lambda x: 0.05 * np.ones_like(x)  # some reflection
+    iv_detailed_balance(junc, options)
+
+    iv_nobackref = junc.iv(options.internal_voltages)
+
+    junc.back_reflector = True
+
+    iv_detailed_balance(junc, options)
+    iv_backref = junc.iv(options.internal_voltages)
+
+    assert iv_nobackref[0] == approx(iv_backref[0], rel=0.001)
+
+    assert np.all(iv_nobackref >= iv_nobackref)
