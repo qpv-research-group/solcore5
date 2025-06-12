@@ -71,6 +71,10 @@ jobs:
           uv pip install --system pytest meson-python ninja cython spin==0.9
           
           python3 -m spin install-dependencies -test-dep
+          
+          git clone https://github.com/qpv-research-group/solsesame
+          cd solsesame
+          pip install .
 
       - name: Install S4 (macOS - arm)
         if: matrix.os == 'macos-latest'
@@ -81,10 +85,7 @@ jobs:
           make S4_pyext --file="Makefile.m1"
           cd ..
           rm -rf S4
-          
-          git clone https://github.com/qpv-research-group/solsesame
-          cd solsesame
-          pip install .
+        
 
       - name: Install S4 (ubuntu)
         if: matrix.os == 'ubuntu-latest'
