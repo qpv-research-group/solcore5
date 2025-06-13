@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from solsesame import Builder, IVcurve, Analyzer, solve
+# from solsesame import Builder, IVcurve, Analyzer, solve
+from solsesame.builder import Builder
+from solsesame.solvers import Solver
+from solsesame.analyzer import Analyzer
 import numpy as np
 from scipy.optimize import root
 from solcore.constants import q, kb
@@ -30,6 +33,9 @@ def equilibrium(junction: Junction, **kwargs):
     )  # needs to be passed as kwargs to be compatible with Fortran equilibrium solver
     # in registries
 
+    solver_class = Solver()
+    IVcurve = solver_class.IVcurve
+
     if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
 
@@ -40,7 +46,7 @@ def equilibrium(junction: Junction, **kwargs):
             "Current calculation did not converge at all voltages", UserWarning
         )
 
-    j = j * junction.sesame_sys.scaling.current * 1e4  # cm-2 -> m-2
+    # j = j * junction.sesame_sys.scaling.current * 1e4  # cm-2 -> m-2
 
     junction.sesame_output = result
 
@@ -76,6 +82,8 @@ def iv_sesame(junction, options):
 
     # TODO: pass output from 'result' parameter to the user, similar to the Fortran PDD solver, so that
     # band structures etc. can be plotted.
+    solver_class = Solver()
+    IVcurve = solver_class.IVcurve
 
     if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
@@ -251,7 +259,7 @@ def iv_sesame(junction, options):
     junction.current = junction.iv(options.internal_voltages)
     junction.pdd_output = process_sesame_results(junction.sesame_sys, result)
 
-def j_per_wl(system, guess=None, tol=1e-6,
+def j_per_wl(system, solve, guess=None, tol=1e-6,
                 periodic_bcs=True, maxiter=300, verbose=True, htp=1):
     """
       Solve the Drift Diffusion Poisson equations at V=0.
@@ -259,6 +267,7 @@ def j_per_wl(system, guess=None, tol=1e-6,
       ----------
       system: Builder
           The discretized system.
+      solve: solsesame.solvers.Solver.solve function
       guess: dictionary of numpy arrays of floats (optional)
           Starting point of the solver. Keys of the dictionary must be 'efn',
           'efp', 'v' for the electron and quasi-Fermi levels, and the
@@ -316,6 +325,10 @@ def qe_sesame(junction: Junction, options: State):
     :param junction: a Junction object
     :param options: a State object containing options for the solver
     """
+
+    solver_class = Solver()
+    solve = solver_class.solve
+
     if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
 
@@ -394,7 +407,7 @@ def qe_sesame(junction: Junction, options: State):
         else:
             guess = result
 
-        j, result = j_per_wl(junction.sesame_sys, guess=guess)
+        j, result = j_per_wl(junction.sesame_sys, solve, guess=guess)
         # j, result = IVcurve(junction.sesame_sys, [0], guess=guess)
         print('wl', i1, j)
         eqe[i1] = np.abs(j) / (q * flux)
