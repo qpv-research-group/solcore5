@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-# from solsesame import Builder, IVcurve, Analyzer, solve
 from solsesame.builder import Builder
 from solsesame.solvers import Solver
 from solsesame.analyzer import Analyzer
 import numpy as np
-from scipy.optimize import root
-from solcore.constants import q, kb
+from solcore.constants import q
 from scipy.interpolate import interp1d
 from solcore.state import State
-from solcore.structure import Junction, Layer
+from solcore.structure import Junction
 from solcore.sesame_drift_diffusion.process_structure import process_structure
 import warnings
 
@@ -24,9 +22,6 @@ def equilibrium(junction: Junction, **kwargs):
     :param junction: a Junction object
     :param options: a State object containing options for the solver
     """
-
-    # TODO: pass output from 'result' parameter to the user, similar to the Fortran PDD solver, so that
-    # band structures etc. can be plotted.
 
     options = State(
         kwargs
@@ -53,16 +48,23 @@ def equilibrium(junction: Junction, **kwargs):
 
 def process_guess(guess, sys):
     """
-    Process the guess for the Sesame solver. This is necessary because the Sesame solver requires
-    the guess to be in the form of a dictionary with keys 'v', 'efn' and 'efp', each of which is an
-    array of length sys.nx. Units also need to be converted to those used by Sesame internally
+    Process the guess for the Sesame solver. This is necessary because the Sesame
+    solver requires the guess to be in the form of a dictionary with keys 'v', 'efn'
+    and 'efp', each of which is an array of length sys.nx (for IV calculations) or
+    (n_wavelengths, sys.nx) (for EQE calculations). Units also need to be
+    converted to those used by Sesame internally
     """
 
-    v = guess["potential"] / sys.scaling.energy
-    efn = guess["Efe"] / sys.scaling.energy
-    efp = guess["Efh"] / sys.scaling.energy
+    if guess is not None:
 
-    guess_sesame = {"v": v, "efn": efn, "efp": efp}
+        v = guess["potential"] / sys.scaling.energy
+        efn = guess["Efe"] / sys.scaling.energy
+        efp = guess["Efh"] / sys.scaling.energy
+
+        guess_sesame = {"v": v, "efn": efn, "efp": efp}
+
+    else:
+        guess_sesame = None
 
     return guess_sesame
 
@@ -70,18 +72,17 @@ def process_guess(guess, sys):
 @register_iv_solver("sesame_PDD")
 def iv_sesame(junction, options):
     """
-    Solve the dark or light IV using the Sesame solver. This will scan through the voltages
-    in options.internal_voltages and call sesame.IVcurve. If your calculation is failing to converge,
-    make sure your calculation includes 0 V and try scanning more voltage points or setting a denser
-    mesh. Note that the solver will not calculate anything at voltages > the bandgap + 10*kb*T, since
-    it will fail to converge for the high injection regime.
+    Solve the dark or light IV using the Sesame solver. This will scan through the
+    voltages  in options.internal_voltages and call sesame.IVcurve. If your calculation
+    is failing to converge, make sure your calculation includes 0 V and try scanning
+    more voltage points or setting a denser mesh. Note that the solver will not
+    calculate anything at voltages > the bandgap + 10*kb*T, since it will fail to
+    converge for the high injection regime.
 
     :param junction: a Junction object
     :param options: a State object containing options for the solver
     """
 
-    # TODO: pass output from 'result' parameter to the user, similar to the Fortran PDD solver, so that
-    # band structures etc. can be plotted.
     solver_class = Solver()
     IVcurve = solver_class.IVcurve
 
@@ -121,18 +122,20 @@ def iv_sesame(junction, options):
         max_Eg + 10 * 8.617e-05 * options.T
     )  # do not go into the high injection regime, will not get convergence
 
-    # voltages need to go from 0 (or close) to highest applied +ve or -ve voltage, otherwise
-    # do not get convergence; need to go from V = 0 to high applied voltage so that Sesame can
-    # use the previous solution as a guess for the next voltage.
+    # voltages need to go from 0 (or close) to highest applied +ve or -ve voltage,
+    # otherwise do not get convergence; need to go from V = 0 to high applied voltage
+    # so that Sesame can use the previous solution as a guess for the next voltage.
 
     if junction.sesame_sys.rho[junction.sesame_sys.nx - 1] < 0:
-        # this is necessary because Sesame will internally flip the sign for an n-p junction
+        # this is necessary because Sesame will internally flip the sign for an n-p
+        # junction
         voltages_for_solve = -voltages
 
         if np.all(options.voltages >= 0):
             warnings.warn(
-                "All voltages are positive, but junction has been identified as n-p, so the "
-                "open-circuit voltage (Voc) of the junction will be negative.",
+                "All voltages are positive, but junction has been identified "
+                "as n-p, so the  open-circuit voltage (Voc) of the junction will be "
+                "negative.",
                 UserWarning,
             )
 
@@ -157,10 +160,14 @@ def iv_sesame(junction, options):
             positive_voltages = positive_voltages[positive_voltages_order]
 
             j_positive, result_positive = IVcurve(
-                junction.sesame_sys, positive_voltages, guess=guess_sesame,
+                junction.sesame_sys,
+                positive_voltages,
+                guess=guess_sesame,
             )
             j_negative, result_negative = IVcurve(
-                junction.sesame_sys, negative_voltages, guess=guess_sesame,
+                junction.sesame_sys,
+                negative_voltages,
+                guess=guess_sesame,
             )
 
             j_negative = j_negative[::-1]
@@ -194,7 +201,8 @@ def iv_sesame(junction, options):
                 }
                 final_voltages = np.concatenate((negative_voltages, positive_voltages))
 
-            # this results in j and result in order of increasing values for voltages_for_solve
+            # this results in j and result in order of increasing values for
+            # voltages_for_solve
         else:
             # negative voltages only
             voltage_order = np.argsort(voltages_for_solve)[::-1]
@@ -206,7 +214,7 @@ def iv_sesame(junction, options):
         voltage_order = np.argsort(voltages_for_solve)
 
         final_voltages = voltages_for_solve[voltage_order]
-        j, result = IVcurve(junction.sesame_sys, final_voltages, guess=guess_sesame)  # , verbose=False)
+        j, result = IVcurve(junction.sesame_sys, final_voltages, guess=guess_sesame)
     warnings.resetwarnings()
 
     if np.any(np.isnan(j)):
@@ -214,9 +222,9 @@ def iv_sesame(junction, options):
             "Current calculation did not converge at all voltages", UserWarning
         )
 
-    # final_voltages are the voltages corresponding to the entries in j and result, USING
-    # Sesame's sign convention. So if the voltage sign was flipped above, need to flip it back
-    # for Solcore
+    # final_voltages are the voltages corresponding to the entries in j and result,
+    # using Sesame's sign convention. So if the voltage sign was flipped above, need
+    # to flip it back for Solcore
 
     if junction.sesame_sys.rho[junction.sesame_sys.nx - 1] < 0:
         result_voltage = -final_voltages
@@ -241,7 +249,8 @@ def iv_sesame(junction, options):
 
     else:
         raise Exception(
-            "No solutions found for IV curve. Try increasing the number of voltage points scanned."
+            "No solutions found for IV curve. "
+            "Try increasing the number of voltage points scanned."
         )
 
     junction.sesame_output = result
@@ -259,44 +268,61 @@ def iv_sesame(junction, options):
     junction.current = junction.iv(options.internal_voltages)
     junction.pdd_output = process_sesame_results(junction.sesame_sys, result)
 
-def j_per_wl(system, solve, guess=None, tol=1e-6,
-                periodic_bcs=True, maxiter=300, verbose=True, htp=1):
-    """
-      Solve the Drift Diffusion Poisson equations at V=0.
-      Parameters
-      ----------
-      system: Builder
-          The discretized system.
-      solve: solsesame.solvers.Solver.solve function
-      guess: dictionary of numpy arrays of floats (optional)
-          Starting point of the solver. Keys of the dictionary must be 'efn',
-          'efp', 'v' for the electron and quasi-Fermi levels, and the
-          electrostatic potential respectively.
-      tol: float
-          Accepted error made by the Newton-Raphson scheme.
-      periodic_bcs: boolean
-          Defines the choice of boundary conditions in the y-direction. True
-          (False) corresponds to periodic (abrupt) boundary conditions.
-      maxiter: integer
-          Maximum number of steps taken by the Newton-Raphson scheme.
-      verbose: boolean
-          The solver returns the step number and the associated error at every
-          step, and this function prints the current applied voltage if set to True (default).
-      htp: integer
-          Number of homotopic Newton loops to perform.
 
-      Returns
-      -------
-      J: numpy array of floats
-          Steady state current computed for each voltage value.
+def j_per_wl(
+    system,
+    solve,
+    guess=None,
+    tol=1e-6,
+    periodic_bcs=True,
+    maxiter=300,
+    verbose=True,
+    htp=1,
+):
+    """
+    Solve the Drift Diffusion Poisson equations at V=0.
+    Parameters
+    ----------
+    system: Builder
+        The discretized system.
+    solve: solsesame.solvers.Solver.solve function
+    guess: dictionary of numpy arrays of floats (optional)
+        Starting point of the solver. Keys of the dictionary must be 'efn',
+        'efp', 'v' for the electron and quasi-Fermi levels, and the
+        electrostatic potential respectively.
+    tol: float
+        Accepted error made by the Newton-Raphson scheme.
+    periodic_bcs: boolean
+        Defines the choice of boundary conditions in the y-direction. True
+        (False) corresponds to periodic (abrupt) boundary conditions.
+    maxiter: integer
+        Maximum number of steps taken by the Newton-Raphson scheme.
+    verbose: boolean
+        The solver returns the step number and the associated error at every
+        step, and this function prints the current applied voltage if set to True
+        (default).
+    htp: integer
+        Number of homotopic Newton loops to perform.
+
+    Returns
+    -------
+    J: numpy array of floats
+        Steady state current computed for each voltage value.
 
     """
 
     # create a dictionary 'result' with efn and efp
 
     # Call the Drift Diffusion Poisson solver
-    result = solve(system, guess=guess, tol=tol, periodic_bcs=periodic_bcs, \
-                        maxiter=maxiter, verbose=verbose, htp=htp)
+    result = solve(
+        system,
+        guess=guess,
+        tol=tol,
+        periodic_bcs=periodic_bcs,
+        maxiter=maxiter,
+        verbose=verbose,
+        htp=htp,
+    )
 
     if result is not None:
 
@@ -306,7 +332,6 @@ def j_per_wl(system, solve, guess=None, tol=1e-6,
 
         except:
             J = np.nan
-
 
     else:
         warnings.warn(("The solver failed to converge.", UserWarning))
@@ -318,9 +343,10 @@ def j_per_wl(system, solve, guess=None, tol=1e-6,
 
 def qe_sesame(junction: Junction, options: State):
     """
-    Calculate the quantum efficiency of a junction using Sesame. This will scan through the wavelengths
-    set in options.wavelength. It will scan from long wavelengths to short wavelengths, to improve
-    the chance of convergence, since carrier generation profiles will be less steep at longer wavelengths.
+    Calculate the quantum efficiency of a junction using Sesame. This will scan through
+    the wavelengths set in options.wavelength. It will scan from long wavelengths to
+    short wavelengths, to improve the chance of convergence, since carrier generation
+    profiles will be less steep at longer wavelengths.
 
     :param junction: a Junction object
     :param options: a State object containing options for the solver
@@ -332,6 +358,20 @@ def qe_sesame(junction: Junction, options: State):
     if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
 
+    if hasattr(junction, "guess"):
+        # guess for the non-equilibrium solution at V = 0
+        guess_sesame = process_guess(junction.guess, junction.sesame_sys)
+
+    else:
+        guess_sesame = None
+
+    # Note: the commented-out sections are for a potential parallel (over wavelengths)
+    # implementation of the solver. At the moment, this generally does not work,
+    # because at short wavelengths the solver needs a good initial guess in order to
+    # converge, so the safest approach is to do the wavelengths in order from longest
+    # to shortest. However, there is no fundamental reason that if you have a good
+    # initial guess for each wavelength, you could not do this in parallel.
+
     # if not options.parallel:
     #     n_jobs = 1
     #
@@ -342,14 +382,12 @@ def qe_sesame(junction: Junction, options: State):
 
     wls = options.wavelength
 
-    voltages = [0]
+    profile_func = junction.absorbed
+    # this returns an array of shape (mesh_points, wavelengths)
 
-    # profile_func = interp1d(bulk_positions_cm, 1e7 * Si_profile, kind='linear', bounds_error=False, fill_value=0)
-    profile_func = (
-        junction.absorbed
-    )  # this returns an array of shape (mesh_points, wavelengths)
-
-    A = np.trapezoid(np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0)
+    A = np.trapezoid(
+        np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0
+    )
 
     def make_gfcn_fun(wl_index, flux):
         def gcfn_fun(x, y):
@@ -359,6 +397,7 @@ def qe_sesame(junction: Junction, options: State):
 
         return gcfn_fun
 
+    # more code for potential parallel implementation
     # def qe_i(i1):
     #
     #     junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
@@ -383,6 +422,8 @@ def qe_sesame(junction: Junction, options: State):
     # vres = np.concatenate([item[1]['v'] for item in allres])
 
     flux = 1e3
+    # TODO: allow user to set the flux explicitly, e.g. according to a
+    # LightSource object or just a fixed number of photons m-2 s-1
 
     eqe = np.zeros_like(wls)
 
@@ -391,26 +432,43 @@ def qe_sesame(junction: Junction, options: State):
     EQE_threshold = 1e-5
 
     wl_solve = np.where(A >= EQE_threshold)[0][::-1]
-    # go in backwards order through wavelengths - since generation profile tends to be flatter at longer wavelengths,
-    # this increases the change of convergence, since the solution for the previous wavelength is always used as a guess
-    # for the next wavelength. Having a good guess helps the short wavelength solutions converge
+    # go in backwards order through wavelengths - since generation profile tends to be
+    # flatter at longer wavelengths, this increases the change of convergence, since the
+    # solution for the previous wavelength is always used as a guess for the next
+    # wavelength. Having a good guess helps the short wavelength solutions converge
 
     warnings.filterwarnings("ignore")
-    # this is to prevent warnings from Sesame flooding the output. Not ideal but unsure on best way to solve.
+    # this is to prevent warnings from Sesame flooding the output. Not ideal but
+    # unsure on best way to solve.
+
+    efn_result = np.zeros((len(wl_solve), junction.sesame_sys.nx))
+    efp_result = np.zeros((len(wl_solve), junction.sesame_sys.nx))
+    v_result = np.zeros((len(wl_solve), junction.sesame_sys.nx))
 
     for i1 in wl_solve:
         junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
 
-        if i1 == wl_solve[0] or result is None:
-            guess = None
+        if guess_sesame is not None:
+            # if there is a guess, use it as a starting point for the next wavelength
+            guess = {
+                "v": guess_sesame["v"][i1],
+                "efn": guess_sesame["efn"][i1],
+                "efp": guess_sesame["efp"][i1],
+            }
 
         else:
-            guess = result
+            if i1 == wl_solve[0] or result is None:
+                guess = None
+
+            else:
+                guess = result
 
         j, result = j_per_wl(junction.sesame_sys, solve, guess=guess)
-        # j, result = IVcurve(junction.sesame_sys, [0], guess=guess)
-        print('wl', i1, j)
+
         eqe[i1] = np.abs(j) / (q * flux)
+        efn_result[i1] = result["efn"]
+        efp_result[i1] = result["efp"]
+        v_result[i1] = result["v"]
 
     if np.any(np.isnan(eqe)):
         warnings.warn(
@@ -438,14 +496,31 @@ def qe_sesame(junction: Junction, options: State):
         fill_value=(eqe[0], eqe[-1]),
     )
 
-    junction.qe = State({"WL": wls, "IQE": junction.iqe(wls), "EQE": junction.eqe(wls)})
+    # PDD output for process_sesame_results should be dictionary with keys 'efn', 'efp',
+    # 'v', each entry has shape (n_wavelengths, mesh_points)
+    result_dict = {
+        "efn": efn_result,
+        "efp": efp_result,
+        "v": v_result,
+    }
+
+    pdd_output = process_sesame_results(junction.sesame_sys, result_dict)
+
+    junction.qe = State(
+        {
+            "WL": wls,
+            "IQE": junction.iqe(wls),
+            "EQE": junction.eqe(wls),
+            "pdd_output": pdd_output,
+        }
+    )
 
 
 def process_sesame_results(sys: Builder, result: dict):
     """
-        Scale the result of a Sesame calculation to SI units, and calculate other quantities like
-        the positions of the conduction and valence band and the recombination rates. Produces a
-        State object with entries:
+        Scale the result of a Sesame calculation to SI units, and calculate other
+        quantities like the positions of the conduction and valence band and the
+        recombination rates. Produces a State object with entries:
 
             - potential: the potential (V)
             - n: the electron density (m\ :sup:`-3`)
@@ -456,9 +531,11 @@ def process_sesame_results(sys: Builder, result: dict):
             - Efh the hole quasi-Fermi level (eV)
             - Rrad: the radiative recombination rate (m\ :sup:`-3` s\ :sup:`-1`)
             - Raug: the Auger recombination rate (m\ :sup:`-3` s\ :sup:`-1`)
-            - Rsrh: the bulk recombination due to Shockley-Read-Hall processes (m\ :sup:`-3` s\ :sup:`-1`)
+            - Rsrh: the bulk recombination due to
+              Shockley-Read-Hall processes (m\ :sup:`-3` s\ :sup:`-1`)
 
-    Each of these is a 2-dimensional array, with dimensions ``(len(options.internal_voltages), len(mesh))``.
+    Each of these is a 2-dimensional array, with dimensions
+    ``(len(options.internal_voltages), len(mesh))``.
 
         :param sys: a Sesame Builder object
         :param result: a dictionary containing the results from a Sesame calculation
@@ -467,7 +544,8 @@ def process_sesame_results(sys: Builder, result: dict):
     line = ((0, 0), (np.max(sys.xpts), 0))
     n_voltages = len(result["v"])
 
-    generation = sys.g * sys.scaling.generation * 1e6 # multiply by internal sesame scaling factor,
+    generation = sys.g * sys.scaling.generation * 1e6  # multiply by internal
+    # sesame scaling factor,
     # convert from cm-3 to m-3 (area and depth are in m, in sesame they are in cm)
 
     potential = result["v"] * sys.scaling.energy
