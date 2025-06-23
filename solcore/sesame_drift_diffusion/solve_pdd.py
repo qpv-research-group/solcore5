@@ -13,11 +13,30 @@ import warnings
 
 from solcore.registries import register_iv_solver, register_equilibrium_solver
 
+def process_sesame_options(options):
+
+    sesame_kwargs = {}
+
+    if hasattr(options, "sesame_max_iterations"):
+        sesame_kwargs["maxiter"] = options.sesame_max_iterations
+
+    if hasattr(options, "sesame_tol"):
+        sesame_kwargs["tol"] = options.sesame_tol
+
+    if hasattr(options, "sesame_verbose"):
+        sesame_kwargs["verbose"] = options.sesame_verbose
+
+    if hasattr(options, "sesame_htp"):
+        sesame_kwargs["htp"] = options.sesame_htp
+
+    if hasattr(options, "sesame_periodic"):
+        sesame_kwargs["periodic_bcs"] = options.sesame_periodic
+
+    return sesame_kwargs
 
 @register_equilibrium_solver("sesame_PDD")
 def equilibrium(junction: Junction, **kwargs):
-    """
-    Solve at equilibrium (no illumination, no applied voltage) using the Sesame solver.
+    """Solve at equilibrium (no illumination, no applied voltage) using the Sesame solver.
 
     :param junction: a Junction object
     :param options: a State object containing options for the solver
@@ -34,7 +53,17 @@ def equilibrium(junction: Junction, **kwargs):
     if not hasattr(junction, "sesame_sys"):
         process_structure(junction, options)
 
-    j, result = IVcurve(junction.sesame_sys, [0])
+    if hasattr(junction, "guess"):
+        # guess for the non-equilibrium solution at V = 0
+        guess_sesame = process_guess(junction.guess, junction.sesame_sys)
+
+    else:
+        guess_sesame = None
+
+    sesame_kwargs = process_sesame_options(options)
+
+    j, result = IVcurve(junction.sesame_sys, [0], guess=guess_sesame,
+                        **sesame_kwargs)
 
     if np.any(np.isnan(j)):
         warnings.warn(
@@ -47,8 +76,7 @@ def equilibrium(junction: Junction, **kwargs):
 
 
 def process_guess(guess, sys):
-    """
-    Process the guess for the Sesame solver. This is necessary because the Sesame
+    """Process the guess for the Sesame solver. This is necessary because the Sesame
     solver requires the guess to be in the form of a dictionary with keys 'v', 'efn'
     and 'efp', each of which is an array of length sys.nx (for IV calculations) or
     (n_wavelengths, sys.nx) (for EQE calculations). Units also need to be
@@ -71,8 +99,7 @@ def process_guess(guess, sys):
 
 @register_iv_solver("sesame_PDD")
 def iv_sesame(junction, options):
-    """
-    Solve the dark or light IV using the Sesame solver. This will scan through the
+    """Solve the dark or light IV using the Sesame solver. This will scan through the
     voltages  in options.internal_voltages and call sesame.IVcurve. If your calculation
     is failing to converge, make sure your calculation includes 0 V and try scanning
     more voltage points or setting a denser mesh. Note that the solver will not
@@ -95,6 +122,8 @@ def iv_sesame(junction, options):
 
     else:
         guess_sesame = None
+
+    sesame_kwargs = process_sesame_options(options)
 
     if options.light_iv and np.all(junction.sesame_sys.g == 0):
         gen_wl = junction.absorbed(junction.mesh) / 100  # m-1 -> cm-1
@@ -163,13 +192,13 @@ def iv_sesame(junction, options):
                 junction.sesame_sys,
                 positive_voltages,
                 guess=guess_sesame,
-                maxiter=2000,
+                **sesame_kwargs,
             )
             j_negative, result_negative = IVcurve(
                 junction.sesame_sys,
                 negative_voltages,
                 guess=guess_sesame,
-                maxiter=2000,
+                **sesame_kwargs,
             )
 
             j_negative = j_negative[::-1]
@@ -211,7 +240,7 @@ def iv_sesame(junction, options):
             final_voltages = voltages_for_solve[voltage_order]
             j, result = IVcurve(junction.sesame_sys, final_voltages,
                                 guess=guess_sesame,
-                                maxiter=2000,
+                                **sesame_kwargs,
                                 )
 
     else:
@@ -220,7 +249,7 @@ def iv_sesame(junction, options):
 
         final_voltages = voltages_for_solve[voltage_order]
         j, result = IVcurve(junction.sesame_sys, final_voltages, guess=guess_sesame,
-                            maxiter=2000,
+                            **sesame_kwargs,
                             )
     warnings.resetwarnings()
 
@@ -279,15 +308,10 @@ def iv_sesame(junction, options):
 def j_per_wl(
     system,
     solve,
+    sesame_kwargs,
     guess=None,
-    tol=1e-6,
-    periodic_bcs=True,
-    maxiter=300,
-    verbose=True,
-    htp=1,
 ):
-    """
-    Solve the Drift Diffusion Poisson equations at V=0.
+    """Solve the Drift Diffusion Poisson equations at V=0.
     Parameters
     ----------
     system: Builder
@@ -321,14 +345,10 @@ def j_per_wl(
     # create a dictionary 'result' with efn and efp
 
     # Call the Drift Diffusion Poisson solver
-    result, x_list, dx_list, damped_dx_list, error_list = solve(
+    result = solve(
         system,
         guess=guess,
-        tol=tol,
-        periodic_bcs=periodic_bcs,
-        maxiter=maxiter,
-        verbose=verbose,
-        htp=htp,
+        **sesame_kwargs,
     )
 
     if result is not None:
@@ -342,22 +362,13 @@ def j_per_wl(
 
     else:
         warnings.warn(("The solver failed to converge.", UserWarning))
+        J = np.nan
 
-        # find where the error is at a minimum:
-        if len(error_list) > 0:
-            min_error_index = np.argmin(error_list)
-            result = {'efn': x_list[min_error_index][0::3], 'efp': x_list[min_error_index][1::3], 'v': x_list[min_error_index][2::3]}
-            az = Analyzer(system, result)
-            J = az.full_current()
-        else:
-            J = np.nan
-
-    return J, result, x_list, dx_list, damped_dx_list, error_list
+    return J, result
 
 
 def qe_sesame(junction: Junction, options: State):
-    """
-    Calculate the quantum efficiency of a junction using Sesame. This will scan through
+    """Calculate the quantum efficiency of a junction using Sesame. This will scan through
     the wavelengths set in options.wavelength. It will scan from long wavelengths to
     short wavelengths, to improve the chance of convergence, since carrier generation
     profiles will be less steep at longer wavelengths.
@@ -397,6 +408,8 @@ def qe_sesame(junction: Junction, options: State):
     wls = options.wavelength
 
     profile_func = junction.absorbed
+
+    sesame_kwargs = process_sesame_options(options)
 
     # this returns an array of shape (mesh_points, wavelengths)
 
@@ -447,7 +460,6 @@ def qe_sesame(junction: Junction, options: State):
     # vres = np.concatenate([item[1]['v'] for item in allres])
 
     flux = 1e4
-    print("hello")
     # TODO: allow user to set the flux explicitly, e.g. according to a
     # LightSource object or just a fixed number of photons m-2 s-1
 
@@ -471,10 +483,7 @@ def qe_sesame(junction: Junction, options: State):
     efp_result = np.empty((len(wl_solve), junction.sesame_sys.nx))*np.nan
     v_result = np.empty((len(wl_solve), junction.sesame_sys.nx))*np.nan
 
-    x_wl = []
-    dx_wl = []
-    damped_dx_wl = []
-    error_wl = []
+    result = None
 
     for i1 in wl_solve:
         junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
@@ -498,17 +507,11 @@ def qe_sesame(junction: Junction, options: State):
                 guess = result
                 print(wls[i1]*1e9, "guess from previous wavelength")
 
-        j, result, x_list, dx_list, damped_dx_list, error_list = j_per_wl(junction.sesame_sys, solve, guess=guess,
-                             maxiter=700,
-                             # tol=1e-5
+        j, result = j_per_wl(junction.sesame_sys, solve, sesame_kwargs,
+                             guess=guess,
                              )
 
         eqe[i1] = np.abs(j) / (q * flux)
-
-        x_wl.append(x_list)
-        dx_wl.append(dx_list)
-        damped_dx_wl.append(damped_dx_list)
-        error_wl.append(error_list)
 
         if result is not None:
             efn_result[i1] = result["efn"]
@@ -557,18 +560,12 @@ def qe_sesame(junction: Junction, options: State):
             "IQE": junction.iqe(wls),
             "EQE": junction.eqe(wls),
             "pdd_output": pdd_output,
-            "debug_output": {
-                "x_list": x_wl,
-                "dx_list": dx_wl,
-                "damped_dx_list": damped_dx_wl,
-                "error_list": error_wl,
-            }
         }
     )
 
 
 def process_sesame_results(sys: Builder, result: dict):
-    """
+    r"""
         Scale the result of a Sesame calculation to SI units, and calculate other
         quantities like the positions of the conduction and valence band and the
         recombination rates. Produces a State object with entries:
