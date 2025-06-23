@@ -163,11 +163,13 @@ def iv_sesame(junction, options):
                 junction.sesame_sys,
                 positive_voltages,
                 guess=guess_sesame,
+                maxiter=2000,
             )
             j_negative, result_negative = IVcurve(
                 junction.sesame_sys,
                 negative_voltages,
                 guess=guess_sesame,
+                maxiter=2000,
             )
 
             j_negative = j_negative[::-1]
@@ -207,14 +209,19 @@ def iv_sesame(junction, options):
             # negative voltages only
             voltage_order = np.argsort(voltages_for_solve)[::-1]
             final_voltages = voltages_for_solve[voltage_order]
-            j, result = IVcurve(junction.sesame_sys, final_voltages, guess=guess_sesame)
+            j, result = IVcurve(junction.sesame_sys, final_voltages,
+                                guess=guess_sesame,
+                                maxiter=2000,
+                                )
 
     else:
         # positive voltages only
         voltage_order = np.argsort(voltages_for_solve)
 
         final_voltages = voltages_for_solve[voltage_order]
-        j, result = IVcurve(junction.sesame_sys, final_voltages, guess=guess_sesame)
+        j, result = IVcurve(junction.sesame_sys, final_voltages, guess=guess_sesame,
+                            maxiter=2000,
+                            )
     warnings.resetwarnings()
 
     if np.any(np.isnan(j)):
@@ -314,7 +321,7 @@ def j_per_wl(
     # create a dictionary 'result' with efn and efp
 
     # Call the Drift Diffusion Poisson solver
-    result = solve(
+    result, x_list, dx_list, damped_dx_list, error_list = solve(
         system,
         guess=guess,
         tol=tol,
@@ -336,9 +343,16 @@ def j_per_wl(
     else:
         warnings.warn(("The solver failed to converge.", UserWarning))
 
-        J = np.nan
+        # find where the error is at a minimum:
+        if len(error_list) > 0:
+            min_error_index = np.argmin(error_list)
+            result = {'efn': x_list[min_error_index][0::3], 'efp': x_list[min_error_index][1::3], 'v': x_list[min_error_index][2::3]}
+            az = Analyzer(system, result)
+            J = az.full_current()
+        else:
+            J = np.nan
 
-    return J, result
+    return J, result, x_list, dx_list, damped_dx_list, error_list
 
 
 def qe_sesame(junction: Junction, options: State):
@@ -383,16 +397,27 @@ def qe_sesame(junction: Junction, options: State):
     wls = options.wavelength
 
     profile_func = junction.absorbed
+
     # this returns an array of shape (mesh_points, wavelengths)
+
+    # the mesh used by Sesame and the mesh used in the optical solver are generally
+    # not the same. This means the total generation (integrated over depth) may not
+    # be the same, especially at short wavelengths where the absorption profile is very
+    # steep. Calculate the mismatch:
 
     A = np.trapezoid(
         np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0
     )
 
+    profile_scale = np.trapezoid(
+        np.nan_to_num(junction.absorbed(options.position), nan=0.0), options.position, axis=0
+    ) / A
+
     def make_gfcn_fun(wl_index, flux):
         def gcfn_fun(x, y):
             return (
-                flux * profile_func(np.array([x / 100]))[0, wl_index] / 100
+                profile_scale[wl_index] * flux * np.nan_to_num(profile_func(np.array([x / 100]))[0, wl_index] / 100,
+                                     nan=0.0)
             )  # convert to cm-1 from m-1
 
         return gcfn_fun
@@ -421,7 +446,8 @@ def qe_sesame(junction: Junction, options: State):
     # efp = np.concatenate([item[1]['efp'] for item in allres])
     # vres = np.concatenate([item[1]['v'] for item in allres])
 
-    flux = 1e3
+    flux = 1e4
+    print("hello")
     # TODO: allow user to set the flux explicitly, e.g. according to a
     # LightSource object or just a fixed number of photons m-2 s-1
 
@@ -441,15 +467,22 @@ def qe_sesame(junction: Junction, options: State):
     # this is to prevent warnings from Sesame flooding the output. Not ideal but
     # unsure on best way to solve.
 
-    efn_result = np.zeros((len(wl_solve), junction.sesame_sys.nx))
-    efp_result = np.zeros((len(wl_solve), junction.sesame_sys.nx))
-    v_result = np.zeros((len(wl_solve), junction.sesame_sys.nx))
+    efn_result = np.empty((len(wl_solve), junction.sesame_sys.nx))*np.nan
+    efp_result = np.empty((len(wl_solve), junction.sesame_sys.nx))*np.nan
+    v_result = np.empty((len(wl_solve), junction.sesame_sys.nx))*np.nan
+
+    x_wl = []
+    dx_wl = []
+    damped_dx_wl = []
+    error_wl = []
 
     for i1 in wl_solve:
         junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
 
+        # if i1 == wl_solve[0] and guess_sesame is not None:
         if guess_sesame is not None:
             # if there is a guess, use it as a starting point for the next wavelength
+            print(wls[i1]*1e9, "guess from previous")
             guess = {
                 "v": guess_sesame["v"][i1],
                 "efn": guess_sesame["efn"][i1],
@@ -459,16 +492,28 @@ def qe_sesame(junction: Junction, options: State):
         else:
             if i1 == wl_solve[0] or result is None:
                 guess = None
+                print(wls[i1]*1e9, "no guess")
 
             else:
                 guess = result
+                print(wls[i1]*1e9, "guess from previous wavelength")
 
-        j, result = j_per_wl(junction.sesame_sys, solve, guess=guess)
+        j, result, x_list, dx_list, damped_dx_list, error_list = j_per_wl(junction.sesame_sys, solve, guess=guess,
+                             maxiter=700,
+                             # tol=1e-5
+                             )
 
         eqe[i1] = np.abs(j) / (q * flux)
-        efn_result[i1] = result["efn"]
-        efp_result[i1] = result["efp"]
-        v_result[i1] = result["v"]
+
+        x_wl.append(x_list)
+        dx_wl.append(dx_list)
+        damped_dx_wl.append(damped_dx_list)
+        error_wl.append(error_list)
+
+        if result is not None:
+            efn_result[i1] = result["efn"]
+            efp_result[i1] = result["efp"]
+            v_result[i1] = result["v"]
 
     if np.any(np.isnan(eqe)):
         warnings.warn(
@@ -512,6 +557,12 @@ def qe_sesame(junction: Junction, options: State):
             "IQE": junction.iqe(wls),
             "EQE": junction.eqe(wls),
             "pdd_output": pdd_output,
+            "debug_output": {
+                "x_list": x_wl,
+                "dx_list": dx_wl,
+                "damped_dx_list": damped_dx_wl,
+                "error_list": error_wl,
+            }
         }
     )
 

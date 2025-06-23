@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from solsesame import Builder
+from solsesame.builder import Builder
 import numpy as np
 from scipy.optimize import root
 from solcore.constants import q, kb
@@ -185,6 +185,11 @@ def process_structure(junction: Junction, options: State):
 
     # get surface recombination velocities
     junction.sesame_sys.contact_S(*get_srv(junction))
+
+    # make sure that the mesh points are all inside the range covered by
+    # options.position, otherwise will get NaNs:
+
+
 
 def get_material_parameters(mat: material):
     """
