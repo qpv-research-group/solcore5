@@ -46,6 +46,18 @@ def solve_external_optics(
     except AttributeError as err:
         raise err
 
+    # try:
+    #     if solar_cell.external_layer_absorption.shape == (len(solar_cell), len(wavelength)):
+    #         calculate_total_absorption = False
+    #         layer_absorption = solar_cell.external_layer_absorption
+    #
+    #     if solar_cell.external_layer_absorption.shape == (len(wavelength), len(solar_cell)):
+    #         calculate_total_absorption = False
+    #         layer_absorption = solar_cell.external_layer_absorption.T
+    #
+    # except:
+    #     calculate_total_absorption = True
+
     # We calculate the total amount of light absorbed in the solar cell, integrating
     # over its whole thickness with a step of 1 nm
     all_absorbed = np.trapezoid(diff_absorption(position), position)
@@ -56,6 +68,11 @@ def solve_external_optics(
     for j in range(len(solar_cell)):
         solar_cell[j].diff_absorption = diff_absorption
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
+
+        solar_cell[j].layer_absorption = initial * np.trapz(
+            diff_absorption(solar_cell[j].offset + position) * (position < solar_cell[j].width),
+            position,
+        )
 
     solar_cell.transmitted = (
         1 - solar_cell.external_reflected - all_absorbed

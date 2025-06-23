@@ -81,7 +81,7 @@ def process_structure(junction: Junction, options: State):
         edges[-1] + 1e-10
     )  # otherwise final point will not be assigned any values
 
-    if hasattr(options, "sesame_periodic"):
+    if "sesame_periodic" in options:
         periodic_bcs = options.sesame_periodic
 
     else:

@@ -17,19 +17,19 @@ def process_sesame_options(options):
 
     sesame_kwargs = {}
 
-    if hasattr(options, "sesame_max_iterations"):
+    if "sesame_max_iterations" in options:
         sesame_kwargs["maxiter"] = options.sesame_max_iterations
 
-    if hasattr(options, "sesame_tol"):
+    if "sesame_tol" in options:
         sesame_kwargs["tol"] = options.sesame_tol
 
-    if hasattr(options, "sesame_verbose"):
+    if "sesame_verbose" in options:
         sesame_kwargs["verbose"] = options.sesame_verbose
 
-    if hasattr(options, "sesame_htp"):
+    if "sesame_htp" in options:
         sesame_kwargs["htp"] = options.sesame_htp
 
-    if hasattr(options, "sesame_periodic"):
+    if "sesame_periodic" in options:
         sesame_kwargs["periodic_bcs"] = options.sesame_periodic
 
     return sesame_kwargs
@@ -422,9 +422,7 @@ def qe_sesame(junction: Junction, options: State):
         np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0
     )
 
-    profile_scale = np.trapezoid(
-        np.nan_to_num(junction.absorbed(options.position), nan=0.0), options.position, axis=0
-    ) / A
+    profile_scale = junction.layer_absorption / A
 
     def make_gfcn_fun(wl_index, flux):
         def gcfn_fun(x, y):
