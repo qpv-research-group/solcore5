@@ -9,7 +9,10 @@ from scipy.interpolate import interp1d
 from solcore.state import State
 from solcore.structure import Junction
 from solcore.sesame_drift_diffusion.process_structure import process_structure
+from solcore.light_source import LightSource
+
 import warnings
+from joblib import Parallel, delayed
 
 from solcore.registries import register_iv_solver, register_equilibrium_solver
 
@@ -359,10 +362,20 @@ def j_per_wl(
 
         except:
             J = np.nan
+            result = {
+                'efn': np.full(system.nx, np.nan),
+                'efp': np.full(system.nx, np.nan),
+                'v': np.full(system.nx, np.nan)
+            }
 
     else:
-        warnings.warn(("The solver failed to converge.", UserWarning))
+        warnings.warn("The solver failed to converge.", UserWarning)
         J = np.nan
+        result = {
+            'efn': np.full(system.nx, np.nan),
+            'efp': np.full(system.nx, np.nan),
+            'v': np.full(system.nx, np.nan)
+        }
 
     return J, result
 
@@ -377,6 +390,77 @@ def qe_sesame(junction: Junction, options: State):
     :param options: a State object containing options for the solver
     """
 
+    def process_qe_sesame_options(options):
+
+        if "sesame_use_previous_wl" in options:
+            use_previous_wl = options.sesame_use_previous_wl
+
+        else:
+            use_previous_wl = True
+
+        if "sesame_qe_flux" in options:
+
+            if isinstance(options.sesame_qe_flux, (int, float)):
+                flux = (float(options.sesame_qe_flux)*np.ones_like(options.wavelength)
+                        / 1e4)
+
+            elif isinstance(options.sesame_qe_flux, LightSource):
+                flux = options.sesame_qe_flux.spectrum(
+                    x=options.wavelength,
+                    output_units="photon_flux_per_m")[1] / 1e4
+                # convert from m-2 -> cm-2
+
+            elif isinstance(options.sesame_qe_flux, np.ndarray):
+                if options.sesame_qe_flux.ndim == 1 and len(options.sesame_qe_flux) == len(options.wavelength):
+                    # assume this is a 1D array of flux values
+                    flux = options.sesame_qe_flux / 1e4
+
+            else:
+                raise ValueError(
+                    "sesame_qe_flux must be a Solcore LightSource object,"
+                    "a 1D array with the same length as options.wavelength,"
+                    " or a float/int."
+                )
+
+        else:
+            flux = 1e4 * np.ones_like(options.wavelength)
+
+        if "sesame_qe_parallel" in options:
+            parallel = options.sesame_qe_parallel
+
+        else:
+            parallel = False
+
+        if "sesame_qe_n_jobs" in options:
+            if isinstance(options.sesame_qe_n_jobs, int):
+                n_jobs = options.sesame_qe_n_jobs
+
+                if n_jobs > 1 or n_jobs == -1:
+                    parallel = True
+            else:
+                raise ValueError(
+                    "sesame_qe_n_jobs must be an integer."
+                )
+
+        else:
+            n_jobs = -1
+
+        if "sesame_qe_voltage" in options:
+            if isinstance(options.sesame_qe_voltage, (int, float)):
+                voltage = float(options.sesame_qe_voltage)
+            else:
+                raise ValueError(
+                    "sesame_qe_voltage must be a float or int."
+                )
+
+        else:
+            voltage = 0.0
+
+        return flux, use_previous_wl, parallel, n_jobs, voltage
+
+
+    flux, use_previous_wl, parallel, n_jobs, voltage = process_qe_sesame_options(options)
+
     solver_class = Solver()
     solve = solver_class.solve
 
@@ -390,28 +474,12 @@ def qe_sesame(junction: Junction, options: State):
     else:
         guess_sesame = None
 
-    # Note: the commented-out sections are for a potential parallel (over wavelengths)
-    # implementation of the solver. At the moment, this generally does not work,
-    # because at short wavelengths the solver needs a good initial guess in order to
-    # converge, so the safest approach is to do the wavelengths in order from longest
-    # to shortest. However, there is no fundamental reason that if you have a good
-    # initial guess for each wavelength, you could not do this in parallel.
-
-    # if not options.parallel:
-    #     n_jobs = 1
-    #
-    # else:
-    #     n_jobs = options.n_jobs if hasattr(options, "n_jobs") else -1
-    # n_jobs = 1
-    # parallel implementation does not work due to pickling error. Unsure of cause.
 
     wls = options.wavelength
 
     profile_func = junction.absorbed
 
     sesame_kwargs = process_sesame_options(options)
-
-    # this returns an array of shape (mesh_points, wavelengths)
 
     # the mesh used by Sesame and the mesh used in the optical solver are generally
     # not the same. This means the total generation (integrated over depth) may not
@@ -420,9 +488,24 @@ def qe_sesame(junction: Junction, options: State):
 
     A = np.trapezoid(
         np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0
-    )
+    ) # total absorption per wavelength using Sesame mesh
 
-    profile_scale = junction.layer_absorption / A
+    if hasattr(junction, "layer_absorption"):
+        profile_scale = junction.layer_absorption / A
+
+    else:
+        # if no layer absorption is defined, do not scale
+        profile_scale = np.ones_like(wls)
+        warnings.warn(
+            "layer_absorption of junction not provided, no generation"
+            "profile scaling correction.", UserWarning
+        )
+
+    # do not solve EQE if absorption is ~ 0
+
+    EQE_threshold = 1e-5
+
+    wl_solve = np.where(A >= EQE_threshold)[0][::-1]
 
     def make_gfcn_fun(wl_index, flux):
         def gcfn_fun(x, y):
@@ -434,84 +517,96 @@ def qe_sesame(junction: Junction, options: State):
         return gcfn_fun
 
     # more code for potential parallel implementation
-    # def qe_i(i1):
-    #
-    #     junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
-    #
-    #     j, result = IVcurve(junction.sesame_sys, voltages)
-    #
-    #     eqe = np.abs(j) / (q * flux)
-    #
-    #     return eqe, result
-    #
-    # allres = Parallel(n_jobs=n_jobs)(
-    #     delayed(qe_i)(
-    #         i1,
-    #     )
-    #     for i1 in range(len(wls))
-    # )
-    #
-    # eqe = np.concatenate([item[0] for item in allres])
-    #
-    # efn = np.concatenate([item[1]['efn'] for item in allres])
-    # efp = np.concatenate([item[1]['efp'] for item in allres])
-    # vres = np.concatenate([item[1]['v'] for item in allres])
+    if parallel:
+        def qe_i(system, i1, gen_profile):
 
-    flux = 1e4
-    # TODO: allow user to set the flux explicitly, e.g. according to a
-    # LightSource object or just a fixed number of photons m-2 s-1
-
-    eqe = np.zeros_like(wls)
-
-    # do not solve EQE if absorption is ~ 0
-
-    EQE_threshold = 1e-5
-
-    wl_solve = np.where(A >= EQE_threshold)[0][::-1]
-    # go in backwards order through wavelengths - since generation profile tends to be
-    # flatter at longer wavelengths, this increases the change of convergence, since the
-    # solution for the previous wavelength is always used as a guess for the next
-    # wavelength. Having a good guess helps the short wavelength solutions converge
-
-    warnings.filterwarnings("ignore")
-    # this is to prevent warnings from Sesame flooding the output. Not ideal but
-    # unsure on best way to solve.
-
-    efn_result = np.empty((len(wl_solve), junction.sesame_sys.nx))*np.nan
-    efp_result = np.empty((len(wl_solve), junction.sesame_sys.nx))*np.nan
-    v_result = np.empty((len(wl_solve), junction.sesame_sys.nx))*np.nan
-
-    result = None
-
-    for i1 in wl_solve:
-        junction.sesame_sys.generation(make_gfcn_fun(i1, flux))
-
-        # if i1 == wl_solve[0] and guess_sesame is not None:
-        if guess_sesame is not None:
-            # if there is a guess, use it as a starting point for the next wavelength
-            print(wls[i1]*1e9, "guess from previous")
-            guess = {
-                "v": guess_sesame["v"][i1],
-                "efn": guess_sesame["efn"][i1],
-                "efp": guess_sesame["efp"][i1],
-            }
-
-        else:
-            if i1 == wl_solve[0] or result is None:
-                guess = None
-                print(wls[i1]*1e9, "no guess")
+            if guess_sesame is not None:
+                # if there is a guess, use it as a starting point for the next wavelength
+                guess = {
+                    "v": guess_sesame["v"][i1],
+                    "efn": guess_sesame["efn"][i1],
+                    "efp": guess_sesame["efp"][i1],
+                }
 
             else:
+                guess = None
+
+            system.generation(gen_profile)
+
+            j, result = j_per_wl(system, solve, sesame_kwargs,
+                                 guess=guess,
+                                 )
+
+            eqe = np.abs(j) / (q * flux[i1])
+
+            return eqe, result
+
+        # make array for generation profile for each wavelength
+
+        gen_wl_x = (profile_scale[:, None] * flux[:, None] *
+                    np.nan_to_num(profile_func(junction.mesh),
+                                     nan=0.0).T
+                    ) / 100
+
+        allres = Parallel(n_jobs=n_jobs)(
+            delayed(qe_i)(
+                junction.sesame_sys, i1, gen_profile=gen_wl_x[i1]
+            )
+            for i1 in wl_solve[::-1]
+        )
+
+        eqe = np.array([item[0] for item in allres])
+
+        efn_result = np.stack([item[1]['efn'] for item in allres])
+        efp_result = np.stack([item[1]['efp'] for item in allres])
+        v_result = np.stack([item[1]['v'] for item in allres])
+
+    else:
+        eqe = np.zeros_like(wls)
+
+        # go in backwards order through wavelengths - since generation profile tends to be
+        # flatter at longer wavelengths, this increases the change of convergence, since the
+        # solution for the previous wavelength is always used as a guess for the next
+        # wavelength. Having a good guess helps the short wavelength solutions converge
+
+        warnings.filterwarnings("ignore")
+        # this is to prevent warnings from Sesame flooding the output. Not ideal but
+        # unsure on best way to solve.
+
+        efn_result = np.full((len(wl_solve), junction.sesame_sys.nx), np.nan)
+        efp_result = np.full((len(wl_solve), junction.sesame_sys.nx), np.nan)
+        v_result = np.full((len(wl_solve), junction.sesame_sys.nx), np.nan)
+
+        result = None
+
+        for i1 in wl_solve:
+            junction.sesame_sys.generation(make_gfcn_fun(i1, flux[i1]))
+
+            # if i1 == wl_solve[0] and guess_sesame is not None:
+            if use_previous_wl and i1 > 0 and result is not None:
+                print("guess from previous wl")
                 guess = result
-                print(wls[i1]*1e9, "guess from previous wavelength")
 
-        j, result = j_per_wl(junction.sesame_sys, solve, sesame_kwargs,
-                             guess=guess,
-                             )
+            elif guess_sesame is not None:
+                # if there is a guess, use it as a starting point for the next wavelength
+                print(wls[i1]*1e9, "guess from previous")
+                guess = {
+                    "v": guess_sesame["v"][i1],
+                    "efn": guess_sesame["efn"][i1],
+                    "efp": guess_sesame["efp"][i1],
+                }
 
-        eqe[i1] = np.abs(j) / (q * flux)
+            else:
+                guess = None
+                print("no guess")
 
-        if result is not None:
+            j, result = j_per_wl(junction.sesame_sys, solve, sesame_kwargs,
+                                 guess=guess,
+                                 )
+
+            eqe[i1] = np.abs(j) / (q * flux[i1])
+
+            # if not np.isnan(j):
             efn_result[i1] = result["efn"]
             efp_result[i1] = result["efp"]
             v_result[i1] = result["v"]

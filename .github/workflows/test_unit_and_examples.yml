@@ -169,7 +169,7 @@ jobs:
            brew install ngspice boost@1.85 suite-sparse
            brew link boost@1.85
 
-      - name: Install Python dependecies
+      - name: Install Python dependencies
         run: |
           pip install --upgrade pip uv
           
@@ -177,6 +177,10 @@ jobs:
           uv pip install --system pytest meson-python ninja cython spin
           
           python3 -m spin install-dependencies -test-dep
+          
+                    git clone https://github.com/qpv-research-group/solsesame
+          cd solsesame
+          pip install .
 
       - name: Install S4 (macOS - arm)
         if: matrix.os == 'macos-latest'
