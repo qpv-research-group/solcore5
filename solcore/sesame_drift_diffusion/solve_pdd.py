@@ -16,6 +16,7 @@ from joblib import Parallel, delayed
 
 from solcore.registries import register_iv_solver, register_equilibrium_solver
 
+
 def process_sesame_options(options):
 
     sesame_kwargs = {}
@@ -37,9 +38,11 @@ def process_sesame_options(options):
 
     return sesame_kwargs
 
+
 @register_equilibrium_solver("sesame_PDD")
 def equilibrium(junction: Junction, **kwargs):
-    """Solve at equilibrium (no illumination, no applied voltage) using the Sesame solver.
+    """Solve at equilibrium (no illumination, no applied voltage) using the Sesame
+    solver.
 
     :param junction: a Junction object
     :param options: a State object containing options for the solver
@@ -65,8 +68,7 @@ def equilibrium(junction: Junction, **kwargs):
 
     sesame_kwargs = process_sesame_options(options)
 
-    j, result = IVcurve(junction.sesame_sys, [0], guess=guess_sesame,
-                        **sesame_kwargs)
+    j, result = IVcurve(junction.sesame_sys, [0], guess=guess_sesame, **sesame_kwargs)
 
     if np.any(np.isnan(j)):
         warnings.warn(
@@ -241,19 +243,24 @@ def iv_sesame(junction, options):
             # negative voltages only
             voltage_order = np.argsort(voltages_for_solve)[::-1]
             final_voltages = voltages_for_solve[voltage_order]
-            j, result = IVcurve(junction.sesame_sys, final_voltages,
-                                guess=guess_sesame,
-                                **sesame_kwargs,
-                                )
+            j, result = IVcurve(
+                junction.sesame_sys,
+                final_voltages,
+                guess=guess_sesame,
+                **sesame_kwargs,
+            )
 
     else:
         # positive voltages only
         voltage_order = np.argsort(voltages_for_solve)
 
         final_voltages = voltages_for_solve[voltage_order]
-        j, result = IVcurve(junction.sesame_sys, final_voltages, guess=guess_sesame,
-                            **sesame_kwargs,
-                            )
+        j, result = IVcurve(
+            junction.sesame_sys,
+            final_voltages,
+            guess=guess_sesame,
+            **sesame_kwargs,
+        )
     warnings.resetwarnings()
 
     if np.any(np.isnan(j)):
@@ -360,31 +367,31 @@ def j_per_wl(
             az = Analyzer(system, result)
             J = az.full_current()
 
-        except:
+        except Exception:
             J = np.nan
             result = {
-                'efn': np.full(system.nx, np.nan),
-                'efp': np.full(system.nx, np.nan),
-                'v': np.full(system.nx, np.nan)
+                "efn": np.full(system.nx, np.nan),
+                "efp": np.full(system.nx, np.nan),
+                "v": np.full(system.nx, np.nan),
             }
 
     else:
         warnings.warn("The solver failed to converge.", UserWarning)
         J = np.nan
         result = {
-            'efn': np.full(system.nx, np.nan),
-            'efp': np.full(system.nx, np.nan),
-            'v': np.full(system.nx, np.nan)
+            "efn": np.full(system.nx, np.nan),
+            "efp": np.full(system.nx, np.nan),
+            "v": np.full(system.nx, np.nan),
         }
 
     return J, result
 
 
 def qe_sesame(junction: Junction, options: State):
-    """Calculate the quantum efficiency of a junction using Sesame. This will scan through
-    the wavelengths set in options.wavelength. It will scan from long wavelengths to
-    short wavelengths, to improve the chance of convergence, since carrier generation
-    profiles will be less steep at longer wavelengths.
+    """Calculate the quantum efficiency of a junction using Sesame. This will scan
+    through the wavelengths set in options.wavelength. It will scan from long
+    wavelengths to short wavelengths, to improve the chance of convergence, since
+    carrier generation profiles will be less steep at longer wavelengths.
 
     :param junction: a Junction object
     :param options: a State object containing options for the solver
@@ -401,17 +408,25 @@ def qe_sesame(junction: Junction, options: State):
         if "sesame_qe_flux" in options:
 
             if isinstance(options.sesame_qe_flux, (int, float)):
-                flux = (float(options.sesame_qe_flux)*np.ones_like(options.wavelength)
-                        / 1e4)
+                flux = (
+                    float(options.sesame_qe_flux)
+                    * np.ones_like(options.wavelength)
+                    / 1e4
+                )
 
             elif isinstance(options.sesame_qe_flux, LightSource):
-                flux = options.sesame_qe_flux.spectrum(
-                    x=options.wavelength,
-                    output_units="photon_flux_per_m")[1] / 1e4
+                flux = (
+                    options.sesame_qe_flux.spectrum(
+                        x=options.wavelength, output_units="photon_flux_per_m"
+                    )[1]
+                    / 1e4
+                )
                 # convert from m-2 -> cm-2
 
             elif isinstance(options.sesame_qe_flux, np.ndarray):
-                if options.sesame_qe_flux.ndim == 1 and len(options.sesame_qe_flux) == len(options.wavelength):
+                if options.sesame_qe_flux.ndim == 1 and len(
+                    options.sesame_qe_flux
+                ) == len(options.wavelength):
                     # assume this is a 1D array of flux values
                     flux = options.sesame_qe_flux / 1e4
 
@@ -438,9 +453,7 @@ def qe_sesame(junction: Junction, options: State):
                 if n_jobs > 1 or n_jobs == -1:
                     parallel = True
             else:
-                raise ValueError(
-                    "sesame_qe_n_jobs must be an integer."
-                )
+                raise ValueError("sesame_qe_n_jobs must be an integer.")
 
         else:
             n_jobs = -1
@@ -449,17 +462,16 @@ def qe_sesame(junction: Junction, options: State):
             if isinstance(options.sesame_qe_voltage, (int, float)):
                 voltage = float(options.sesame_qe_voltage)
             else:
-                raise ValueError(
-                    "sesame_qe_voltage must be a float or int."
-                )
+                raise ValueError("sesame_qe_voltage must be a float or int.")
 
         else:
             voltage = 0.0
 
         return flux, use_previous_wl, parallel, n_jobs, voltage
 
-
-    flux, use_previous_wl, parallel, n_jobs, voltage = process_qe_sesame_options(options)
+    flux, use_previous_wl, parallel, n_jobs, voltage = process_qe_sesame_options(
+        options
+    )
 
     solver_class = Solver()
     solve = solver_class.solve
@@ -474,7 +486,6 @@ def qe_sesame(junction: Junction, options: State):
     else:
         guess_sesame = None
 
-
     wls = options.wavelength
 
     profile_func = junction.absorbed
@@ -488,7 +499,7 @@ def qe_sesame(junction: Junction, options: State):
 
     A = np.trapezoid(
         np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0
-    ) # total absorption per wavelength using Sesame mesh
+    )  # total absorption per wavelength using Sesame mesh
 
     if hasattr(junction, "layer_absorption"):
         profile_scale = junction.layer_absorption / A
@@ -498,7 +509,8 @@ def qe_sesame(junction: Junction, options: State):
         profile_scale = np.ones_like(wls)
         warnings.warn(
             "layer_absorption of junction not provided, no generation"
-            "profile scaling correction.", UserWarning
+            "profile scaling correction.",
+            UserWarning,
         )
 
     # do not solve EQE if absorption is ~ 0
@@ -510,18 +522,23 @@ def qe_sesame(junction: Junction, options: State):
     def make_gfcn_fun(wl_index, flux):
         def gcfn_fun(x, y):
             return (
-                profile_scale[wl_index] * flux * np.nan_to_num(profile_func(np.array([x / 100]))[0, wl_index] / 100,
-                                     nan=0.0)
+                profile_scale[wl_index]
+                * flux
+                * np.nan_to_num(
+                    profile_func(np.array([x / 100]))[0, wl_index] / 100, nan=0.0
+                )
             )  # convert to cm-1 from m-1
 
         return gcfn_fun
 
     # more code for potential parallel implementation
     if parallel:
+
         def qe_i(system, i1, gen_profile):
 
             if guess_sesame is not None:
-                # if there is a guess, use it as a starting point for the next wavelength
+                # if there is a guess, use it as a starting point for the next
+                # wavelength
                 guess = {
                     "v": guess_sesame["v"][i1],
                     "efn": guess_sesame["efn"][i1],
@@ -533,9 +550,12 @@ def qe_sesame(junction: Junction, options: State):
 
             system.generation(gen_profile)
 
-            j, result = j_per_wl(system, solve, sesame_kwargs,
-                                 guess=guess,
-                                 )
+            j, result = j_per_wl(
+                system,
+                solve,
+                sesame_kwargs,
+                guess=guess,
+            )
 
             eqe = np.abs(j) / (q * flux[i1])
 
@@ -543,31 +563,31 @@ def qe_sesame(junction: Junction, options: State):
 
         # make array for generation profile for each wavelength
 
-        gen_wl_x = (profile_scale[:, None] * flux[:, None] *
-                    np.nan_to_num(profile_func(junction.mesh),
-                                     nan=0.0).T
-                    ) / 100
+        gen_wl_x = (
+            profile_scale[:, None]
+            * flux[:, None]
+            * np.nan_to_num(profile_func(junction.mesh), nan=0.0).T
+        ) / 100
 
         allres = Parallel(n_jobs=n_jobs)(
-            delayed(qe_i)(
-                junction.sesame_sys, i1, gen_profile=gen_wl_x[i1]
-            )
+            delayed(qe_i)(junction.sesame_sys, i1, gen_profile=gen_wl_x[i1])
             for i1 in wl_solve[::-1]
         )
 
         eqe = np.array([item[0] for item in allres])
 
-        efn_result = np.stack([item[1]['efn'] for item in allres])
-        efp_result = np.stack([item[1]['efp'] for item in allres])
-        v_result = np.stack([item[1]['v'] for item in allres])
+        efn_result = np.stack([item[1]["efn"] for item in allres])
+        efp_result = np.stack([item[1]["efp"] for item in allres])
+        v_result = np.stack([item[1]["v"] for item in allres])
 
     else:
         eqe = np.zeros_like(wls)
 
-        # go in backwards order through wavelengths - since generation profile tends to be
-        # flatter at longer wavelengths, this increases the change of convergence, since the
-        # solution for the previous wavelength is always used as a guess for the next
-        # wavelength. Having a good guess helps the short wavelength solutions converge
+        # go in backwards order through wavelengths - since generation profile tends to
+        # be flatter at longer wavelengths, this increases the change of convergence,
+        # since the solution for the previous wavelength is always used as a guess for
+        # the next wavelength. Having a good guess can help the short wavelength
+        # solutions converge
 
         warnings.filterwarnings("ignore")
         # this is to prevent warnings from Sesame flooding the output. Not ideal but
@@ -588,8 +608,9 @@ def qe_sesame(junction: Junction, options: State):
                 guess = result
 
             elif guess_sesame is not None:
-                # if there is a guess, use it as a starting point for the next wavelength
-                print(wls[i1]*1e9, "guess from previous")
+                # if there is a guess, use it as a starting point for the next
+                # wavelength
+                print(wls[i1] * 1e9, "guess from previous")
                 guess = {
                     "v": guess_sesame["v"][i1],
                     "efn": guess_sesame["efn"][i1],
@@ -600,9 +621,12 @@ def qe_sesame(junction: Junction, options: State):
                 guess = None
                 print("no guess")
 
-            j, result = j_per_wl(junction.sesame_sys, solve, sesame_kwargs,
-                                 guess=guess,
-                                 )
+            j, result = j_per_wl(
+                junction.sesame_sys,
+                solve,
+                sesame_kwargs,
+                guess=guess,
+            )
 
             eqe[i1] = np.abs(j) / (q * flux[i1])
 
