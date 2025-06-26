@@ -40,6 +40,8 @@ dependencies = [
     "yabox",
     "joblib",
     "solsesame",
+    "PySpice",
+    "pixie-python"
 ]
 dynamic = ["version"]
 
@@ -70,9 +72,6 @@ package = 'solcore'
 [tool.spin.commands]
 "Build" = ["spin.cmds.meson.build", "spin.cmds.meson.test"]
 "Extensions" = ['.spin/cmds.py:codecov', '.spin/cmds.py:install_dependencies']
-
-[tool.pytest.ini_options]
-addopts = "--cov=solcore --cov-report=html:htmlcov -p no:warnings -n \"auto\" -v"
 
 [tool.isort]
 line_length = 88
