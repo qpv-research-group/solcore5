@@ -45,7 +45,7 @@ def equilibrium(junction: Junction, **kwargs):
     solver.
 
     :param junction: a Junction object
-    :param options: a State object containing options for the solver
+    :param **kwargs: options, passed as keyword arguments
     """
 
     options = State(
@@ -86,6 +86,11 @@ def process_guess(guess, sys):
     and 'efp', each of which is an array of length sys.nx (for IV calculations) or
     (n_wavelengths, sys.nx) (for EQE calculations). Units also need to be
     converted to those used by Sesame internally
+
+    :param guess: a dictionary with keys 'v', 'efn'
+      and 'efp', each of which is an array of length sys.nx (for IV calculations) or
+      (n_wavelengths, sys.nx) (for EQE calculations)
+    :param sys: a Sesame Builder object
     """
 
     if guess is not None:
@@ -327,28 +332,31 @@ def j_per_wl(
     system: Builder
         The discretized system.
     solve: solsesame.solvers.Solver.solve function
+    sesame_kwargs: dictionary of keyword arguments to pass to Sesame's solve function,
+        which can contain:
+            - tol: float. Accepted error made by the Newton-Raphson scheme.
+            - periodic_bcs: boolean. Defines the choice of boundary conditions in the
+                y-direction. True
+                (False) corresponds to periodic (abrupt) boundary conditions.
+            - maxiter: integer. Maximum number of steps taken by the Newton-Raphson scheme.
+            - verbose: boolean. The solver returns the step number and the associated
+                error at every step, and this function prints the current applied
+                voltage if set to True (default).
+            - htp: integer
+                Number of homotopic Newton loops to perform.
+
     guess: dictionary of numpy arrays of floats (optional)
         Starting point of the solver. Keys of the dictionary must be 'efn',
         'efp', 'v' for the electron and quasi-Fermi levels, and the
         electrostatic potential respectively.
-    tol: float
-        Accepted error made by the Newton-Raphson scheme.
-    periodic_bcs: boolean
-        Defines the choice of boundary conditions in the y-direction. True
-        (False) corresponds to periodic (abrupt) boundary conditions.
-    maxiter: integer
-        Maximum number of steps taken by the Newton-Raphson scheme.
-    verbose: boolean
-        The solver returns the step number and the associated error at every
-        step, and this function prints the current applied voltage if set to True
-        (default).
-    htp: integer
-        Number of homotopic Newton loops to perform.
 
     Returns
     -------
     J: numpy array of floats
         Steady state current computed for each voltage value.
+    result: dictionary of numpy arrays of floats with the electron and hole Fermi levels
+       (efn, efp) and the electrostatic potential (v) at each point in the mesh. Note
+       this will be in Sesame's internal units.
 
     """
 
@@ -398,6 +406,9 @@ def qe_sesame(junction: Junction, options: State):
     """
 
     def process_qe_sesame_options(options):
+
+        """Process options for how Solcore interacts with the Sesame solver for quantum
+        efficiency calculations."""
 
         if "sesame_use_previous_wl" in options:
             use_previous_wl = options.sesame_use_previous_wl

@@ -557,3 +557,50 @@ def test_generation_rate():
 
     gen_G = solar_cell(0).pdd_output.G
     assert gen_total == approx(gen_G)
+
+def test_process_sesame_options():
+    from solcore.sesame_drift_diffusion.solve_pdd import process_sesame_options
+    from solcore.state import State
+
+    options = State(
+        sesame_max_iterations=1000,
+        sesame_tol=1e-4,
+        sesame_verbose=True,
+        sesame_htp=2,
+        sesame_periodic=False
+    )
+
+    dict_out = process_sesame_options(options)
+
+    assert dict_out['maxiter'] == 1000
+    assert dict_out['tol'] == 1e-4
+    assert dict_out['verbose'] is True
+    assert dict_out['htp'] == 2
+    assert dict_out['periodic_bcs'] is False
+
+
+def test_process_guess():
+    from solcore.sesame_drift_diffusion.solve_pdd import process_guess
+    from solcore.state import State
+
+    sys_mock = State(scaling=State(energy=2))
+
+    guess = process_guess(None, sys_mock)
+
+    assert guess is None
+
+    v_guess = np.random.rand(3, 5)
+    efn_guess = np.random.rand(3, 5)
+    efp_guess = np.random.rand(3, 5)
+
+    guess_in = {'potential': v_guess, 'Efe': efn_guess, 'Efh': efp_guess}
+
+    guess_out = process_guess(guess_in, sys_mock)
+
+    assert np.all(guess_out['v'] == v_guess / sys_mock.scaling.energy)
+    assert np.all(guess_out['efn'] == efn_guess / sys_mock.scaling.energy)
+    assert np.all(guess_out['efp'] == efp_guess / sys_mock.scaling.energy)
+
+
+
+
