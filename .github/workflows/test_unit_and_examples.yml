@@ -71,10 +71,6 @@ jobs:
           uv pip install --system pytest meson-python ninja cython spin==0.9
           
           python3 -m spin install-dependencies -test-dep
-          
-          git clone https://github.com/qpv-research-group/solsesame
-          cd solsesame
-          pip install .
 
       - name: Install S4 (macOS - arm)
         if: matrix.os == 'macos-latest'
@@ -177,10 +173,6 @@ jobs:
           uv pip install --system pytest meson-python ninja cython spin
           
           python3 -m spin install-dependencies -test-dep
-          
-                    git clone https://github.com/qpv-research-group/solsesame
-          cd solsesame
-          pip install .
 
       - name: Install S4 (macOS - arm)
         if: matrix.os == 'macos-latest'

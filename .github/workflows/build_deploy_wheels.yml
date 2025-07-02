@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - sesame_trial_solution
 
     tags:
       - "**"
