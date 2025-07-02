@@ -135,8 +135,28 @@ def iv_sesame(junction, options):
 
     sesame_kwargs = process_sesame_options(options)
 
-    if options.light_iv and np.all(junction.sesame_sys.g == 0):
+    user_defined_generation = options.user_defined_generation if (
+            "user_defined_generation" in options) else False
+
+    if options.light_iv and not user_defined_generation:
         gen_wl = junction.absorbed(junction.mesh) / 100  # m-1 -> cm-1
+
+        if hasattr(junction, "layer_absorption"):
+            A = np.trapezoid(
+                np.nan_to_num(junction.absorbed(junction.mesh), nan=0.0), junction.mesh, axis=0
+            )  # total absorption per wavelength using Sesame mesh
+            profile_scale = junction.layer_absorption / A
+            profile_scale[junction.layer_absorption < 1e-6] = 0
+
+            gen_wl = gen_wl * profile_scale[None, :]
+
+        else:
+            warnings.warn(
+                "layer_absorption of junction not provided, no generation"
+                "profile scaling correction.",
+                UserWarning,
+            )
+
         wls = options.wavelength
 
         gg = (
@@ -615,13 +635,11 @@ def qe_sesame(junction: Junction, options: State):
 
             # if i1 == wl_solve[0] and guess_sesame is not None:
             if use_previous_wl and i1 > 0 and result is not None:
-                print("guess from previous wl")
                 guess = result
 
             elif guess_sesame is not None:
                 # if there is a guess, use it as a starting point for the next
                 # wavelength
-                print(wls[i1] * 1e9, "guess from previous")
                 guess = {
                     "v": guess_sesame["v"][i1],
                     "efn": guess_sesame["efn"][i1],
@@ -630,7 +648,6 @@ def qe_sesame(junction: Junction, options: State):
 
             else:
                 guess = None
-                print("no guess")
 
             j, result = j_per_wl(
                 junction.sesame_sys,

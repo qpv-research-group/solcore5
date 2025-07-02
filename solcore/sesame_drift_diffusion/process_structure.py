@@ -468,8 +468,6 @@ def update_mesh(junction: Junction, layer_width: list[float], options: State):
     junction.mesh_cm = current_mesh
     junction.mesh = junction.mesh_cm * 1e-2  # cm to m
 
-    # np.save("nonconverging_differentmesh/mesh.npy", junction.mesh * 1e6)
-
 
 def get_srv(junction: Junction):
     """

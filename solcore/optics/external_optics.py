@@ -70,7 +70,8 @@ def solve_external_optics(
         solar_cell[j].absorbed = types.MethodType(absorbed, solar_cell[j])
 
         solar_cell[j].layer_absorption = initial * np.trapezoid(
-            diff_absorption(solar_cell[j].offset + position) * (position < solar_cell[j].width),
+            np.nan_to_num(diff_absorption(solar_cell[j].offset + position), nan=0)
+            * (position < solar_cell[j].width),
             position,
         )
 
