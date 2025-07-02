@@ -12,8 +12,8 @@ from solcore.light_source import LightSource
 # define user options
 options = State()
 options.wavelength = np.linspace(280, 950, 70)*1e-9
-options.voltages = np.linspace(-1.2, -0.2, 60)
-options.internal_voltages = np.linspace(-1.2, 0.00, 60)
+options.voltages = np.linspace(-1.2, 0, 60)
+options.internal_voltages = np.linspace(-1.2, 0.0, 60)
 options.light_iv = True
 options.mpp = True
 options.optics_method = 'TMM'

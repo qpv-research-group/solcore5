@@ -81,6 +81,7 @@ jobs:
           make S4_pyext --file="Makefile.m1"
           cd ..
           rm -rf S4
+        
 
       - name: Install S4 (ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -164,7 +165,7 @@ jobs:
            brew install ngspice boost@1.85 suite-sparse
            brew link boost@1.85
 
-      - name: Install Python dependecies
+      - name: Install Python dependencies
         run: |
           pip install --upgrade pip uv
           

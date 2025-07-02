@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sesame import Builder
+from solsesame.builder import Builder
 import numpy as np
 from scipy.optimize import root
 from solcore.constants import q, kb
@@ -81,6 +81,12 @@ def process_structure(junction: Junction, options: State):
         edges[-1] + 1e-10
     )  # otherwise final point will not be assigned any values
 
+    if "sesame_periodic" in options:
+        periodic_bcs = options.sesame_periodic
+
+    else:
+        periodic_bcs = True
+
     if hasattr(junction, "doping_profile"):
         junction_depth = (
             100 * root(junction.doping_profile, np.sum(layer_widths) / (2 * 100)).x
@@ -133,7 +139,7 @@ def process_structure(junction: Junction, options: State):
             )
 
     # Make Sesame Builder object for simulations
-    junction.sesame_sys = Builder(junction.mesh_cm, T=options.T)  # Sesame system
+    junction.sesame_sys = Builder(junction.mesh_cm, T=options.T, periodic=periodic_bcs)  # Sesame system
 
     junction.sesame_sys.rho = doping_profile_x / junction.sesame_sys.scaling.density
 
@@ -170,7 +176,7 @@ def process_structure(junction: Junction, options: State):
                     - edges[i1] / 100,
                 )
 
-        junction.sesame_sys = Builder(junction.mesh_cm, T=options.T)  # Sesame system
+        junction.sesame_sys = Builder(junction.mesh_cm, T=options.T, periodic=periodic_bcs)  # Sesame system
 
         # set doping profile in Sesame Builder objects
         junction.sesame_sys.rho = doping_profile_x / junction.sesame_sys.scaling.density
@@ -185,6 +191,11 @@ def process_structure(junction: Junction, options: State):
 
     # get surface recombination velocities
     junction.sesame_sys.contact_S(*get_srv(junction))
+
+    # make sure that the mesh points are all inside the range covered by
+    # options.position, otherwise will get NaNs:
+
+
 
 def get_material_parameters(mat: material):
     """
@@ -306,7 +317,7 @@ def make_mesh(
     else:
         # edges = np.insert(np.cumsum(layer_width), 0, 0)
 
-        front_spacing = np.min([minimum_spacing, 0.5e-7])
+        front_spacing = np.max([minimum_spacing, 0.5e-7])
 
         dense_front_width = 200e-7
 

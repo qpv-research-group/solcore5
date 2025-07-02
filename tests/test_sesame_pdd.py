@@ -9,13 +9,19 @@ def test_constant_doping():
     from solcore.sesame_drift_diffusion.process_structure import process_structure
     from solcore.state import State
 
-    Si_n = material('Si')(Nd=1e24, electron_minority_lifetime=1e-6, hole_minority_lifetime=1e-7)
-    Si_i = material('Si')(Na=0, Nd=0, electron_minority_lifetime=2e-6, hole_minority_lifetime=2e-7)
-    Si_p = material('Si')(Na=2e24, electron_minority_lifetime=1.5e-6, hole_minority_lifetime=1.5e-7)
+    Si_n = material("Si")(
+        Nd=1e24, electron_minority_lifetime=1e-6, hole_minority_lifetime=1e-7
+    )
+    Si_i = material("Si")(
+        Na=0, Nd=0, electron_minority_lifetime=2e-6, hole_minority_lifetime=2e-7
+    )
+    Si_p = material("Si")(
+        Na=2e24, electron_minority_lifetime=1.5e-6, hole_minority_lifetime=1.5e-7
+    )
 
-    junction = Junction([Layer(si('200nm'), Si_n),
-                            Layer(si('2000nm'), Si_i),
-                            Layer(si('2000nm'), Si_p)])
+    junction = Junction(
+        [Layer(si("200nm"), Si_n), Layer(si("2000nm"), Si_i), Layer(si("2000nm"), Si_p)]
+    )
 
     options = State()
     options.T = 300
@@ -25,8 +31,8 @@ def test_constant_doping():
     sesame_obj = junction.sesame_sys
 
     assert len(np.unique(sesame_obj.rho)) == 3
-    assert sesame_obj.rho[0] == 1e24*1e-6/sesame_obj.scaling.density
-    assert sesame_obj.rho[-1] == -2e24*1e-6/sesame_obj.scaling.density
+    assert sesame_obj.rho[0] == 1e24 * 1e-6 / sesame_obj.scaling.density
+    assert sesame_obj.rho[-1] == -2e24 * 1e-6 / sesame_obj.scaling.density
 
 
 def test_doping_profile():
@@ -38,17 +44,27 @@ def test_doping_profile():
     from solcore.state import State
     from scipy.interpolate import interp1d
 
-    Si_n = material('Si')(Nd=1e25, electron_minority_lifetime=1e-6, hole_minority_lifetime=1e-7)
-    Si_i = material('Si')(electron_minority_lifetime=2e-6, hole_minority_lifetime=2e-7)
-    Si_p = material('Si')(Na=2e24, electron_minority_lifetime=1.5e-6, hole_minority_lifetime=1.5e-7)
+    Si_n = material("Si")(
+        Nd=1e25, electron_minority_lifetime=1e-6, hole_minority_lifetime=1e-7
+    )
+    Si_i = material("Si")(electron_minority_lifetime=2e-6, hole_minority_lifetime=2e-7)
+    Si_p = material("Si")(
+        Na=2e24, electron_minority_lifetime=1.5e-6, hole_minority_lifetime=1.5e-7
+    )
 
     doping_profile = np.linspace(Si_n.Nd, -Si_p.Na, 2000)
     x_pos = np.linspace(0, 2000, 2000) * 1e-9
-    doping_profile_func = interp1d(x_pos, doping_profile, fill_value=(Si_n.Nd, -Si_p.Na), bounds_error=False)
+    doping_profile_func = interp1d(
+        x_pos, doping_profile, fill_value=(Si_n.Nd, -Si_p.Na), bounds_error=False
+    )
 
-    junction = Junction([Layer(si('200nm'), Si_n),
-                         Layer(si('2000nm'), Si_i, doping_profile=doping_profile_func),
-                         Layer(si('2000nm'), Si_p)])
+    junction = Junction(
+        [
+            Layer(si("200nm"), Si_n),
+            Layer(si("2000nm"), Si_i, doping_profile=doping_profile_func),
+            Layer(si("2000nm"), Si_p),
+        ]
+    )
 
     options = State()
     options.T = 300
@@ -58,11 +74,18 @@ def test_doping_profile():
     rho_1 = interp1d(junction.mesh, junction.sesame_sys.rho)
 
     x_pos_2 = np.linspace(200, 2200, 2000) * 1e-9
-    doping_profile_func = interp1d(x_pos_2, doping_profile, fill_value=(Si_n.Nd, -Si_p.Na), bounds_error=False)
+    doping_profile_func = interp1d(
+        x_pos_2, doping_profile, fill_value=(Si_n.Nd, -Si_p.Na), bounds_error=False
+    )
 
-    junction = Junction([Layer(si('200nm'), Si_n),
-                         Layer(si('2000nm'), Si_i),
-                         Layer(si('2000nm'), Si_p)], doping_profile=doping_profile_func)
+    junction = Junction(
+        [
+            Layer(si("200nm"), Si_n),
+            Layer(si("2000nm"), Si_i),
+            Layer(si("2000nm"), Si_p),
+        ],
+        doping_profile=doping_profile_func,
+    )
 
     process_structure(junction, options)
 
@@ -70,13 +93,14 @@ def test_doping_profile():
 
     assert np.allclose(rho_1(junction.mesh), rho_2(junction.mesh))
 
+
 def test_parameter_extraction():
     # test all material parameters are correctly extracted by process_structure
     from solcore.sesame_drift_diffusion.process_structure import get_material_parameters
     from solcore import material
     from solcore.constants import q, kb
 
-    test_mat = material('Si')(Nd=1e24, Na=2e24)
+    test_mat = material("Si")(Nd=1e24, Na=2e24)
 
     with raises(ValueError) as excinfo:
         get_material_parameters(test_mat)
@@ -84,10 +108,16 @@ def test_parameter_extraction():
 
     test_mat.hole_diffusion_length, test_mat.electron_diffusion_length = 100e-9, 200e-9
 
-    expected_tau_e = (q * test_mat.electron_diffusion_length ** 2 /
-                      (kb * test_mat.T * test_mat.electron_mobility))
-    expected_tau_h = (q * test_mat.hole_diffusion_length ** 2 /
-                        (kb * test_mat.T * test_mat.hole_mobility))
+    expected_tau_e = (
+        q
+        * test_mat.electron_diffusion_length**2
+        / (kb * test_mat.T * test_mat.electron_mobility)
+    )
+    expected_tau_h = (
+        q
+        * test_mat.hole_diffusion_length**2
+        / (kb * test_mat.T * test_mat.hole_mobility)
+    )
 
     result = get_material_parameters(test_mat)
 
@@ -142,30 +172,48 @@ def test_compare_DA_np():
     from solcore.state import State
     from solcore.light_source import LightSource
 
-    GaAs_n = material('GaAs')(T=300, Nd=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
-    GaAs_p = material('GaAs')(T=300, Na=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+    GaAs_n = material("GaAs")(
+        T=300, Nd=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
+    GaAs_p = material("GaAs")(
+        T=300, Na=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
 
-    GaAs_p.electron_diffusion_length = carrier_constants("electron_diffusion_length", GaAs_p)
+    GaAs_p.electron_diffusion_length = carrier_constants(
+        "electron_diffusion_length", GaAs_p
+    )
     GaAs_n.hole_diffusion_length = carrier_constants("hole_diffusion_length", GaAs_n)
 
     options = State()
-    options.wavelength = np.linspace(300, 950, 100)*1e-9
+    options.wavelength = np.linspace(300, 950, 100) * 1e-9
     options.voltages = np.linspace(-1.3, 0.5, 30)
     options.internal_voltages = np.linspace(-1.3, 0.5, 30)
     options.T = 300
     options.light_iv = True
-    options.light_source = LightSource(source_type='standard', version='AM1.5g', x=options.wavelength, output_units='photon_flux_per_m')
-    options.da_mode = 'green'
-    options.optics_method = 'TMM'
+    options.light_source = LightSource(
+        source_type="standard",
+        version="AM1.5g",
+        x=options.wavelength,
+        output_units="photon_flux_per_m",
+    )
+    options.da_mode = "green"
+    options.optics_method = "TMM"
 
-    mesh = np.linspace(0, 2200, 500)*1e-9
+    mesh = np.linspace(0, 2200, 500) * 1e-9
 
-    np_junction = Junction([Layer(si('200nm'), GaAs_n, role='emitter'), Layer(si('2000nm'), GaAs_p, role='base')],
-                           kind='DA', R_shunt=0.1, mesh=mesh, sn=10, sp=10)
+    np_junction = Junction(
+        [
+            Layer(si("200nm"), GaAs_n, role="emitter"),
+            Layer(si("2000nm"), GaAs_p, role="base"),
+        ],
+        kind="DA",
+        R_shunt=0.1,
+        mesh=mesh,
+        sn=10,
+        sp=10,
+    )
 
-    solar_cell_solver(SolarCell([np_junction]), 'optics', options)
+    solar_cell_solver(SolarCell([np_junction]), "optics", options)
 
     iv_depletion(np_junction, options)
     depletion_current = np_junction.current
@@ -195,30 +243,46 @@ def test_compare_DA_pn():
     from solcore.state import State
     from solcore.light_source import LightSource
 
-    GaAs_p = material('GaAs')(T=300, Na=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
-    GaAs_n = material('GaAs')(T=300, Nd=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+    GaAs_p = material("GaAs")(
+        T=300, Na=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
+    GaAs_n = material("GaAs")(
+        T=300, Nd=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
 
-    GaAs_p.electron_diffusion_length = carrier_constants("electron_diffusion_length", GaAs_p)
+    GaAs_p.electron_diffusion_length = carrier_constants(
+        "electron_diffusion_length", GaAs_p
+    )
     GaAs_n.hole_diffusion_length = carrier_constants("hole_diffusion_length", GaAs_n)
 
     options = State()
-    options.wavelength = np.linspace(300, 950, 100)*1e-9
+    options.wavelength = np.linspace(300, 950, 100) * 1e-9
     options.voltages = np.linspace(-0.5, 1.3, 30)
     options.internal_voltages = np.linspace(-0.5, 1.3, 30)
     options.T = 300
     options.light_iv = True
-    options.light_source = LightSource(source_type='standard', version='AM1.5g', x=options.wavelength, output_units='photon_flux_per_m')
-    options.da_mode = 'green'
-    options.optics_method = 'TMM'
+    options.light_source = LightSource(
+        source_type="standard",
+        version="AM1.5g",
+        x=options.wavelength,
+        output_units="photon_flux_per_m",
+    )
+    options.da_mode = "green"
+    options.optics_method = "TMM"
 
-    mesh = np.linspace(0, 2200, 500)*1e-9
+    mesh = np.linspace(0, 2200, 500) * 1e-9
 
-    pn_junction = Junction([Layer(si('200nm'), GaAs_p, role='emitter'), Layer(si('2000nm'), GaAs_n, role='base')],
-                           kind='DA', R_shunt=0.1, mesh=mesh)
+    pn_junction = Junction(
+        [
+            Layer(si("200nm"), GaAs_p, role="emitter"),
+            Layer(si("2000nm"), GaAs_n, role="base"),
+        ],
+        kind="DA",
+        R_shunt=0.1,
+        mesh=mesh,
+    )
 
-    solar_cell_solver(SolarCell([pn_junction]), 'optics', options)
+    solar_cell_solver(SolarCell([pn_junction]), "optics", options)
 
     iv_depletion(pn_junction, options)
     depletion_current = pn_junction.current
@@ -247,32 +311,41 @@ def test_qe():
     from solcore.sesame_drift_diffusion.process_structure import carrier_constants
     from solcore.state import State
 
-    GaAs_p = material('GaAs')(T=300, Na=1e24,
-                              hole_minority_lifetime=1e-6,
-                              electron_minority_lifetime=1e-6)
-    GaAs_n = material('GaAs')(T=300, Nd=1e24,
-                              hole_minority_lifetime=1e-6,
-                              electron_minority_lifetime=1e-6)
+    GaAs_p = material("GaAs")(
+        T=300, Na=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
+    GaAs_n = material("GaAs")(
+        T=300, Nd=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
 
-    GaAs_p.electron_diffusion_length = carrier_constants("electron_diffusion_length", GaAs_p)
+    GaAs_p.electron_diffusion_length = carrier_constants(
+        "electron_diffusion_length", GaAs_p
+    )
     GaAs_n.hole_diffusion_length = carrier_constants("hole_diffusion_length", GaAs_n)
 
-    wls = np.linspace(300, 950, 100)*1e-9
+    wls = np.linspace(300, 950, 100) * 1e-9
     options = State()
     options.wavelength = wls
     options.T = 300
     options.light_iv = True
-    options.da_mode = 'green'
-    options.optics_method = 'BL'
+    options.da_mode = "green"
+    options.optics_method = "BL"
 
     mesh = np.linspace(0, 2500, 1000) * 1e-9
 
-    pn_junction = Junction([Layer(si('500nm'), GaAs_p, role='emitter'),
-                            Layer(si('2000nm'), GaAs_n, role='base')],
-                           kind='DA', R_shunt=0.1, mesh=mesh,
-                           sn=1e5, sp=1e5)
+    pn_junction = Junction(
+        [
+            Layer(si("500nm"), GaAs_p, role="emitter"),
+            Layer(si("2000nm"), GaAs_n, role="base"),
+        ],
+        kind="DA",
+        R_shunt=0.1,
+        mesh=mesh,
+        sn=1e5,
+        sp=1e5,
+    )
 
-    solar_cell_solver(SolarCell([pn_junction]), 'optics', options)
+    solar_cell_solver(SolarCell([pn_junction]), "optics", options)
 
     qe_sesame(pn_junction, options)
 
@@ -293,35 +366,44 @@ def test_mesh_generation():
     from solcore.structure import Junction, Layer
     from solcore.state import State
 
-    GaAs_n = material('GaAs')()
-    GaAs_p = material('GaAs')()
+    GaAs_n = material("GaAs")()
+    GaAs_p = material("GaAs")()
 
     options = State(minimum_spacing=1e-9, maximum_spacing=1e-9)
 
-    pn_junction = Junction([Layer(si('500nm'), GaAs_n),
-                            Layer(si('2000nm'), GaAs_p)])
+    pn_junction = Junction([Layer(si("500nm"), GaAs_n), Layer(si("2000nm"), GaAs_p)])
 
-    layer_width = [layer.width*1e2 for layer in pn_junction]
+    layer_width = [layer.width * 1e2 for layer in pn_junction]
 
     make_mesh(pn_junction, layer_width, options, [500e-7])
 
-    assert pn_junction.mesh == approx(np.arange(0, 2500.01, 1)*1e-9)
+    assert pn_junction.mesh == approx(np.arange(0, 2500.01, 1) * 1e-9)
 
 
 def test_get_srv_np(np_junction):
-    from solcore.sesame_drift_diffusion.process_structure import get_srv, process_structure
+    from solcore.sesame_drift_diffusion.process_structure import (
+        get_srv,
+        process_structure,
+    )
     from solcore import material, si
     from solcore.structure import Junction, Layer
     from solcore.state import State
 
     options = State(T=300)
 
-    GaAs_n = material('GaAs')(T=300, Nd=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
-    GaAs_p = material('GaAs')(T=300, Na=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+    GaAs_n = material("GaAs")(
+        T=300, Nd=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
+    GaAs_p = material("GaAs")(
+        T=300, Na=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
 
-    junction = Junction([Layer(si('200nm'), GaAs_n, role='emitter'), Layer(si('2000nm'), GaAs_p, role='base')])
+    junction = Junction(
+        [
+            Layer(si("200nm"), GaAs_n, role="emitter"),
+            Layer(si("2000nm"), GaAs_p, role="base"),
+        ]
+    )
 
     junction.sn = 5
     junction.sp = 8
@@ -330,11 +412,11 @@ def test_get_srv_np(np_junction):
 
     Sfront_e, Sfront_h, Sback_e, Sback_h = get_srv(junction)
 
-    assert Sfront_e == junction.sn*100
-    assert Sfront_h == junction.sn*100
+    assert Sfront_e == junction.sn * 100
+    assert Sfront_h == junction.sn * 100
 
-    assert Sback_e == junction.sp*100
-    assert Sback_e == junction.sp*100
+    assert Sback_e == junction.sp * 100
+    assert Sback_e == junction.sp * 100
 
     junction.sn_e = 2
     junction.sn_h = 3
@@ -343,26 +425,37 @@ def test_get_srv_np(np_junction):
 
     Sfront_e, Sfront_h, Sback_e, Sback_h = get_srv(junction)
 
-    assert Sfront_e == junction.sn_e*100
-    assert Sfront_h == junction.sn_h*100
+    assert Sfront_e == junction.sn_e * 100
+    assert Sfront_h == junction.sn_h * 100
 
-    assert Sback_e == junction.sp_e*100
-    assert Sback_h == junction.sp_h*100
+    assert Sback_e == junction.sp_e * 100
+    assert Sback_h == junction.sp_h * 100
+
 
 def test_get_srv_pn(np_junction):
-    from solcore.sesame_drift_diffusion.process_structure import get_srv, process_structure
+    from solcore.sesame_drift_diffusion.process_structure import (
+        get_srv,
+        process_structure,
+    )
     from solcore import material, si
     from solcore.structure import Junction, Layer
     from solcore.state import State
 
     options = State(T=300)
 
-    GaAs_p = material('GaAs')(T=300, Na=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
-    GaAs_n = material('GaAs')(T=300, Nd=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+    GaAs_p = material("GaAs")(
+        T=300, Na=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
+    GaAs_n = material("GaAs")(
+        T=300, Nd=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
 
-    junction = Junction([Layer(si('200nm'), GaAs_p, role='emitter'), Layer(si('2000nm'), GaAs_n, role='base')])
+    junction = Junction(
+        [
+            Layer(si("200nm"), GaAs_p, role="emitter"),
+            Layer(si("2000nm"), GaAs_n, role="base"),
+        ]
+    )
 
     junction.sn = 5
     junction.sp = 8
@@ -371,11 +464,11 @@ def test_get_srv_pn(np_junction):
 
     Sfront_e, Sfront_h, Sback_e, Sback_h = get_srv(junction)
 
-    assert Sfront_e == junction.sp*100
-    assert Sfront_h == junction.sp*100
+    assert Sfront_e == junction.sp * 100
+    assert Sfront_h == junction.sp * 100
 
-    assert Sback_e == junction.sn*100
-    assert Sback_e == junction.sn*100
+    assert Sback_e == junction.sn * 100
+    assert Sback_e == junction.sn * 100
 
     junction.sn_e = 2
     junction.sn_h = 3
@@ -384,11 +477,12 @@ def test_get_srv_pn(np_junction):
 
     Sfront_e, Sfront_h, Sback_e, Sback_h = get_srv(junction)
 
-    assert Sfront_e == junction.sp_e*100
-    assert Sfront_h == junction.sp_h*100
+    assert Sfront_e == junction.sp_e * 100
+    assert Sfront_h == junction.sp_h * 100
 
-    assert Sback_e == junction.sn_e*100
-    assert Sback_h == junction.sn_h*100
+    assert Sback_e == junction.sn_e * 100
+    assert Sback_h == junction.sn_h * 100
+
 
 def test_voltages_np():
     from solcore import material, si
@@ -398,22 +492,34 @@ def test_voltages_np():
     from solcore.state import State
     from solcore.light_source import LightSource
 
-    GaAs_n = material('GaAs')(T=300, Nd=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
-    GaAs_p = material('GaAs')(T=300, Na=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+    GaAs_n = material("GaAs")(
+        T=300, Nd=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
+    GaAs_p = material("GaAs")(
+        T=300, Na=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
 
     options = State()
-    options.wavelength = np.linspace(300, 950, 100)*1e-9
+    options.wavelength = np.linspace(300, 950, 100) * 1e-9
     options.T = 300
     options.light_iv = True
-    options.light_source = LightSource(source_type='standard', version='AM1.5g', x=options.wavelength, output_units='photon_flux_per_m')
-    options.optics_method = 'TMM'
+    options.light_source = LightSource(
+        source_type="standard",
+        version="AM1.5g",
+        x=options.wavelength,
+        output_units="photon_flux_per_m",
+    )
+    options.optics_method = "TMM"
 
-    np_junction = Junction([Layer(si('200nm'), GaAs_n, role='emitter'), Layer(si('2000nm'), GaAs_p, role='base')],
-                           kind='sesame_PDD')
+    np_junction = Junction(
+        [
+            Layer(si("200nm"), GaAs_n, role="emitter"),
+            Layer(si("2000nm"), GaAs_p, role="base"),
+        ],
+        kind="sesame_PDD",
+    )
 
-    solar_cell_solver(SolarCell([np_junction]), 'optics', options)
+    solar_cell_solver(SolarCell([np_junction]), "optics", options)
 
     voltage_end = [0, 1.3, 1.3]
     voltage_points = [20, 41, 40]
@@ -442,22 +548,34 @@ def test_voltages_pn():
     from solcore.state import State
     from solcore.light_source import LightSource
 
-    GaAs_p = material('GaAs')(T=300, Na=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
-    GaAs_n = material('GaAs')(T=300, Nd=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+    GaAs_p = material("GaAs")(
+        T=300, Na=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
+    GaAs_n = material("GaAs")(
+        T=300, Nd=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
 
     options = State()
-    options.wavelength = np.linspace(300, 950, 100)*1e-9
+    options.wavelength = np.linspace(300, 950, 100) * 1e-9
     options.T = 300
     options.light_iv = True
-    options.light_source = LightSource(source_type='standard', version='AM1.5g', x=options.wavelength, output_units='photon_flux_per_m')
-    options.optics_method = 'TMM'
+    options.light_source = LightSource(
+        source_type="standard",
+        version="AM1.5g",
+        x=options.wavelength,
+        output_units="photon_flux_per_m",
+    )
+    options.optics_method = "TMM"
 
-    pn_junction = Junction([Layer(si('200nm'), GaAs_p, role='emitter'), Layer(si('2000nm'), GaAs_n, role='base')],
-                           kind='sesame_PDD')
+    pn_junction = Junction(
+        [
+            Layer(si("200nm"), GaAs_p, role="emitter"),
+            Layer(si("2000nm"), GaAs_n, role="base"),
+        ],
+        kind="sesame_PDD",
+    )
 
-    solar_cell_solver(SolarCell([pn_junction]), 'optics', options)
+    solar_cell_solver(SolarCell([pn_junction]), "optics", options)
 
     voltage_start = [0, -1.3, -1.3]
     voltage_points = [20, 41, 40]
@@ -486,22 +604,34 @@ def test_reverse_bias():
     from solcore.state import State
     from solcore.light_source import LightSource
 
-    GaAs_n = material('GaAs')(T=300, Nd=1e24,
-                          hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
-    GaAs_p = material('GaAs')(T=300, Na=1e24,
-                          hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+    GaAs_n = material("GaAs")(
+        T=300, Nd=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
+    GaAs_p = material("GaAs")(
+        T=300, Na=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
 
     options = State()
-    options.wavelength = np.linspace(300, 950, 100)*1e-9
+    options.wavelength = np.linspace(300, 950, 100) * 1e-9
     options.T = 300
     options.light_iv = True
-    options.light_source = LightSource(source_type='standard', version='AM1.5g', x=options.wavelength, output_units='photon_flux_per_m')
-    options.optics_method = 'TMM'
+    options.light_source = LightSource(
+        source_type="standard",
+        version="AM1.5g",
+        x=options.wavelength,
+        output_units="photon_flux_per_m",
+    )
+    options.optics_method = "TMM"
 
-    np_junction = Junction([Layer(si('200nm'), GaAs_n, role='emitter'), Layer(si('2000nm'), GaAs_p, role='base')],
-                       kind='sesame_PDD')
+    np_junction = Junction(
+        [
+            Layer(si("200nm"), GaAs_n, role="emitter"),
+            Layer(si("2000nm"), GaAs_p, role="base"),
+        ],
+        kind="sesame_PDD",
+    )
 
-    solar_cell_solver(SolarCell([np_junction]), 'optics', options)
+    solar_cell_solver(SolarCell([np_junction]), "optics", options)
     options.voltages = np.linspace(0, 1.3, 10)
     options.internal_voltages = options.voltages
 
@@ -522,38 +652,111 @@ def test_generation_rate():
     from solcore.state import State
     from solcore.light_source import LightSource
 
-    GaAs_p = material('GaAs')(T=300, Na=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
-    GaAs_n = material('GaAs')(T=300, Nd=1e24,
-                              hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6)
+    GaAs_p = material("GaAs")(
+        T=300, Na=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
+    GaAs_n = material("GaAs")(
+        T=300, Nd=1e24, hole_minority_lifetime=1e-6, electron_minority_lifetime=1e-6
+    )
 
-    GaAs_p.electron_diffusion_length = carrier_constants("electron_diffusion_length", GaAs_p)
+    GaAs_p.electron_diffusion_length = carrier_constants(
+        "electron_diffusion_length", GaAs_p
+    )
     GaAs_n.hole_diffusion_length = carrier_constants("hole_diffusion_length", GaAs_n)
 
     options = State()
-    options.wavelength = np.linspace(300, 950, 100)*1e-9
+    options.wavelength = np.linspace(300, 950, 100) * 1e-9
     options.voltages = np.linspace(-0.5, 1.3, 30)
     options.internal_voltages = np.linspace(-0.5, 1.3, 30)
     options.T = 300
     options.light_iv = True
-    options.light_source = LightSource(source_type='standard', version='AM1.5g', x=options.wavelength, output_units='photon_flux_per_m')
-    options.da_mode = 'green'
-    options.optics_method = 'TMM'
+    options.light_source = LightSource(
+        source_type="standard",
+        version="AM1.5g",
+        x=options.wavelength,
+        output_units="photon_flux_per_m",
+    )
+    options.da_mode = "green"
+    options.optics_method = "TMM"
 
-    mesh = np.linspace(0, 2200, 500)*1e-9
+    mesh = np.linspace(0, 2200, 500) * 1e-9
 
-    pn_junction = Junction([Layer(si('200nm'), GaAs_p, role='emitter'), Layer(si('2000nm'), GaAs_n, role='base')],
-                           kind='sesame_PDD', R_shunt=0.1, mesh=mesh)
+    pn_junction = Junction(
+        [
+            Layer(si("200nm"), GaAs_p, role="emitter"),
+            Layer(si("2000nm"), GaAs_n, role="base"),
+        ],
+        kind="sesame_PDD",
+        R_shunt=0.1,
+        mesh=mesh,
+    )
     solar_cell = SolarCell([pn_junction])
-    solar_cell_solver(solar_cell, 'iv', options)
+    solar_cell_solver(solar_cell, "iv", options)
 
     z_pos = np.linspace(0, 2200, 500) * 1e-9
 
     gen_per_wl = solar_cell(0).absorbed(z_pos)
 
-    gen_total = np.trapezoid(gen_per_wl * options.light_source.spectrum(options.wavelength,
-                                                                    output_units="photon_flux_per_m")[
-                                          1][None, :], options.wavelength)
+    # correction for layer absorption:
+
+    A = np.trapezoid(
+        np.nan_to_num(pn_junction.absorbed(pn_junction.mesh), nan=0.0),
+        pn_junction.mesh, axis=0
+    )  # total absorption per wavelength using Sesame mesh
+    profile_scale = pn_junction.layer_absorption / A
+    profile_scale[pn_junction.layer_absorption < 1e-6] = 0
+
+    gen_total = np.trapezoid(
+        profile_scale[None, :] * gen_per_wl
+        * options.light_source.spectrum(
+            options.wavelength, output_units="photon_flux_per_m"
+        )[1][None, :],
+        options.wavelength,
+    )
 
     gen_G = solar_cell(0).pdd_output.G
     assert gen_total == approx(gen_G)
+
+
+def test_process_sesame_options():
+    from solcore.sesame_drift_diffusion.solve_pdd import process_sesame_options
+    from solcore.state import State
+
+    options = State(
+        sesame_max_iterations=1000,
+        sesame_tol=1e-4,
+        sesame_verbose=True,
+        sesame_htp=2,
+        sesame_periodic=False,
+    )
+
+    dict_out = process_sesame_options(options)
+
+    assert dict_out["maxiter"] == 1000
+    assert dict_out["tol"] == 1e-4
+    assert dict_out["verbose"] is True
+    assert dict_out["htp"] == 2
+    assert dict_out["periodic_bcs"] is False
+
+
+def test_process_guess():
+    from solcore.sesame_drift_diffusion.solve_pdd import process_guess
+    from solcore.state import State
+
+    sys_mock = State(scaling=State(energy=2))
+
+    guess = process_guess(None, sys_mock)
+
+    assert guess is None
+
+    v_guess = np.random.rand(3, 5)
+    efn_guess = np.random.rand(3, 5)
+    efp_guess = np.random.rand(3, 5)
+
+    guess_in = {"potential": v_guess, "Efe": efn_guess, "Efh": efp_guess}
+
+    guess_out = process_guess(guess_in, sys_mock)
+
+    assert np.all(guess_out["v"] == v_guess / sys_mock.scaling.energy)
+    assert np.all(guess_out["efn"] == efn_guess / sys_mock.scaling.energy)
+    assert np.all(guess_out["efp"] == efp_guess / sys_mock.scaling.energy)
