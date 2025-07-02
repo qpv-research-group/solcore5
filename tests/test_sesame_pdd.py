@@ -697,8 +697,17 @@ def test_generation_rate():
 
     gen_per_wl = solar_cell(0).absorbed(z_pos)
 
+    # correction for layer absorption:
+
+    A = np.trapezoid(
+        np.nan_to_num(pn_junction.absorbed(pn_junction.mesh), nan=0.0),
+        pn_junction.mesh, axis=0
+    )  # total absorption per wavelength using Sesame mesh
+    profile_scale = pn_junction.layer_absorption / A
+    profile_scale[pn_junction.layer_absorption < 1e-6] = 0
+
     gen_total = np.trapezoid(
-        gen_per_wl
+        profile_scale[None, :] * gen_per_wl
         * options.light_source.spectrum(
             options.wavelength, output_units="photon_flux_per_m"
         )[1][None, :],
