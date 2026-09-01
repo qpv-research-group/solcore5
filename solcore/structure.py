@@ -66,7 +66,7 @@ class Layer:
     """ Class that stores the information about layers of materials, such as thickness and composition.
     It is the building block of the 'Structures' """
 
-    def __init__(self, width, material, role=None, geometry=None, **kwargs):
+    def __init__(self, width, material, nk_parameter=None, role=None, geometry=None, **kwargs):
         """ Layer class constructor.
 
         :param width: Width of the layer, in SI units.
@@ -75,6 +75,7 @@ class Layer:
         :param kwargs: Any other keyword parameter which will become part of the layer attributes
         """
         self.width = width
+        self.nk_parameter = nk_parameter
         self.material = material
         self.role = role
         self.geometry = geometry

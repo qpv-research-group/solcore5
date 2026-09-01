@@ -88,14 +88,14 @@ class MaterialSystem(metaclass=Singleton):
                         print('\t {}  \tx = {}'.format(v, x))
                     else:
                         print('\t {}'.format(v))
-                print(
-                    '\nIn compounds, check that the order of the elements is the correct one (eg. GaInSb is OK but InGaSb'
-                    ' is not).')
-                val = input('\nDo you want to see the list of available SOPRA materials (y/n)?')
-                if val in 'Yy':
-                    sopra_database.material_list()
+                # print(
+                #     '\nIn compounds, check that the order of the elements is the correct one (eg. GaInSb is OK but InGaSb'
+                #     ' is not).')
+                # val = input('\nDo you want to see the list of available SOPRA materials (y/n)?')
+                # if val in 'Yy':
+                #     sopra_database.material_list()
 
-                sys.exit()
+                # sys.exit()
         except solcore.absorption_calculator.sopra_db.SOPRAError:
             pass
 
@@ -112,10 +112,11 @@ class MaterialSystem(metaclass=Singleton):
     def parameterised_material(self, name):
         """ The function that actually creates the material class. """
 
-        if "x" in ParameterSystem().database.options(name):
-            self.composition = [ParameterSystem().database.get(name, "x")]
-        else:
-            self.composition = []
+        # if "x" in ParameterSystem().database.options(name):
+        #     self.composition = [ParameterSystem().database.get(name, "x")]
+        # else:
+        #     self.composition = []
+        self.composition = []
 
         class SpecificMaterial(BaseMaterial):
             material_string = name
@@ -282,6 +283,8 @@ class BaseMaterial:
     material_directory = None
     k_path = None
     n_path = None
+    nk_parameter = None
+    nk_parameters = None
     strained = False
 
     def __init__(self, T, **kwargs):
@@ -362,28 +365,116 @@ class BaseMaterial:
     @lru_cache(maxsize=1)
     def load_n_data(self):
         if len(self.composition) == 0:
-            self.n_data = np.loadtxt(self.n_path, unpack=True)
+            if isinstance(self.n_path, str):
+                try:
+                    self.n_data = np.loadtxt(self.n_path, unpack=True)
+                except:
+                    self.n_data = np.loadtxt(self.n_path, delimiter=',', skiprows=1, encoding='utf-8')
+                    self.n_data = self.n_data[:,[0,1]]
+                    self.n_data[:,0] /= 1.0e9
+                    self.n_data = self.n_data.transpose()
+            else: # 
+                self.n_data = []
+                self.nk_parameters = []
+                for entry in self.n_path:
+                    n_data = np.loadtxt(entry['path'], delimiter=',', skiprows=1, encoding='utf-8')
+                    n_data = n_data[:,[0,1]]
+                    n_data[:,0] /= 1.0e9
+                    n_data = n_data.transpose()
+                    self.nk_parameters.append(entry['parameter'])
+                    self.n_data.append(n_data)
+                self.nk_parameters = np.array(self.nk_parameters)
+                self.nk_parameter = self.nk_parameters[0]
+                    
         else:
             self.n_data, self.n_critical_points = critical_point_interpolate.load_data_from_directory(self.n_path)
 
     @lru_cache(maxsize=1)
     def load_k_data(self):
         if len(self.composition) == 0:
-            self.k_data = np.loadtxt(self.k_path, unpack=True)
+            if isinstance(self.k_path, str):
+                try:
+                    self.k_data = np.loadtxt(self.k_path, unpack=True)
+                except:
+                    self.k_data = np.loadtxt(self.k_path, delimiter=',', skiprows=1, encoding='utf-8')
+                    self.k_data = self.k_data[:,[0,-1]]
+                    self.k_data[:,0] /= 1.0e9
+                    self.k_data = self.k_data.transpose()
+            else: # 
+                self.k_data = []
+                self.nk_parameters = []
+                for entry in self.n_path:
+                    k_data = np.loadtxt(entry['path'], delimiter=',', skiprows=1, encoding='utf-8')
+                    k_data = k_data[:,[0,3]]
+                    k_data[:,0] /= 1.0e9
+                    k_data = k_data.transpose()
+                    self.nk_parameters.append(entry['parameter'])
+                    self.k_data.append(k_data)
+                self.nk_parameters = np.array(self.nk_parameters)
+                self.nk_parameter = self.nk_parameters[0]
         else:
             self.k_data, self.k_critical_points = critical_point_interpolate.load_data_from_directory(self.k_path)
+
+    @lru_cache(maxsize=1)
+    def load_nk_data(self):
+        if isinstance(self.n_path, str):
+            data_ = np.loadtxt(self.n_path, delimiter=',', skiprows=1, encoding='utf-8')
+            self.n_data = data_[:,[0,1]]
+            self.n_data[:,0] /= 1.0e9
+            self.n_data = self.n_data.transpose()
+            self.k_data = data_[:,[0,3]]
+            self.k_data[:,0] /= 1.0e9
+            self.k_data = self.k_data.transpose()
+        else: # a list
+            self.n_data = []
+            self.k_data = []
+            self.nk_parameters = []
+            for entry in self.n_path:
+                self.nk_parameters.append(entry['parameter'])
+                data_ = np.loadtxt(entry['path'], delimiter=',', skiprows=1, encoding='utf-8')
+                n_data = data_[:,[0,1]]
+                n_data[:,0] /= 1.0e9
+                n_data = n_data.transpose()
+                self.n_data.append(n_data)
+                k_data = data_[:,[0,3]]
+                k_data[:,0] /= 1.0e9
+                k_data = k_data.transpose()
+                self.k_data.append(k_data)
+            self.nk_parameters = np.array(self.nk_parameters)
+            self.nk_parameter = self.nk_parameters[0]
 
     def n_interpolated(self, x):
         assert len(self.composition) <= 1, "Can't interpolate 2d spectra yet"
 
         try:
-            self.load_n_data()
+            if not hasattr(self,'n_data'):
+                self.n_data = None
         except:
-            print('Material "{}" does not have n-data defined. Returning "ones"'.format(self.material_string))
-            return np.ones_like(x)
+            self.n_data = None
+
+        if not hasattr(self,'n_data') or self.n_data is None:
+            try:
+                self.load_n_data()
+            except:
+                print('Material "{}" does not have n-data defined. Returning "ones"'.format(self.material_string))
+                return np.ones_like(x)
 
         if len(self.composition) == 0:
-            y = np.interp(x, self.n_data[0], self.n_data[1])
+            if self.nk_parameter is not None:
+                left_index = np.searchsorted(self.nk_parameters, self.nk_parameter, side='right') - 1
+                left_data = self.n_data[left_index]
+                left_y = np.interp(x, left_data[0], left_data[1])
+                left_parameter = self.nk_parameters[left_index]
+                if left_index == len(self.nk_parameters)-1:
+                    y = left_y
+                else:
+                    right_index = left_index + 1
+                    right_data = self.n_data[right_index]
+                    right_y = np.interp(x, right_data[0], right_data[1])
+                    right_parameter = self.nk_parameters[right_index]
+                    y = (left_y*(right_parameter - self.nk_parameter) + right_y*(self.nk_parameter - left_parameter))/(right_parameter-left_parameter)
+            else:
+                y = np.interp(x, self.n_data[0], self.n_data[1])
         else:
             x, y, self.critical_points_n = critical_point_interpolate.critical_point_interpolate(
                 self.n_data,
@@ -398,13 +489,34 @@ class BaseMaterial:
         assert len(self.composition) <= 1, "Can't interpolate 2d spectra yet"
 
         try:
-            self.load_k_data()
+            if not hasattr(self,'k_data'):
+                self.k_data = None
         except:
-            print('Material "{}" does not have k-data defined. Returning "zeros"'.format(self.material_string))
-            return np.zeros_like(x)
+            self.k_data = None
+
+        if not hasattr(self,'k_data') or self.k_data is None:
+            try:
+                self.load_k_data()
+            except:
+                print('Material "{}" does not have k-data defined. Returning "zeros"'.format(self.material_string))
+                return np.zeros_like(x)
 
         if len(self.composition) == 0:
-            y = np.interp(x, self.k_data[0], self.k_data[1])
+            if self.nk_parameter is not None:
+                left_index = np.searchsorted(self.nk_parameters, self.nk_parameter, side='right') - 1
+                left_data = self.k_data[left_index]
+                left_y = np.interp(x, left_data[0], left_data[1])
+                left_parameter = self.nk_parameters[left_index]
+                if left_index == len(self.nk_parameters)-1:
+                    y = left_y
+                else:
+                    right_index = left_index + 1
+                    right_data = self.k_data[right_index]
+                    right_y = np.interp(x, right_data[0], right_data[1])
+                    right_parameter = self.nk_parameters[right_index]
+                    y = (left_y*(right_parameter - self.nk_parameter) + right_y*(self.nk_parameter - left_parameter))/(right_parameter-left_parameter)
+            else:
+                y = np.interp(x, self.k_data[0], self.k_data[1])
         else:
             x, y, self.critical_points_k = critical_point_interpolate.critical_point_interpolate(
                 self.k_data,

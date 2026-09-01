@@ -149,7 +149,7 @@ class OptiStack(object):
             )
             self.no_back_reflection = kwargs["no_back_reflexion"]
 
-    def get_indices(self, wl):
+    def get_indices(self, wl, nk_differentials=None):
         """Returns the complex refractive index of the stack.
 
         :param wl: Wavelength of the light in nm.
@@ -181,19 +181,40 @@ class OptiStack(object):
                 n0 = 1
 
         for i in range(self.num_layers):
-            out.append(self.n_data[i](wl_m) + self.k_data[i](wl_m) * 1.0j)
+            if hasattr(self.layers[i], 'nk_parameter') and self.layers[i].nk_parameter is not None:
+                self.layers[i].material.nk_parameter = self.layers[i].nk_parameter
+                n_ = self.layers[i].material.n_interpolated(wl_m)
+                k_ = self.layers[i].material.k_interpolated(wl_m)
+                out.append(n_ + k_ * 1.0j)
+            else:
+                out.append(self.n_data[i](wl_m) + self.k_data[i](wl_m) * 1.0j)
+
+        out_diff = []
+        if nk_differentials is not None:
+            for i in range(self.num_layers):
+                if len(nk_differentials)>i and nk_differentials[i] is not None:
+                    nk_parameter_ = self.layers[i].material.nk_parameter
+                    self.layers[i].material.nk_parameter += nk_differentials[i]
+                    n_ = self.layers[i].material.n_interpolated(wl_m)
+                    k_ = self.layers[i].material.k_interpolated(wl_m)
+                    out_diff.append(n_ + k_ * 1.0j)
+                    self.layers[i].material.nk_parameter = nk_parameter_
+                else:
+                    out_diff.append(None)
+            out_diff = [None]+out_diff+[None]
 
         # substrate irrelevant if no_back_reflection = True
         if self.no_back_reflection:
-            return (
-                [n0]
-                + out
-                + [self.n_data[-1](wl_m) + self._k_absorbing(wl_m) * 1.0j, n1]
-            )  # look at last entry in stack,
-            # make high;y absorbing layer based on it.
-
+            out = [n0] + out + [self.n_data[-1](wl_m) + self._k_absorbing(wl_m) * 1.0j, n1]
+            # look at last entry in stack,
+            # make highly absorbing layer based on it.
         else:
-            return [n0] + out + [n1]
+            out = [n0] + out + [n1]
+
+        if len(out_diff)==0:
+            return out
+        else:
+            return {'baseline': out, 'diff': out_diff}
 
     def get_widths(self):
         """Returns the widths of the layers of the stack.

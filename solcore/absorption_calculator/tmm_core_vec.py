@@ -124,13 +124,13 @@ def R_from_r(r):
     return abs(r) ** 2
 
 
-def T_from_t(pol, t, n_i, n_f, th_i, th_f):
+def T_from_t(pol, t, n_i, n_f, cos_th_i, cos_th_f):
     """
     Calculate transmitted power T, starting with transmission amplitude t.
 
     n_i,n_f are refractive indices of incident and final medium.
 
-    th_i, th_f are (complex) propegation angles through incident & final medium
+    cos_th_i, cos_th_f are cosines of (complex) propegation angles through incident & final medium
     (in radians, where 0=normal). "th" stands for "theta".
 
     In the case that n_i,n_f,th_i,th_f are real, formulas simplify to
@@ -139,15 +139,15 @@ def T_from_t(pol, t, n_i, n_f, th_i, th_f):
     See manual for discussion of formulas
     """
     if (pol == 's'):
-        return abs(t ** 2) * (((n_f * np.cos(th_f)).real) / (n_i * np.cos(th_i)).real)
+        return abs(t ** 2) * (((n_f * cos_th_f).real) / (n_i * cos_th_i).real)
     elif (pol == 'p'):
-        return abs(t ** 2) * (((n_f * np.conj(np.cos(th_f))).real) /
-                              (n_i * np.conj(np.cos(th_i))).real)
+        return abs(t ** 2) * (((n_f * np.conj(cos_th_f)).real) /
+                              (n_i * np.conj(cos_th_i)).real)
     else:
         raise ValueError("Polarization must be 's' or 'p'")
 
 
-def power_entering_from_r(pol, r, n_i, th_i):
+def power_entering_from_r(pol, r, n_i, cos_th_i):
     """
     Calculate the power entering the first interface of the stack, starting with
     reflection amplitude r. Normally this equals 1-R, but in the unusual case
@@ -155,15 +155,15 @@ def power_entering_from_r(pol, r, n_i, th_i):
 
     n_i is refractive index of incident medium.
 
-    th_i is (complex) propegation angle through incident medium
+    cos_th_i is cosine of (complex) propegation angle through incident medium
     (in radians, where 0=normal). "th" stands for "theta".
     """
     if (pol == 's'):
-        return ((n_i * np.cos(th_i) * (1 + np.conj(r)) * (1 - r)).real
-                / (n_i * np.cos(th_i)).real)
+        return ((n_i * cos_th_i * (1 + np.conj(r)) * (1 - r)).real
+                / (n_i * cos_th_i).real)
     elif (pol == 'p'):
-        return ((n_i * np.conj(np.cos(th_i)) * (1 + r) * (1 - np.conj(r))).real
-                / (n_i * np.conj(np.cos(th_i))).real)
+        return ((n_i * np.conj(cos_th_i) * (1 + r) * (1 - np.conj(r))).real
+                / (n_i * np.conj(cos_th_i)).real)
     else:
         raise ValueError("Polarization must be 's' or 'p'")
 
@@ -201,8 +201,10 @@ def interface_T(polarization, n_i, n_f, th_i, th_f):
 
     return T_from_t(polarization, t, n_i, n_f, th_i, th_f)
 
-
-def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
+# 2024-03-23: JW - modified to run at faster speed, execution time roughly 57% of original
+# if further set detailed = False, this function will skip calculations of power_entering 
+# and vw_list, and the function will be faster still, execution time roughly 80% x 57% = 45% of original
+def coh_tmm(pol, n_list, d_list, th_0, lam_vac, detailed=True, width_differentials=None, n_list_diff=None):
     """
     This function is vectorized.
     Main "coherent transfer matrix method" calc. Given parameters of a stack,
@@ -249,8 +251,6 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     d_list = np.array(d_list, dtype=float)[:, None]
 
     # input tests
-    if hasattr(th_0, 'size') and th_0.size > 1 and th_0.size != lam_vac.size:
-        raise ValueError('This function is not vectorized for angles; you need to run one angle calculation at a time.')
     if n_list.shape[0] != d_list.shape[0]:
         raise ValueError("Problem with n_list or d_list!")
     if (d_list[0] != np.inf) or (d_list[-1] != np.inf):
@@ -262,19 +262,44 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     num_layers = n_list.shape[0]
     num_wl = n_list.shape[1]
 
+    d_list_truncated = d_list[1:-1]        
+
     # th_list is a list with, for each layer, the angle that the light travels
     # through the layer. Computed with Snell's law. Note that the "angles" may be
     # complex!
     th_list = list_snell(n_list, th_0)
+    cos_th_0 = np.cos(th_0)
+    cos_th_list = np.cos(th_list)
 
     # kz is the z-component of (complex) angular wavevector for forward-moving
     # wave. Positive imaginary part means decaying.
-    kz_list = 2 * np.pi * n_list * np.cos(th_list) / lam_vac
+    kz_list = 2 * np.pi * n_list * cos_th_list / lam_vac
+    kz_list_truncated = kz_list[1:-1,:]
+    width_differentials_num = 0
+    nk_differentials_num = 0
+    if width_differentials is not None:
+        kz_original = np.copy(kz_list_truncated)
+        for i, d in enumerate(width_differentials):
+            if d is not None:
+                width_differentials_num += 1
+                kz_ = np.copy(kz_original)
+                ratio = 1.0 + d*1e9/d_list_truncated[i]
+                kz_[i,:] *= ratio
+                kz_list_truncated = np.hstack((kz_list_truncated,kz_))
+    if n_list_diff is not None:
+        for j, entry in enumerate(n_list_diff):
+            if entry is not None:
+                nk_differentials_num += 1
+                n_list2 = np.copy(n_list)
+                n_list2[j] = entry 
+                kz_list = 2 * np.pi * n_list2 * cos_th_list / lam_vac
+                kz_list_truncated = np.hstack((kz_list_truncated,kz_list[1:-1,:]))
 
     # delta is the total phase accrued by traveling through a given layer.
     # ignore warning about inf multiplication
     olderr = np.seterr(invalid='ignore')
-    delta = kz_list * d_list
+    delta = kz_list_truncated * d_list_truncated
+
     np.seterr(**olderr)
 
     # For a very opaque layer, reset delta to avoid divide-by-0 and similar
@@ -282,20 +307,28 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # transmission < 1e-30 --- small enough that the exact value doesn't
     # matter.
     # It DOES matter (for depth-dependent calculations!)
-    delta[1:num_layers - 1, :] = np.where(delta[1:num_layers - 1, :].imag > 100, delta[1:num_layers - 1, :].real + 100j,
-                                          delta[1:num_layers - 1, :])
+    delta = np.where(delta.imag > 100, delta.real + 100j,
+                                          delta)
 
     # t_list[i,j] and r_list[i,j] are transmission and reflection amplitudes,
     # respectively, coming from i, going to j. Only need to calculate this when
     # j=i+1. (2D array is overkill but helps avoid confusion.)
-    t_list = np.zeros((num_wl, num_layers, num_layers), dtype=complex)
-    r_list = np.zeros((num_wl, num_layers, num_layers), dtype=complex)
+    t_list = np.zeros((num_wl, num_layers), dtype=complex)
+    r_list = np.zeros((num_wl, num_layers), dtype=complex)
 
-    for i in range(num_layers - 1):
-        t_list[:, i, i + 1] = interface_t(pol, n_list[i], n_list[i + 1],
-                                          th_list[i], th_list[i + 1])
-        r_list[:, i, i + 1] = interface_r(pol, n_list[i], n_list[i + 1],
-                                          th_list[i], th_list[i + 1])
+    if pol == 's':
+        t_list[:,:-1] = np.transpose((2 * n_list[:-1] * cos_th_list[:-1]) /
+                (n_list[:-1] * cos_th_list[:-1] + n_list[1:] * cos_th_list[1:]))
+        r_list[:,:-1] = np.transpose((n_list[:-1] * cos_th_list[:-1] - n_list[1:] * cos_th_list[1:]) /
+                (n_list[:-1] * cos_th_list[:-1] + n_list[1:] * cos_th_list[1:]))
+    elif pol == 'p':
+        t_list[:,:-1] = np.transpose((2 * n_list[:-1] * cos_th_list[:-1]) /
+                (n_list[1:] * cos_th_list[:-1] + n_list[:-1] * cos_th_list[1:]))
+        r_list[:,:-1] = np.transpose((n_list[1:] * cos_th_list[:-1] - n_list[:-1] * cos_th_list[1:]) /
+                (n_list[1:] * cos_th_list[:-1] + n_list[:-1] * cos_th_list[1:]))
+    else:
+        raise ValueError("Polarization must be 's' or 'p'")
+    
     # At the interface between the (n-1)st and nth material, let v_n be the
     # amplitude of the wave on the nth side heading forwards (away from the
     # boundary), and let w_n be the amplitude on the nth side heading backwards
@@ -303,49 +336,76 @@ def coh_tmm(pol, n_list, d_list, th_0, lam_vac):
     # M_list[n]. M_0 and M_{num_layers-1} are not defined.
     # My M is a bit different than Sernelius's, but Mtilde is the same.
 
-    M_list = np.zeros((num_layers, num_wl, 2, 2), dtype=complex)
-    for i in range(1, num_layers - 1):
-        A = make_2x2_array(np.exp(-1j * delta[i]), np.zeros_like(delta[i]), np.zeros_like(delta[i]), np.exp(1j * delta[i]),
-                           dtype=complex)
-        B = make_2x2_array(np.ones_like(delta[i]), r_list[:, i, i + 1], r_list[:, i, i + 1], np.ones_like(delta[i]),
-                           dtype=complex)
-        d = (1 / t_list[:, i, i + 1])
+    t_list = np.tile(t_list, (width_differentials_num+nk_differentials_num+1, 1))
+    r_list = np.tile(r_list, (width_differentials_num+nk_differentials_num+1, 1))
+    n_list_ = np.copy(n_list)
+    n_list = np.tile(n_list, (1,width_differentials_num+nk_differentials_num+1))
+    if n_list_diff is not None:
+        count = 0
+        for j, entry in enumerate(n_list_diff):
+            if entry is not None:
+                n_list2 = np.copy(n_list_)
+                n_list2[j] = entry 
+                start_ = num_wl*(width_differentials_num+1+count)
+                end_ = num_wl*(width_differentials_num+1+count+1)
+                n_list[:,start_:end_] = n_list2
+                if pol == 's':
+                    t_list[start_:end_,:-1] = np.transpose((2 * n_list2[:-1] * cos_th_list[:-1]) /
+                            (n_list2[:-1] * cos_th_list[:-1] + n_list2[1:] * cos_th_list[1:]))
+                    r_list[start_:end_,:-1] = np.transpose((n_list2[:-1] * cos_th_list[:-1] - n_list2[1:] * cos_th_list[1:]) /
+                            (n_list2[:-1] * cos_th_list[:-1] + n_list2[1:] * cos_th_list[1:]))
+                elif pol == 'p':
+                    t_list[start_:end_,:-1] = np.transpose((2 * n_list2[:-1] * cos_th_list[:-1]) /
+                            (n_list2[1:] * cos_th_list[:-1] + n_list2[:-1] * cos_th_list[1:]))
+                    r_list[start_:end_,:-1] = np.transpose((n_list2[1:] * cos_th_list[:-1] - n_list2[:-1] * cos_th_list[1:]) /
+                            (n_list2[1:] * cos_th_list[:-1] + n_list2[:-1] * cos_th_list[1:]))
+                count += 1
 
-        M_list[i] = np.transpose(d * np.transpose(np.matmul(A, B)))  # , (1, 2, 0)), (2, 0, 1))
+    cos_th_0 = np.tile(cos_th_0,(width_differentials_num+nk_differentials_num+1))
+    cos_th_list = np.tile(cos_th_list,(1, width_differentials_num+nk_differentials_num+1))
 
-    Mtilde = make_2x2_array(np.ones_like(delta[i]), np.zeros_like(delta[i]), np.zeros_like(delta[i]),
-                            np.ones_like(delta[i]), dtype=complex)
-    for i in range(1, num_layers - 1):
-        Mtilde = np.matmul(Mtilde, M_list[i])
+    M_list = np.zeros((num_layers, num_wl*(width_differentials_num+nk_differentials_num+1), 2, 2), dtype=complex)
+    for i in range(0, num_layers - 1):
+        exp_ = 1.0
+        if i > 0:
+            exp_ = np.exp(-1j * delta[i-1])
+        d = (1 / t_list[:, i])
+        M_list[i,:,0,0] = exp_*d
+        M_list[i,:,0,1] = exp_*d*r_list[:, i]
+        M_list[i,:,1,0] = d/exp_*r_list[:, i]
+        M_list[i,:,1,1] = d/exp_
 
-    A = make_2x2_array(np.ones_like(delta[i]), r_list[:, 0, 1], r_list[:, 0, 1], np.ones_like(delta[i]),
-                       dtype=complex)
-    d = 1 / t_list[:, 0, 1]
-    Mtilde = np.matmul(np.transpose(d * np.transpose(A, (1, 2, 0)), (2, 0, 1)), Mtilde)
+    Mtilde = make_2x2_array(np.ones((t_list.shape[0])), np.zeros((t_list.shape[0])), np.zeros((t_list.shape[0])),
+                            np.ones((t_list.shape[0])), dtype=complex)
+    for i in range(0, num_layers - 1):
+        Mtilde = np.einsum('ijk,ikl->ijl', Mtilde, M_list[i])
 
     # Net complex transmission and reflection amplitudes
     r = Mtilde[:, 1, 0] / Mtilde[:, 0, 0]
     t = np.ones_like(Mtilde[:, 0, 0]) / Mtilde[:, 0, 0]
 
-    # vw_list[n] = [v_n, w_n]. v_0 and w_0 are undefined because the 0th medium
-    # has no left interface.
-    vw_list = np.zeros((num_layers, num_wl, 2), dtype=complex)
-    vw = np.zeros((num_wl, 2, 2), dtype=complex)
-    I = np.identity(2)
-    vw[:, 0, 0] = t
-    vw[:, 0, 1] = t
-    vw_list[-1] = vw[:, 0, :]
-    for i in range(num_layers - 2, 0, -1):
-        vw = np.matmul(M_list[i], vw)
-        vw_list[i, :, :] = vw[:, :, 1]
-    vw_list[-1, :, 1] = 0
+    vw_list = None
+    if detailed:
+        # vw_list[n] = [v_n, w_n]. v_0 and w_0 are undefined because the 0th medium
+        # has no left interface.
+        vw_list = np.zeros((num_layers, num_wl*(width_differentials_num+nk_differentials_num+1), 2), dtype=complex)
+        vw = np.zeros((num_wl*(width_differentials_num+nk_differentials_num+1), 2, 2), dtype=complex)
+        I = np.identity(2)
+        vw[:, 0, 0] = t
+        vw[:, 0, 1] = t
+        vw_list[-1] = vw[:, 0, :]
+        for i in range(num_layers - 2, 0, -1):
+            vw = np.einsum('ijk,ikl->ijl', M_list[i], vw)
+            vw_list[i, :, :] = vw[:, :, 1]
+        vw_list[-1, :, 1] = 0
 
     # Net transmitted and reflected power, as a proportion of the incoming light
     # power.
     R = R_from_r(r)
-    T = T_from_t(pol, t, n_list[0], n_list[-1], th_0, th_list[-1])
+    T = T_from_t(pol, t, n_list[0], n_list[-1], cos_th_0, cos_th_list[-1])
+
     power_entering = power_entering_from_r(
-        pol, r, n_list[0], th_0)
+            pol, r, n_list[0], cos_th_0)
 
     return {'r': r, 't': t, 'R': R, 'T': T, 'power_entering': power_entering,
             'vw_list': vw_list, 'kz_list': kz_list, 'th_list': th_list,
@@ -627,13 +687,13 @@ def absorp_in_each_layer(coh_tmm_data):
     """
     num_layers = len(coh_tmm_data['d_list'])
     num_lam_vec = len(coh_tmm_data['lam_vac'])
-    power_entering_each_layer = np.zeros((num_layers, num_lam_vec))
+    power_entering_each_layer = np.zeros((num_layers, coh_tmm_data['power_entering'].shape[0]))
     power_entering_each_layer[0] = 1
     power_entering_each_layer[1] = coh_tmm_data['power_entering']
     power_entering_each_layer[-1] = coh_tmm_data['T']
     for i in range(2, num_layers - 1):
         power_entering_each_layer[i] = position_resolved(i, 0, coh_tmm_data)['poyn']
-    final_answer = np.zeros((num_layers, num_lam_vec))
+    final_answer = np.zeros((num_layers, coh_tmm_data['power_entering'].shape[0]))
     final_answer[0:-1] = -np.diff(power_entering_each_layer, axis=0)
     final_answer[-1] = power_entering_each_layer[-1]
 
